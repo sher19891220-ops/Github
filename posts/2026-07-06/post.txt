@@ -1,0 +1,19 @@
+🚨 Cargo Thieves Just Had Their Most Expensive Half-Year Ever
+
+Verisk CargoNet's post-July 4th theft analysis shows freight criminals aren't just stealing more often — they're stealing smarter, targeting fewer but far pricier loads, and increasingly hacking their way in instead of breaking in.
+
+📊 The stats/facts:
+• Cargo theft losses topped $359 million in the first six months of 2026
+• The average stolen shipment is now valued at $341,518 — up sharply as thieves go after fewer, higher-value loads
+• CargoNet's analysis of 256 theft events from 2021–2025 shows theft activity peaks on July 3, then dips July 4–5 as facilities close
+• Prime targets: copper, molybdenum, antimony, tungsten and zinc, plus enterprise IT gear like RAM modules, fiber transceivers and server blades — many shipments exceeding $1 million
+• New attack vector: compromised business phone systems let fraudsters spoof calls from a carrier's own verified number and monitor live calls to pull off theft-by-deception
+
+💡 Why marketers should care:
+• This is a masterclass in newsjacking: CargoNet turns proprietary claims data into a story pegged to a fixed calendar date (July 4th) every year, guaranteeing pickup across every logistics trade outlet — B2B marketers in freight/insurtech should study and replicate this "own the news cycle around a predictable event" playbook
+• "$341,518 average stolen load" is a ready-made stat for insurtech, cargo-security and telematics vendors to drop into ABM outreach and sales decks aimed at carriers, brokers and 3PLs renewing cargo insurance
+• The pivot to phone-system compromise and fake-carrier-identity fraud is a fresh messaging angle for freight-tech and TMS vendors selling identity verification, carrier vetting, or fraud-detection features — most buyers are still only thinking about GPS trackers and locks
+
+🔗 Source: DC Velocity, published July 2, 2026 — https://www.dcvelocity.com/supply-chain/other-services/safety-security/cargonet-july-4-cargo-thieves-get-more-sophisticated
+
+#FounderHub #Logistics #SupplyChain #FreightTech #CargoSecurity
