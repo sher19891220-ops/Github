@@ -1,0 +1,19 @@
+🚛 EPA Proposes $12B Truck Rule Rollback — Ends the "Limp Mode" Era
+
+The Trump EPA just unveiled a proposal to gut Biden-era diesel emissions warranty and "deratement" rules, promising truckers up to $6,000 in savings per new rig.
+
+📊 The stats/facts:
+• $12 billion in projected industry-wide savings if the rule is finalized
+• Up to $6,000 saved per new truck purchased
+• Engine warranty requirement shortened from 450,000 miles to 100,000 miles
+• "Useful life" emissions compliance window pushed from 435,000 to 650,000 miles, delayed 3 years
+• DEF-triggered "deratements" (forced speed cuts/shutdowns) eliminated entirely and replaced with dashboard alerts — EPA says ~90% of the original NOx reduction is still preserved
+
+💡 Why marketers should care:
+• Compliance-cost relief is the message fleets want right now — "productivity gained, downtime eliminated" messaging will outperform sustainability-first pitches with this audience for the next few months
+• Freight-tech and telematics vendors have a built-in upsell moment: EPA is swapping hard shutdowns for driver alerts, which creates fresh demand for smarter DEF/emissions monitoring and predictive-maintenance dashboards — position your product as "the alert system," not just a compliance checkbox
+• PR lesson: EPA's own release led with one hard number ($12B, $6K/truck) and it got picked up by NPR affiliates, UPI, Fox News, The Hill, and every major trucking trade outlet — lead your next release with a single concrete figure, not adjectives
+
+🔗 Source: EPA Newsroom, July 9, 2026 — https://www.epa.gov/newsreleases/trump-epa-unveils-proposal-save-truckers-12-billion-revising-unworkable-biden-era-rule
+
+#FounderHub #Trucking #FreightTech #Logistics #Regulation
