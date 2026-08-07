@@ -1,0 +1,19 @@
+🚨 Cargo Theft Losses DOUBLE to $304.6M — Even as Incidents Drop 26%
+
+Verisk CargoNet's Q2 2026 report shows organized crews are stealing less often but hitting far bigger paydays, pivoting to high-value metals, tech, and business email compromise scams instead of opportunistic grabs.
+
+📊 The stats/facts:
+• 677 cargo theft incidents in Q2 2026 — down 26% YoY and 14% quarter-over-quarter
+• Estimated losses hit $304.6M, up 125% YoY from $135.7M in Q2 2025
+• Average theft value: $564,009
+• Metal theft (mostly copper) jumped from 54 to 80 incidents
+• Business email compromise remains the #1 access vector, ahead of physical theft; seafood theft rose while beverage theft fell 36 events
+
+💡 Why marketers should care:
+• "Fewer incidents ≠ less risk" is a ready-made counterintuitive hook for insurtech and freight-security brands — the data does the persuading for you
+• BEC overtaking physical theft as the top attack vector signals a messaging shift: campaigns for carriers/brokers should lean into cybersecurity and identity-verification, not just GPS trackers and yard security
+• The report itself is a PR playbook — a proprietary quarterly data drop from Verisk CargoNet got picked up by 6+ trade and business-wire outlets in a day; if you sit on shipment or claims data, this is the template
+
+🔗 Source: Verisk CargoNet, published August 6, 2026 — https://www.globenewswire.com/news-release/2026/08/06/3340253/0/en/cargo-theft-losses-more-than-double-to-304-million-in-q2-despite-a-drop-in-thefts-driven-by-high-value-metals-and-technology-heists.html
+
+#FounderHub #CargoTheft #SupplyChainSecurity #FreightTech #Logistics
