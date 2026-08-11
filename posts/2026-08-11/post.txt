@@ -1,0 +1,19 @@
+⛽ Diesel Prices Finally Cool Off — First Broad Drop in Weeks
+
+After a months-long climb driven by Strait of Hormuz tensions and Iran-linked oil supply fears, U.S. diesel prices posted their first nationwide weekly pullback, per fresh EIA data.
+
+📊 The stats/facts:
+• National average on-highway diesel: $5.257/gal, down 9.1¢ from the prior week (EIA, week of Aug 10, 2026)
+• Every PADD region fell week-over-week — Lower Atlantic led the drop at -13.4¢, followed by East Coast overall at -10.6¢
+• West Coast and Gulf Coast both eased roughly 9.7¢ on the week
+• California remains the nation's priciest market at $6.618/gal, even after a 9.8¢ drop
+• This follows a stretch where national diesel had climbed above $5.30-5.35/gal amid ongoing Middle East supply disruption fears
+
+💡 Why marketers should care:
+• Fuel-cost relief is a live messaging opportunity right now — carriers, 3PLs, and brokers are watching margins closely, so content connecting fuel trends to rate and capacity forecasts will resonate
+• The real story isn't "prices are low," it's "prices are volatile" — a strong hook for freight-tech and insurtech brands pitching forecasting, hedging, or fuel-surcharge management tools
+• The $1.50+ regional spread (California vs. Gulf Coast) is a cue for geo-targeted messaging and lane-specific rate content aimed at carriers and shippers in high-cost markets
+
+🔗 Source: U.S. Energy Information Administration (EIA), published August 10, 2026, https://www.eia.gov/petroleum/gasdiesel/
+
+#FounderHub #Freight #Trucking #Logistics #Diesel
