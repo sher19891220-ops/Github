@@ -4,6 +4,7 @@ Run: pytest tests/test_api.py -v
 """
 
 import os
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -44,10 +45,10 @@ def test_clear(client):
     assert resp.json()["success"] is True
 
 
-def test_chat_requires_key():
-    os.environ["BACKEND_API_KEY"] = "secret123"
-    from main import app
-    with TestClient(app) as c:
-        resp = c.post("/chat", json={"chat_id": 1, "message": "hi"})
-        assert resp.status_code == 401
-    os.environ["BACKEND_API_KEY"] = ""
+def test_chat_requires_key(client, monkeypatch):
+    # main.py binds BACKEND_API_KEY at import time, so patch the module attribute
+    # the dependency actually reads rather than os.environ.
+    import main
+    monkeypatch.setattr(main, "BACKEND_API_KEY", "secret123")
+    resp = client.post("/chat", json={"chat_id": 1, "message": "hi"})
+    assert resp.status_code == 401
