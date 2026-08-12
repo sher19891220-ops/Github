@@ -7,7 +7,7 @@ ANTHROPIC_API_KEY = os.environ["ANTHROPIC_API_KEY"]
 TELEGRAM_TOKEN = os.environ["TELEGRAM_TOKEN"]
 TELEGRAM_CHAT_ID = int(os.environ["TELEGRAM_CHAT_ID"])  # Sher's chat ID for proactive messages
 
-MODEL = os.environ.get("CLAUDE_MODEL", "claude-sonnet-4-5")
+MODEL = os.environ.get("CLAUDE_MODEL", "claude-sonnet-5")
 MAX_TOKENS = int(os.environ.get("MAX_TOKENS", "8192"))
 MAX_TOOL_ITERATIONS = int(os.environ.get("MAX_TOOL_ITERATIONS", "25"))
 

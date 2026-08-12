@@ -81,7 +81,7 @@ async def chat(req: ChatRequest):
     # Run agentic loop in thread pool (blocking Claude calls)
     context = {"chat_id": req.chat_id}
     try:
-        reply = await asyncio.get_event_loop().run_in_executor(
+        reply = await asyncio.get_running_loop().run_in_executor(
             None, jarvis_engine.run, history, context
         )
     except Exception as e:

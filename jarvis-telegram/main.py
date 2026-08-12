@@ -90,6 +90,15 @@ async def handle_message(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     except httpx.ConnectError:
         await update.message.reply_text("❌ Cannot reach Mac mini backend. Is it running?")
         return
+    except httpx.HTTPStatusError as e:
+        detail = ""
+        try:
+            detail = e.response.json().get("detail", "")
+        except Exception:
+            detail = e.response.text[:500]
+        log.error("Backend HTTP %s: %s", e.response.status_code, detail)
+        await update.message.reply_text(f"❌ Backend error {e.response.status_code}: {detail}")
+        return
     except Exception as e:
         log.error("Backend error: %s", e)
         await update.message.reply_text(f"❌ Error: {e}")
