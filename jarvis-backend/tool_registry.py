@@ -4,8 +4,41 @@ Add new tools here — one entry in TOOLS, one branch in dispatch().
 """
 
 import json
+import os
 from tools import system, tasks, memory, research, docker_tools, notifications, scheduler
 from tools import google_tools, finance_tools, microsoft_tools
+
+
+def _check_setup() -> dict:
+    """Report which integrations are configured and ready."""
+    google_token = os.environ.get("GOOGLE_TOKEN_PATH", "token.json")
+    ms_token = os.environ.get("MS_TOKEN_PATH", "ms_token.json")
+    plaid_ready = bool(os.environ.get("PLAID_CLIENT_ID") and (os.environ.get("PLAID_ACCESS_TOKENS") or os.environ.get("PLAID_ACCESS_TOKEN")))
+    qb_ready = bool(os.environ.get("QB_CLIENT_ID") and os.environ.get("QB_REFRESH_TOKEN"))
+
+    statuses = {
+        "shell_and_files": {"ready": True, "note": "Full Mac mini access available"},
+        "gmail_drive_sheets_calendar": {
+            "ready": os.path.exists(google_token),
+            "note": "Ready" if os.path.exists(google_token) else "Run: python setup_google_auth.py (needs credentials.json first)",
+        },
+        "outlook": {
+            "ready": bool(os.environ.get("MS_CLIENT_ID") and os.path.exists(ms_token)),
+            "note": "Ready" if (os.environ.get("MS_CLIENT_ID") and os.path.exists(ms_token)) else "Run: python setup_microsoft_auth.py",
+        },
+        "bank_accounts_plaid": {
+            "ready": plaid_ready,
+            "note": "Ready" if plaid_ready else "Set PLAID_CLIENT_ID, PLAID_SECRET, PLAID_ACCESS_TOKENS in .env",
+        },
+        "quickbooks": {
+            "ready": qb_ready,
+            "note": "Ready" if qb_ready else "Set QB_CLIENT_ID, QB_CLIENT_SECRET, QB_REALM_ID, QB_ACCESS_TOKEN, QB_REFRESH_TOKEN in .env",
+        },
+        "docker": {"ready": True, "note": "Available (Docker must be running on Mac mini)"},
+        "telegram_notifications": {"ready": bool(os.environ.get("TELEGRAM_TOKEN")), "note": "Ready" if os.environ.get("TELEGRAM_TOKEN") else "Set TELEGRAM_TOKEN in .env"},
+    }
+    ready_count = sum(1 for v in statuses.values() if v["ready"])
+    return {"integrations": statuses, "ready": ready_count, "total": len(statuses)}
 
 # ── Tool definitions (sent to Claude) ─────────────────────────────────────────
 
@@ -64,6 +97,12 @@ TOOLS = [
             },
             "required": ["pattern"],
         },
+    },
+
+    {
+        "name": "check_setup",
+        "description": "Check which integrations are configured and ready. Run this to see what Axel can currently access.",
+        "input_schema": {"type": "object", "properties": {}, "required": []},
     },
 
     # TASKS
@@ -552,6 +591,8 @@ def dispatch(tool_name: str, tool_input: dict, context: dict) -> str:
                 result = system.list_directory(tool_input["path"])
             case "search_files":
                 result = system.search_files(tool_input["pattern"], tool_input.get("directory", "~"))
+            case "check_setup":
+                result = _check_setup()
 
             # Tasks
             case "create_task":
