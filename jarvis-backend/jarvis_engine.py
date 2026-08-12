@@ -120,7 +120,7 @@ def run(messages: list[dict], context: dict) -> str:
         log.debug("Iteration %d — stop_reason=%s", iteration, response.stop_reason)
 
         if response.stop_reason == "end_turn":
-            return _extract_text(response)
+            return _extract_text(response) or "Done."
 
         if response.stop_reason == "tool_use":
             # Collect all tool calls in this response

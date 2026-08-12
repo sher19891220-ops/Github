@@ -9,7 +9,11 @@ def send_telegram(chat_id: int, message: str) -> dict:
         # Split if over 4096 chars
         chunks = _split(message, 4000)
         for chunk in chunks:
+            if not chunk.strip():
+                continue
             resp = httpx.post(url, json={"chat_id": chat_id, "text": chunk, "parse_mode": "Markdown"}, timeout=10)
+            if not resp.ok:
+                resp = httpx.post(url, json={"chat_id": chat_id, "text": chunk}, timeout=10)
             resp.raise_for_status()
         return {"success": True, "chunks_sent": len(chunks)}
     except Exception as e:

@@ -105,7 +105,12 @@ async def handle_message(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         return
 
     for chunk in _split(reply, 4000):
-        await update.message.reply_text(chunk, parse_mode="Markdown")
+        if not chunk.strip():
+            continue
+        try:
+            await update.message.reply_text(chunk, parse_mode="Markdown")
+        except Exception:
+            await update.message.reply_text(chunk)
 
 
 def _split(text: str, size: int) -> list[str]:

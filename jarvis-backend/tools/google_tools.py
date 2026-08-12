@@ -413,12 +413,19 @@ def drive_read(file_id):
             return f"📄 {name}\n\n{content.decode('utf-8')}"
         elif "google-apps.spreadsheet" in mime:
             return sheets_read(file_id)
-        elif "pdf" in mime:
+        elif "google-apps" in mime:
+            # Other Google Workspace types (Slides, Forms, etc.)
             content = svc.files().export(fileId=file_id, mimeType="text/plain").execute()
-            return f"📄 {name} (PDF)\n\n{content.decode('utf-8', errors='replace')}"
-        else:
-            content = svc.files().get_media(fileId=file_id).execute()
             return f"📄 {name}\n\n{content.decode('utf-8', errors='replace')}"
+        else:
+            # Binary files (PDF, images, etc.) — download raw bytes
+            content = svc.files().get_media(fileId=file_id).execute()
+            if isinstance(content, bytes):
+                try:
+                    return f"📄 {name}\n\n{content.decode('utf-8', errors='replace')}"
+                except Exception:
+                    return f"📄 {name} — binary file ({len(content):,} bytes), cannot display as text."
+            return f"📄 {name}\n\n{content}"
     except FileNotFoundError as e:
         return str(e)
     except Exception as e:

@@ -29,7 +29,7 @@ def run_shell(command: str, timeout: int = 30) -> dict:
 def read_file(path: str) -> dict:
     path = os.path.expanduser(path)
     try:
-        with open(path) as f:
+        with open(path, encoding="utf-8", errors="replace") as f:
             content = f.read()
         return {"content": content, "size": len(content), "path": path}
     except Exception as e:
@@ -40,7 +40,7 @@ def write_file(path: str, content: str) -> dict:
     path = os.path.expanduser(path)
     try:
         os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
-        with open(path, "w") as f:
+        with open(path, "w", encoding="utf-8") as f:
             f.write(content)
         return {"success": True, "path": path, "bytes_written": len(content)}
     except Exception as e:

@@ -19,7 +19,7 @@ import jarvis_engine
 from tools.scheduler import check_and_send_due
 
 logging.basicConfig(
-    format="%(asctime)s [%(levelname)s] %(name)s — %(message)s",
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     level=logging.INFO,
 )
 log = logging.getLogger("jarvis")
