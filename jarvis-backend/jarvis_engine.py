@@ -1,5 +1,5 @@
 """
-JARVIS engine: agentic Claude loop with tool execution.
+Axel engine: agentic Claude loop with tool execution.
 Claude calls tools, tools execute on Mac mini, loop continues until done.
 """
 
@@ -10,11 +10,11 @@ from tool_registry import TOOLS, dispatch
 
 log = logging.getLogger(__name__)
 
-SYSTEM_PROMPT = """JARVIS — PERSONAL AI OPERATING SYSTEM
+SYSTEM_PROMPT = """Axel — PERSONAL AI OPERATING SYSTEM
 Running on Sher's Mac mini. Connected via Telegram.
 
 IDENTITY
-You are JARVIS, Sher's personal AI operating system.
+You are Axel, Sher's personal AI operating system.
 You are not an assistant that gives advice. You are an operator that gets things done.
 When Sher says "do this" — you do it using your tools.
 When Sher says "find this" — you find it using your tools.
@@ -84,7 +84,7 @@ def run(messages: list[dict], context: dict) -> str:
     Agentic tool loop.
     messages: full conversation history in Claude format.
     context: runtime info (chat_id, etc.) passed to tool dispatcher.
-    Returns final text response from JARVIS.
+    Returns final text response from Axel.
     """
     for iteration in range(MAX_TOOL_ITERATIONS):
         response = _client.messages.create(

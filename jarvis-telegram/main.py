@@ -30,7 +30,7 @@ async def cmd_start(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     if not is_allowed(update.effective_user.id):
         return
     await update.message.reply_text(
-        "JARVIS online. Ready, Sher.\n\n"
+        "Axel online. Ready, Sher.\n\n"
         "/clear — Reset conversation\n"
         "/status — System status\n"
         "/id — Your Telegram user ID"
@@ -53,7 +53,7 @@ async def cmd_status(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     try:
         data = await _backend("get", "/status")
         await update.message.reply_text(
-            f"JARVIS operational ✅\n"
+            f"Axel operational ✅\n"
             f"Open tasks: {data.get('open_tasks', '?')}\n"
             f"Memories: {data.get('memories', '?')}\n"
             f"Scheduler: {data.get('scheduler', '?')}"
@@ -84,7 +84,7 @@ async def handle_message(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         data = await _backend("post", "/chat", json={"chat_id": chat_id, "message": text})
         reply = data.get("reply", "")
     except httpx.TimeoutException:
-        await update.message.reply_text("⏱ JARVIS is still working on it... (backend timeout — check Mac mini)")
+        await update.message.reply_text("⏱ Axel is still working on it... (backend timeout — check Mac mini)")
         return
     except httpx.ConnectError:
         await update.message.reply_text("❌ Cannot reach Mac mini backend. Is it running?")
@@ -120,7 +120,7 @@ def main():
     app.add_handler(CommandHandler("status", cmd_status))
     app.add_handler(CommandHandler("id", cmd_id))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-    log.info("JARVIS Telegram bot starting — backend: %s", BACKEND_URL)
+    log.info("Axel Telegram bot starting — backend: %s", BACKEND_URL)
     app.run_polling(drop_pending_updates=True)
 
 
