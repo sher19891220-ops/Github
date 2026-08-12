@@ -10,4 +10,5 @@ if [ -f "$DIR/.env" ]; then
     set -a; source "$DIR/.env"; set +a
 fi
 
+export PYTHONUTF8=1
 exec "$PYTHON" "$DIR/main.py" >> "$LOG" 2>&1
