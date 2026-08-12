@@ -16,9 +16,10 @@ For personal Outlook.com: MS_TENANT_ID = "consumers"
 For work/school: MS_TENANT_ID = your tenant ID from Azure
 """
 
-import os
 import json
 import logging
+import os
+
 import requests
 
 log = logging.getLogger(__name__)

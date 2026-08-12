@@ -3,19 +3,18 @@ JARVIS Backend — FastAPI server running on Mac mini.
 The Telegram bot calls /chat to get JARVIS responses.
 """
 
-import logging
 import asyncio
+import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException, Depends, Header
-from fastapi.responses import JSONResponse
-from pydantic import BaseModel
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from fastapi import Depends, FastAPI, Header, HTTPException
+from pydantic import BaseModel
 
-from config import BACKEND_API_KEY, HOST, PORT
-from db import init_db
 import conversation
 import jarvis_engine
+from config import BACKEND_API_KEY, HOST, PORT
+from db import init_db
 from tools.scheduler import check_and_send_due
 
 logging.basicConfig(
@@ -115,8 +114,8 @@ def get_memory(category: str = ""):
 
 @app.get("/status", dependencies=[Depends(check_api_key)])
 def status():
-    from tools.tasks import list_tasks
     from tools.memory import list_memory
+    from tools.tasks import list_tasks
     open_tasks = list_tasks("open")
     memories = list_memory()
     return {

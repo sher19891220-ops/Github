@@ -34,8 +34,8 @@ def main():
         sys.exit(1)
 
     try:
+        from google.auth.transport.requests import Request  # noqa: F401  (availability probe)
         from google_auth_oauthlib.flow import InstalledAppFlow
-        from google.auth.transport.requests import Request
     except ImportError:
         print("Installing Google auth libraries...")
         os.system("pip install google-api-python-client google-auth-httplib2 google-auth-oauthlib")

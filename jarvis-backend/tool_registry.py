@@ -4,8 +4,19 @@ Add new tools here — one entry in TOOLS, one branch in dispatch().
 """
 
 import json
-from tools import system, tasks, memory, research, docker_tools, notifications, scheduler
-from tools import google_tools, finance_tools, microsoft_tools
+
+from tools import (
+    docker_tools,
+    finance_tools,
+    google_tools,
+    memory,
+    microsoft_tools,
+    notifications,
+    research,
+    scheduler,
+    system,
+    tasks,
+)
 
 # ── Tool definitions (sent to Claude) ─────────────────────────────────────────
 

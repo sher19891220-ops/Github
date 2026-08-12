@@ -20,7 +20,6 @@ Note: Plaid sandbox works with test credentials (username: user_good, password: 
 
 import os
 import sys
-import json
 
 
 def main():
@@ -36,21 +35,21 @@ def main():
     try:
         import plaid
         from plaid.api import plaid_api
+        from plaid.model.country_code import CountryCode
+        from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
         from plaid.model.link_token_create_request import LinkTokenCreateRequest
         from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
         from plaid.model.products import Products
-        from plaid.model.country_code import CountryCode
-        from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
     except ImportError:
         print("Installing Plaid...")
         os.system("pip install plaid-python")
         import plaid
         from plaid.api import plaid_api
+        from plaid.model.country_code import CountryCode
+        from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
         from plaid.model.link_token_create_request import LinkTokenCreateRequest
         from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
         from plaid.model.products import Products
-        from plaid.model.country_code import CountryCode
-        from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
 
     env_map = {
         "sandbox": plaid.Environment.Sandbox,
@@ -109,19 +108,18 @@ document.getElementById('link-button').onclick = function() {{ handler.open(); }
         access_token = exchange_res.access_token
         item_id = exchange_res.item_id
 
-        print(f"\n✅ Bank connected!")
+        print("\n✅ Bank connected!")
         print(f"Access token: {access_token}")
         print(f"Item ID: {item_id}")
-        print(f"\nAdd to your .env:")
+        print("\nAdd to your .env:")
         print(f"PLAID_ACCESS_TOKENS={access_token}")
-        print(f"\nIf adding multiple banks, comma-separate them:")
-        print(f"PLAID_ACCESS_TOKENS=access-xxx,access-yyy")
+        print("\nIf adding multiple banks, comma-separate them:")
+        print("PLAID_ACCESS_TOKENS=access-xxx,access-yyy")
         return
 
     import http.server
     import urllib.parse
     import webbrowser
-    import threading
 
     access_tokens = []
 
@@ -161,8 +159,8 @@ document.getElementById('link-button').onclick = function() {{ handler.open(); }
         pass
 
     if access_tokens:
-        print(f"\n✅ Bank connected!")
-        print(f"\nAdd to your .env:")
+        print("\n✅ Bank connected!")
+        print("\nAdd to your .env:")
         print(f"PLAID_ACCESS_TOKENS={','.join(access_tokens)}")
     else:
         print("No bank connected.")

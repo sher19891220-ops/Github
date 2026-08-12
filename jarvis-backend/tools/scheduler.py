@@ -1,4 +1,5 @@
 from datetime import datetime
+
 from db import conn
 from tools.notifications import send_telegram
 

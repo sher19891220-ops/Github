@@ -1,6 +1,7 @@
-import subprocess
-import os
 import glob as glob_module
+import os
+import subprocess
+
 from config import ALLOW_SHELL
 
 

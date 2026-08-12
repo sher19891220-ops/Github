@@ -21,9 +21,9 @@ Requirements:
 Uses device code flow — no browser automation needed, just copy a code into your browser.
 """
 
+import json
 import os
 import sys
-import json
 
 
 def main():

@@ -15,8 +15,8 @@ QUICKBOOKS SETUP:
   4. Set QB_CLIENT_ID, QB_CLIENT_SECRET, QB_REALM_ID, QB_ACCESS_TOKEN, QB_REFRESH_TOKEN in .env
 """
 
-import os
 import logging
+import os
 from datetime import datetime, timedelta
 
 log = logging.getLogger(__name__)

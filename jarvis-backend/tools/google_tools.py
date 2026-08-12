@@ -11,11 +11,11 @@ Setup (one-time on Mac mini):
   After that, Axel can use all Google tools without re-auth.
 """
 
-import os
 import base64
 import logging
-from email.mime.text import MIMEText
+import os
 from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 log = logging.getLogger(__name__)
 
@@ -286,7 +286,7 @@ def sheets_list(query=""):
 def calendar_list(days_ahead=7, max_results=20, calendar_id="primary"):
     """List upcoming calendar events for the next N days."""
     try:
-        from datetime import datetime, timezone, timedelta
+        from datetime import datetime, timedelta, timezone
         svc = _service("calendar", "v3")
         now = datetime.now(timezone.utc)
         end = now + timedelta(days=days_ahead)

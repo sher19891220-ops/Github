@@ -3,9 +3,8 @@ Tests for individual tool functions.
 Run: pytest tests/ -v
 """
 
-import os
 import json
-import pytest
+import os
 
 os.environ.setdefault("ANTHROPIC_API_KEY", "test")
 os.environ.setdefault("TELEGRAM_TOKEN", "test")
@@ -35,7 +34,7 @@ def test_read_file_missing():
 
 
 def test_write_then_read(tmp_path):
-    from tools.system import write_file, read_file
+    from tools.system import read_file, write_file
     path = str(tmp_path / "test.txt")
     write_file(path, "hello world")
     result = read_file(path)
@@ -43,7 +42,7 @@ def test_write_then_read(tmp_path):
 
 
 def test_write_file_unicode(tmp_path):
-    from tools.system import write_file, read_file
+    from tools.system import read_file, write_file
     path = str(tmp_path / "unicode.txt")
     write_file(path, "Axel ✅ ready")
     result = read_file(path)
@@ -65,7 +64,7 @@ def test_save_and_get_memory(tmp_path, monkeypatch):
     monkeypatch.setenv("DB_PATH", str(tmp_path / "test.db"))
     from db import init_db
     init_db()
-    from tools.memory import save_memory, get_memory
+    from tools.memory import get_memory, save_memory
     save_memory("test.key", "hello", "profile")
     result = get_memory("test.key")
     assert result["value"] == "hello"
@@ -99,7 +98,7 @@ def test_complete_task(tmp_path, monkeypatch):
     monkeypatch.setenv("DB_PATH", str(tmp_path / "test.db"))
     from db import init_db
     init_db()
-    from tools.tasks import create_task, complete_task, list_tasks
+    from tools.tasks import complete_task, create_task, list_tasks
     create_task("Test task", "", "low", "")
     open_tasks = list_tasks("open")
     task_id = open_tasks["tasks"][0]["id"]
@@ -111,7 +110,7 @@ def test_complete_task(tmp_path, monkeypatch):
 # ── Tool registry ──────────────────────────────────────────────────────────────
 
 def test_tool_registry_loads():
-    from tool_registry import TOOLS, dispatch
+    from tool_registry import TOOLS
     assert len(TOOLS) > 0
     for t in TOOLS:
         assert "name" in t

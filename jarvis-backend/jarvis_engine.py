@@ -3,9 +3,11 @@ Axel engine: agentic Claude loop with tool execution.
 Claude calls tools, tools execute on Mac mini, loop continues until done.
 """
 
-import anthropic
 import logging
-from config import ANTHROPIC_API_KEY, MODEL, MAX_TOKENS, MAX_TOOL_ITERATIONS
+
+import anthropic
+
+from config import ANTHROPIC_API_KEY, MAX_TOKENS, MAX_TOOL_ITERATIONS, MODEL
 from tool_registry import TOOLS, dispatch
 
 log = logging.getLogger(__name__)
