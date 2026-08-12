@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import httpx
 from telegram import Update
@@ -114,6 +115,7 @@ def _split(text: str, size: int) -> list[str]:
 
 
 def main():
+    asyncio.set_event_loop(asyncio.new_event_loop())
     app = Application.builder().token(TELEGRAM_TOKEN).build()
     app.add_handler(CommandHandler("start", cmd_start))
     app.add_handler(CommandHandler("clear", cmd_clear))
