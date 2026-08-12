@@ -82,6 +82,10 @@ cat > "$BACKEND_PLIST" << PLIST
         <string>/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
         <key>HOME</key>
         <string>$HOME</string>
+        <key>PYTHONUTF8</key>
+        <string>1</string>
+        <key>PYTHONIOENCODING</key>
+        <string>utf-8</string>
     </dict>
 </dict>
 </plist>
@@ -133,6 +137,10 @@ cat > "$BOT_PLIST" << PLIST
         <string>/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
         <key>HOME</key>
         <string>$HOME</string>
+        <key>PYTHONUTF8</key>
+        <string>1</string>
+        <key>PYTHONIOENCODING</key>
+        <string>utf-8</string>
     </dict>
 </dict>
 </plist>

@@ -11,4 +11,5 @@ if [ -f "$DIR/.env" ]; then
 fi
 
 export PYTHONUTF8=1
-exec "$PYTHON" "$DIR/main.py" >> "$LOG" 2>&1
+export PYTHONIOENCODING=utf-8
+exec "$PYTHON" -X utf8 "$DIR/main.py" >> "$LOG" 2>&1

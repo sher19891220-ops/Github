@@ -10,4 +10,5 @@ if [ -f "$DIR/.env" ]; then
 fi
 
 export PYTHONUTF8=1
-exec "$PYTHON" -m uvicorn main:app --host 0.0.0.0 --port 8000 >> "$LOG" 2>&1
+export PYTHONIOENCODING=utf-8
+exec "$PYTHON" -X utf8 -m uvicorn main:app --host 0.0.0.0 --port 8000 >> "$LOG" 2>&1
