@@ -1,19 +1,12 @@
 #!/bin/bash
-# Axel backend startup wrapper — sourced by launchd
 DIR="$(cd "$(dirname "$0")" && pwd)"
+PYTHON="$DIR/venv/bin/python"
+LOG="$DIR/logs/backend.log"
 
-# Load environment variables from .env
+mkdir -p "$DIR/logs"
+
 if [ -f "$DIR/.env" ]; then
-    set -a
-    source "$DIR/.env"
-    set +a
+    set -a; source "$DIR/.env"; set +a
 fi
 
-# Activate virtualenv if present
-if [ -f "$DIR/venv/bin/activate" ]; then
-    source "$DIR/venv/bin/activate"
-fi
-
-cd "$DIR"
-exec python -m uvicorn main:app --host 0.0.0.0 --port 8000 \
-    >> "$DIR/logs/backend.log" 2>&1
+exec "$PYTHON" -m uvicorn main:app --host 0.0.0.0 --port 8000 >> "$LOG" 2>&1
