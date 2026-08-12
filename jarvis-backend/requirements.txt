@@ -9,3 +9,19 @@ docker>=7.0.0
 apscheduler>=3.10.0
 aiofiles>=24.0.0
 pydantic>=2.0.0
+
+# Google Workspace (Gmail, Sheets, Calendar, Drive)
+google-api-python-client>=2.140.0
+google-auth-httplib2>=0.2.0
+google-auth-oauthlib>=1.2.0
+
+# Bank accounts (Plaid — uses REST API via httpx, no SDK needed)
+# plaid-python is optional — install if you need the SDK
+
+# QuickBooks
+python-quickbooks>=0.9.0
+intuit-oauth>=1.2.0
+
+# Microsoft / Outlook
+msal>=1.30.0
+requests>=2.32.0

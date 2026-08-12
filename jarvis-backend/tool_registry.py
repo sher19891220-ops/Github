@@ -5,6 +5,7 @@ Add new tools here — one entry in TOOLS, one branch in dispatch().
 
 import json
 from tools import system, tasks, memory, research, docker_tools, notifications, scheduler
+from tools import google_tools, finance_tools, microsoft_tools
 
 # ── Tool definitions (sent to Claude) ─────────────────────────────────────────
 
@@ -286,6 +287,249 @@ TOOLS = [
             "required": ["scheduled_id"],
         },
     },
+
+    # GMAIL
+    {
+        "name": "gmail_list",
+        "description": "List Gmail emails. Supports Gmail search syntax: from:x, to:x, is:unread, subject:x, after:2024/1/1, has:attachment, label:x",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "Gmail search query (empty = all inbox)"},
+                "max_results": {"type": "integer", "description": "Max emails to return (default 20)"},
+            },
+        },
+    },
+    {
+        "name": "gmail_read",
+        "description": "Read the full content of a Gmail email by its message ID (obtained from gmail_list).",
+        "input_schema": {
+            "type": "object",
+            "properties": {"message_id": {"type": "string"}},
+            "required": ["message_id"],
+        },
+    },
+    {
+        "name": "gmail_send",
+        "description": "Send an email from Sher's Gmail account.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "to": {"type": "string", "description": "Recipient email address"},
+                "subject": {"type": "string"},
+                "body": {"type": "string", "description": "Email body text"},
+                "cc": {"type": "string", "description": "CC email address (optional)"},
+            },
+            "required": ["to", "subject", "body"],
+        },
+    },
+
+    # GOOGLE SHEETS
+    {
+        "name": "sheets_read",
+        "description": "Read data from a Google Sheet. Returns all rows formatted as a table.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "spreadsheet_id": {"type": "string", "description": "Sheet ID from the URL (the long string between /d/ and /edit)"},
+                "range_notation": {"type": "string", "description": "e.g. 'Sheet1!A1:Z100' or just 'Sheet1'. Defaults to all data."},
+            },
+            "required": ["spreadsheet_id"],
+        },
+    },
+    {
+        "name": "sheets_write",
+        "description": "Write data to a Google Sheet.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "spreadsheet_id": {"type": "string"},
+                "range_notation": {"type": "string", "description": "e.g. 'Sheet1!A1'"},
+                "values": {
+                    "type": "array",
+                    "description": "List of rows, each row is a list of cell values",
+                    "items": {"type": "array", "items": {}},
+                },
+            },
+            "required": ["spreadsheet_id", "range_notation", "values"],
+        },
+    },
+    {
+        "name": "sheets_list",
+        "description": "List all Google Sheets in Sher's Drive.",
+        "input_schema": {
+            "type": "object",
+            "properties": {"query": {"type": "string", "description": "Optional name filter"}},
+        },
+    },
+
+    # GOOGLE CALENDAR
+    {
+        "name": "calendar_list",
+        "description": "List upcoming Google Calendar events.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "days_ahead": {"type": "integer", "description": "How many days ahead to look (default 7)"},
+                "max_results": {"type": "integer", "description": "Max events (default 20)"},
+            },
+        },
+    },
+    {
+        "name": "calendar_create",
+        "description": "Create a Google Calendar event.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "summary": {"type": "string", "description": "Event title"},
+                "start_datetime": {"type": "string", "description": "ISO format: 2024-01-15T10:00:00"},
+                "end_datetime": {"type": "string", "description": "ISO format: 2024-01-15T11:00:00"},
+                "description": {"type": "string"},
+                "location": {"type": "string"},
+                "attendees": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "List of attendee email addresses",
+                },
+            },
+            "required": ["summary", "start_datetime", "end_datetime"],
+        },
+    },
+
+    # GOOGLE DRIVE
+    {
+        "name": "drive_list",
+        "description": "List files in Sher's Google Drive.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "Filename search filter"},
+                "max_results": {"type": "integer", "description": "Default 20"},
+                "mime_filter": {"type": "string", "description": "e.g. 'application/pdf' or 'application/vnd.google-apps.document'"},
+            },
+        },
+    },
+    {
+        "name": "drive_read",
+        "description": "Read content of a Google Drive file (Docs, Sheets, text files).",
+        "input_schema": {
+            "type": "object",
+            "properties": {"file_id": {"type": "string", "description": "File ID from drive_list"}},
+            "required": ["file_id"],
+        },
+    },
+
+    # BANK (PLAID)
+    {
+        "name": "bank_accounts",
+        "description": "Get all connected bank accounts with current and available balances.",
+        "input_schema": {"type": "object", "properties": {}},
+    },
+    {
+        "name": "bank_transactions",
+        "description": "Get bank transactions from the past N days. Shows spending, income, and net.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "days": {"type": "integer", "description": "Days to look back (default 30)"},
+                "account_id": {"type": "string", "description": "Filter to specific account (optional)"},
+                "category": {"type": "string", "description": "Filter by category keyword (optional)"},
+            },
+        },
+    },
+
+    # QUICKBOOKS
+    {
+        "name": "qb_invoices",
+        "description": "Get QuickBooks invoices with totals, balances, and customer info.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "status": {"type": "string", "enum": ["Open", "Paid"], "description": "Filter by payment status"},
+                "days": {"type": "integer", "description": "Look back N days (default 90)"},
+            },
+        },
+    },
+    {
+        "name": "qb_expenses",
+        "description": "Get QuickBooks expenses and purchases from the past N days.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "days": {"type": "integer", "description": "Days to look back (default 30)"},
+            },
+        },
+    },
+    {
+        "name": "qb_profit_loss",
+        "description": "Get QuickBooks Profit & Loss report for a date range. Defaults to current month.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "start_date": {"type": "string", "description": "YYYY-MM-DD (defaults to first of current month)"},
+                "end_date": {"type": "string", "description": "YYYY-MM-DD (defaults to today)"},
+            },
+        },
+    },
+    {
+        "name": "qb_customers",
+        "description": "List QuickBooks customers with contact info and outstanding balances.",
+        "input_schema": {
+            "type": "object",
+            "properties": {"search": {"type": "string", "description": "Optional name filter"}},
+        },
+    },
+
+    # OUTLOOK
+    {
+        "name": "outlook_list",
+        "description": "List Outlook/Microsoft emails.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "folder": {"type": "string", "description": "inbox, sentitems, drafts, deleteditems (default: inbox)"},
+                "max_results": {"type": "integer", "description": "Default 20"},
+                "filter_unread": {"type": "boolean", "description": "Only show unread emails"},
+                "search": {"type": "string", "description": "Keyword search in subject/body"},
+            },
+        },
+    },
+    {
+        "name": "outlook_read",
+        "description": "Read full content of an Outlook email by ID (from outlook_list).",
+        "input_schema": {
+            "type": "object",
+            "properties": {"message_id": {"type": "string"}},
+            "required": ["message_id"],
+        },
+    },
+    {
+        "name": "outlook_send",
+        "description": "Send an email from Sher's Outlook/Microsoft account.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "to": {"type": "string", "description": "Recipient email address"},
+                "subject": {"type": "string"},
+                "body": {"type": "string"},
+                "cc": {"type": "string", "description": "CC email (optional)"},
+                "importance": {"type": "string", "enum": ["normal", "high", "low"], "description": "Default: normal"},
+            },
+            "required": ["to", "subject", "body"],
+        },
+    },
+    {
+        "name": "outlook_reply",
+        "description": "Reply to an Outlook email by message ID.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "message_id": {"type": "string"},
+                "body": {"type": "string", "description": "Reply text"},
+            },
+            "required": ["message_id", "body"],
+        },
+    },
 ]
 
 
@@ -360,6 +604,60 @@ def dispatch(tool_name: str, tool_input: dict, context: dict) -> str:
                 result = scheduler.list_scheduled(chat_id)
             case "cancel_scheduled":
                 result = scheduler.cancel_scheduled(tool_input["scheduled_id"])
+
+            # Gmail
+            case "gmail_list":
+                result = google_tools.gmail_list(tool_input.get("query", ""), tool_input.get("max_results", 20))
+            case "gmail_read":
+                result = google_tools.gmail_read(tool_input["message_id"])
+            case "gmail_send":
+                result = google_tools.gmail_send(tool_input["to"], tool_input["subject"], tool_input["body"], tool_input.get("cc", ""))
+
+            # Google Sheets
+            case "sheets_read":
+                result = google_tools.sheets_read(tool_input["spreadsheet_id"], tool_input.get("range_notation", ""))
+            case "sheets_write":
+                result = google_tools.sheets_write(tool_input["spreadsheet_id"], tool_input["range_notation"], tool_input["values"])
+            case "sheets_list":
+                result = google_tools.sheets_list(tool_input.get("query", ""))
+
+            # Google Calendar
+            case "calendar_list":
+                result = google_tools.calendar_list(tool_input.get("days_ahead", 7), tool_input.get("max_results", 20))
+            case "calendar_create":
+                result = google_tools.calendar_create(tool_input["summary"], tool_input["start_datetime"], tool_input["end_datetime"], tool_input.get("description", ""), tool_input.get("location", ""), tool_input.get("attendees"))
+
+            # Google Drive
+            case "drive_list":
+                result = google_tools.drive_list(tool_input.get("query", ""), tool_input.get("max_results", 20), tool_input.get("mime_filter", ""))
+            case "drive_read":
+                result = google_tools.drive_read(tool_input["file_id"])
+
+            # Bank (Plaid)
+            case "bank_accounts":
+                result = finance_tools.bank_accounts()
+            case "bank_transactions":
+                result = finance_tools.bank_transactions(tool_input.get("days", 30), tool_input.get("account_id"), tool_input.get("category"))
+
+            # QuickBooks
+            case "qb_invoices":
+                result = finance_tools.qb_invoices(tool_input.get("status"), tool_input.get("days", 90))
+            case "qb_expenses":
+                result = finance_tools.qb_expenses(tool_input.get("days", 30))
+            case "qb_profit_loss":
+                result = finance_tools.qb_profit_loss(tool_input.get("start_date"), tool_input.get("end_date"))
+            case "qb_customers":
+                result = finance_tools.qb_customers(tool_input.get("search"))
+
+            # Outlook
+            case "outlook_list":
+                result = microsoft_tools.outlook_list(tool_input.get("folder", "inbox"), tool_input.get("max_results", 20), tool_input.get("filter_unread", False), tool_input.get("search"))
+            case "outlook_read":
+                result = microsoft_tools.outlook_read(tool_input["message_id"])
+            case "outlook_send":
+                result = microsoft_tools.outlook_send(tool_input["to"], tool_input["subject"], tool_input["body"], tool_input.get("cc", ""), tool_input.get("importance", "normal"))
+            case "outlook_reply":
+                result = microsoft_tools.outlook_reply(tool_input["message_id"], tool_input["body"])
 
             case _:
                 result = {"error": f"Unknown tool: {tool_name}"}
