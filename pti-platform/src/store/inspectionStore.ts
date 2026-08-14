@@ -1,4 +1,3 @@
-'use client'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type {
@@ -9,34 +8,20 @@ import { buildChecklist } from '@/lib/checklist'
 import { generateId, generateSessionToken } from '@/lib/utils'
 
 interface InspectionState {
-  // Session
   sessionToken: string | null
   inspectionType: InspectionType | null
   inspectionId: string | null
-
-  // Driver & Vehicle
   driver: Driver | null
   vehicle: Vehicle | null
-
-  // Step 1 - Info
   odometer: number
   fuelLevel: number
   gps: GPSCoordinates | null
-
-  // Step 2 - Photos
   photos: CapturedPhoto[]
   currentAngle: AngleKey | null
-
-  // Step 3 - Checklist
   checklist: ChecklistItem[]
-
-  // Step 4 - Damage
   damageMarkers: DamageMarker[]
-
-  // Step 5 - Signature
   signatureDataUrl: string | null
 
-  // Actions
   initSession: (type: InspectionType, driver: Driver, vehicle: Vehicle) => void
   setOdometer: (v: number) => void
   setFuelLevel: (v: number) => void

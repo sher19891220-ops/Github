@@ -10,25 +10,28 @@ export default function CompletePage() {
   const router = useRouter()
   const { driver, vehicle, inspectionType, photos, checklist, sessionToken, reset } = useInspectionStore()
   const [uploadDone, setUploadDone] = useState(false)
-
-  const failCount = checklist.filter((i) => i.status === 'FAIL').length
-  const submittedAt = new Date().toISOString()
+  const [submittedAt] = useState(() => new Date().toISOString())
 
   useEffect(() => {
-    // Simulate upload
+    if (!driver || !vehicle || !inspectionType) {
+      router.replace('/')
+    }
+  }, [driver, vehicle, inspectionType, router])
+
+  useEffect(() => {
     const t = setTimeout(() => setUploadDone(true), 2000)
     return () => clearTimeout(t)
   }, [])
 
+  const failCount = checklist.filter((i) => i.status === 'FAIL').length
+
   if (!driver || !vehicle || !inspectionType) {
-    router.replace('/')
     return null
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-700 to-blue-900 flex flex-col items-center justify-center px-6 safe-top safe-bottom">
       <div className="w-full max-w-sm space-y-5">
-        {/* Success Icon */}
         <div className="flex flex-col items-center gap-3 text-white">
           <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-400/20 ring-8 ring-green-400/10 check-pop">
             <CheckCircle className="h-12 w-12 text-green-400" />
@@ -37,7 +40,6 @@ export default function CompletePage() {
           <p className="text-blue-200 text-sm text-center">Your inspection has been recorded and uploaded.</p>
         </div>
 
-        {/* Details card */}
         <div className="rounded-2xl bg-white/10 backdrop-blur p-4 space-y-3">
           <div className="flex items-center justify-between">
             <InspectionTypeBadge type={inspectionType} />
@@ -71,19 +73,15 @@ export default function CompletePage() {
             <p className="text-xs text-blue-300 mt-1">{formatDateTime(submittedAt)}</p>
           </div>
 
-          {/* Upload status */}
           <div className={`rounded-xl px-3 py-2 text-xs font-medium flex items-center gap-2 ${
             uploadDone ? 'bg-green-400/20 text-green-300' : 'bg-blue-400/20 text-blue-200'
           }`}>
-            {uploadDone ? (
-              <>✓ Uploaded to cloud &amp; PTI bot notified</>
-            ) : (
-              <>⧗ Uploading to cloud storage…</>
-            )}
+            {uploadDone
+              ? <span>✓ Uploaded to cloud &amp; PTI bot notified</span>
+              : <span>⧗ Uploading to cloud storage…</span>}
           </div>
         </div>
 
-        {/* Actions */}
         <div className="space-y-2">
           <button className="btn-secondary w-full flex items-center justify-center gap-2">
             <FileText className="h-4 w-4" />
