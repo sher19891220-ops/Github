@@ -62,7 +62,7 @@ def _get_token():
                     "scope": " ".join(SCOPES),
                 }
             )
-            if resp.ok:
+            if resp.is_success:
                 import time as t
                 new_data = resp.json()
                 new_data["expires_at"] = t.time() + new_data.get("expires_in", 3600)

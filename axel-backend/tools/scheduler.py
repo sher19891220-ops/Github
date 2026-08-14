@@ -1,7 +1,10 @@
+import logging
 from datetime import datetime
 
 from db import conn
 from tools.notifications import send_telegram
+
+log = logging.getLogger(__name__)
 
 
 def schedule_message(chat_id: int, message: str, fire_at: str) -> dict:
@@ -43,6 +46,13 @@ def check_and_send_due(now: datetime = None) -> int:
             (now_str,),
         ).fetchall()
         for row in due:
-            send_telegram(row["chat_id"], row["message"])
+            result = send_telegram(row["chat_id"], row["message"])
+            # Marked sent either way, so a permanent failure can't retry forever.
+            # Log it, otherwise a dropped message leaves no trace anywhere.
+            if isinstance(result, dict) and result.get("error"):
+                log.error(
+                    "Scheduled message %s to chat %s failed: %s",
+                    row["id"], row["chat_id"], result["error"],
+                )
             c.execute("UPDATE scheduled_messages SET sent=1 WHERE id=?", (row["id"],))
     return len(due)
