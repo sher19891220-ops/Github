@@ -337,8 +337,8 @@ def calendar_create(summary, start_datetime, end_datetime, description="", locat
             "summary": summary,
             "location": location,
             "description": description,
-            "start": {"dateTime": start_datetime, "timeZone": "UTC"},
-            "end": {"dateTime": end_datetime, "timeZone": "UTC"},
+            "start": {"dateTime": start_datetime, "timeZone": os.environ.get("TIMEZONE", "America/Los_Angeles")},
+            "end": {"dateTime": end_datetime, "timeZone": os.environ.get("TIMEZONE", "America/Los_Angeles")},
         }
         if attendees:
             event["attendees"] = [{"email": e} for e in (attendees if isinstance(attendees, list) else [attendees])]
