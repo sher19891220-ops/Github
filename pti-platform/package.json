@@ -15,7 +15,8 @@
     "lucide-react": "^0.394.0",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
-    "react-hook-form": "^7.52.0"
+    "react-hook-form": "^7.52.0",
+    "zustand": "^4.5.4"
   },
   "devDependencies": {
     "@types/node": "^20",
