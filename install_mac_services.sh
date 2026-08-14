@@ -11,8 +11,8 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-BACKEND_DIR="$SCRIPT_DIR/jarvis-backend"
-BOT_DIR="$SCRIPT_DIR/jarvis-telegram"
+BACKEND_DIR="$SCRIPT_DIR/axel-backend"
+BOT_DIR="$SCRIPT_DIR/axel-telegram"
 LAUNCH_AGENTS="$HOME/Library/LaunchAgents"
 LOG_DIR="$HOME/Library/Logs/Axel"
 
