@@ -186,10 +186,19 @@ def run(messages: list[dict], context: dict) -> str:
             ]
             continue
 
-        # Unexpected stop reason
+        # Unexpected stop reason (max_tokens, refusal, pause_turn, ...)
+        log.warning("Unexpected stop_reason=%r at iteration %d", response.stop_reason, iteration)
         break
 
-    return _extract_text(response) or "Task completed."
+    # Never report success we didn't achieve — the system prompt promises as much.
+    text = _extract_text(response)
+    if response.stop_reason == "max_tokens":
+        return (text or "") + "\n\n⚠️ Cut off at the token limit. Ask me to continue."
+    if response.stop_reason not in ("end_turn", "tool_use"):
+        return text or f"⚠️ Stopped early (stop_reason={response.stop_reason})."
+    # Fell out of the loop still wanting tools — hit the iteration ceiling.
+    log.warning("Hit MAX_TOOL_ITERATIONS=%d without finishing", MAX_TOOL_ITERATIONS)
+    return (text or "") + f"\n\n⚠️ Stopped after {MAX_TOOL_ITERATIONS} tool iterations without finishing."
 
 
 def _extract_text(response) -> str:
