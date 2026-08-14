@@ -23,11 +23,7 @@ export default function InspectionStartPage() {
   const [gpsError, setGpsError] = useState<string | null>(null)
   const [distanceWarning, setDistanceWarning] = useState<string | null>(null)
 
-  if (!inspectionType || !vehicle || !driver) {
-    if (typeof window !== 'undefined') router.replace('/')
-    return null
-  }
-
+  // All hooks must be called before any early return
   const captureGPS = useCallback(() => {
     if (!navigator.geolocation) {
       setGpsError('Geolocation not supported on this device')
@@ -35,6 +31,7 @@ export default function InspectionStartPage() {
     }
     setGpsLoading(true)
     setGpsError(null)
+    setDistanceWarning(null)
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const { latitude: lat, longitude: lng, accuracy } = pos.coords
@@ -58,7 +55,16 @@ export default function InspectionStartPage() {
     )
   }, [setGPS])
 
-  useEffect(() => { captureGPS() }, [])
+  useEffect(() => { captureGPS() }, [captureGPS])
+
+  // Guard after all hooks
+  if (!inspectionType || !vehicle || !driver) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-sm text-slate-500">No active session. <a href="/" className="text-blue-600 underline">Go home</a></p>
+      </div>
+    )
+  }
 
   const canProceed = odometer > 0
 
@@ -69,9 +75,7 @@ export default function InspectionStartPage() {
         subtitle={`Unit ${vehicle.unitNumber} · ${driver.name}`}
         showBack
         backHref="/"
-        rightAction={
-          <InspectionTypeBadge type={inspectionType} />
-        }
+        rightAction={<InspectionTypeBadge type={inspectionType} />}
       />
 
       <div className="px-4 py-4 space-y-4">

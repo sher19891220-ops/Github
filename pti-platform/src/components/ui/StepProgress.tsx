@@ -1,3 +1,4 @@
+import React from 'react'
 import { Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -16,8 +17,8 @@ export function StepProgress({ steps, className }: StepProgressProps) {
   return (
     <div className={cn('flex items-center', className)}>
       {steps.map((step, i) => (
-        <>
-          <div key={step.label} className="flex flex-col items-center gap-1">
+        <React.Fragment key={step.label}>
+          <div className="flex flex-col items-center gap-1">
             <div
               className={cn(
                 'flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-all',
@@ -41,14 +42,13 @@ export function StepProgress({ steps, className }: StepProgressProps) {
           </div>
           {i < steps.length - 1 && (
             <div
-              key={`line-${i}`}
               className={cn(
                 'flex-1 h-0.5 mx-1 mb-4 rounded transition-all',
                 step.completed ? 'bg-blue-600' : 'bg-slate-200'
               )}
             />
           )}
-        </>
+        </React.Fragment>
       ))}
     </div>
   )

@@ -1,7 +1,7 @@
 'use client'
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Camera, Check, RotateCcw, ChevronRight, AlertCircle } from 'lucide-react'
+import { Check, RotateCcw, ChevronRight, AlertCircle } from 'lucide-react'
 import { TopBar } from '@/components/ui/TopBar'
 import { useInspectionStore } from '@/store/inspectionStore'
 import { INSPECTION_ANGLES } from '@/lib/angles'
@@ -10,7 +10,7 @@ import type { AngleKey, CapturedPhoto } from '@/lib/types'
 
 export default function CameraPage() {
   const router = useRouter()
-  const { photos, addPhoto, removePhoto, inspectionType } = useInspectionStore()
+  const { photos, addPhoto, removePhoto } = useInspectionStore()
   const [activeAngle, setActiveAngle] = useState<AngleKey>(INSPECTION_ANGLES[0].key)
   const [cameraReady, setCameraReady] = useState(false)
   const [cameraError, setCameraError] = useState<string | null>(null)
@@ -28,15 +28,12 @@ export default function CameraPage() {
 
   const startCamera = useCallback(async () => {
     try {
+      setCameraError(null)
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((t) => t.stop())
       }
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: 'environment',
-          width: { ideal: 1920 },
-          height: { ideal: 1080 },
-        },
+        video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } },
         audio: false,
       })
       streamRef.current = stream
@@ -45,17 +42,14 @@ export default function CameraPage() {
         videoRef.current.onloadedmetadata = () => setCameraReady(true)
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Camera access denied'
-      setCameraError(msg)
+      setCameraError(err instanceof Error ? err.message : 'Camera access denied')
     }
   }, [])
 
   useEffect(() => {
     startCamera()
-    return () => {
-      streamRef.current?.getTracks().forEach((t) => t.stop())
-    }
-  }, [])
+    return () => { streamRef.current?.getTracks().forEach((t) => t.stop()) }
+  }, [startCamera])
 
   const capturePhoto = useCallback(() => {
     if (!videoRef.current || !canvasRef.current || capturing) return
@@ -67,7 +61,6 @@ export default function CameraPage() {
     const ctx = canvas.getContext('2d')!
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
 
-    // Simple blur detection via variance of grayscale
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
     const blurScore = computeBlurScore(imageData)
     const isBlurry = blurScore < 80
@@ -92,17 +85,10 @@ export default function CameraPage() {
     setJustCaptured(true)
     setTimeout(() => setJustCaptured(false), 1200)
 
-    // Auto-advance to next angle
     if (!isBlurry && currentIndex < INSPECTION_ANGLES.length - 1) {
       setTimeout(() => setActiveAngle(INSPECTION_ANGLES[currentIndex + 1].key), 800)
     }
   }, [activeAngle, capturing, currentAngleConfig, currentIndex, addPhoto])
-
-  const nextAngle = () => {
-    if (currentIndex < INSPECTION_ANGLES.length - 1) {
-      setActiveAngle(INSPECTION_ANGLES[currentIndex + 1].key)
-    }
-  }
 
   return (
     <div className="flex flex-col h-screen bg-black">
@@ -111,10 +97,9 @@ export default function CameraPage() {
         subtitle={`${currentIndex + 1} of ${INSPECTION_ANGLES.length}`}
         showBack
         backHref="/inspection/start"
-        className="!bg-black !border-slate-800 !text-white [&_*]:!text-white [&_*]:!text-slate-300"
+        className="!bg-black !border-slate-800 [&_h1]:!text-white [&_p]:!text-slate-400 [&_button]:!text-slate-300"
       />
 
-      {/* Camera Viewfinder */}
       <div className="relative flex-1 overflow-hidden">
         {cameraError ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-slate-900 p-8 text-center">
@@ -124,48 +109,38 @@ export default function CameraPage() {
           </div>
         ) : (
           <>
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted
-              className="h-full w-full object-cover"
-            />
+            <video ref={videoRef} autoPlay playsInline muted className="h-full w-full object-cover" />
 
-            {/* Corner guides */}
             {cameraReady && (
               <>
-                <div className="camera-overlay">
-                  <div className="camera-corner" style={{ top: 24, left: 24, borderTopWidth: 3, borderLeftWidth: 3, borderRightWidth: 0, borderBottomWidth: 0 }} />
-                  <div className="camera-corner" style={{ top: 24, right: 24, borderTopWidth: 3, borderRightWidth: 3, borderLeftWidth: 0, borderBottomWidth: 0 }} />
-                  <div className="camera-corner" style={{ bottom: 24, left: 24, borderBottomWidth: 3, borderLeftWidth: 3, borderRightWidth: 0, borderTopWidth: 0 }} />
-                  <div className="camera-corner" style={{ bottom: 24, right: 24, borderBottomWidth: 3, borderRightWidth: 3, borderLeftWidth: 0, borderTopWidth: 0 }} />
+                {/* Corner guides */}
+                <div className="absolute inset-0 pointer-events-none">
+                  <div className="absolute" style={{ top: 24, left: 24, width: 24, height: 24, borderTop: '3px solid #22c55e', borderLeft: '3px solid #22c55e' }} />
+                  <div className="absolute" style={{ top: 24, right: 24, width: 24, height: 24, borderTop: '3px solid #22c55e', borderRight: '3px solid #22c55e' }} />
+                  <div className="absolute" style={{ bottom: 160, left: 24, width: 24, height: 24, borderBottom: '3px solid #22c55e', borderLeft: '3px solid #22c55e' }} />
+                  <div className="absolute" style={{ bottom: 160, right: 24, width: 24, height: 24, borderBottom: '3px solid #22c55e', borderRight: '3px solid #22c55e' }} />
                 </div>
 
-                {/* Angle label */}
                 <div className="absolute top-4 left-1/2 -translate-x-1/2 rounded-full bg-black/60 px-4 py-1.5">
-                  <p className="text-xs font-semibold text-white text-center">{currentAngleConfig.label.toUpperCase()}</p>
+                  <p className="text-xs font-semibold text-white">{currentAngleConfig.label.toUpperCase()}</p>
                 </div>
 
-                {/* Instruction */}
-                <div className="absolute bottom-28 inset-x-4 rounded-xl bg-black/70 px-4 py-3">
+                <div className="absolute bottom-36 inset-x-4 rounded-xl bg-black/70 px-4 py-3">
                   <p className="text-xs text-white/90 text-center leading-relaxed">{currentAngleConfig.instruction}</p>
                 </div>
               </>
             )}
 
-            {/* Flash / capture feedback */}
             {justCaptured && (
-              <div className="absolute inset-0 bg-white/30 flex items-center justify-center">
+              <div className="absolute inset-0 bg-white/30 flex items-center justify-center pointer-events-none">
                 <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-500 check-pop">
                   <Check className="h-8 w-8 text-white" />
                 </div>
               </div>
             )}
 
-            {/* Blur warning */}
             {blurWarning && (
-              <div className="absolute top-16 inset-x-4 rounded-xl bg-yellow-500/90 px-4 py-2 text-center">
+              <div className="absolute top-16 inset-x-4 rounded-xl bg-yellow-500/90 px-4 py-2 text-center pointer-events-none">
                 <p className="text-xs font-semibold text-white">Image may be blurry — retake for best results</p>
               </div>
             )}
@@ -175,11 +150,9 @@ export default function CameraPage() {
 
       <canvas ref={canvasRef} className="hidden" />
 
-      {/* Bottom Controls */}
       <div className="bg-black px-4 py-4 space-y-3 safe-bottom">
-        {/* Angle Dots */}
         <div className="flex items-center justify-center gap-1.5">
-          {INSPECTION_ANGLES.map((a, i) => {
+          {INSPECTION_ANGLES.map((a) => {
             const captured = photos.some((p) => p.angle === a.key)
             const active = a.key === activeAngle
             return (
@@ -195,18 +168,15 @@ export default function CameraPage() {
           })}
         </div>
 
-        {/* Controls row */}
         <div className="flex items-center justify-between">
-          {/* Retake */}
           <button
-            onClick={() => { removePhoto(activeAngle); setJustCaptured(false) }}
+            onClick={() => removePhoto(activeAngle)}
             disabled={!currentPhoto}
             className="flex h-12 w-12 items-center justify-center rounded-full border border-slate-700 text-slate-400 disabled:opacity-30"
           >
             <RotateCcw className="h-5 w-5" />
           </button>
 
-          {/* Capture */}
           <button
             onClick={capturePhoto}
             disabled={capturing || !cameraReady}
@@ -215,9 +185,8 @@ export default function CameraPage() {
             <div className={cn('h-16 w-16 rounded-full bg-white transition-all', capturing && 'scale-90')} />
           </button>
 
-          {/* Next / Skip */}
           <button
-            onClick={nextAngle}
+            onClick={() => currentIndex < INSPECTION_ANGLES.length - 1 && setActiveAngle(INSPECTION_ANGLES[currentIndex + 1].key)}
             disabled={currentIndex >= INSPECTION_ANGLES.length - 1}
             className="flex h-12 w-12 items-center justify-center rounded-full border border-slate-700 text-slate-400 disabled:opacity-30"
           >
@@ -225,22 +194,12 @@ export default function CameraPage() {
           </button>
         </div>
 
-        {/* Proceed */}
-        {allCaptured && (
-          <button
-            onClick={() => router.push('/inspection/checklist')}
-            className="btn-primary w-full"
-          >
-            <Check className="h-4 w-4" />
-            All photos captured — Next: Checklist
+        {allCaptured ? (
+          <button onClick={() => router.push('/inspection/checklist')} className="btn-primary w-full">
+            <Check className="h-4 w-4" /> All photos captured — Next: Checklist
           </button>
-        )}
-
-        {!allCaptured && (
-          <button
-            onClick={() => router.push('/inspection/checklist')}
-            className="btn-secondary w-full text-sm py-2.5"
-          >
+        ) : (
+          <button onClick={() => router.push('/inspection/checklist')} className="btn-secondary w-full text-sm py-2.5">
             Skip to Checklist ({photos.length}/{INSPECTION_ANGLES.length} captured)
           </button>
         )}
@@ -257,9 +216,13 @@ function computeBlurScore(imageData: ImageData): number {
   for (let y = 1; y < height - 1; y += step) {
     for (let x = 1; x < width - 1; x += step) {
       const i = (y * width + x) * 4
+      const rightI = i + 4
+      const downI = ((y + 1) * width + x) * 4
+      // Bounds check
+      if (rightI + 2 >= data.length || downI + 2 >= data.length) continue
       const gray = (data[i] + data[i + 1] + data[i + 2]) / 3
-      const right = (data[i + 4] + data[i + 5] + data[i + 6]) / 3
-      const down = (data[(y + 1) * width * 4 + x * 4] + data[(y + 1) * width * 4 + x * 4 + 1] + data[(y + 1) * width * 4 + x * 4 + 2]) / 3
+      const right = (data[rightI] + data[rightI + 1] + data[rightI + 2]) / 3
+      const down = (data[downI] + data[downI + 1] + data[downI + 2]) / 3
       sum += Math.abs(gray - right) + Math.abs(gray - down)
       count++
     }
