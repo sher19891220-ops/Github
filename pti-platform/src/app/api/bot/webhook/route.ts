@@ -21,7 +21,8 @@ export async function POST(req: NextRequest) {
     if (!BOT_TOKEN) return NextResponse.json({ ok: false, error: 'Bot token not configured' })
 
     const parts = text.split(/\s+/)
-    const cmd   = parts[0]?.toLowerCase() ?? ''
+    // Strip @BotName suffix so group commands (/pickup@Pti_check_bot) match
+    const cmd   = (parts[0]?.split('@')[0] ?? '').toLowerCase()
 
     if (cmd === '/start' || cmd === '/help') {
       await send(chatId,
