@@ -1,0 +1,19 @@
+🛃 White House Deploys AI to Hunt Down $75B in Tariff-Dodging Shipments
+
+A new federal enforcement report accuses 40+ countries of helping funnel Chinese goods around U.S. tariffs — and the government is rolling out an AI system to catch it before containers even clear customs.
+
+📊 The stats/facts:
+• $75 billion in illegally transshipped goods identified between February 2025 and February 2026
+• An estimated $19-34 billion in lost U.S. tariff revenue tied to the scheme
+• 40+ countries flagged for elevated transshipment risk, including Mexico, Canada, the EU, India, Japan, South Korea, Indonesia, Thailand, Brazil, and Malaysia
+• The new "detective border" AI system cross-references shipping routes, factory ownership, production capacity, and port X-ray images to catch mismatched cargo
+• Findings are built on two government and three private-sector data sources
+
+💡 Why marketers should care:
+• Compliance just became a sellable differentiator — trade-compliance, customs brokerage, and supply-chain visibility vendors can lead with "prove your origin before the AI flags it" messaging to importers sourcing from the 10 named countries
+• Account-based campaigns targeting importers/3PLs with exposure to these corridors should name the transshipment risk directly, not go generic
+• PR lesson: the White House branded this "The Great Transshipment Scam" — a vivid label plus one big dollar figure ($75B) is what turned a dry enforcement memo into Bloomberg/Fortune-level coverage; freight-tech reports should borrow that playbook
+
+🔗 Source: Transport Topics (Bloomberg News), August 13, 2026 — https://www.ttnews.com/articles/trump-ai-tariff-crackdown
+
+#FounderHub #Freight #SupplyChain #TradeCompliance #Logistics
