@@ -13,4 +13,4 @@ ALLOWED_USER_IDS = set(
 # Mac mini backend
 BACKEND_URL = os.environ.get("BACKEND_URL", "http://localhost:8000")
 BACKEND_API_KEY = os.environ.get("BACKEND_API_KEY", "")
-BACKEND_TIMEOUT = int(os.environ.get("BACKEND_TIMEOUT", "120"))  # seconds — JARVIS may use multiple tools
+BACKEND_TIMEOUT = int(os.environ.get("BACKEND_TIMEOUT", "120"))  # seconds — AXEL may use multiple tools

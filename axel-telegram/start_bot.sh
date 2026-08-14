@@ -1,6 +1,6 @@
 #!/bin/bash
 DIR="$(cd "$(dirname "$0")" && pwd)"
-BACKEND_DIR="$(dirname "$DIR")/jarvis-backend"
+BACKEND_DIR="$(dirname "$DIR")/axel-backend"
 PYTHON="$BACKEND_DIR/venv/bin/python"
 LOG="$DIR/logs/bot.log"
 

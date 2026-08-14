@@ -4,7 +4,7 @@ from config import TELEGRAM_TOKEN
 
 
 def send_telegram(chat_id: int, message: str) -> dict:
-    """Send a message to a Telegram chat. Used by JARVIS for proactive updates."""
+    """Send a message to a Telegram chat. Used by AXEL for proactive updates."""
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     try:
         # Split if over 4096 chars

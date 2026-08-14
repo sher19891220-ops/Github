@@ -80,7 +80,7 @@ TOOLS = [
     # TASKS
     {
         "name": "create_task",
-        "description": "Create a task in JARVIS task list.",
+        "description": "Create a task in AXEL task list.",
         "input_schema": {
             "type": "object",
             "properties": {

@@ -12,7 +12,7 @@ MODEL = os.environ.get("CLAUDE_MODEL", "claude-sonnet-5")
 MAX_TOKENS = int(os.environ.get("MAX_TOKENS", "8192"))
 MAX_TOOL_ITERATIONS = int(os.environ.get("MAX_TOOL_ITERATIONS", "25"))
 
-DB_PATH = os.environ.get("DB_PATH", "jarvis.db")
+DB_PATH = os.environ.get("DB_PATH", "axel.db")
 HOST = os.environ.get("HOST", "0.0.0.0")
 PORT = int(os.environ.get("PORT", "8000"))
 

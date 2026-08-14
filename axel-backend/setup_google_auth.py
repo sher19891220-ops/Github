@@ -7,7 +7,7 @@ Requirements:
   3. Enable these APIs: Gmail API, Google Sheets API, Google Drive API, Google Calendar API
   4. Go to Credentials → Create Credentials → OAuth 2.0 Client ID
   5. Application type: Desktop app
-  6. Download the JSON file → save it as credentials.json in the jarvis-backend/ folder
+  6. Download the JSON file → save it as credentials.json in the axel-backend/ folder
   7. Run: python setup_google_auth.py
 
 A browser will open asking you to authorize. After you approve, token.json is created

@@ -5,7 +5,7 @@ Setup (one-time on Mac mini):
   1. Go to console.cloud.google.com → Create project → Enable APIs:
      Gmail API, Sheets API, Drive API, Calendar API
   2. Credentials → OAuth 2.0 Client ID (Desktop app) → Download JSON
-  3. Save as credentials.json in jarvis-backend/
+  3. Save as credentials.json in axel-backend/
   4. Run: python setup_google_auth.py
      This opens a browser, you authorize, and token.json is created.
   After that, Axel can use all Google tools without re-auth.

@@ -1,6 +1,6 @@
 """
-JARVIS Backend — FastAPI server running on Mac mini.
-The Telegram bot calls /chat to get JARVIS responses.
+AXEL Backend — FastAPI server running on Mac mini.
+The Telegram bot calls /chat to get AXEL responses.
 """
 
 import asyncio
@@ -11,8 +11,8 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import Depends, FastAPI, Header, HTTPException
 from pydantic import BaseModel
 
+import axel_engine
 import conversation
-import jarvis_engine
 from config import BACKEND_API_KEY, HOST, PORT
 from db import init_db
 from tools.scheduler import check_and_send_due
@@ -21,7 +21,7 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     level=logging.INFO,
 )
-log = logging.getLogger("jarvis")
+log = logging.getLogger("axel")
 
 
 # ── Scheduler ─────────────────────────────────────────────────────────────────
@@ -35,13 +35,13 @@ async def lifespan(app: FastAPI):
     # Check scheduled messages every minute
     scheduler.add_job(check_and_send_due, "interval", minutes=1, id="scheduled_msgs")
     scheduler.start()
-    log.info("JARVIS backend online.")
+    log.info("AXEL backend online.")
     yield
     scheduler.shutdown()
-    log.info("JARVIS backend shutting down.")
+    log.info("AXEL backend shutting down.")
 
 
-app = FastAPI(title="JARVIS Backend", lifespan=lifespan)
+app = FastAPI(title="AXEL Backend", lifespan=lifespan)
 
 
 # ── Auth ───────────────────────────────────────────────────────────────────────
@@ -66,7 +66,7 @@ class ClearRequest(BaseModel):
 
 @app.get("/health")
 def health():
-    return {"status": "online", "service": "JARVIS"}
+    return {"status": "online", "service": "AXEL"}
 
 
 @app.post("/chat", dependencies=[Depends(check_api_key)])
@@ -81,7 +81,7 @@ async def chat(req: ChatRequest):
     context = {"chat_id": req.chat_id}
     try:
         reply = await asyncio.get_running_loop().run_in_executor(
-            None, jarvis_engine.run, history, context
+            None, axel_engine.run, history, context
         )
     except Exception as e:
         log.error("Engine error: %s", e, exc_info=True)
