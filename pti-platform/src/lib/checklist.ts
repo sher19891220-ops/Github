@@ -6,7 +6,9 @@ export const DEFAULT_CHECKLIST: Omit<ChecklistItem, 'status' | 'notes'>[] = [
   { id: 'ext-roof',    category: 'Trailer Exterior', label: 'Roof & Sides (No Damage)',          mandatory: true },
   { id: 'ext-frame',   category: 'Trailer Exterior', label: 'Frame & Undercarriage',             mandatory: true },
   { id: 'ext-floor',   category: 'Trailer Exterior', label: 'Floor Condition (No Soft Spots)',   mandatory: true },
-  { id: 'ext-landing', category: 'Trailer Exterior', label: 'Landing Gear (Retracted & Secure)', mandatory: true },
+  { id: 'ext-landing',  category: 'Trailer Exterior', label: 'Landing Gear (Retracted & Secure)', mandatory: true },
+  { id: 'ext-plate',   category: 'Trailer Exterior', label: 'License Plate (Visible & Secure)',   mandatory: true },
+  { id: 'ext-mudflaps', category: 'Trailer Exterior', label: 'Mud Flaps (Installed & Intact)',     mandatory: true },
 
   // Lights & Reflectors
   { id: 'lt-tail',       category: 'Lights & Reflectors', label: 'Tail Lights',                  mandatory: true },
@@ -16,16 +18,6 @@ export const DEFAULT_CHECKLIST: Omit<ChecklistItem, 'status' | 'notes'>[] = [
   { id: 'lt-reflectors', category: 'Lights & Reflectors', label: 'Reflectors (All Sides)',       mandatory: true },
   { id: 'lt-abs',        category: 'Lights & Reflectors', label: 'ABS Light (Off When Running)', mandatory: true },
 
-  // Coupling & Connection
-  { id: 'coup-kingpin',    category: 'Coupling & Connection', label: 'King Pin Secure',                     mandatory: true },
-  { id: 'coup-gladhands',  category: 'Coupling & Connection', label: 'Glad Hands Connected (Air Lines)',    mandatory: true },
-  { id: 'coup-electrical', category: 'Coupling & Connection', label: 'Electrical Plug (7-Pin) Connected',   mandatory: true },
-  { id: 'coup-safety',     category: 'Coupling & Connection', label: 'Safety Chains / Cables Secured',      mandatory: true },
-
-  // Cargo & Seals
-  { id: 'cargo-doors',  category: 'Cargo & Seals', label: 'Cargo Doors Locked & Latched', mandatory: true },
-  { id: 'cargo-seal',   category: 'Cargo & Seals', label: 'Seal Intact (if applicable)',   mandatory: false },
-  { id: 'cargo-secure', category: 'Cargo & Seals', label: 'Cargo Properly Secured',        mandatory: false },
 ]
 
 export const TIRE_POSITIONS = [

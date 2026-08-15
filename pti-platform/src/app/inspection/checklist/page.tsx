@@ -258,6 +258,20 @@ function TireCard({
         />
         <span className="text-xs text-slate-400">psi</span>
       </div>
+
+      {/* PSI indicator */}
+      {tire.psi.trim() !== '' && (() => {
+        const val = Number(tire.psi)
+        const ok = val >= 90
+        return (
+          <div className={`mt-1.5 flex items-center gap-1.5 rounded-lg px-2 py-1 ${ok ? 'bg-green-50' : 'bg-red-50'}`}>
+            <span className={`h-2 w-2 rounded-full flex-shrink-0 ${ok ? 'bg-green-500' : 'bg-red-500'}`} />
+            <span className={`text-xs font-bold ${ok ? 'text-green-700' : 'text-red-700'}`}>
+              {ok ? 'OK' : 'VIOLATION'}
+            </span>
+          </div>
+        )
+      })()}
     </div>
   )
 }
