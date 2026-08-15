@@ -7,6 +7,7 @@ export type Company = 'Zone LLC' | 'Xtrack LLC' | 'AFG Transportco'
 export interface TireInspection {
   position: string
   condition: TireCondition | null
+  psi: string
 }
 
 export interface Driver {

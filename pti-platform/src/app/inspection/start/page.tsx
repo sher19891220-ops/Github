@@ -2,7 +2,6 @@
 import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Loader2, Truck } from 'lucide-react'
-import { FuelSlider } from '@/components/ui/FuelSlider'
 import { useInspectionStore } from '@/store/inspectionStore'
 import type { InspectionType, Company } from '@/lib/types'
 
@@ -80,7 +79,7 @@ function InspectionStartContent() {
           <div className="flex rounded-xl overflow-hidden border border-white/20">
             <button
               onClick={() => setInspType('PICKUP')}
-              className={`flex-1 py-4 text-base font-bold transition-colors ${
+              className={`flex-1 py-5 text-lg font-black tracking-wide transition-colors ${
                 inspType === 'PICKUP' ? 'bg-green-500 text-white' : 'bg-white/10 text-blue-200'
               }`}
             >
@@ -88,7 +87,7 @@ function InspectionStartContent() {
             </button>
             <button
               onClick={() => setInspType('DROP_OFF')}
-              className={`flex-1 py-4 text-base font-bold transition-colors ${
+              className={`flex-1 py-5 text-lg font-black tracking-wide transition-colors ${
                 inspType === 'DROP_OFF' ? 'bg-orange-500 text-white' : 'bg-white/10 text-blue-200'
               }`}
             >
@@ -107,7 +106,7 @@ function InspectionStartContent() {
             placeholder="Enter trailer number"
             value={unitNumber}
             onChange={(e) => setUnitNumber(e.target.value)}
-            className="input-field text-xl font-bold"
+            className="input-field text-2xl font-black"
             autoCapitalize="characters"
             autoFocus={!urlUnit}
           />
@@ -121,21 +120,15 @@ function InspectionStartContent() {
             placeholder="Your full name"
             value={driverName}
             onChange={(e) => setDriverName(e.target.value)}
-            className="input-field text-lg"
+            className="input-field text-xl"
             autoComplete="name"
           />
-        </div>
-
-        {/* Fuel level */}
-        <div className="card">
-          <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-3">Fuel Level</h3>
-          <FuelSlider value={store.fuelLevel} onChange={store.setFuelLevel} />
         </div>
 
         <button
           disabled={!canBegin}
           onClick={handleBegin}
-          className="btn-primary w-full py-4 text-base disabled:opacity-40"
+          className="btn-primary w-full py-5 text-lg font-black disabled:opacity-40"
         >
           Begin {inspType === 'PICKUP' ? 'Pickup' : 'Drop-off'} Inspection →
         </button>

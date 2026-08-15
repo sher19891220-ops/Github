@@ -6,17 +6,17 @@ import { useInspectionStore } from '@/store/inspectionStore'
 import { getChecklistCategories, isChecklistComplete } from '@/lib/checklist'
 import type { TireCondition } from '@/lib/types'
 
-const TIRE_CONDITION_OPTIONS: { value: TireCondition; label: string; color: string }[] = [
-  { value: 'GOOD',            label: 'GOOD',            color: 'bg-green-500 text-white' },
-  { value: 'FAIR',            label: 'FAIR',            color: 'bg-yellow-400 text-white' },
-  { value: 'NEEDS_ATTENTION', label: 'NEEDS ATTENTION', color: 'bg-red-500 text-white' },
+const TIRE_CONDITIONS: { value: TireCondition; label: string; activeClass: string }[] = [
+  { value: 'GOOD',            label: 'GOOD',         activeClass: 'bg-green-500 text-white border-green-500' },
+  { value: 'FAIR',            label: 'FAIR',          activeClass: 'bg-yellow-400 text-white border-yellow-400' },
+  { value: 'NEEDS_ATTENTION', label: 'NEEDS ATTN',   activeClass: 'bg-red-500 text-white border-red-500' },
 ]
 
 function statusIcon(status: string) {
-  if (status === 'PASS') return <CheckCircle2 className="h-5 w-5 text-green-500" />
-  if (status === 'FAIL') return <XCircle className="h-5 w-5 text-red-500" />
-  if (status === 'NA')   return <MinusCircle className="h-5 w-5 text-slate-400" />
-  return <div className="h-5 w-5 rounded-full border-2 border-slate-300" />
+  if (status === 'PASS') return <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
+  if (status === 'FAIL') return <XCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
+  if (status === 'NA')   return <MinusCircle className="h-5 w-5 text-slate-400 flex-shrink-0" />
+  return <div className="h-5 w-5 rounded-full border-2 border-slate-300 flex-shrink-0" />
 }
 
 export default function ChecklistPage() {
@@ -26,11 +26,13 @@ export default function ChecklistPage() {
 
   const categories = getChecklistCategories(store.checklist)
   const allMandatoryDone = isChecklistComplete(store.checklist)
-  const tiresAllDone = store.tireInspections.every((t) => t.condition !== null)
+  const tiresAllDone = store.tireInspections.every((t) => t.condition !== null && t.psi.trim() !== '')
   const canProceed = allMandatoryDone && tiresAllDone
 
+  const tiresDone = store.tireInspections.filter((t) => t.condition !== null && t.psi.trim() !== '').length
+
   return (
-    <div className="min-h-screen bg-slate-50 pb-24">
+    <div className="min-h-screen bg-slate-50 pb-28">
       {/* Header */}
       <div className="bg-gradient-to-br from-blue-700 to-blue-900 text-white safe-top">
         <div className="px-4 pt-4 pb-5">
@@ -62,31 +64,32 @@ export default function ChecklistPage() {
                 <h3 className="font-semibold text-slate-800">{cat}</h3>
                 <span className="text-xs text-slate-500">
                   {catDone}/{items.length}
-                  {catFail > 0 && <span className="ml-1 text-red-500 font-bold">{catFail} FAIL</span>}
+                  {catFail > 0 && <span className="ml-1 text-red-500 font-bold"> · {catFail} FAIL</span>}
                 </span>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1">
                 {items.map((item) => (
                   <div key={item.id}>
                     <div
-                      className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 cursor-pointer"
+                      className="flex items-center gap-3 p-2.5 rounded-xl active:bg-slate-50 cursor-pointer"
                       onClick={() => setExpandedItem(expandedItem === item.id ? null : item.id)}
                     >
                       {statusIcon(item.status)}
-                      <span className="flex-1 text-sm text-slate-700">
+                      <span className="flex-1 text-sm text-slate-700 leading-tight">
                         {item.label}
                         {item.mandatory && <span className="ml-1 text-red-400 text-xs">*</span>}
                       </span>
+                      <span className="text-xs text-slate-400">{expandedItem === item.id ? '▲' : '▼'}</span>
                     </div>
 
                     {expandedItem === item.id && (
-                      <div className="ml-8 mt-1 mb-2 space-y-2">
+                      <div className="mx-2 mb-3 space-y-2">
                         <div className="flex gap-2">
                           {(['PASS', 'FAIL', 'NA'] as const).map((s) => (
                             <button
                               key={s}
                               onClick={() => store.updateChecklistItem(item.id, s)}
-                              className={`flex-1 py-2 rounded-lg text-sm font-bold border-2 transition-all ${
+                              className={`flex-1 py-2.5 rounded-xl text-sm font-bold border-2 transition-all ${
                                 item.status === s
                                   ? s === 'PASS' ? 'bg-green-500 border-green-500 text-white'
                                   : s === 'FAIL' ? 'bg-red-500 border-red-500 text-white'
@@ -103,7 +106,7 @@ export default function ChecklistPage() {
                             placeholder="Describe the issue..."
                             value={item.notes ?? ''}
                             onChange={(e) => store.updateChecklistItem(item.id, item.status, e.target.value)}
-                            className="w-full text-sm border border-slate-200 rounded-lg p-2 resize-none"
+                            className="w-full text-sm border border-slate-200 rounded-xl p-3 resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
                             rows={2}
                           />
                         )}
@@ -120,48 +123,43 @@ export default function ChecklistPage() {
         <div className="card">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-slate-800">Tire Inspection</h3>
-            <span className="text-xs text-slate-500">
-              {store.tireInspections.filter((t) => t.condition !== null).length}/8 done
-            </span>
+            <span className="text-xs text-slate-500">{tiresDone}/8 done</span>
           </div>
 
-          {/* Axle diagram label */}
-          <div className="grid grid-cols-2 gap-3 mb-3">
-            <div className="text-center text-xs font-bold text-slate-500 uppercase tracking-wide">AXLE 1</div>
-            <div className="text-center text-xs font-bold text-slate-500 uppercase tracking-wide">AXLE 2</div>
-          </div>
+          <div className="space-y-4">
+            {/* Axle 1 */}
+            <div>
+              <div className="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 text-center">
+                — AXLE 1 —
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {store.tireInspections.slice(0, 4).map((tire) => (
+                  <TireCard
+                    key={tire.position}
+                    tire={tire}
+                    onCondition={(c) => store.updateTireCondition(tire.position, c)}
+                    onPsi={(p) => store.updateTirePsi(tire.position, p)}
+                  />
+                ))}
+              </div>
+            </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            {[0, 1].map((axle) => {
-              const axleTires = store.tireInspections.filter((_, i) => Math.floor(i / 4) === axle)
-              return (
-                <div key={axle} className="space-y-2">
-                  {axleTires.map((tire) => {
-                    const shortLabel = tire.position.replace(/Axle \d — /, '')
-                    return (
-                      <div key={tire.position} className="bg-slate-50 rounded-xl p-2">
-                        <div className="text-xs font-semibold text-slate-600 mb-1.5 text-center">{shortLabel}</div>
-                        <div className="flex flex-col gap-1">
-                          {TIRE_CONDITION_OPTIONS.map((opt) => (
-                            <button
-                              key={opt.value}
-                              onClick={() => store.updateTireCondition(tire.position, opt.value)}
-                              className={`w-full py-1.5 rounded-lg text-xs font-bold transition-all ${
-                                tire.condition === opt.value
-                                  ? opt.color + ' shadow-sm'
-                                  : 'bg-white border border-slate-200 text-slate-500'
-                              }`}
-                            >
-                              {opt.label}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              )
-            })}
+            {/* Axle 2 */}
+            <div>
+              <div className="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 text-center">
+                — AXLE 2 —
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {store.tireInspections.slice(4, 8).map((tire) => (
+                  <TireCard
+                    key={tire.position}
+                    tire={tire}
+                    onCondition={(c) => store.updateTireCondition(tire.position, c)}
+                    onPsi={(p) => store.updateTirePsi(tire.position, p)}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -178,10 +176,10 @@ export default function ChecklistPage() {
         </div>
 
         {!canProceed && (
-          <div className="flex items-center gap-2 p-3 bg-amber-50 border border-amber-200 rounded-xl">
-            <AlertTriangle className="h-4 w-4 text-amber-500 flex-shrink-0" />
+          <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+            <AlertTriangle className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
             <p className="text-xs text-amber-700">
-              Complete all mandatory checklist items (*) and all 8 tire inspections to proceed.
+              Complete all mandatory items (*) and all 8 tire inspections (condition + PSI) to continue.
             </p>
           </div>
         )}
@@ -191,7 +189,7 @@ export default function ChecklistPage() {
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-4 py-3 flex gap-3">
         <button
           onClick={() => router.push('/inspection/camera')}
-          className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-slate-200 text-slate-600 font-semibold"
+          className="flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl border-2 border-slate-200 text-slate-600 font-semibold"
         >
           <ChevronLeft className="h-5 w-5" />
           Back
@@ -199,11 +197,66 @@ export default function ChecklistPage() {
         <button
           disabled={!canProceed}
           onClick={() => router.push('/inspection/signature')}
-          className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-blue-600 text-white font-semibold disabled:opacity-40"
+          className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl bg-blue-600 text-white font-bold disabled:opacity-40"
         >
           Next
           <ChevronRight className="h-5 w-5" />
         </button>
+      </div>
+    </div>
+  )
+}
+
+function TireCard({
+  tire,
+  onCondition,
+  onPsi,
+}: {
+  tire: { position: string; condition: TireCondition | null; psi: string }
+  onCondition: (c: TireCondition) => void
+  onPsi: (p: string) => void
+}) {
+  const shortLabel = tire.position.replace(/Axle \d — /, '')
+  const isDone = tire.condition !== null && tire.psi.trim() !== ''
+
+  return (
+    <div className={`rounded-2xl p-3 border-2 transition-all ${isDone ? 'border-green-200 bg-green-50' : 'border-slate-200 bg-white'}`}>
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs font-bold text-slate-700 leading-tight">{shortLabel}</span>
+        {isDone && <CheckCircle2 className="h-4 w-4 text-green-500" />}
+      </div>
+
+      {/* Condition buttons */}
+      <div className="flex flex-col gap-1 mb-2">
+        {TIRE_CONDITIONS.map((opt) => (
+          <button
+            key={opt.value}
+            onClick={() => onCondition(opt.value)}
+            className={`w-full py-1.5 rounded-lg text-xs font-bold border-2 transition-all ${
+              tire.condition === opt.value
+                ? opt.activeClass
+                : 'bg-white border-slate-200 text-slate-500'
+            }`}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+
+      {/* PSI input */}
+      <div className="flex items-center gap-1.5 bg-slate-50 rounded-lg px-2 py-1.5 border border-slate-200">
+        <span className="text-xs text-slate-400 font-medium">PSI</span>
+        <input
+          type="number"
+          inputMode="numeric"
+          placeholder="0"
+          value={tire.psi}
+          onChange={(e) => onPsi(e.target.value)}
+          className="flex-1 bg-transparent text-sm font-bold text-slate-800 w-0 min-w-0 outline-none"
+          min="0"
+          max="200"
+        />
+        <span className="text-xs text-slate-400">psi</span>
       </div>
     </div>
   )

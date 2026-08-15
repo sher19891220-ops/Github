@@ -14,6 +14,7 @@ export const DEFAULT_CHECKLIST: Omit<ChecklistItem, 'status' | 'notes'>[] = [
   { id: 'lt-turn',       category: 'Lights & Reflectors', label: 'Turn Signals (Left & Right)',  mandatory: true },
   { id: 'lt-clearance',  category: 'Lights & Reflectors', label: 'Clearance / Marker Lights',   mandatory: true },
   { id: 'lt-reflectors', category: 'Lights & Reflectors', label: 'Reflectors (All Sides)',       mandatory: true },
+  { id: 'lt-abs',        category: 'Lights & Reflectors', label: 'ABS Light (Off When Running)', mandatory: true },
 
   // Coupling & Connection
   { id: 'coup-kingpin',    category: 'Coupling & Connection', label: 'King Pin Secure',                     mandatory: true },

@@ -8,7 +8,7 @@ import { buildChecklist, TIRE_POSITIONS } from '@/lib/checklist'
 import { generateId, generateSessionToken } from '@/lib/utils'
 
 function buildTires(): TireInspection[] {
-  return TIRE_POSITIONS.map((position) => ({ position, condition: null }))
+  return TIRE_POSITIONS.map((position) => ({ position, condition: null, psi: '' }))
 }
 
 interface InspectionState {
@@ -17,7 +17,6 @@ interface InspectionState {
   inspectionId: string | null
   driver: Driver | null
   vehicle: Vehicle | null
-  fuelLevel: number
   gps: GPSCoordinates | null
   photos: CapturedPhoto[]
   currentAngle: AngleKey | null
@@ -28,13 +27,13 @@ interface InspectionState {
   comments: string
 
   initSession: (type: InspectionType, driver: Driver, vehicle: Vehicle) => void
-  setFuelLevel: (v: number) => void
   setGPS: (gps: GPSCoordinates) => void
   addPhoto: (photo: CapturedPhoto) => void
   removePhoto: (angleKey: AngleKey) => void
   setCurrentAngle: (angle: AngleKey | null) => void
   updateChecklistItem: (id: string, status: ChecklistItem['status'], notes?: string) => void
   updateTireCondition: (position: string, condition: TireCondition) => void
+  updateTirePsi: (position: string, psi: string) => void
   setComments: (v: string) => void
   setSignature: (dataUrl: string) => void
   reset: () => void
@@ -46,7 +45,6 @@ const defaultState = {
   inspectionId: null,
   driver: null,
   vehicle: null,
-  fuelLevel: 0.5,
   gps: null,
   photos: [] as CapturedPhoto[],
   currentAngle: null as AngleKey | null,
@@ -74,12 +72,10 @@ export const useInspectionStore = create<InspectionState>()(
           photos: [],
           damageMarkers: [],
           signatureDataUrl: null,
-          fuelLevel: 0.5,
           gps: null,
           comments: '',
         }),
 
-      setFuelLevel: (v) => set({ fuelLevel: v }),
       setGPS: (gps) => set({ gps }),
 
       addPhoto: (photo) =>
@@ -103,6 +99,13 @@ export const useInspectionStore = create<InspectionState>()(
         set((s) => ({
           tireInspections: s.tireInspections.map((t) =>
             t.position === position ? { ...t, condition } : t
+          ),
+        })),
+
+      updateTirePsi: (position, psi) =>
+        set((s) => ({
+          tireInspections: s.tireInspections.map((t) =>
+            t.position === position ? { ...t, psi } : t
           ),
         })),
 
