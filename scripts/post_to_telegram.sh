@@ -12,7 +12,7 @@ POST_FILE="${3:?post text file required}"
 
 API="https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}"
 
-photo_response=$(curl -sS -X POST "${API}/sendPhoto" \
+photo_response=$(curl -sS -H "Expect:" --http1.1 -X POST "${API}/sendPhoto" \
     -F "chat_id=${TELEGRAM_CHAT_ID}" \
     -F "caption=${CAPTION}" \
     -F "photo=@${PHOTO_PATH}")
