@@ -9,8 +9,8 @@ import type { AngleKey, CapturedPhoto } from '@/lib/types'
 
 // SVG dashed trailer silhouettes for each angle
 function TrailerGuide({ angle }: { angle: AngleKey }) {
-  const d = { stroke: '#22c55e', strokeWidth: '2.5', strokeDasharray: '10 6', fill: 'none', opacity: '0.9' } as React.SVGProps<SVGRectElement>
-  const s = (extra?: object) => ({ ...d, ...extra })
+  const d: React.SVGAttributes<SVGElement> = { stroke: '#22c55e', strokeWidth: '2.5', strokeDasharray: '10 6', fill: 'none', opacity: '0.9' }
+  const s = (extra?: React.SVGAttributes<SVGElement>) => ({ ...d, ...extra })
 
   switch (angle) {
     case 'front':

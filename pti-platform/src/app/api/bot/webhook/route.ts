@@ -41,7 +41,8 @@ export async function POST(req: NextRequest) {
 
     if (cmd === '/pickup' || cmd === '/dropoff') {
       const unit       = parts[1]
-      const driverName = parts.slice(2).join(' ')
+      // Only take words that are NOT @mentions — strip if dispatcher included them
+      const driverName = parts.slice(2).filter((w) => !w.startsWith('@')).join(' ')
       const type       = cmd === '/pickup' ? 'PICKUP' : 'DROP_OFF'
       const typeLabel  = type === 'PICKUP'  ? '▲ PICKUP' : '▼ DROP\-OFF'
 
@@ -96,6 +97,6 @@ async function send(chatId: number, text: string, parseMode: 'Markdown' | 'Markd
   return fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: chatId, text, parse_mode: parseMode, disable_web_page_preview: true }),
+    body: JSON.stringify({ chat_id: chatId, text, parse_mode: parseMode, link_preview_options: { is_disabled: true } }),
   })
 }
