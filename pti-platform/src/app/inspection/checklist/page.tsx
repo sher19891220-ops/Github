@@ -1,28 +1,19 @@
 'use client'
-import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronLeft, ChevronRight, CheckCircle2, XCircle, MinusCircle, AlertTriangle } from 'lucide-react'
+import { ChevronLeft, ChevronRight, CheckCircle2, AlertTriangle } from 'lucide-react'
 import { useInspectionStore } from '@/store/inspectionStore'
 import { getChecklistCategories, isChecklistComplete } from '@/lib/checklist'
 import type { TireCondition } from '@/lib/types'
 
 const TIRE_CONDITIONS: { value: TireCondition; label: string; activeClass: string }[] = [
-  { value: 'GOOD',            label: 'GOOD',         activeClass: 'bg-green-500 text-white border-green-500' },
-  { value: 'FAIR',            label: 'FAIR',          activeClass: 'bg-yellow-400 text-white border-yellow-400' },
-  { value: 'NEEDS_ATTENTION', label: 'NEEDS ATTN',   activeClass: 'bg-red-500 text-white border-red-500' },
+  { value: 'GOOD',            label: 'GOOD',       activeClass: 'bg-green-500 text-white border-green-500' },
+  { value: 'FAIR',            label: 'FAIR',        activeClass: 'bg-yellow-400 text-white border-yellow-400' },
+  { value: 'NEEDS_ATTENTION', label: 'NEEDS ATTN', activeClass: 'bg-red-500 text-white border-red-500' },
 ]
-
-function statusIcon(status: string) {
-  if (status === 'PASS') return <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
-  if (status === 'FAIL') return <XCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
-  if (status === 'NA')   return <MinusCircle className="h-5 w-5 text-slate-400 flex-shrink-0" />
-  return <div className="h-5 w-5 rounded-full border-2 border-slate-300 flex-shrink-0" />
-}
 
 export default function ChecklistPage() {
   const router = useRouter()
   const store = useInspectionStore()
-  const [expandedItem, setExpandedItem] = useState<string | null>(null)
 
   const categories = getChecklistCategories(store.checklist)
   const allMandatoryDone = isChecklistComplete(store.checklist)
@@ -67,50 +58,43 @@ export default function ChecklistPage() {
                   {catFail > 0 && <span className="ml-1 text-red-500 font-bold"> · {catFail} FAIL</span>}
                 </span>
               </div>
-              <div className="space-y-1">
+              <div className="divide-y divide-slate-100">
                 {items.map((item) => (
-                  <div key={item.id}>
-                    <div
-                      className="flex items-center gap-3 p-2.5 rounded-xl active:bg-slate-50 cursor-pointer"
-                      onClick={() => setExpandedItem(expandedItem === item.id ? null : item.id)}
-                    >
-                      {statusIcon(item.status)}
-                      <span className="flex-1 text-sm text-slate-700 leading-tight">
+                  <div key={item.id} className="py-3 first:pt-0 last:pb-0">
+                    {/* Label row */}
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-sm font-medium text-slate-800 leading-tight flex-1">
                         {item.label}
                         {item.mandatory && <span className="ml-1 text-red-400 text-xs">*</span>}
                       </span>
-                      <span className="text-xs text-slate-400">{expandedItem === item.id ? '▲' : '▼'}</span>
                     </div>
-
-                    {expandedItem === item.id && (
-                      <div className="mx-2 mb-3 space-y-2">
-                        <div className="flex gap-2">
-                          {(['PASS', 'FAIL', 'NA'] as const).map((s) => (
-                            <button
-                              key={s}
-                              onClick={() => store.updateChecklistItem(item.id, s)}
-                              className={`flex-1 py-2.5 rounded-xl text-sm font-bold border-2 transition-all ${
-                                item.status === s
-                                  ? s === 'PASS' ? 'bg-green-500 border-green-500 text-white'
-                                  : s === 'FAIL' ? 'bg-red-500 border-red-500 text-white'
-                                  : 'bg-slate-400 border-slate-400 text-white'
-                                  : 'bg-white border-slate-200 text-slate-600'
-                              }`}
-                            >
-                              {s === 'PASS' ? '✓ PASS' : s === 'FAIL' ? '✗ FAIL' : '— N/A'}
-                            </button>
-                          ))}
-                        </div>
-                        {item.status === 'FAIL' && (
-                          <textarea
-                            placeholder="Describe the issue..."
-                            value={item.notes ?? ''}
-                            onChange={(e) => store.updateChecklistItem(item.id, item.status, e.target.value)}
-                            className="w-full text-sm border border-slate-200 rounded-xl p-3 resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
-                            rows={2}
-                          />
-                        )}
-                      </div>
+                    {/* Always-visible PASS / FAIL / N/A buttons */}
+                    <div className="flex gap-2">
+                      {(['PASS', 'FAIL', 'NA'] as const).map((s) => (
+                        <button
+                          key={s}
+                          onClick={() => store.updateChecklistItem(item.id, s)}
+                          className={`flex-1 py-2.5 rounded-xl text-sm font-bold border-2 transition-all ${
+                            item.status === s
+                              ? s === 'PASS' ? 'bg-green-500 border-green-500 text-white'
+                              : s === 'FAIL' ? 'bg-red-500 border-red-500 text-white'
+                              : 'bg-slate-400 border-slate-400 text-white'
+                              : 'bg-white border-slate-200 text-slate-500'
+                          }`}
+                        >
+                          {s === 'PASS' ? '✓ PASS' : s === 'FAIL' ? '✗ FAIL' : '— N/A'}
+                        </button>
+                      ))}
+                    </div>
+                    {/* Notes textarea — only when FAIL */}
+                    {item.status === 'FAIL' && (
+                      <textarea
+                        placeholder="Describe the issue..."
+                        value={item.notes ?? ''}
+                        onChange={(e) => store.updateChecklistItem(item.id, item.status, e.target.value)}
+                        className="mt-2 w-full text-sm border border-red-200 rounded-xl p-3 resize-none focus:outline-none focus:ring-2 focus:ring-red-300 bg-red-50"
+                        rows={2}
+                      />
                     )}
                   </div>
                 ))}
