@@ -58,6 +58,11 @@ export type AngleKey =
   | 'rear-left'
   | 'left'
   | 'front-left'
+  | 'inside-roof'
+  | 'floor'
+  | 'inside-left-wall'
+  | 'inside-right-wall'
+  | 'damage'
 
 export interface AngleConfig {
   key: AngleKey
