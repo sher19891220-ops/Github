@@ -57,13 +57,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div>
-            <p className="text-blue-200 text-sm">Good {getGreeting()},</p>
-            <h1 className="text-2xl font-bold mt-0.5">{driver.name.split(' ')[0]}</h1>
-            <p className="text-blue-200 text-xs mt-1">CDL: {driver.licenseNumber}</p>
-          </div>
-
-          <div className="mt-4 flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2">
+          <div className="flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2">
             <Shield className="h-4 w-4 text-green-300 flex-shrink-0" />
             <p className="text-xs text-blue-100">FMCSA compliant · Records stored 12 months</p>
           </div>
@@ -167,9 +161,3 @@ export default function HomePage() {
   )
 }
 
-function getGreeting() {
-  const h = new Date().getHours()
-  if (h < 12) return 'morning'
-  if (h < 17) return 'afternoon'
-  return 'evening'
-}

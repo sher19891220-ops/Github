@@ -379,15 +379,6 @@ export default function CameraPage() {
                   </div>
                 </div>
 
-                {/* Trailer wireframe — centered, fills most of the camera viewport */}
-                <div
-                  className="absolute inset-0 flex items-center justify-center pointer-events-none"
-                  style={{ filter: 'drop-shadow(0 0 6px rgba(255,255,255,0.35))' }}
-                >
-                  <div style={{ width: '82%', maxHeight: '62%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <TrailerGuide angle={activeAngle} />
-                  </div>
-                </div>
               </>
             )}
 
