@@ -2,10 +2,14 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type {
   InspectionType, Driver, Vehicle, GPSCoordinates,
-  CapturedPhoto, ChecklistItem, DamageMarker, AngleKey
+  CapturedPhoto, ChecklistItem, DamageMarker, AngleKey, TireInspection, TireCondition
 } from '@/lib/types'
-import { buildChecklist } from '@/lib/checklist'
+import { buildChecklist, TIRE_POSITIONS } from '@/lib/checklist'
 import { generateId, generateSessionToken } from '@/lib/utils'
+
+function buildTires(): TireInspection[] {
+  return TIRE_POSITIONS.map((position) => ({ position, condition: null }))
+}
 
 interface InspectionState {
   sessionToken: string | null
@@ -13,25 +17,25 @@ interface InspectionState {
   inspectionId: string | null
   driver: Driver | null
   vehicle: Vehicle | null
-  odometer: number
   fuelLevel: number
   gps: GPSCoordinates | null
   photos: CapturedPhoto[]
   currentAngle: AngleKey | null
   checklist: ChecklistItem[]
+  tireInspections: TireInspection[]
   damageMarkers: DamageMarker[]
   signatureDataUrl: string | null
+  comments: string
 
   initSession: (type: InspectionType, driver: Driver, vehicle: Vehicle) => void
-  setOdometer: (v: number) => void
   setFuelLevel: (v: number) => void
   setGPS: (gps: GPSCoordinates) => void
   addPhoto: (photo: CapturedPhoto) => void
   removePhoto: (angleKey: AngleKey) => void
   setCurrentAngle: (angle: AngleKey | null) => void
   updateChecklistItem: (id: string, status: ChecklistItem['status'], notes?: string) => void
-  addDamageMarker: (marker: Omit<DamageMarker, 'id'>) => void
-  removeDamageMarker: (id: string) => void
+  updateTireCondition: (position: string, condition: TireCondition) => void
+  setComments: (v: string) => void
   setSignature: (dataUrl: string) => void
   reset: () => void
 }
@@ -42,14 +46,15 @@ const defaultState = {
   inspectionId: null,
   driver: null,
   vehicle: null,
-  odometer: 0,
   fuelLevel: 0.5,
   gps: null,
   photos: [] as CapturedPhoto[],
   currentAngle: null as AngleKey | null,
   checklist: [] as ChecklistItem[],
+  tireInspections: [] as TireInspection[],
   damageMarkers: [] as DamageMarker[],
   signatureDataUrl: null,
+  comments: '',
 }
 
 export const useInspectionStore = create<InspectionState>()(
@@ -65,15 +70,15 @@ export const useInspectionStore = create<InspectionState>()(
           driver,
           vehicle,
           checklist: buildChecklist(),
+          tireInspections: buildTires(),
           photos: [],
           damageMarkers: [],
           signatureDataUrl: null,
-          odometer: 0,
           fuelLevel: 0.5,
           gps: null,
+          comments: '',
         }),
 
-      setOdometer: (v) => set({ odometer: v }),
       setFuelLevel: (v) => set({ fuelLevel: v }),
       setGPS: (gps) => set({ gps }),
 
@@ -94,16 +99,15 @@ export const useInspectionStore = create<InspectionState>()(
           ),
         })),
 
-      addDamageMarker: (marker) =>
+      updateTireCondition: (position, condition) =>
         set((s) => ({
-          damageMarkers: [...s.damageMarkers, { ...marker, id: generateId() }],
+          tireInspections: s.tireInspections.map((t) =>
+            t.position === position ? { ...t, condition } : t
+          ),
         })),
 
-      removeDamageMarker: (id) =>
-        set((s) => ({ damageMarkers: s.damageMarkers.filter((m) => m.id !== id) })),
-
+      setComments: (v) => set({ comments: v }),
       setSignature: (dataUrl) => set({ signatureDataUrl: dataUrl }),
-
       reset: () => set(defaultState),
     }),
     { name: 'pti-inspection-session' }

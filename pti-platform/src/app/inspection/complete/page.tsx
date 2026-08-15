@@ -1,104 +1,248 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { CheckCircle, Download, Share2, Home, FileText } from 'lucide-react'
+import {
+  CheckCircle2, Download, Share2, LogOut,
+  MessageCircle, Smartphone, Info,
+} from 'lucide-react'
 import { useInspectionStore } from '@/store/inspectionStore'
-import { CompanyBadge, InspectionTypeBadge } from '@/components/ui/Badge'
-import { formatDateTime } from '@/lib/utils'
 
 export default function CompletePage() {
   const router = useRouter()
-  const { driver, vehicle, inspectionType, photos, checklist, sessionToken, reset } = useInspectionStore()
-  const [uploadDone, setUploadDone] = useState(false)
-  const [submittedAt] = useState(() => new Date().toISOString())
+  const store = useInspectionStore()
+  const [shareMsg, setShareMsg] = useState('')
 
-  useEffect(() => {
-    if (!driver || !vehicle || !inspectionType) {
-      router.replace('/')
+  const driver     = store.driver
+  const vehicle    = store.vehicle
+  const inspType   = store.inspectionType === 'PICKUP' ? 'PICKUP' : 'DROP-OFF'
+  const dateStr    = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+  const failCount  = store.checklist.filter((i) => i.status === 'FAIL').length
+  const photoCount = store.photos.length
+  const gpsStr     = store.gps ? `${store.gps.lat.toFixed(4)}, ${store.gps.lng.toFixed(4)}` : 'N/A'
+
+  const summaryText = [
+    `PTI Inspection Report`,
+    `━━━━━━━━━━━━━━━━━━━━`,
+    `Type:   ${inspType}`,
+    `Trailer: ${vehicle?.unitNumber ?? '—'}`,
+    `Driver:  ${driver?.name ?? '—'}`,
+    `Date:    ${dateStr}`,
+    `GPS:     ${gpsStr}`,
+    `Photos:  ${photoCount}`,
+    `Issues:  ${failCount}`,
+    store.comments.trim() ? `Notes:   ${store.comments.trim()}` : '',
+  ].filter(Boolean).join('\n')
+
+  function handleDownloadPDF() {
+    window.print()
+  }
+
+  async function handleShare() {
+    const shareData = {
+      title: `PTI Inspection — ${vehicle?.unitNumber ?? 'Trailer'}`,
+      text: summaryText,
     }
-  }, [driver, vehicle, inspectionType, router])
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData)
+      } catch {
+        // user cancelled or API failed — fallback to clipboard
+        fallbackCopy()
+      }
+    } else {
+      fallbackCopy()
+    }
+  }
 
-  useEffect(() => {
-    const t = setTimeout(() => setUploadDone(true), 2000)
-    return () => clearTimeout(t)
-  }, [])
+  function fallbackCopy() {
+    navigator.clipboard.writeText(summaryText).then(() => {
+      setShareMsg('Summary copied to clipboard!')
+      setTimeout(() => setShareMsg(''), 3000)
+    }).catch(() => {
+      setShareMsg('Could not copy — please screenshot this page.')
+      setTimeout(() => setShareMsg(''), 4000)
+    })
+  }
 
-  const failCount = checklist.filter((i) => i.status === 'FAIL').length
-
-  if (!driver || !vehicle || !inspectionType) {
-    return null
+  function handleExit() {
+    store.reset()
+    router.push('/inspection/start')
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-700 to-blue-900 flex flex-col items-center justify-center px-6 safe-top safe-bottom">
-      <div className="w-full max-w-sm space-y-5">
-        <div className="flex flex-col items-center gap-3 text-white">
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-400/20 ring-8 ring-green-400/10 check-pop">
-            <CheckCircle className="h-12 w-12 text-green-400" />
+    <div className="min-h-screen bg-slate-50">
+      {/* Print-only report */}
+      <style>{`
+        @media print {
+          .no-print { display: none !important; }
+          .print-show { display: block !important; }
+          body { background: white; }
+        }
+        .print-show { display: none; }
+      `}</style>
+
+      {/* Print view */}
+      <div className="print-show p-8 text-sm font-mono">
+        <h1 className="text-2xl font-bold mb-2">PTI Trailer Inspection Report</h1>
+        <pre className="whitespace-pre-wrap">{summaryText}</pre>
+        {store.checklist.filter((i) => i.status === 'FAIL').map((item) => (
+          <div key={item.id} className="mt-1">
+            <strong>FAIL:</strong> {item.label} {item.notes ? `— ${item.notes}` : ''}
           </div>
-          <h1 className="text-2xl font-bold">Submitted!</h1>
-          <p className="text-blue-200 text-sm text-center">Your inspection has been recorded and uploaded.</p>
+        ))}
+        {store.tireInspections.filter((t) => t.condition === 'NEEDS_ATTENTION').map((t) => (
+          <div key={t.position}><strong>TIRE ALERT:</strong> {t.position}</div>
+        ))}
+        <div className="mt-4">
+          <strong>Signature:</strong>
+          {store.signatureDataUrl && (
+            <img src={store.signatureDataUrl} alt="Signature" className="mt-1 border" style={{ height: 80 }} />
+          )}
         </div>
+        <div className="mt-4 text-xs text-slate-400">Generated by PTI Inspection System</div>
+      </div>
 
-        <div className="rounded-2xl bg-white/10 backdrop-blur p-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <InspectionTypeBadge type={inspectionType} />
-            {driver.company && <CompanyBadge company={driver.company} />}
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 text-sm">
-            <div>
-              <p className="text-blue-200 text-xs">Driver</p>
-              <p className="text-white font-semibold">{driver.name}</p>
+      {/* Screen view */}
+      <div className="no-print pb-32">
+        {/* Success header */}
+        <div className="bg-gradient-to-br from-green-600 to-green-800 text-white safe-top px-4 pt-6 pb-8">
+          <div className="flex flex-col items-center text-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/20 mb-4">
+              <CheckCircle2 className="h-10 w-10" />
             </div>
-            <div>
-              <p className="text-blue-200 text-xs">Unit #</p>
-              <p className="text-white font-semibold">{vehicle.unitNumber}</p>
-            </div>
-            <div>
-              <p className="text-blue-200 text-xs">Photos</p>
-              <p className="text-white font-semibold">{photos.length}</p>
-            </div>
-            <div>
-              <p className="text-blue-200 text-xs">Issues</p>
-              <p className={`font-semibold ${failCount > 0 ? 'text-red-300' : 'text-green-300'}`}>
-                {failCount > 0 ? `${failCount} failed` : 'None'}
-              </p>
-            </div>
-          </div>
-
-          <div className="border-t border-white/10 pt-3">
-            <p className="text-xs text-blue-200">Session Token</p>
-            <p className="text-white font-mono text-sm">{sessionToken}</p>
-            <p className="text-xs text-blue-300 mt-1">{formatDateTime(submittedAt)}</p>
-          </div>
-
-          <div className={`rounded-xl px-3 py-2 text-xs font-medium flex items-center gap-2 ${
-            uploadDone ? 'bg-green-400/20 text-green-300' : 'bg-blue-400/20 text-blue-200'
-          }`}>
-            {uploadDone
-              ? <span>✓ Uploaded to cloud &amp; PTI bot notified</span>
-              : <span>⧗ Uploading to cloud storage…</span>}
+            <h1 className="text-2xl font-black">Inspection Complete!</h1>
+            <p className="text-green-100 mt-1 text-sm">
+              {inspType} · Trailer {vehicle?.unitNumber ?? '—'}
+            </p>
           </div>
         </div>
 
-        <div className="space-y-2">
-          <button className="btn-secondary w-full flex items-center justify-center gap-2">
-            <FileText className="h-4 w-4" />
-            Download PDF Report
-          </button>
-          <button className="btn-secondary w-full flex items-center justify-center gap-2">
-            <Share2 className="h-4 w-4" />
-            Share Report
+        <div className="px-4 -mt-4 space-y-4">
+
+          {/* Quick stats */}
+          <div className="card">
+            <div className="grid grid-cols-3 divide-x divide-slate-100">
+              <div className="text-center pr-3">
+                <div className="text-2xl font-black text-blue-600">{photoCount}</div>
+                <div className="text-xs text-slate-500">Photos</div>
+              </div>
+              <div className="text-center px-3">
+                <div className={`text-2xl font-black ${failCount > 0 ? 'text-red-500' : 'text-green-500'}`}>
+                  {failCount}
+                </div>
+                <div className="text-xs text-slate-500">Issues</div>
+              </div>
+              <div className="text-center pl-3">
+                <div className="text-2xl font-black text-slate-700">
+                  {store.tireInspections.filter((t) => t.condition !== null).length}/8
+                </div>
+                <div className="text-xs text-slate-500">Tires</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Where was this submitted */}
+          <div className="card border border-blue-100 bg-blue-50">
+            <div className="flex items-center gap-2 mb-3">
+              <Info className="h-5 w-5 text-blue-600 flex-shrink-0" />
+              <h3 className="font-semibold text-blue-800">Where is my report?</h3>
+            </div>
+            <div className="space-y-3 text-sm text-slate-700">
+              <div className="flex items-start gap-3">
+                <MessageCircle className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
+                <div>
+                  <div className="font-semibold">Telegram Group</div>
+                  <div className="text-slate-600 text-xs mt-0.5">
+                    A notification was sent to your dispatch group via <strong>@Pti_check_bot</strong>.
+                    Your dispatcher can see the inspection summary, photos, and any issues flagged.
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <Smartphone className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
+                <div>
+                  <div className="font-semibold">This Device</div>
+                  <div className="text-slate-600 text-xs mt-0.5">
+                    The full report including photos, checklist, and your signature is saved in this browser session.
+                    Use <strong>Download PDF</strong> to save a permanent copy.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Summary preview */}
+          <div className="card">
+            <h3 className="font-semibold text-slate-800 mb-3">Report Summary</h3>
+            <pre className="text-xs text-slate-600 whitespace-pre-wrap font-mono bg-slate-50 rounded-lg p-3">
+              {summaryText}
+            </pre>
+            {store.checklist.filter((i) => i.status === 'FAIL').length > 0 && (
+              <div className="mt-3 space-y-1">
+                <div className="text-xs font-semibold text-red-600 uppercase tracking-wide">Failed Items</div>
+                {store.checklist.filter((i) => i.status === 'FAIL').map((item) => (
+                  <div key={item.id} className="text-xs text-slate-700">
+                    ✗ <span className="font-medium">{item.label}</span>
+                    {item.notes ? <span className="text-slate-500"> — {item.notes}</span> : null}
+                  </div>
+                ))}
+              </div>
+            )}
+            {store.tireInspections.filter((t) => t.condition === 'NEEDS_ATTENTION').length > 0 && (
+              <div className="mt-3 space-y-1">
+                <div className="text-xs font-semibold text-amber-600 uppercase tracking-wide">Tire Alerts</div>
+                {store.tireInspections.filter((t) => t.condition === 'NEEDS_ATTENTION').map((t) => (
+                  <div key={t.position} className="text-xs text-slate-700">⚠ {t.position}</div>
+                ))}
+              </div>
+            )}
+            {store.signatureDataUrl && (
+              <div className="mt-3">
+                <div className="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1">Signature</div>
+                <img
+                  src={store.signatureDataUrl}
+                  alt="Driver signature"
+                  className="border border-slate-200 rounded-lg"
+                  style={{ maxHeight: 80 }}
+                />
+              </div>
+            )}
+          </div>
+
+          {shareMsg && (
+            <div className="bg-green-50 border border-green-200 text-green-700 text-sm text-center rounded-xl py-2 px-4">
+              {shareMsg}
+            </div>
+          )}
+
+        </div>
+      </div>
+
+      {/* Bottom actions */}
+      <div className="no-print fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-4 py-3 space-y-2">
+        <div className="flex gap-3">
+          <button
+            onClick={handleDownloadPDF}
+            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-blue-600 text-white font-semibold"
+          >
+            <Download className="h-5 w-5" />
+            Download PDF
           </button>
           <button
-            onClick={() => { reset(); router.push('/') }}
-            className="btn-primary w-full flex items-center justify-center gap-2"
+            onClick={handleShare}
+            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-slate-100 text-slate-700 font-semibold"
           >
-            <Home className="h-4 w-4" />
-            Back to Home
+            <Share2 className="h-5 w-5" />
+            Share
           </button>
         </div>
+        <button
+          onClick={handleExit}
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-red-200 text-red-600 font-semibold"
+        >
+          <LogOut className="h-5 w-5" />
+          Exit Inspection
+        </button>
       </div>
     </div>
   )

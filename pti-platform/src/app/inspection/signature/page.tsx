@@ -1,174 +1,248 @@
 'use client'
 import { useRef, useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { RotateCcw, PenLine, Check } from 'lucide-react'
-import { TopBar } from '@/components/ui/TopBar'
+import { ChevronLeft, MapPin, Calendar, Truck, User, AlertTriangle } from 'lucide-react'
 import { useInspectionStore } from '@/store/inspectionStore'
-import { formatDate } from '@/lib/utils'
 
 export default function SignaturePage() {
   const router = useRouter()
-  const { driver, vehicle, inspectionType, signatureDataUrl, setSignature, checklist, photos } = useInspectionStore()
+  const store = useInspectionStore()
+
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [drawing, setDrawing] = useState(false)
-  const [hasStrokes, setHasStrokes] = useState(false)
-  const [agreed, setAgreed] = useState(false)
+  const [hasSig, setHasSig] = useState(false)
+  const [certified, setCertified] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
 
-  useEffect(() => {
+  const failedItems = store.checklist.filter((i) => i.status === 'FAIL')
+  const needsAttentionTires = store.tireInspections.filter((t) => t.condition === 'NEEDS_ATTENTION')
+
+  const dateStr = new Date().toLocaleDateString('en-US', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+  })
+  const timeStr = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+  const gpsStr = store.gps
+    ? `${store.gps.lat.toFixed(5)}, ${store.gps.lng.toFixed(5)}`
+    : 'Location unavailable'
+
+  const canSubmit = hasSig && certified
+
+  // Canvas drawing helpers
+  function getPos(e: React.MouseEvent | React.TouchEvent, canvas: HTMLCanvasElement) {
+    const rect = canvas.getBoundingClientRect()
+    const scaleX = canvas.width / rect.width
+    const scaleY = canvas.height / rect.height
+    if ('touches' in e) {
+      const t = e.touches[0]
+      return { x: (t.clientX - rect.left) * scaleX, y: (t.clientY - rect.top) * scaleY }
+    }
+    return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY }
+  }
+
+  function startDraw(e: React.MouseEvent | React.TouchEvent) {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    e.preventDefault()
+    const ctx = canvas.getContext('2d')!
+    const { x, y } = getPos(e, canvas)
+    ctx.beginPath()
+    ctx.moveTo(x, y)
+    setDrawing(true)
+  }
+
+  function draw(e: React.MouseEvent | React.TouchEvent) {
+    if (!drawing) return
+    const canvas = canvasRef.current
+    if (!canvas) return
+    e.preventDefault()
+    const ctx = canvas.getContext('2d')!
+    ctx.lineWidth = 3
+    ctx.lineCap = 'round'
+    ctx.strokeStyle = '#1e40af'
+    const { x, y } = getPos(e, canvas)
+    ctx.lineTo(x, y)
+    ctx.stroke()
+    setHasSig(true)
+  }
+
+  function endDraw() { setDrawing(false) }
+
+  function clearSig() {
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext('2d')!
-    ctx.strokeStyle = '#1e3a8a'
-    ctx.lineWidth = 3
-    ctx.lineCap = 'round'
-    ctx.lineJoin = 'round'
-    if (signatureDataUrl) {
-      const img = new Image()
-      img.onload = () => ctx.drawImage(img, 0, 0)
-      img.src = signatureDataUrl
-    }
-  }, [])
-
-  const getPoint = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    const rect = canvasRef.current!.getBoundingClientRect()
-    return {
-      x: (e.clientX - rect.left) * (canvasRef.current!.width / rect.width),
-      y: (e.clientY - rect.top) * (canvasRef.current!.height / rect.height),
-    }
-  }
-
-  const onPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    e.currentTarget.setPointerCapture(e.pointerId)
-    setDrawing(true)
-    setHasStrokes(true)
-    const ctx = canvasRef.current!.getContext('2d')!
-    const { x, y } = getPoint(e)
-    ctx.beginPath()
-    ctx.moveTo(x, y)
-  }
-
-  const onPointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    if (!drawing) return
-    const ctx = canvasRef.current!.getContext('2d')!
-    const { x, y } = getPoint(e)
-    ctx.lineTo(x, y)
-    ctx.stroke()
-  }
-
-  const onPointerUp = () => {
-    setDrawing(false)
-    if (canvasRef.current) {
-      setSignature(canvasRef.current.toDataURL('image/png'))
-    }
-  }
-
-  const clear = () => {
-    const canvas = canvasRef.current!
-    const ctx = canvas.getContext('2d')!
     ctx.clearRect(0, 0, canvas.width, canvas.height)
-    setHasStrokes(false)
-    setSignature('')
+    setHasSig(false)
+    store.setSignature('')
   }
 
-  const canSubmit = hasStrokes && agreed
-
-  const failCount = checklist.filter((i) => i.status === 'FAIL').length
+  function handleSubmit() {
+    if (!canSubmit) return
+    const canvas = canvasRef.current
+    if (!canvas) return
+    store.setSignature(canvas.toDataURL('image/png'))
+    setSubmitting(true)
+    setTimeout(() => router.push('/inspection/complete'), 400)
+  }
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-8">
-      <TopBar title="Driver Signature" subtitle="Review & sign to submit" showBack backHref="/inspection/checklist" />
+    <div className="min-h-screen bg-slate-50 pb-28">
+      {/* Header */}
+      <div className="bg-gradient-to-br from-blue-700 to-blue-900 text-white safe-top">
+        <div className="px-4 pt-4 pb-5">
+          <div className="flex items-center justify-between mb-1">
+            <button onClick={() => router.push('/inspection/checklist')} className="flex items-center gap-1 text-blue-200">
+              <ChevronLeft className="h-5 w-5" />
+              <span className="text-sm">Checklist</span>
+            </button>
+            <span className="text-xs text-blue-200">Step 4 of 5</span>
+          </div>
+          <h1 className="text-xl font-bold">Certification</h1>
+          <p className="text-sm text-blue-200 mt-0.5">Review and sign to complete inspection</p>
+        </div>
+      </div>
 
       <div className="px-4 py-4 space-y-4">
+
         {/* Summary card */}
-        <div className="card">
-          <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-3">Inspection Summary</h3>
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            <div>
-              <p className="text-xs text-slate-400">Driver</p>
-              <p className="font-semibold text-slate-800">{driver?.name}</p>
+        <div className="card space-y-3">
+          <h3 className="font-semibold text-slate-800 mb-1">Inspection Summary</h3>
+
+          <div className="flex items-center gap-2 text-sm text-slate-700">
+            <User className="h-4 w-4 text-blue-500 flex-shrink-0" />
+            <span className="font-medium">{store.driver?.name ?? '—'}</span>
+          </div>
+
+          <div className="flex items-center gap-2 text-sm text-slate-700">
+            <Truck className="h-4 w-4 text-blue-500 flex-shrink-0" />
+            <span>
+              Trailer <span className="font-bold">{store.vehicle?.unitNumber ?? '—'}</span>
+              {' · '}
+              <span className={`font-bold ${store.inspectionType === 'PICKUP' ? 'text-green-600' : 'text-orange-500'}`}>
+                {store.inspectionType === 'PICKUP' ? '▲ PICKUP' : '▼ DROP-OFF'}
+              </span>
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 text-sm text-slate-700">
+            <Calendar className="h-4 w-4 text-blue-500 flex-shrink-0" />
+            <span>{dateStr}, {timeStr}</span>
+          </div>
+
+          <div className="flex items-center gap-2 text-sm text-slate-700">
+            <MapPin className="h-4 w-4 text-blue-500 flex-shrink-0" />
+            <span className="font-mono text-xs">{gpsStr}</span>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100">
+            <div className="text-center">
+              <div className="text-xl font-black text-blue-600">{store.photos.length}</div>
+              <div className="text-xs text-slate-500">Photos</div>
             </div>
-            <div>
-              <p className="text-xs text-slate-400">Unit #</p>
-              <p className="font-semibold text-slate-800">{vehicle?.unitNumber}</p>
+            <div className="text-center">
+              <div className={`text-xl font-black ${failedItems.length > 0 ? 'text-red-500' : 'text-green-500'}`}>
+                {failedItems.length}
+              </div>
+              <div className="text-xs text-slate-500">Failed Items</div>
             </div>
-            <div>
-              <p className="text-xs text-slate-400">Type</p>
-              <p className="font-semibold text-slate-800">{inspectionType === 'PICKUP' ? 'Pickup' : 'Drop-off'}</p>
-            </div>
-            <div>
-              <p className="text-xs text-slate-400">Date</p>
-              <p className="font-semibold text-slate-800">{formatDate(new Date().toISOString())}</p>
-            </div>
-            <div>
-              <p className="text-xs text-slate-400">Photos</p>
-              <p className="font-semibold text-slate-800">{photos.length} captured</p>
-            </div>
-            <div>
-              <p className="text-xs text-slate-400">Issues</p>
-              <p className={`font-semibold ${failCount > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                {failCount > 0 ? `${failCount} item${failCount > 1 ? 's' : ''} failed` : 'No issues'}
-              </p>
+            <div className="text-center">
+              <div className={`text-xl font-black ${needsAttentionTires.length > 0 ? 'text-amber-500' : 'text-green-500'}`}>
+                {needsAttentionTires.length}
+              </div>
+              <div className="text-xs text-slate-500">Tire Alerts</div>
             </div>
           </div>
         </div>
 
-        {/* Signature Pad */}
-        <div className="card">
-          <div className="flex items-center justify-between mb-3">
-            <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-              <PenLine className="h-4 w-4" />
-              Driver Signature
-            </label>
-            <button onClick={clear} className="flex items-center gap-1 text-xs text-slate-400 hover:text-red-500 transition-colors">
-              <RotateCcw className="h-3.5 w-3.5" />
-              Clear
-            </button>
-          </div>
+        {/* Issues section */}
+        {(failedItems.length > 0 || needsAttentionTires.length > 0 || store.comments.trim()) && (
+          <div className="card border border-red-100 bg-red-50">
+            <div className="flex items-center gap-2 mb-3">
+              <AlertTriangle className="h-5 w-5 text-red-500" />
+              <h3 className="font-semibold text-red-700">Issues Found</h3>
+            </div>
 
-          <div className="relative rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 overflow-hidden" style={{ height: 200 }}>
-            {!hasStrokes && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-slate-300">
-                <PenLine className="h-8 w-8 mb-2" />
-                <p className="text-sm">Sign here</p>
+            {failedItems.map((item) => (
+              <div key={item.id} className="mb-2">
+                <div className="text-sm font-medium text-red-700">✗ {item.label}</div>
+                {item.notes && <div className="text-xs text-slate-600 ml-4">{item.notes}</div>}
+              </div>
+            ))}
+
+            {needsAttentionTires.map((tire) => (
+              <div key={tire.position} className="mb-1 text-sm font-medium text-amber-700">
+                ⚠ {tire.position} — Needs Attention
+              </div>
+            ))}
+
+            {store.comments.trim() && (
+              <div className="mt-2 pt-2 border-t border-red-200">
+                <div className="text-xs font-semibold text-slate-600 mb-1">Additional Comments:</div>
+                <div className="text-sm text-slate-700 whitespace-pre-wrap">{store.comments}</div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Signature */}
+        <div className="card">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-slate-800">Driver Signature</h3>
+            {hasSig && (
+              <button onClick={clearSig} className="text-xs text-red-500 font-medium">Clear</button>
+            )}
+          </div>
+          <div className="border-2 border-dashed border-slate-300 rounded-xl overflow-hidden bg-white">
             <canvas
               ref={canvasRef}
-              width={800}
-              height={200}
-              className="h-full w-full touch-none cursor-crosshair"
-              onPointerDown={onPointerDown}
-              onPointerMove={onPointerMove}
-              onPointerUp={onPointerUp}
+              width={600}
+              height={160}
+              className="w-full touch-none"
+              style={{ height: '160px' }}
+              onMouseDown={startDraw}
+              onMouseMove={draw}
+              onMouseUp={endDraw}
+              onMouseLeave={endDraw}
+              onTouchStart={startDraw}
+              onTouchMove={draw}
+              onTouchEnd={endDraw}
             />
           </div>
-
-          {/* Signature line */}
-          <div className="mt-2 border-t-2 border-slate-300 pt-1">
-            <p className="text-xs text-slate-400 text-center">{driver?.name} · {formatDate(new Date().toISOString())}</p>
-          </div>
+          {!hasSig && (
+            <p className="text-xs text-slate-400 text-center mt-2">Sign above with your finger or mouse</p>
+          )}
         </div>
 
-        {/* Agreement */}
-        <label className="flex items-start gap-3 card cursor-pointer">
+        {/* Certification checkbox */}
+        <label className="card flex items-start gap-3 cursor-pointer">
           <input
             type="checkbox"
-            checked={agreed}
-            onChange={(e) => setAgreed(e.target.checked)}
-            className="mt-0.5 h-5 w-5 rounded border-slate-300 text-blue-600 flex-shrink-0"
+            checked={certified}
+            onChange={(e) => setCertified(e.target.checked)}
+            className="mt-0.5 h-5 w-5 rounded accent-blue-600 flex-shrink-0"
           />
-          <p className="text-xs text-slate-600 leading-relaxed">
-            I certify that this vehicle has been inspected in accordance with FMCSA regulations and that the information provided above is true and accurate to the best of my knowledge.
-          </p>
+          <span className="text-sm text-slate-700 leading-snug">
+            I certify that I have inspected this trailer and the information reported above is accurate and true to the best of my knowledge.
+          </span>
         </label>
 
+      </div>
+
+      {/* Bottom nav */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-4 py-3 flex gap-3">
         <button
-          disabled={!canSubmit}
-          onClick={() => router.push('/inspection/complete')}
-          className="btn-primary w-full py-4 text-base"
+          onClick={() => router.push('/inspection/checklist')}
+          className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl border-2 border-slate-200 text-slate-600 font-semibold"
         >
-          <Check className="h-5 w-5" />
-          Submit Inspection
+          <ChevronLeft className="h-5 w-5" />
+          Back
+        </button>
+        <button
+          disabled={!canSubmit || submitting}
+          onClick={handleSubmit}
+          className="flex-1 py-3 rounded-xl bg-blue-600 text-white font-bold text-base disabled:opacity-40"
+        >
+          {submitting ? 'Submitting…' : 'Submit Inspection'}
         </button>
       </div>
     </div>

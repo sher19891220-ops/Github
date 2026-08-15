@@ -1,7 +1,13 @@
 export type InspectionType = 'PICKUP' | 'DROP_OFF'
 export type InspectionStatus = 'PENDING' | 'IN_PROGRESS' | 'SUBMITTED' | 'REVIEWED'
 export type ItemStatus = 'PASS' | 'FAIL' | 'NA' | 'PENDING'
+export type TireCondition = 'GOOD' | 'FAIR' | 'NEEDS_ATTENTION'
 export type Company = 'Zone LLC' | 'Xtrack LLC' | 'AFG Transportco'
+
+export interface TireInspection {
+  position: string
+  condition: TireCondition | null
+}
 
 export interface Driver {
   id: string
