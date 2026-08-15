@@ -7,256 +7,213 @@ import { INSPECTION_ANGLES } from '@/lib/angles'
 import { cn } from '@/lib/utils'
 import type { AngleKey, CapturedPhoto } from '@/lib/types'
 
-// 3D dashed wireframe trailer silhouettes for each camera angle
+// Solid white wireframe trailer outlines — transparent background, centered
 function TrailerGuide({ angle }: { angle: AngleKey }) {
-  const base: React.SVGAttributes<SVGElement> = {
-    stroke: '#22c55e', strokeWidth: '2', strokeDasharray: '9 5', fill: 'none', opacity: '0.95',
+  const s: React.SVGAttributes<SVGElement> = {
+    stroke: 'rgba(255,255,255,0.92)',
+    strokeWidth: '2',
+    fill: 'none',
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
   }
-  const solid: React.SVGAttributes<SVGElement> = { ...base, strokeDasharray: '0' }
-  const faint: React.SVGAttributes<SVGElement> = { ...base, opacity: '0.45', strokeDasharray: '5 6' }
-  const filled = (fillColor: string): React.SVGAttributes<SVGElement> => ({
-    ...base, fill: fillColor, strokeDasharray: '0',
-  })
+  const f: React.SVGAttributes<SVGElement> = { ...s, stroke: 'rgba(255,255,255,0.38)' }
 
   switch (angle) {
-    // ── FRONT — standing directly in front, full face + 3D depth ──
+    // ── FRONT ──────────────────────────────────────────────────────────────
     case 'front':
       return (
-        <svg viewBox="0 0 220 250" className="w-full h-full">
-          {/* Top face (3D depth going right) */}
-          <path d="M 30 42 L 52 22 L 212 22 L 190 42 Z" {...base} />
-          {/* Right side face (narrow depth strip) */}
-          <path d="M 190 42 L 212 22 L 212 202 L 190 202 Z" {...base} />
-          {/* Main front face */}
-          <rect x="30" y="42" width="160" height="160" rx="2" {...base} />
-          {/* Top marker lights */}
-          <rect x="36" y="48" width="26" height="13" rx="2" {...solid} />
-          <rect x="158" y="48" width="26" height="13" rx="2" {...solid} />
-          {/* Bottom marker lights */}
-          <rect x="36" y="185" width="26" height="12" rx="2" {...solid} />
-          <rect x="158" y="185" width="26" height="12" rx="2" {...solid} />
-          {/* Landing gear — two legs with feet */}
-          <line x1="75"  y1="202" x2="75"  y2="238" {...base} />
-          <line x1="145" y1="202" x2="145" y2="238" {...base} />
-          <line x1="60"  y1="238" x2="90"  y2="238" {...base} />
-          <line x1="130" y1="238" x2="160" y2="238" {...base} />
-          {/* Center top cap */}
-          <rect x="88" y="20" width="44" height="8" rx="2" {...solid} />
+        <svg viewBox="0 0 200 248" className="w-full h-full">
+          <rect x="30" y="18" width="140" height="162" {...s} />
+          <line x1="30" y1="25" x2="170" y2="25" {...s} />
+          <rect x="30" y="30" width="9" height="26" rx="1" {...s} />
+          <rect x="161" y="30" width="9" height="26" rx="1" {...s} />
+          {/* Left landing gear */}
+          <line x1="64" y1="180" x2="64" y2="225" {...s} />
+          <line x1="80" y1="180" x2="80" y2="220" {...s} />
+          <line x1="50" y1="225" x2="78" y2="225" {...s} />
+          <line x1="66" y1="220" x2="94" y2="220" {...s} />
+          {/* Right landing gear */}
+          <line x1="120" y1="180" x2="120" y2="220" {...s} />
+          <line x1="136" y1="180" x2="136" y2="225" {...s} />
+          <line x1="106" y1="220" x2="134" y2="220" {...s} />
+          <line x1="122" y1="225" x2="150" y2="225" {...s} />
         </svg>
       )
 
-    // ── FRONT-RIGHT — standing at front-right corner ──
-    case 'front-right':
-      return (
-        <svg viewBox="0 0 280 245" className="w-full h-full">
-          {/* Top face parallelogram */}
-          <path d="M 18 52 L 40 28 L 260 38 L 120 30 L 120 52 Z" {...faint} />
-          <path d="M 18 52 L 120 30 L 260 38 L 260 48 L 120 42 L 18 65" {...base} />
-          {/* Front face (left panel, slight perspective taper) */}
-          <path d="M 18 52 L 120 42 L 120 205 L 18 215 Z" {...base} />
-          {/* Right side face (right panel going into distance) */}
-          <path d="M 120 42 L 260 48 L 260 200 L 120 205 Z" {...base} />
-          {/* Marker light — front face top */}
-          <rect x="23" y="55" width="22" height="12" rx="2" {...solid} />
-          {/* Glad hands (air couplings) on front face */}
-          <circle cx="65" cy="115" r="9" {...base} />
-          <circle cx="65" cy="138" r="9" {...base} />
-          <circle cx="65" cy="115" r="4" {...filled('rgba(34,197,94,0.25)')} />
-          <circle cx="65" cy="138" r="4" {...filled('rgba(34,197,94,0.25)')} />
-          {/* Landing gear (bottom of front face) */}
-          <line x1="42"  y1="215" x2="42"  y2="242" {...base} />
-          <line x1="85"  y1="210" x2="85"  y2="237" {...base} />
-          <line x1="28"  y1="242" x2="56"  y2="242" {...base} />
-          <line x1="71"  y1="237" x2="99"  y2="237" {...base} />
-        </svg>
-      )
-
-    // ── RIGHT SIDE — center-right, full trailer length ──
-    case 'right':
-      return (
-        <svg viewBox="0 0 340 175" className="w-full h-full">
-          {/* Top face (thin strip above body) */}
-          <path d="M 10 30 L 22 14 L 322 14 L 310 30 Z" {...base} />
-          {/* Front face (narrow left strip) */}
-          <path d="M 10 30 L 22 14 L 22 125 L 10 128 Z" {...base} />
-          {/* Rear face (narrow right strip) */}
-          <path d="M 310 30 L 322 14 L 322 125 L 310 128 Z" {...base} />
-          {/* Main side body */}
-          <rect x="10" y="30" width="300" height="98" rx="2" {...base} />
-          {/* Roof ribs */}
-          <line x1="80"  y1="30" x2="80"  y2="128" {...faint} />
-          <line x1="160" y1="30" x2="160" y2="128" {...faint} />
-          <line x1="240" y1="30" x2="240" y2="128" {...faint} />
-          {/* Front corner light */}
-          <rect x="10" y="35" width="10" height="25" rx="1" {...solid} />
-          {/* Rear corner light */}
-          <rect x="318" y="35" width="10" height="25" rx="1" {...solid} />
-          {/* Landing gear (front area) */}
-          <line x1="55"  y1="128" x2="55"  y2="155" {...base} />
-          <line x1="90"  y1="128" x2="90"  y2="155" {...base} />
-          <line x1="42"  y1="155" x2="68"  y2="155" {...base} />
-          <line x1="77"  y1="155" x2="103" y2="155" {...base} />
-          {/* Tandem axle 1 — dual wheels */}
-          <ellipse cx="218" cy="148" rx="20" ry="14" {...base} />
-          <ellipse cx="218" cy="148" rx="11" ry="8"  {...base} />
-          {/* Tandem axle 2 */}
-          <ellipse cx="262" cy="148" rx="20" ry="14" {...base} />
-          <ellipse cx="262" cy="148" rx="11" ry="8"  {...base} />
-          {/* Axle bar */}
-          <line x1="198" y1="148" x2="282" y2="148" {...faint} />
-        </svg>
-      )
-
-    // ── REAR-RIGHT — standing at rear-right corner ──
-    case 'rear-right':
-      return (
-        <svg viewBox="0 0 280 245" className="w-full h-full">
-          {/* Top face */}
-          <path d="M 20 42 L 20 32 L 160 28 L 262 36 L 262 46 L 160 38 Z" {...base} />
-          {/* Right side face (left panel, receding) */}
-          <path d="M 20 42 L 160 38 L 160 205 L 20 210 Z" {...base} />
-          {/* Rear face (right panel, flat) */}
-          <path d="M 160 38 L 262 46 L 262 208 L 160 205 Z" {...base} />
-          {/* Tail lights on rear face */}
-          <rect x="168" y="50" width="22" height="38" rx="3" {...solid} />
-          <rect x="234" y="50" width="22" height="38" rx="3" {...solid} />
-          {/* Door split on rear face */}
-          <line x1="211" y1="46" x2="211" y2="205" {...faint} />
-          {/* ICC bar across rear face */}
-          <rect x="166" y="208" width="92" height="10" rx="2" {...solid} />
-          {/* Rear axle wheels on right side */}
-          <ellipse cx="60"  cy="210" rx="22" ry="15" {...base} />
-          <ellipse cx="60"  cy="210" rx="12" ry="8"  {...base} />
-          <ellipse cx="108" cy="208" rx="22" ry="15" {...base} />
-          <ellipse cx="108" cy="208" rx="12" ry="8"  {...base} />
-          {/* Axle bar */}
-          <line x1="38" y1="210" x2="130" y2="208" {...faint} />
-          {/* Bottom marker lights on rear face */}
-          <rect x="168" y="188" width="22" height="13" rx="2" {...solid} />
-          <rect x="234" y="188" width="22" height="13" rx="2" {...solid} />
-        </svg>
-      )
-
-    // ── REAR — standing directly behind ──
+    // ── REAR ───────────────────────────────────────────────────────────────
     case 'rear':
       return (
-        <svg viewBox="0 0 220 250" className="w-full h-full">
-          {/* Top face (3D depth going left) */}
-          <path d="M 30 42 L 10 22 L 168 22 L 190 42 Z" {...base} />
-          {/* Left side face (depth strip) */}
-          <path d="M 30 42 L 10 22 L 10 202 L 30 202 Z" {...base} />
-          {/* Main rear face */}
-          <rect x="30" y="42" width="160" height="160" rx="2" {...base} />
-          {/* Door center split */}
-          <line x1="110" y1="42" x2="110" y2="202" {...faint} />
+        <svg viewBox="0 0 200 248" className="w-full h-full">
+          <rect x="30" y="18" width="140" height="162" {...s} />
+          <line x1="30" y1="25" x2="170" y2="25" {...s} />
           {/* Tail lights */}
-          <rect x="36" y="48" width="24" height="38" rx="3" {...solid} />
-          <rect x="160" y="48" width="24" height="38" rx="3" {...solid} />
-          {/* Door latch bars */}
-          <line x1="94"  y1="75" x2="94"  y2="170" {...faint} />
-          <line x1="126" y1="75" x2="126" y2="170" {...faint} />
-          {/* Door handles */}
-          <circle cx="97"  cy="122" r="5" {...filled('rgba(34,197,94,0.3)')} />
-          <circle cx="123" cy="122" r="5" {...filled('rgba(34,197,94,0.3)')} />
+          <rect x="32" y="28" width="20" height="36" rx="2" {...s} />
+          <rect x="148" y="28" width="20" height="36" rx="2" {...s} />
+          {/* Door split */}
+          <line x1="100" y1="65" x2="100" y2="178" {...f} />
+          {/* Latch bars */}
+          <line x1="87"  y1="88" x2="87"  y2="162" {...f} />
+          <line x1="113" y1="88" x2="113" y2="162" {...f} />
           {/* Bottom lights */}
-          <rect x="36"  y="185" width="24" height="13" rx="2" {...solid} />
-          <rect x="160" y="185" width="24" height="13" rx="2" {...solid} />
+          <rect x="32"  y="152" width="20" height="14" rx="2" {...s} />
+          <rect x="148" y="152" width="20" height="14" rx="2" {...s} />
           {/* ICC bar */}
-          <rect x="36" y="205" width="148" height="10" rx="3" {...solid} />
-          {/* Rear wheels visible below ICC bar */}
-          <ellipse cx="82"  cy="235" rx="20" ry="10" {...base} />
-          <ellipse cx="140" cy="235" rx="20" ry="10" {...base} />
+          <rect x="38" y="182" width="124" height="8" rx="2" {...s} />
+          {/* Rear wheels */}
+          <ellipse cx="78"  cy="212" rx="18" ry="10" {...s} />
+          <ellipse cx="122" cy="212" rx="18" ry="10" {...s} />
         </svg>
       )
 
-    // ── REAR-LEFT — standing at rear-left corner ──
-    case 'rear-left':
+    // ── RIGHT SIDE ─────────────────────────────────────────────────────────
+    case 'right':
       return (
-        <svg viewBox="0 0 280 245" className="w-full h-full">
-          {/* Top face */}
-          <path d="M 18 36 L 18 46 L 120 38 L 262 42 L 262 32 L 120 28 Z" {...base} />
-          {/* Left side face (right panel, receding into distance) */}
-          <path d="M 120 38 L 262 42 L 262 210 L 120 205 Z" {...base} />
-          {/* Rear face (left panel, flat) */}
-          <path d="M 18 46 L 120 38 L 120 205 L 18 210 Z" {...base} />
-          {/* Tail lights on rear face */}
-          <rect x="24"  y="52" width="22" height="38" rx="3" {...solid} />
-          <rect x="90"  y="52" width="22" height="38" rx="3" {...solid} />
-          {/* Door split on rear face */}
-          <line x1="69"  y1="46" x2="69"  y2="205" {...faint} />
-          {/* ICC bar */}
-          <rect x="22" y="208" width="92" height="10" rx="2" {...solid} />
-          {/* Rear axle wheels on left side */}
-          <ellipse cx="172" cy="210" rx="22" ry="15" {...base} />
-          <ellipse cx="172" cy="210" rx="12" ry="8"  {...base} />
-          <ellipse cx="220" cy="208" rx="22" ry="15" {...base} />
-          <ellipse cx="220" cy="208" rx="12" ry="8"  {...base} />
-          {/* Axle bar */}
-          <line x1="150" y1="210" x2="242" y2="208" {...faint} />
-          {/* Bottom marker lights */}
-          <rect x="24" y="188" width="22" height="13" rx="2" {...solid} />
-          <rect x="90" y="188" width="22" height="13" rx="2" {...solid} />
+        <svg viewBox="0 0 370 185" className="w-full h-full">
+          <rect x="12" y="28" width="346" height="102" {...s} />
+          <line x1="12" y1="35" x2="358" y2="35" {...s} />
+          <rect x="12"  y="38" width="9" height="26" rx="1" {...s} />
+          <rect x="349" y="38" width="9" height="26" rx="1" {...s} />
+          {/* Landing gear — front (left) */}
+          <line x1="54" y1="130" x2="54" y2="162" {...s} />
+          <line x1="70" y1="130" x2="70" y2="157" {...s} />
+          <line x1="40" y1="162" x2="68" y2="162" {...s} />
+          <line x1="57" y1="157" x2="84" y2="157" {...s} />
+          {/* Tandem axle dual-wheels — rear (right) */}
+          <ellipse cx="256" cy="156" rx="23" ry="17" {...s} />
+          <ellipse cx="256" cy="156" rx="12" ry="9"  {...s} />
+          <ellipse cx="304" cy="156" rx="23" ry="17" {...s} />
+          <ellipse cx="304" cy="156" rx="12" ry="9"  {...s} />
+          <line x1="233" y1="156" x2="327" y2="156" {...f} />
         </svg>
       )
 
-    // ── LEFT SIDE — center-left, full trailer length (mirror of right) ──
+    // ── LEFT SIDE ──────────────────────────────────────────────────────────
     case 'left':
       return (
-        <svg viewBox="0 0 340 175" className="w-full h-full">
-          {/* Top face */}
-          <path d="M 30 30 L 18 14 L 318 14 L 330 30 Z" {...base} />
-          {/* Front face (narrow right strip — front is at RIGHT for left-side view) */}
-          <path d="M 318 14 L 330 30 L 330 128 L 318 125 Z" {...base} />
-          {/* Rear face (narrow left strip) */}
-          <path d="M 10 30 L 18 14 L 18 125 L 10 128 Z" {...base} />
-          {/* Main side body */}
-          <rect x="10" y="30" width="320" height="98" rx="2" {...base} />
-          {/* Roof ribs */}
-          <line x1="100" y1="30" x2="100" y2="128" {...faint} />
-          <line x1="180" y1="30" x2="180" y2="128" {...faint} />
-          <line x1="260" y1="30" x2="260" y2="128" {...faint} />
-          {/* Rear corner light (left side rear = right of image) */}
-          <rect x="10" y="35" width="10" height="25" rx="1" {...solid} />
-          {/* Front corner light (left side front = right of image) */}
-          <rect x="318" y="35" width="10" height="25" rx="1" {...solid} />
-          {/* Landing gear (at RIGHT side = front of trailer) */}
-          <line x1="250" y1="128" x2="250" y2="155" {...base} />
-          <line x1="285" y1="128" x2="285" y2="155" {...base} />
-          <line x1="237" y1="155" x2="263" y2="155" {...base} />
-          <line x1="272" y1="155" x2="298" y2="155" {...base} />
-          {/* Tandem axle 1 */}
-          <ellipse cx="78"  cy="148" rx="20" ry="14" {...base} />
-          <ellipse cx="78"  cy="148" rx="11" ry="8"  {...base} />
-          {/* Tandem axle 2 */}
-          <ellipse cx="122" cy="148" rx="20" ry="14" {...base} />
-          <ellipse cx="122" cy="148" rx="11" ry="8"  {...base} />
-          {/* Axle bar */}
-          <line x1="58" y1="148" x2="142" y2="148" {...faint} />
+        <svg viewBox="0 0 370 185" className="w-full h-full">
+          <rect x="12" y="28" width="346" height="102" {...s} />
+          <line x1="12" y1="35" x2="358" y2="35" {...s} />
+          <rect x="12"  y="38" width="9" height="26" rx="1" {...s} />
+          <rect x="349" y="38" width="9" height="26" rx="1" {...s} />
+          {/* Tandem axle dual-wheels — rear (left) */}
+          <ellipse cx="66"  cy="156" rx="23" ry="17" {...s} />
+          <ellipse cx="66"  cy="156" rx="12" ry="9"  {...s} />
+          <ellipse cx="114" cy="156" rx="23" ry="17" {...s} />
+          <ellipse cx="114" cy="156" rx="12" ry="9"  {...s} />
+          <line x1="43" y1="156" x2="137" y2="156" {...f} />
+          {/* Landing gear — front (right) */}
+          <line x1="300" y1="130" x2="300" y2="157" {...s} />
+          <line x1="316" y1="130" x2="316" y2="162" {...s} />
+          <line x1="286" y1="157" x2="313" y2="157" {...s} />
+          <line x1="302" y1="162" x2="330" y2="162" {...s} />
         </svg>
       )
 
-    // ── FRONT-LEFT — standing at front-left corner ──
+    // ── FRONT-RIGHT ────────────────────────────────────────────────────────
+    case 'front-right':
+      return (
+        <svg viewBox="0 0 310 265" className="w-full h-full">
+          {/* Top face */}
+          <path d="M 14 78 L 38 44 L 290 54 L 266 88 Z" {...s} />
+          {/* Front face (left, slight taper) */}
+          <path d="M 14 78 L 38 44 L 38 218 L 14 238 Z" {...s} />
+          {/* Right side face */}
+          <path d="M 38 44 L 290 54 L 290 220 L 38 218 Z" {...s} />
+          {/* Glad hands on front face */}
+          <circle cx="26" cy="128" r="9" {...s} />
+          <circle cx="26" cy="154" r="9" {...s} />
+          <circle cx="26" cy="128" r="4" {...f} />
+          <circle cx="26" cy="154" r="4" {...f} />
+          {/* Landing gear below front face */}
+          <line x1="20" y1="238" x2="20" y2="256" {...s} />
+          <line x1="33" y1="234" x2="33" y2="250" {...s} />
+          <line x1="9"  y1="256" x2="31" y2="256" {...s} />
+          <line x1="22" y1="250" x2="45" y2="250" {...s} />
+          {/* Tandem wheels on right side */}
+          <ellipse cx="196" cy="228" rx="21" ry="15" {...s} />
+          <ellipse cx="196" cy="228" rx="11" ry="8"  {...s} />
+          <ellipse cx="244" cy="226" rx="21" ry="15" {...s} />
+          <ellipse cx="244" cy="226" rx="11" ry="8"  {...s} />
+          <line x1="175" y1="227" x2="265" y2="226" {...f} />
+        </svg>
+      )
+
+    // ── REAR-RIGHT ─────────────────────────────────────────────────────────
+    case 'rear-right':
+      return (
+        <svg viewBox="0 0 310 265" className="w-full h-full">
+          {/* Top face */}
+          <path d="M 20 88 L 20 54 L 272 44 L 296 78 L 296 88 L 20 88 Z" {...s} />
+          {/* Right side face (left panel) */}
+          <path d="M 20 88 L 272 88 L 272 222 L 20 230 Z" {...s} />
+          {/* Rear face (right panel) */}
+          <path d="M 272 88 L 296 78 L 296 222 L 272 222 Z" {...s} />
+          {/* Tail lights on rear face */}
+          <rect x="274" y="94" width="18" height="32" rx="2" {...s} />
+          {/* Door split */}
+          <line x1="284" y1="126" x2="284" y2="220" {...f} />
+          {/* ICC bar */}
+          <rect x="272" y="222" width="22" height="8" rx="2" {...s} />
+          {/* Tandem wheels on right side */}
+          <ellipse cx="84"  cy="228" rx="23" ry="16" {...s} />
+          <ellipse cx="84"  cy="228" rx="12" ry="9"  {...s} />
+          <ellipse cx="138" cy="226" rx="23" ry="16" {...s} />
+          <ellipse cx="138" cy="226" rx="12" ry="9"  {...s} />
+          <line x1="61" y1="227" x2="161" y2="226" {...f} />
+        </svg>
+      )
+
+    // ── REAR-LEFT ──────────────────────────────────────────────────────────
+    case 'rear-left':
+      return (
+        <svg viewBox="0 0 310 265" className="w-full h-full">
+          {/* Top face */}
+          <path d="M 14 78 L 38 44 L 290 54 L 290 88 L 38 88 L 14 78 Z" {...s} />
+          {/* Rear face (left panel) */}
+          <path d="M 14 78 L 38 44 L 38 222 L 14 222 Z" {...s} />
+          {/* Left side face (right panel) */}
+          <path d="M 38 44 L 290 54 L 290 230 L 38 222 Z" {...s} />
+          {/* Tail lights on rear face */}
+          <rect x="16" y="84" width="18" height="32" rx="2" {...s} />
+          {/* Door split */}
+          <line x1="26" y1="116" x2="26" y2="220" {...f} />
+          {/* ICC bar */}
+          <rect x="14" y="222" width="22" height="8" rx="2" {...s} />
+          {/* Tandem wheels on left side */}
+          <ellipse cx="172" cy="228" rx="23" ry="16" {...s} />
+          <ellipse cx="172" cy="228" rx="12" ry="9"  {...s} />
+          <ellipse cx="226" cy="226" rx="23" ry="16" {...s} />
+          <ellipse cx="226" cy="226" rx="12" ry="9"  {...s} />
+          <line x1="149" y1="227" x2="249" y2="226" {...f} />
+        </svg>
+      )
+
+    // ── FRONT-LEFT ─────────────────────────────────────────────────────────
     case 'front-left':
       return (
-        <svg viewBox="0 0 280 245" className="w-full h-full">
+        <svg viewBox="0 0 310 265" className="w-full h-full">
           {/* Top face */}
-          <path d="M 20 38 L 20 48 L 160 42 L 262 52 L 262 42 L 160 30 Z" {...base} />
-          {/* Left side face (left panel going into distance) */}
-          <path d="M 20 38 L 160 30 L 160 205 L 20 215 Z" {...base} />
-          {/* Front face (right panel, flat) */}
-          <path d="M 160 30 L 262 42 L 262 208 L 160 205 Z" {...base} />
-          {/* Marker light on front face top-right */}
-          <rect x="230" y="48" width="22" height="12" rx="2" {...solid} />
-          {/* Glad hands (air couplings) on front face */}
-          <circle cx="210" cy="115" r="9" {...base} />
-          <circle cx="210" cy="138" r="9" {...base} />
-          <circle cx="210" cy="115" r="4" {...filled('rgba(34,197,94,0.25)')} />
-          <circle cx="210" cy="138" r="4" {...filled('rgba(34,197,94,0.25)')} />
-          {/* Landing gear (bottom of front face) */}
-          <line x1="185" y1="205" x2="185" y2="233" {...base} />
-          <line x1="228" y1="208" x2="228" y2="236" {...base} />
-          <line x1="171" y1="233" x2="199" y2="233" {...base} />
-          <line x1="214" y1="236" x2="242" y2="236" {...base} />
+          <path d="M 20 54 L 272 44 L 296 78 L 44 88 L 20 78 Z" {...s} />
+          {/* Left side face (left panel) */}
+          <path d="M 20 54 L 272 44 L 272 220 L 20 230 Z" {...s} />
+          {/* Front face (right panel, slight taper) */}
+          <path d="M 272 44 L 296 78 L 296 238 L 272 220 Z" {...s} />
+          {/* Glad hands on front face */}
+          <circle cx="284" cy="128" r="9" {...s} />
+          <circle cx="284" cy="154" r="9" {...s} />
+          <circle cx="284" cy="128" r="4" {...f} />
+          <circle cx="284" cy="154" r="4" {...f} />
+          {/* Landing gear below front face */}
+          <line x1="278" y1="238" x2="278" y2="256" {...s} />
+          <line x1="291" y1="234" x2="291" y2="250" {...s} />
+          <line x1="265" y1="256" x2="289" y2="256" {...s} />
+          <line x1="279" y1="250" x2="302" y2="250" {...s} />
+          {/* Tandem wheels on left side */}
+          <ellipse cx="66"  cy="228" rx="21" ry="15" {...s} />
+          <ellipse cx="66"  cy="228" rx="11" ry="8"  {...s} />
+          <ellipse cx="114" cy="226" rx="21" ry="15" {...s} />
+          <ellipse cx="114" cy="226" rx="11" ry="8"  {...s} />
+          <line x1="45" y1="227" x2="135" y2="226" {...f} />
         </svg>
       )
 
@@ -415,23 +372,21 @@ export default function CameraPage() {
 
             {cameraReady && (
               <>
-                {/* 3D wireframe trailer guide overlay */}
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none p-6">
-                  <div className="w-full" style={{ maxHeight: '58%', maxWidth: '88%' }}>
-                    <TrailerGuide angle={activeAngle} />
-                  </div>
-                </div>
-
-                {/* Big angle label */}
+                {/* Angle label — top center */}
                 <div className="absolute top-4 inset-x-0 flex justify-center pointer-events-none">
-                  <div className="rounded-2xl bg-black/75 px-6 py-2">
+                  <div className="rounded-2xl bg-black/70 px-6 py-2">
                     <p className="text-2xl font-black text-white tracking-widest">{currentAngleConfig.label}</p>
                   </div>
                 </div>
 
-                {/* Instruction */}
-                <div className="absolute bottom-36 inset-x-4 rounded-xl bg-black/70 px-4 py-3 pointer-events-none">
-                  <p className="text-sm text-white/95 text-center leading-relaxed font-medium">{currentAngleConfig.instruction}</p>
+                {/* Trailer wireframe — centered, fills most of the camera viewport */}
+                <div
+                  className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                  style={{ filter: 'drop-shadow(0 0 6px rgba(255,255,255,0.35))' }}
+                >
+                  <div style={{ width: '82%', maxHeight: '62%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <TrailerGuide angle={activeAngle} />
+                  </div>
                 </div>
               </>
             )}
