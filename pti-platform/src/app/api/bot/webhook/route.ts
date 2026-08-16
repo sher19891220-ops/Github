@@ -5,6 +5,24 @@ import { registerGroup, unregisterGroup, getRegisteredGroups, isKvConfigured } f
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
 const APP_URL   = process.env.NEXT_PUBLIC_APP_URL || 'https://pti-check.vercel.app'
 
+// GET /api/bot/webhook — self-registers this URL as the Telegram webhook.
+// Runs on Vercel's servers so the registration reaches Telegram without proxy interference.
+export async function GET() {
+  if (!BOT_TOKEN) return NextResponse.json({ error: 'Bot token not configured' }, { status: 500 })
+  const webhookUrl = `${APP_URL}/api/bot/webhook`
+  const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/setWebhook`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      url: webhookUrl,
+      allowed_updates: ['message', 'edited_message', 'my_chat_member'],
+      drop_pending_updates: false,
+    }),
+  })
+  const data = await res.json()
+  return NextResponse.json({ webhookUrl, telegram: data })
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
