@@ -34,8 +34,8 @@ export async function POST(req: NextRequest) {
             `Group: *${escMd(title)}*\n\n` +
             `✅ This group is now registered to receive PTI inspection reports.\n\n` +
             `Commands:\n` +
-            `/pickup ZN\\-401 \\[Driver Name\\] — Send pickup inspection link\n` +
-            `/dropoff ZN\\-401 — Send drop\\-off inspection link\n` +
+            `/pickup UNIT \\[Driver Name\\] — Send pickup inspection link\n` +
+            `/dropoff UNIT — Send drop\\-off inspection link\n` +
             `/chatid — Show this group's ID\n` +
             `/ptiregister — Re\\-register this group\n` +
             `/ptiunregister — Remove from report list`,
@@ -108,9 +108,9 @@ export async function POST(req: NextRequest) {
         chatId,
         '🚛 *PTI Check Bot*\n\n' +
         'Send a command to generate an inspection link:\n\n' +
-        '`/pickup ZN\\-401` — Pickup \\(pre\\-trip\\)\n' +
-        '`/dropoff ZN\\-401` — Drop\\-off \\(post\\-trip\\)\n' +
-        '`/pickup ZN\\-401 John Smith` — Include driver name\n\n' +
+        '`/pickup UNIT` — Pickup \\(pre\\-trip\\)\n' +
+        '`/dropoff UNIT` — Drop\\-off \\(post\\-trip\\)\n' +
+        '`/pickup UNIT Driver Name` — Include driver name\n\n' +
         '*Group management:*\n' +
         '`/ptiregister` — Register this group for reports\n' +
         '`/ptiunregister` — Unregister this group\n' +
@@ -130,7 +130,7 @@ export async function POST(req: NextRequest) {
       const typeLabel  = type === 'PICKUP' ? '▲ PICKUP' : '▼ DROP\\-OFF'
 
       if (!unit) {
-        await sendMessage(chatId, `⚠️ Please include the unit number: \`/${cmd.slice(1)} ZN\\-401\``, 'MarkdownV2')
+        await sendMessage(chatId, `⚠️ Please include the unit number\\. Example: \`/${cmd.slice(1)} UNIT\``, 'MarkdownV2')
         return NextResponse.json({ ok: true })
       }
 
@@ -154,7 +154,7 @@ export async function POST(req: NextRequest) {
     if (cmd === '/status') {
       const unit = parts[1]
       if (!unit) {
-        await sendMessage(chatId, '⚠️ Usage: `/status ZN\\-401`', 'MarkdownV2')
+        await sendMessage(chatId, '⚠️ Usage: `/status UNIT`', 'MarkdownV2')
         return NextResponse.json({ ok: true })
       }
       await sendMessage(chatId, `📊 *Unit ${escMd(unit)}*\n_No inspections on record yet_`, 'MarkdownV2')
