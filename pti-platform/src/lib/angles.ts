@@ -79,6 +79,60 @@ export const INSPECTION_ANGLES: AngleConfig[] = [
     instruction: 'Photograph any damage, dents, or issues found. Take as many photos as needed.',
     order: 13,
   },
+  {
+    key: 'tire-a1-lo',
+    label: 'AXLE 1 — L-OUTER',
+    instruction: 'Photograph the front-left outer tire. Show tread depth and full sidewall.',
+    order: 14,
+  },
+  {
+    key: 'tire-a1-li',
+    label: 'AXLE 1 — L-INNER',
+    instruction: 'Photograph the front-left inner tire. Show tread depth and full sidewall.',
+    order: 15,
+  },
+  {
+    key: 'tire-a1-ri',
+    label: 'AXLE 1 — R-INNER',
+    instruction: 'Photograph the front-right inner tire. Show tread depth and full sidewall.',
+    order: 16,
+  },
+  {
+    key: 'tire-a1-ro',
+    label: 'AXLE 1 — R-OUTER',
+    instruction: 'Photograph the front-right outer tire. Show tread depth and full sidewall.',
+    order: 17,
+  },
+  {
+    key: 'tire-a2-lo',
+    label: 'AXLE 2 — L-OUTER',
+    instruction: 'Photograph the rear-left outer tire. Show tread depth and full sidewall.',
+    order: 18,
+  },
+  {
+    key: 'tire-a2-li',
+    label: 'AXLE 2 — L-INNER',
+    instruction: 'Photograph the rear-left inner tire. Show tread depth and full sidewall.',
+    order: 19,
+  },
+  {
+    key: 'tire-a2-ri',
+    label: 'AXLE 2 — R-INNER',
+    instruction: 'Photograph the rear-right inner tire. Show tread depth and full sidewall.',
+    order: 20,
+  },
+  {
+    key: 'tire-a2-ro',
+    label: 'AXLE 2 — R-OUTER',
+    instruction: 'Photograph the rear-right outer tire. Show tread depth and full sidewall.',
+    order: 21,
+  },
+  {
+    key: 'extras',
+    label: '+EXTRAS',
+    instruction: 'Take any additional photos of damage, issues, or areas of concern.',
+    order: 22,
+  },
 ]
 
 export const ANGLE_POSITIONS: Record<AngleKey, { top: string; left: string; rotate: string }> = {
@@ -95,4 +149,13 @@ export const ANGLE_POSITIONS: Record<AngleKey, { top: string; left: string; rota
   'inside-left-wall':  { top: '50%', left: '50%', rotate: '0deg'   },
   'inside-right-wall': { top: '50%', left: '50%', rotate: '0deg'   },
   damage:              { top: '50%', left: '50%', rotate: '0deg'   },
+  'tire-a1-lo':        { top: '50%', left: '50%', rotate: '0deg'   },
+  'tire-a1-li':        { top: '50%', left: '50%', rotate: '0deg'   },
+  'tire-a1-ri':        { top: '50%', left: '50%', rotate: '0deg'   },
+  'tire-a1-ro':        { top: '50%', left: '50%', rotate: '0deg'   },
+  'tire-a2-lo':        { top: '50%', left: '50%', rotate: '0deg'   },
+  'tire-a2-li':        { top: '50%', left: '50%', rotate: '0deg'   },
+  'tire-a2-ri':        { top: '50%', left: '50%', rotate: '0deg'   },
+  'tire-a2-ro':        { top: '50%', left: '50%', rotate: '0deg'   },
+  extras:              { top: '50%', left: '50%', rotate: '0deg'   },
 }

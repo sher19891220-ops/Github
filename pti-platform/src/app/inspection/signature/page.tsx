@@ -1,7 +1,7 @@
 'use client'
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronLeft, MapPin, Calendar, Truck, User, AlertTriangle } from 'lucide-react'
+import { ChevronLeft, MapPin, Calendar, Truck, User } from 'lucide-react'
 import { useInspectionStore } from '@/store/inspectionStore'
 
 export default function SignaturePage() {
@@ -14,9 +14,6 @@ export default function SignaturePage() {
   const [certified, setCertified] = useState(false)
   const [submitting, setSubmitting] = useState(false)
 
-  const failedItems = store.checklist.filter((i) => i.status === 'FAIL')
-  const needsAttentionTires = store.tireInspections.filter((t) => t.condition === 'NEEDS_ATTENTION')
-
   const dateStr = new Date().toLocaleDateString('en-US', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
   })
@@ -27,7 +24,6 @@ export default function SignaturePage() {
 
   const canSubmit = hasSig && certified
 
-  // Canvas drawing helpers
   function getPos(e: React.MouseEvent | React.TouchEvent, canvas: HTMLCanvasElement) {
     const rect = canvas.getBoundingClientRect()
     const scaleX = canvas.width / rect.width
@@ -91,11 +87,11 @@ export default function SignaturePage() {
       <div className="bg-gradient-to-br from-blue-700 to-blue-900 text-white safe-top">
         <div className="px-4 pt-4 pb-5">
           <div className="flex items-center justify-between mb-1">
-            <button onClick={() => router.push('/inspection/checklist')} className="flex items-center gap-1 text-blue-200">
+            <button onClick={() => router.push('/inspection/camera')} className="flex items-center gap-1 text-blue-200">
               <ChevronLeft className="h-5 w-5" />
-              <span className="text-sm">Checklist</span>
+              <span className="text-sm">Camera</span>
             </button>
-            <span className="text-xs text-blue-200">Step 4 of 5</span>
+            <span className="text-xs text-blue-200">Step 3 of 3</span>
           </div>
           <h1 className="text-xl font-bold">Certification</h1>
           <p className="text-sm text-blue-200 mt-0.5">Review and sign to complete inspection</p>
@@ -134,55 +130,29 @@ export default function SignaturePage() {
             <span className="font-mono text-xs">{gpsStr}</span>
           </div>
 
-          <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100">
+          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
             <div className="text-center">
               <div className="text-xl font-black text-blue-600">{store.photos.length}</div>
               <div className="text-xs text-slate-500">Photos</div>
             </div>
             <div className="text-center">
-              <div className={`text-xl font-black ${failedItems.length > 0 ? 'text-red-500' : 'text-green-500'}`}>
-                {failedItems.length}
-              </div>
-              <div className="text-xs text-slate-500">Failed Items</div>
-            </div>
-            <div className="text-center">
-              <div className={`text-xl font-black ${needsAttentionTires.length > 0 ? 'text-amber-500' : 'text-green-500'}`}>
-                {needsAttentionTires.length}
-              </div>
-              <div className="text-xs text-slate-500">Tire Alerts</div>
+              <div className="text-xl font-black text-slate-700">{store.vehicle?.company ?? '—'}</div>
+              <div className="text-xs text-slate-500">Company</div>
             </div>
           </div>
         </div>
 
-        {/* Issues section */}
-        {(failedItems.length > 0 || needsAttentionTires.length > 0 || store.comments.trim()) && (
-          <div className="card border border-red-100 bg-red-50">
-            <div className="flex items-center gap-2 mb-3">
-              <AlertTriangle className="h-5 w-5 text-red-500" />
-              <h3 className="font-semibold text-red-700">Issues Found</h3>
-            </div>
-
-            {failedItems.map((item) => (
-              <div key={item.id} className="mb-2">
-                <div className="text-sm font-medium text-red-700">✗ {item.label}</div>
-                {item.notes && <div className="text-xs text-slate-600 ml-4">{item.notes}</div>}
-              </div>
-            ))}
-
-            {needsAttentionTires.map((tire) => (
-              <div key={tire.position} className="mb-1 text-sm font-medium text-amber-700">
-                ⚠ {tire.position} — Needs Attention
-              </div>
-            ))}
-
-            {store.comments.trim() && (
-              <div className="mt-2 pt-2 border-t border-red-200">
-                <div className="text-xs font-semibold text-slate-600 mb-1">Additional Comments:</div>
-                <div className="text-sm text-slate-700 whitespace-pre-wrap">{store.comments}</div>
-              </div>
-            )}
-          </div>
-        )}
+        {/* Comments box */}
+        <div className="card">
+          <h3 className="font-semibold text-slate-800 mb-3">Comments / Notes</h3>
+          <textarea
+            placeholder="Note any additional issues, damage, or observations..."
+            value={store.comments}
+            onChange={(e) => store.setComments(e.target.value)}
+            className="w-full text-sm border border-slate-200 rounded-xl p-3 resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
+            rows={3}
+          />
+        </div>
 
         {/* Signature */}
         <div className="card">
@@ -231,7 +201,7 @@ export default function SignaturePage() {
       {/* Bottom nav */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-4 py-3 flex gap-3">
         <button
-          onClick={() => router.push('/inspection/checklist')}
+          onClick={() => router.push('/inspection/camera')}
           className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl border-2 border-slate-200 text-slate-600 font-semibold"
         >
           <ChevronLeft className="h-5 w-5" />

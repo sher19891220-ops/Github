@@ -63,6 +63,15 @@ export type AngleKey =
   | 'inside-left-wall'
   | 'inside-right-wall'
   | 'damage'
+  | 'tire-a1-lo'
+  | 'tire-a1-li'
+  | 'tire-a1-ri'
+  | 'tire-a1-ro'
+  | 'tire-a2-lo'
+  | 'tire-a2-li'
+  | 'tire-a2-ri'
+  | 'tire-a2-ro'
+  | 'extras'
 
 export interface AngleConfig {
   key: AngleKey

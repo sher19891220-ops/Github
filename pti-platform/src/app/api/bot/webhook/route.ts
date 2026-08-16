@@ -24,6 +24,11 @@ export async function POST(req: NextRequest) {
     // Strip @BotName suffix so group commands (/pickup@Pti_check_bot) match
     const cmd   = (parts[0]?.split('@')[0] ?? '').toLowerCase()
 
+    if (cmd === '/chatid') {
+      await send(chatId, `Chat ID: \`${chatId}\``, 'MarkdownV2')
+      return NextResponse.json({ ok: true })
+    }
+
     if (cmd === '/start' || cmd === '/help') {
       await send(chatId,
         '🚛 *PTI Check Bot*\n\n' +

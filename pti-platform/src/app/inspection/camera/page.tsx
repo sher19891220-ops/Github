@@ -7,209 +7,10 @@ import { INSPECTION_ANGLES } from '@/lib/angles'
 import { cn } from '@/lib/utils'
 import type { AngleKey, CapturedPhoto } from '@/lib/types'
 
-const REQUIRED_ANGLES = INSPECTION_ANGLES.filter((a) => a.key !== 'damage')
-
-function TrailerGuide({ angle }: { angle: AngleKey }) {
-  const d: React.SVGAttributes<SVGElement> = {
-    stroke: 'rgba(255,255,255,0.88)',
-    strokeWidth: '2.5',
-    fill: 'none',
-    strokeLinecap: 'round',
-    strokeLinejoin: 'round',
-    strokeDasharray: '8 5',
-  }
-  const f: React.SVGAttributes<SVGElement> = { ...d, stroke: 'rgba(255,255,255,0.45)' }
-
-  switch (angle) {
-    case 'front':
-      return (
-        <svg viewBox="0 0 200 248" className="w-full h-full">
-          <rect x="30" y="18" width="140" height="162" {...d} />
-          <line x1="30" y1="25" x2="170" y2="25" {...d} />
-          <rect x="30" y="30" width="9" height="26" rx="1" {...d} />
-          <rect x="161" y="30" width="9" height="26" rx="1" {...d} />
-          <line x1="64" y1="180" x2="64" y2="225" {...d} />
-          <line x1="80" y1="180" x2="80" y2="220" {...d} />
-          <line x1="50" y1="225" x2="78" y2="225" {...d} />
-          <line x1="66" y1="220" x2="94" y2="220" {...d} />
-          <line x1="120" y1="180" x2="120" y2="220" {...d} />
-          <line x1="136" y1="180" x2="136" y2="225" {...d} />
-          <line x1="106" y1="220" x2="134" y2="220" {...d} />
-          <line x1="122" y1="225" x2="150" y2="225" {...d} />
-        </svg>
-      )
-
-    case 'rear':
-      return (
-        <svg viewBox="0 0 200 248" className="w-full h-full">
-          <rect x="30" y="18" width="140" height="162" {...d} />
-          <line x1="30" y1="25" x2="170" y2="25" {...d} />
-          <rect x="32" y="28" width="20" height="36" rx="2" {...d} />
-          <rect x="148" y="28" width="20" height="36" rx="2" {...d} />
-          <line x1="100" y1="65" x2="100" y2="178" {...f} />
-          <line x1="87" y1="88" x2="87" y2="162" {...f} />
-          <line x1="113" y1="88" x2="113" y2="162" {...f} />
-          <rect x="32" y="152" width="20" height="14" rx="2" {...d} />
-          <rect x="148" y="152" width="20" height="14" rx="2" {...d} />
-          <rect x="38" y="182" width="124" height="8" rx="2" {...d} />
-          <ellipse cx="78" cy="212" rx="18" ry="10" {...d} />
-          <ellipse cx="122" cy="212" rx="18" ry="10" {...d} />
-        </svg>
-      )
-
-    case 'right':
-      return (
-        <svg viewBox="0 0 370 185" className="w-full h-full">
-          <rect x="12" y="28" width="346" height="102" {...d} />
-          <line x1="12" y1="35" x2="358" y2="35" {...d} />
-          <rect x="12" y="38" width="9" height="26" rx="1" {...d} />
-          <rect x="349" y="38" width="9" height="26" rx="1" {...d} />
-          <line x1="54" y1="130" x2="54" y2="162" {...d} />
-          <line x1="70" y1="130" x2="70" y2="157" {...d} />
-          <line x1="40" y1="162" x2="68" y2="162" {...d} />
-          <line x1="57" y1="157" x2="84" y2="157" {...d} />
-          <ellipse cx="256" cy="156" rx="23" ry="17" {...d} />
-          <ellipse cx="256" cy="156" rx="12" ry="9" {...d} />
-          <ellipse cx="304" cy="156" rx="23" ry="17" {...d} />
-          <ellipse cx="304" cy="156" rx="12" ry="9" {...d} />
-          <line x1="233" y1="156" x2="327" y2="156" {...f} />
-        </svg>
-      )
-
-    case 'left':
-      return (
-        <svg viewBox="0 0 370 185" className="w-full h-full">
-          <rect x="12" y="28" width="346" height="102" {...d} />
-          <line x1="12" y1="35" x2="358" y2="35" {...d} />
-          <rect x="12" y="38" width="9" height="26" rx="1" {...d} />
-          <rect x="349" y="38" width="9" height="26" rx="1" {...d} />
-          <ellipse cx="66" cy="156" rx="23" ry="17" {...d} />
-          <ellipse cx="66" cy="156" rx="12" ry="9" {...d} />
-          <ellipse cx="114" cy="156" rx="23" ry="17" {...d} />
-          <ellipse cx="114" cy="156" rx="12" ry="9" {...d} />
-          <line x1="43" y1="156" x2="137" y2="156" {...f} />
-          <line x1="300" y1="130" x2="300" y2="157" {...d} />
-          <line x1="316" y1="130" x2="316" y2="162" {...d} />
-          <line x1="286" y1="157" x2="313" y2="157" {...d} />
-          <line x1="302" y1="162" x2="330" y2="162" {...d} />
-        </svg>
-      )
-
-    case 'front-right':
-      return (
-        <svg viewBox="0 0 310 265" className="w-full h-full">
-          <path d="M 14 78 L 38 44 L 290 54 L 266 88 Z" {...d} />
-          <path d="M 14 78 L 38 44 L 38 218 L 14 238 Z" {...d} />
-          <path d="M 38 44 L 290 54 L 290 220 L 38 218 Z" {...d} />
-          <circle cx="26" cy="128" r="9" {...d} />
-          <circle cx="26" cy="154" r="9" {...d} />
-          <circle cx="26" cy="128" r="4" {...f} />
-          <circle cx="26" cy="154" r="4" {...f} />
-          <line x1="20" y1="238" x2="20" y2="256" {...d} />
-          <line x1="33" y1="234" x2="33" y2="250" {...d} />
-          <line x1="9" y1="256" x2="31" y2="256" {...d} />
-          <line x1="22" y1="250" x2="45" y2="250" {...d} />
-          <ellipse cx="196" cy="228" rx="21" ry="15" {...d} />
-          <ellipse cx="196" cy="228" rx="11" ry="8" {...d} />
-          <ellipse cx="244" cy="226" rx="21" ry="15" {...d} />
-          <ellipse cx="244" cy="226" rx="11" ry="8" {...d} />
-          <line x1="175" y1="227" x2="265" y2="226" {...f} />
-        </svg>
-      )
-
-    case 'rear-right':
-      return (
-        <svg viewBox="0 0 310 265" className="w-full h-full">
-          <path d="M 20 88 L 20 54 L 272 44 L 296 78 L 296 88 L 20 88 Z" {...d} />
-          <path d="M 20 88 L 272 88 L 272 222 L 20 230 Z" {...d} />
-          <path d="M 272 88 L 296 78 L 296 222 L 272 222 Z" {...d} />
-          <rect x="274" y="94" width="18" height="32" rx="2" {...d} />
-          <line x1="284" y1="126" x2="284" y2="220" {...f} />
-          <rect x="272" y="222" width="22" height="8" rx="2" {...d} />
-          <ellipse cx="84" cy="228" rx="23" ry="16" {...d} />
-          <ellipse cx="84" cy="228" rx="12" ry="9" {...d} />
-          <ellipse cx="138" cy="226" rx="23" ry="16" {...d} />
-          <ellipse cx="138" cy="226" rx="12" ry="9" {...d} />
-          <line x1="61" y1="227" x2="161" y2="226" {...f} />
-        </svg>
-      )
-
-    case 'rear-left':
-      return (
-        <svg viewBox="0 0 310 265" className="w-full h-full">
-          <path d="M 14 78 L 38 44 L 290 54 L 290 88 L 38 88 L 14 78 Z" {...d} />
-          <path d="M 14 78 L 38 44 L 38 222 L 14 222 Z" {...d} />
-          <path d="M 38 44 L 290 54 L 290 230 L 38 222 Z" {...d} />
-          <rect x="16" y="84" width="18" height="32" rx="2" {...d} />
-          <line x1="26" y1="116" x2="26" y2="220" {...f} />
-          <rect x="14" y="222" width="22" height="8" rx="2" {...d} />
-          <ellipse cx="172" cy="228" rx="23" ry="16" {...d} />
-          <ellipse cx="172" cy="228" rx="12" ry="9" {...d} />
-          <ellipse cx="226" cy="226" rx="23" ry="16" {...d} />
-          <ellipse cx="226" cy="226" rx="12" ry="9" {...d} />
-          <line x1="149" y1="227" x2="249" y2="226" {...f} />
-        </svg>
-      )
-
-    case 'front-left':
-      return (
-        <svg viewBox="0 0 310 265" className="w-full h-full">
-          <path d="M 20 54 L 272 44 L 296 78 L 44 88 L 20 78 Z" {...d} />
-          <path d="M 20 54 L 272 44 L 272 220 L 20 230 Z" {...d} />
-          <path d="M 272 44 L 296 78 L 296 238 L 272 220 Z" {...d} />
-          <circle cx="284" cy="128" r="9" {...d} />
-          <circle cx="284" cy="154" r="9" {...d} />
-          <circle cx="284" cy="128" r="4" {...f} />
-          <circle cx="284" cy="154" r="4" {...f} />
-          <line x1="278" y1="238" x2="278" y2="256" {...d} />
-          <line x1="291" y1="234" x2="291" y2="250" {...d} />
-          <line x1="265" y1="256" x2="289" y2="256" {...d} />
-          <line x1="279" y1="250" x2="302" y2="250" {...d} />
-          <ellipse cx="66" cy="228" rx="21" ry="15" {...d} />
-          <ellipse cx="66" cy="228" rx="11" ry="8" {...d} />
-          <ellipse cx="114" cy="226" rx="21" ry="15" {...d} />
-          <ellipse cx="114" cy="226" rx="11" ry="8" {...d} />
-          <line x1="45" y1="227" x2="135" y2="226" {...f} />
-        </svg>
-      )
-
-    case 'inside-roof':
-      return (
-        <svg viewBox="0 0 300 200" className="w-full h-full">
-          <rect x="15" y="15" width="270" height="170" {...d} />
-          {[72, 114, 150, 186, 228].map((x) => (
-            <line key={x} x1={x} y1="15" x2={x} y2="185" {...d} />
-          ))}
-          <line x1="15" y1="100" x2="285" y2="100" {...f} />
-        </svg>
-      )
-
-    case 'floor':
-      return (
-        <svg viewBox="0 0 300 200" className="w-full h-full">
-          <rect x="15" y="15" width="270" height="170" {...d} />
-          {[50, 90, 130, 170].map((y) => (
-            <line key={y} x1="15" y1={y} x2="285" y2={y} {...d} />
-          ))}
-        </svg>
-      )
-
-    case 'inside-left-wall':
-    case 'inside-right-wall':
-      return (
-        <svg viewBox="0 0 300 200" className="w-full h-full">
-          <rect x="15" y="15" width="270" height="170" {...d} />
-          {[66, 108, 150, 192, 234].map((x) => (
-            <line key={x} x1={x} y1="15" x2={x} y2="185" {...d} />
-          ))}
-          <line x1="15" y1="30" x2="285" y2="30" {...f} />
-        </svg>
-      )
-
-    default:
-      return null
-  }
-}
+const MULTI_PHOTO_ANGLES: AngleKey[] = ['damage', 'extras']
+const REQUIRED_ANGLES = INSPECTION_ANGLES.filter(
+  (a) => !MULTI_PHOTO_ANGLES.includes(a.key)
+)
 
 export default function CameraPage() {
   const router = useRouter()
@@ -226,10 +27,13 @@ export default function CameraPage() {
 
   const currentAngleConfig = INSPECTION_ANGLES.find((a) => a.key === activeAngle)!
   const currentIndex = INSPECTION_ANGLES.findIndex((a) => a.key === activeAngle)
-  const currentPhoto = photos.find((p) => p.angle === activeAngle)
-  const damagePhotos = photos.filter((p) => p.angle === 'damage')
+  const isMultiPhoto = MULTI_PHOTO_ANGLES.includes(activeAngle)
+  const currentPhoto = isMultiPhoto ? undefined : photos.find((p) => p.angle === activeAngle)
+  const multiPhotos = isMultiPhoto ? photos.filter((p) => p.angle === activeAngle) : []
   const allCaptured = REQUIRED_ANGLES.every((a) => photos.some((p) => p.angle === a.key))
   const requiredCaptured = photos.filter((p) => REQUIRED_ANGLES.some((a) => a.key === p.angle)).length
+
+  const isTireAngle = activeAngle.startsWith('tire-')
 
   useEffect(() => {
     if (!gps && navigator.geolocation) {
@@ -320,10 +124,24 @@ export default function CameraPage() {
     setJustCaptured(true)
     setTimeout(() => setJustCaptured(false), 1200)
 
-    if (!isBlurry && activeAngle !== 'damage' && currentIndex < INSPECTION_ANGLES.length - 1) {
+    if (!isBlurry && !isMultiPhoto && currentIndex < INSPECTION_ANGLES.length - 1) {
       setTimeout(() => setActiveAngle(INSPECTION_ANGLES[currentIndex + 1].key), 800)
     }
-  }, [activeAngle, capturing, currentAngleConfig, currentIndex, addPhoto, gps])
+  }, [activeAngle, capturing, currentAngleConfig, currentIndex, isMultiPhoto, addPhoto, gps])
+
+  const handleRemove = () => {
+    if (isMultiPhoto) {
+      if (multiPhotos.length > 0) {
+        const lastId = multiPhotos[multiPhotos.length - 1].id
+        useInspectionStore.getState().photos.filter((p) => p.id !== lastId)
+        // remove all then re-add all except last
+        const keep = photos.filter((p) => p.angle !== activeAngle || p.id !== lastId)
+        useInspectionStore.setState({ photos: keep })
+      }
+    } else {
+      removePhoto(activeAngle)
+    }
+  }
 
   const goBack = () => {
     if (currentIndex > 0) setActiveAngle(INSPECTION_ANGLES[currentIndex - 1].key)
@@ -332,6 +150,14 @@ export default function CameraPage() {
   const goNext = () => {
     if (currentIndex < INSPECTION_ANGLES.length - 1) setActiveAngle(INSPECTION_ANGLES[currentIndex + 1].key)
   }
+
+  const accentColor = activeAngle === 'extras'
+    ? 'text-blue-400'
+    : isTireAngle
+    ? 'text-amber-400'
+    : activeAngle === 'damage'
+    ? 'text-orange-400'
+    : 'text-white'
 
   return (
     <div className="flex flex-col h-screen bg-black">
@@ -343,7 +169,7 @@ export default function CameraPage() {
           <p className="text-xs text-slate-400">{currentIndex + 1} of {INSPECTION_ANGLES.length}</p>
         </div>
         <button
-          onClick={() => router.push('/inspection/checklist')}
+          onClick={() => router.push('/inspection/signature')}
           className="text-xs text-blue-400 font-medium px-2"
         >
           Skip
@@ -363,29 +189,42 @@ export default function CameraPage() {
 
             {cameraReady && (
               <>
-                {/* Wireframe overlay */}
-                {activeAngle !== 'damage' && (
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none p-8">
-                    <div className="w-full h-full opacity-80">
-                      <TrailerGuide angle={activeAngle} />
-                    </div>
-                  </div>
-                )}
-
                 {/* Angle label — top center */}
                 <div className="absolute top-4 inset-x-0 flex justify-center pointer-events-none">
-                  <div className="rounded-2xl bg-black/70 px-6 py-2">
-                    <p className="text-2xl font-black text-white tracking-widest">{currentAngleConfig.label}</p>
+                  <div className={`rounded-2xl px-6 py-2 ${
+                    activeAngle === 'extras' ? 'bg-blue-600/80' :
+                    isTireAngle ? 'bg-amber-600/80' :
+                    activeAngle === 'damage' ? 'bg-orange-600/80' :
+                    'bg-black/70'
+                  }`}>
+                    <p className={`text-2xl font-black tracking-widest ${accentColor}`}>
+                      {currentAngleConfig.label}
+                    </p>
                   </div>
                 </div>
 
-                {/* Damage instruction */}
-                {activeAngle === 'damage' && (
-                  <div className="absolute top-20 inset-x-8 rounded-xl bg-orange-500/80 px-4 py-2 text-center pointer-events-none">
-                    <p className="text-sm font-semibold text-white">Free photo — capture any damage or issues</p>
-                    {damagePhotos.length > 0 && (
-                      <p className="text-xs text-orange-100 mt-0.5">{damagePhotos.length} photo{damagePhotos.length !== 1 ? 's' : ''} taken</p>
+                {/* Instruction banner for multi-photo angles */}
+                {isMultiPhoto && (
+                  <div className={`absolute top-20 inset-x-8 rounded-xl px-4 py-2 text-center pointer-events-none ${
+                    activeAngle === 'extras' ? 'bg-blue-500/80' : 'bg-orange-500/80'
+                  }`}>
+                    <p className="text-sm font-semibold text-white">
+                      {activeAngle === 'extras'
+                        ? 'Extra photos — capture any additional issues'
+                        : 'Free photo — capture any damage or issues'}
+                    </p>
+                    {multiPhotos.length > 0 && (
+                      <p className="text-xs text-white/80 mt-0.5">
+                        {multiPhotos.length} photo{multiPhotos.length !== 1 ? 's' : ''} taken
+                      </p>
                     )}
+                  </div>
+                )}
+
+                {/* Tire instruction */}
+                {isTireAngle && (
+                  <div className="absolute bottom-32 inset-x-8 rounded-xl bg-black/60 px-4 py-2 text-center pointer-events-none">
+                    <p className="text-xs text-amber-200">{currentAngleConfig.instruction}</p>
                   </div>
                 )}
               </>
@@ -406,13 +245,17 @@ export default function CameraPage() {
             )}
 
             {/* Thumbnail */}
-            {activeAngle === 'damage' ? (
-              damagePhotos.length > 0 && !justCaptured && (
-                <div className="absolute top-16 right-4 w-20 h-14 rounded-lg overflow-hidden border-2 border-orange-400 pointer-events-none">
+            {isMultiPhoto ? (
+              multiPhotos.length > 0 && !justCaptured && (
+                <div className={`absolute top-16 right-4 w-20 h-14 rounded-lg overflow-hidden border-2 pointer-events-none ${
+                  activeAngle === 'extras' ? 'border-blue-400' : 'border-orange-400'
+                }`}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={damagePhotos[damagePhotos.length - 1].dataUrl} alt="damage" className="w-full h-full object-cover" />
-                  <div className="absolute bottom-0 right-0 bg-orange-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-tl">
-                    ×{damagePhotos.length}
+                  <img src={multiPhotos[multiPhotos.length - 1].dataUrl} alt="captured" className="w-full h-full object-cover" />
+                  <div className={`absolute bottom-0 right-0 text-white text-xs font-bold px-1.5 py-0.5 rounded-tl ${
+                    activeAngle === 'extras' ? 'bg-blue-500' : 'bg-orange-500'
+                  }`}>
+                    ×{multiPhotos.length}
                   </div>
                 </div>
               )
@@ -434,12 +277,13 @@ export default function CameraPage() {
         {/* Progress dots */}
         <div className="flex items-center justify-center gap-1 flex-wrap">
           {INSPECTION_ANGLES.map((a) => {
-            const captured = a.key === 'damage'
-              ? damagePhotos.length > 0
-              : photos.some((p) => p.angle === a.key)
+            const anglePhotos = photos.filter((p) => p.angle === a.key)
+            const captured = anglePhotos.length > 0
             const active = a.key === activeAngle
+            const isMulti = MULTI_PHOTO_ANGLES.includes(a.key)
+            const isTire = a.key.startsWith('tire-')
 
-            if (a.key === 'damage') {
+            if (isMulti) {
               return (
                 <button
                   key={a.key}
@@ -447,13 +291,17 @@ export default function CameraPage() {
                   className={cn(
                     'rounded-full px-2 py-0.5 text-xs font-bold transition-all border',
                     active
-                      ? 'bg-orange-500 border-orange-500 text-white'
-                      : damagePhotos.length > 0
-                        ? 'bg-orange-400 border-orange-400 text-white'
+                      ? a.key === 'extras'
+                        ? 'bg-blue-500 border-blue-500 text-white'
+                        : 'bg-orange-500 border-orange-500 text-white'
+                      : captured
+                        ? a.key === 'extras'
+                          ? 'bg-blue-400 border-blue-400 text-white'
+                          : 'bg-orange-400 border-orange-400 text-white'
                         : 'bg-slate-700 border-slate-600 text-slate-400'
                   )}
                 >
-                  {damagePhotos.length > 0 ? `+${damagePhotos.length}` : '⚠'}
+                  {anglePhotos.length > 0 ? `+${anglePhotos.length}` : a.key === 'extras' ? '+' : '⚠'}
                 </button>
               )
             }
@@ -464,7 +312,11 @@ export default function CameraPage() {
                 onClick={() => setActiveAngle(a.key)}
                 className={cn(
                   'rounded-full transition-all',
-                  active ? 'h-3 w-8 bg-white' : captured ? 'h-2.5 w-2.5 bg-green-400' : 'h-2.5 w-2.5 bg-slate-600'
+                  active
+                    ? 'h-3 w-8 ' + (isTire ? 'bg-amber-400' : 'bg-white')
+                    : captured
+                    ? 'h-2.5 w-2.5 ' + (isTire ? 'bg-amber-500' : 'bg-green-400')
+                    : 'h-2.5 w-2.5 bg-slate-600'
                 )}
               />
             )
@@ -473,8 +325,8 @@ export default function CameraPage() {
 
         <div className="flex items-center justify-between">
           <button
-            onClick={() => removePhoto(activeAngle)}
-            disabled={activeAngle === 'damage' ? damagePhotos.length === 0 : !currentPhoto}
+            onClick={handleRemove}
+            disabled={isMultiPhoto ? multiPhotos.length === 0 : !currentPhoto}
             className="flex h-12 w-12 items-center justify-center rounded-full border border-slate-700 text-slate-400 disabled:opacity-30"
           >
             <RotateCcw className="h-5 w-5" />
@@ -498,12 +350,12 @@ export default function CameraPage() {
         </div>
 
         {allCaptured ? (
-          <button onClick={() => router.push('/inspection/checklist')} className="btn-primary w-full py-3">
-            <Check className="h-4 w-4" /> All {REQUIRED_ANGLES.length} photos — Next: Checklist
+          <button onClick={() => router.push('/inspection/signature')} className="btn-primary w-full py-3">
+            <Check className="h-4 w-4" /> All {REQUIRED_ANGLES.length} photos — Next: Sign &amp; Submit
           </button>
         ) : (
-          <button onClick={() => router.push('/inspection/checklist')} className="w-full rounded-xl border border-slate-700 py-3 text-sm font-medium text-slate-300">
-            Skip to Checklist ({requiredCaptured}/{REQUIRED_ANGLES.length} captured)
+          <button onClick={() => router.push('/inspection/signature')} className="w-full rounded-xl border border-slate-700 py-3 text-sm font-medium text-slate-300">
+            Skip to Sign &amp; Submit ({requiredCaptured}/{REQUIRED_ANGLES.length} captured)
           </button>
         )}
       </div>
