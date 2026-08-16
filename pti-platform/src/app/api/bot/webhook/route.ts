@@ -1,58 +1,136 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { sendMessage, escMd } from '@/lib/tg'
+import { registerGroup, unregisterGroup, getRegisteredGroups, isKvConfigured } from '@/lib/kv'
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
-const APP_URL   = process.env.NEXT_PUBLIC_APP_URL || 'https://pti.zonellc.com'
+const APP_URL   = process.env.NEXT_PUBLIC_APP_URL || 'https://pti-check.vercel.app'
 
-// Telegram @Pti_check_bot webhook
-// Commands:
-//   /pickup  ZN-401 [John Smith]  — send a PICKUP inspection link
-//   /dropoff ZN-401 [John Smith]  — send a DROP-OFF inspection link
-//   /status  ZN-401               — last inspection summary for that unit
-//   /start                        — show help
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const message = body?.message || body?.edited_message
-    if (!message) return NextResponse.json({ ok: true })
-
-    const text: string  = (message.text || '').trim()
-    const chatId: number = message.chat.id
 
     if (!BOT_TOKEN) return NextResponse.json({ ok: false, error: 'Bot token not configured' })
 
-    const parts = text.split(/\s+/)
-    // Strip @BotName suffix so group commands (/pickup@Pti_check_bot) match
-    const cmd   = (parts[0]?.split('@')[0] ?? '').toLowerCase()
+    // ── Handle bot added/removed from a group ────────────────────────────
+    const memberUpdate = body?.my_chat_member
+    if (memberUpdate) {
+      const chat    = memberUpdate.chat
+      const newMember = memberUpdate.new_chat_member
+      const isBot   = newMember?.user?.is_bot
 
-    if (cmd === '/chatid') {
-      await send(chatId, `Chat ID: \`${chatId}\``, 'MarkdownV2')
+      if (isBot) {
+        const status = newMember?.status
+        const chatId: number = chat.id
+        const title: string  = chat.title ?? 'Unknown Group'
+        const type: string   = chat.type ?? 'group'
+
+        if (status === 'member' || status === 'administrator') {
+          // Bot was added to a group
+          await registerGroup(chatId, title, type)
+          await sendMessage(
+            chatId,
+            `👋 *PTI Check Bot activated in this group!*\n\n` +
+            `Group ID: \`${chatId}\`\n` +
+            `Group: *${escMd(title)}*\n\n` +
+            `✅ This group is now registered to receive PTI inspection reports.\n\n` +
+            `Commands:\n` +
+            `/pickup ZN\\-401 \\[Driver Name\\] — Send pickup inspection link\n` +
+            `/dropoff ZN\\-401 — Send drop\\-off inspection link\n` +
+            `/chatid — Show this group's ID\n` +
+            `/ptiregister — Re\\-register this group\n` +
+            `/ptiunregister — Remove from report list`,
+            'MarkdownV2',
+          )
+        } else if (status === 'left' || status === 'kicked') {
+          // Bot was removed
+          await unregisterGroup(chatId)
+        }
+      }
       return NextResponse.json({ ok: true })
     }
 
-    if (cmd === '/start' || cmd === '/help') {
-      await send(chatId,
-        '🚛 *PTI Check Bot*\n\n' +
-        'Send a command to generate an inspection link:\n\n' +
-        '`/pickup ZN\-401` — Pickup \(pre\-trip\)\n' +
-        '`/dropoff ZN\-401` — Drop\-off \(post\-trip\)\n' +
-        '`/status ZN\-401` — Last inspection result\n\n' +
-        'Optionally include the driver name:\n' +
-        '`/pickup ZN\-401 John Smith`\n\n' +
-        '_Driver opens the link on their phone \— no login required_',
-        'MarkdownV2'
+    // ── Handle regular messages ──────────────────────────────────────────
+    const message = body?.message || body?.edited_message
+    if (!message) return NextResponse.json({ ok: true })
+
+    const text: string   = (message.text || '').trim()
+    const chatId: number = message.chat.id
+    const chatTitle: string = message.chat.title ?? 'Unknown'
+    const chatType: string  = message.chat.type ?? 'private'
+
+    const parts = text.split(/\s+/)
+    const cmd   = (parts[0]?.split('@')[0] ?? '').toLowerCase()
+
+    // ── /chatid ────────────────────────────────────────────────────────
+    if (cmd === '/chatid') {
+      await sendMessage(chatId, `Chat ID: \`${chatId}\`\nTitle: ${escMd(chatTitle)}`, 'MarkdownV2')
+      return NextResponse.json({ ok: true })
+    }
+
+    // ── /ptiregister ──────────────────────────────────────────────────
+    if (cmd === '/ptiregister') {
+      await registerGroup(chatId, chatTitle, chatType)
+      const kvNote = isKvConfigured()
+        ? '✅ Saved to database — persists across deployments.'
+        : '⚠️ No database configured. Set UPSTASH\\_REDIS\\_REST\\_URL and UPSTASH\\_REDIS\\_REST\\_TOKEN in Vercel for persistent auto\\-registration.'
+      await sendMessage(
+        chatId,
+        `✅ *Group registered for PTI reports\\!*\n\nGroup ID: \`${chatId}\`\n${kvNote}`,
+        'MarkdownV2',
       )
       return NextResponse.json({ ok: true })
     }
 
+    // ── /ptiunregister ────────────────────────────────────────────────
+    if (cmd === '/ptiunregister') {
+      await unregisterGroup(chatId)
+      await sendMessage(chatId, '🔕 This group has been removed from PTI inspection reports.')
+      return NextResponse.json({ ok: true })
+    }
+
+    // ── /ptigroups — list all registered groups (admin use) ───────────
+    if (cmd === '/ptigroups') {
+      const groups = await getRegisteredGroups()
+      if (groups.length === 0) {
+        await sendMessage(chatId, '📋 No groups currently registered\\.\nSet TELEGRAM\\_GROUP\\_CHAT\\_IDS in Vercel or add bot to a group to auto\\-register\\.', 'MarkdownV2')
+      } else {
+        const lines = groups.map((g, i) =>
+          `${i + 1}\\. *${escMd(g.title)}*\n   ID: \`${g.chatId}\` \\(${escMd(g.type)}\\)`
+        )
+        await sendMessage(chatId, `📋 *Registered PTI groups \\(${groups.length}\\)*\n\n${lines.join('\n\n')}`, 'MarkdownV2')
+      }
+      return NextResponse.json({ ok: true })
+    }
+
+    // ── /start / /help ────────────────────────────────────────────────
+    if (cmd === '/start' || cmd === '/help') {
+      await sendMessage(
+        chatId,
+        '🚛 *PTI Check Bot*\n\n' +
+        'Send a command to generate an inspection link:\n\n' +
+        '`/pickup ZN\\-401` — Pickup \\(pre\\-trip\\)\n' +
+        '`/dropoff ZN\\-401` — Drop\\-off \\(post\\-trip\\)\n' +
+        '`/pickup ZN\\-401 John Smith` — Include driver name\n\n' +
+        '*Group management:*\n' +
+        '`/ptiregister` — Register this group for reports\n' +
+        '`/ptiunregister` — Unregister this group\n' +
+        '`/ptigroups` — List all registered groups\n' +
+        '`/chatid` — Show this group\'s ID\n\n' +
+        '_Add this bot to any group — it auto\\-registers and starts sending reports\\._',
+        'MarkdownV2',
+      )
+      return NextResponse.json({ ok: true })
+    }
+
+    // ── /pickup / /dropoff ────────────────────────────────────────────
     if (cmd === '/pickup' || cmd === '/dropoff') {
       const unit       = parts[1]
-      // Only take words that are NOT @mentions — strip if dispatcher included them
       const driverName = parts.slice(2).filter((w) => !w.startsWith('@')).join(' ')
       const type       = cmd === '/pickup' ? 'PICKUP' : 'DROP_OFF'
-      const typeLabel  = type === 'PICKUP'  ? '▲ PICKUP' : '▼ DROP\-OFF'
+      const typeLabel  = type === 'PICKUP' ? '▲ PICKUP' : '▼ DROP\\-OFF'
 
       if (!unit) {
-        await send(chatId, `⚠️ Please include the unit number: \`/${cmd.slice(1)} ZN\-401\``, 'MarkdownV2')
+        await sendMessage(chatId, `⚠️ Please include the unit number: \`/${cmd.slice(1)} ZN\\-401\``, 'MarkdownV2')
         return NextResponse.json({ ok: true })
       }
 
@@ -61,47 +139,36 @@ export async function POST(req: NextRequest) {
       const link = `${APP_URL}/inspection/start?${params.toString()}`
 
       const driverLine = driverName ? `\nDriver: *${escMd(driverName)}*` : ''
-      await send(chatId,
+      await sendMessage(
+        chatId,
         `🔗 *${typeLabel} Inspection*\n` +
         `Unit: *${escMd(unit)}*${driverLine}\n\n` +
         `[Open on phone](${link})\n\n` +
-        `_Share this link with the driver_ \— no login needed`,
-        'MarkdownV2'
+        `_Share this link with the driver — no login needed_`,
+        'MarkdownV2',
       )
       return NextResponse.json({ ok: true })
     }
 
+    // ── /status ────────────────────────────────────────────────────────
     if (cmd === '/status') {
       const unit = parts[1]
       if (!unit) {
-        await send(chatId, '⚠️ Usage: `/status ZN\-401`', 'MarkdownV2')
+        await sendMessage(chatId, '⚠️ Usage: `/status ZN\\-401`', 'MarkdownV2')
         return NextResponse.json({ ok: true })
       }
-      // Placeholder until real DB is wired — replace with Prisma query
-      await send(chatId,
-        `📊 *Unit ${escMd(unit)}*\n_No inspections on record yet_`,
-        'MarkdownV2'
-      )
+      await sendMessage(chatId, `📊 *Unit ${escMd(unit)}*\n_No inspections on record yet_`, 'MarkdownV2')
       return NextResponse.json({ ok: true })
     }
 
-    // Unrecognised command
-    await send(chatId, 'Unknown command\. Send /help to see what I can do\.', 'MarkdownV2')
+    // ── Unknown command (only reply to commands, ignore plain messages) ─
+    if (cmd.startsWith('/')) {
+      await sendMessage(chatId, 'Unknown command\\. Send /help to see what I can do\\.', 'MarkdownV2')
+    }
     return NextResponse.json({ ok: true })
+
   } catch (err) {
     console.error('Bot webhook error:', err)
     return NextResponse.json({ ok: false }, { status: 500 })
   }
-}
-
-function escMd(s: string) {
-  return s.replace(/([_*[\]()~`>#+\-=|{}.!])/g, '\\$1')
-}
-
-async function send(chatId: number, text: string, parseMode: 'Markdown' | 'MarkdownV2' = 'Markdown') {
-  return fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: chatId, text, parse_mode: parseMode, link_preview_options: { is_disabled: true } }),
-  })
 }
