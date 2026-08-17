@@ -129,9 +129,10 @@ export async function POST(req: NextRequest) {
       await sendMessage(
         chatId,
         '🚛 *PTI Check Bot*\n\n' +
-        'Send a command to generate an inspection link:\n\n' +
-        '`/pickup UNIT` — Pickup \\(pre\\-trip\\)\n' +
-        '`/dropoff UNIT` — Drop\\-off \\(post\\-trip\\)\n' +
+        '*Quick commands:*\n' +
+        '`/link` — Get a pinnable universal inspection link\n' +
+        '`/pickup UNIT` — Send pickup inspection link\n' +
+        '`/dropoff UNIT` — Send drop\\-off inspection link\n' +
         '`/pickup UNIT Driver Name` — Include driver name\n\n' +
         '*Group management:*\n' +
         '`/ptiregister` — Register this group for reports\n' +
@@ -139,6 +140,21 @@ export async function POST(req: NextRequest) {
         '`/ptigroups` — List all registered groups\n' +
         '`/chatid` — Show this group\'s ID\n\n' +
         '_Add this bot to any group — it auto\\-registers and starts sending reports\\._',
+        'MarkdownV2',
+      )
+      return NextResponse.json({ ok: true })
+    }
+
+    // ── /link — generate a pinnable universal inspection link ─────────
+    if (cmd === '/link') {
+      const groupLink = `${APP_URL}/inspection/start?group=${chatId}`
+      await sendMessage(
+        chatId,
+        `📌 *Universal Inspection Link*\n\n` +
+        `Drivers can use this link any time — no command needed\\.\n\n` +
+        `[Open PTI Inspection](${groupLink})\n\n` +
+        `\`${groupLink}\`\n\n` +
+        `_Pin this message so drivers can find it easily\\._`,
         'MarkdownV2',
       )
       return NextResponse.json({ ok: true })
