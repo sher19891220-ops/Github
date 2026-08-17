@@ -187,6 +187,29 @@ HMAC verification and endpoint auth, message rendering and escaping, message
 splitting, client retry/pagination, the KV store, command parsing and
 timezone/DST day boundaries.
 
+## Verifying against your Samsara org
+
+The endpoint paths and response field names below are written from the
+documented API and have **not** been exercised against a live Samsara account.
+Before trusting this in production, run the probe:
+
+```bash
+SAMSARA_API_TOKEN=... node scripts/verify-samsara.mjs
+```
+
+It calls every endpoint the bot depends on and reports, per endpoint: the HTTP
+status, whether a `data` array and `pagination` object came back, the field
+names on the first row, and any field the bot reads that is absent. It
+distinguishes a wrong path (404) from a missing token scope (403), and exits
+non-zero if a *required* endpoint fails.
+
+It prints **field names only — never values**, no vehicle or driver names and no
+coordinates, so the output is safe to paste into a chat or an issue. The token
+is read from the environment rather than argv, keeping it out of shell history.
+
+Anything it flags is a one-line fix in the `ENDPOINTS` map or the matching type
+in `src/samsara/types.ts`.
+
 ## Notes on the Samsara API
 
 Endpoint paths are collected in `ENDPOINTS` at the top of
