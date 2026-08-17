@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { sendMessage, escMd } from '@/lib/tg'
+import { sendMessage } from '@/lib/tg'
 import { registerGroup, unregisterGroup, getRegisteredGroups, isKvConfigured } from '@/lib/kv'
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
@@ -51,17 +51,18 @@ export async function POST(req: NextRequest) {
           await registerGroup(chatId, title, type)
           await sendMessage(
             chatId,
-            `👋 *PTI Check Bot activated in this group!*\n\n` +
-            `Group ID: \`${chatId}\`\n` +
-            `Group: *${escMd(title)}*\n\n` +
+            `👋 <b>PTI Check Bot activated in this group!</b>\n\n` +
+            `Group ID: <code>${chatId}</code>\n` +
+            `Group: <b>${title}</b>\n\n` +
             `✅ This group is now registered to receive PTI inspection reports.\n\n` +
-            `Commands:\n` +
-            `/pickup UNIT \\[Driver Name\\] — Send pickup inspection link\n` +
-            `/dropoff UNIT — Send drop\\-off inspection link\n` +
+            `<b>Commands:</b>\n` +
+            `/pickup — Send pickup inspection link\n` +
+            `/dropoff — Send drop-off inspection link\n` +
+            `/link — Get a pinnable universal inspection link\n` +
             `/chatid — Show this group's ID\n` +
-            `/ptiregister — Re\\-register this group\n` +
+            `/ptiregister — Re-register this group\n` +
             `/ptiunregister — Remove from report list`,
-            'MarkdownV2',
+            'HTML',
           )
         } else if (status === 'left' || status === 'kicked') {
           // Bot was removed
@@ -85,7 +86,7 @@ export async function POST(req: NextRequest) {
 
     // ── /chatid ────────────────────────────────────────────────────────
     if (cmd === '/chatid') {
-      await sendMessage(chatId, `Chat ID: \`${chatId}\`\nTitle: ${escMd(chatTitle)}`, 'MarkdownV2')
+      await sendMessage(chatId, `Chat ID: <code>${chatId}</code>\nTitle: ${chatTitle}`, 'HTML')
       return NextResponse.json({ ok: true })
     }
 
@@ -94,11 +95,11 @@ export async function POST(req: NextRequest) {
       await registerGroup(chatId, chatTitle, chatType)
       const kvNote = isKvConfigured()
         ? '✅ Saved to database — persists across deployments.'
-        : '⚠️ No database configured. Set UPSTASH\\_REDIS\\_REST\\_URL and UPSTASH\\_REDIS\\_REST\\_TOKEN in Vercel for persistent auto\\-registration.'
+        : '⚠️ No database configured. Set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN in Vercel for persistent auto-registration.'
       await sendMessage(
         chatId,
-        `✅ *Group registered for PTI reports\\!*\n\nGroup ID: \`${chatId}\`\n${kvNote}`,
-        'MarkdownV2',
+        `✅ <b>Group registered for PTI reports!</b>\n\nGroup ID: <code>${chatId}</code>\n${kvNote}`,
+        'HTML',
       )
       return NextResponse.json({ ok: true })
     }
@@ -114,12 +115,12 @@ export async function POST(req: NextRequest) {
     if (cmd === '/ptigroups') {
       const groups = await getRegisteredGroups()
       if (groups.length === 0) {
-        await sendMessage(chatId, '📋 No groups currently registered\\.\nSet TELEGRAM\\_GROUP\\_CHAT\\_IDS in Vercel or add bot to a group to auto\\-register\\.', 'MarkdownV2')
+        await sendMessage(chatId, '📋 No groups currently registered.\nSet TELEGRAM_GROUP_CHAT_IDS in Vercel or add bot to a group to auto-register.', 'HTML')
       } else {
         const lines = groups.map((g, i) =>
-          `${i + 1}\\. *${escMd(g.title)}*\n   ID: \`${g.chatId}\` \\(${escMd(g.type)}\\)`
+          `${i + 1}. <b>${g.title}</b>\n   ID: <code>${g.chatId}</code> (${g.type})`
         )
-        await sendMessage(chatId, `📋 *Registered PTI groups \\(${groups.length}\\)*\n\n${lines.join('\n\n')}`, 'MarkdownV2')
+        await sendMessage(chatId, `📋 <b>Registered PTI groups (${groups.length})</b>\n\n${lines.join('\n\n')}`, 'HTML')
       }
       return NextResponse.json({ ok: true })
     }
@@ -128,19 +129,18 @@ export async function POST(req: NextRequest) {
     if (cmd === '/start' || cmd === '/help') {
       await sendMessage(
         chatId,
-        '🚛 *PTI Check Bot*\n\n' +
-        '*Quick commands:*\n' +
-        '`/link` — Get a pinnable universal inspection link\n' +
-        '`/pickup UNIT` — Send pickup inspection link\n' +
-        '`/dropoff UNIT` — Send drop\\-off inspection link\n' +
-        '`/pickup UNIT Driver Name` — Include driver name\n\n' +
-        '*Group management:*\n' +
-        '`/ptiregister` — Register this group for reports\n' +
-        '`/ptiunregister` — Unregister this group\n' +
-        '`/ptigroups` — List all registered groups\n' +
-        '`/chatid` — Show this group\'s ID\n\n' +
-        '_Add this bot to any group — it auto\\-registers and starts sending reports\\._',
-        'MarkdownV2',
+        '🚛 <b>PTI Check Bot</b>\n\n' +
+        '<b>Quick commands:</b>\n' +
+        '<code>/link</code> — Get a pinnable universal inspection link\n' +
+        '<code>/pickup</code> — Send pickup inspection link\n' +
+        '<code>/dropoff</code> — Send drop-off inspection link\n\n' +
+        '<b>Group management:</b>\n' +
+        '<code>/ptiregister</code> — Register this group for reports\n' +
+        '<code>/ptiunregister</code> — Unregister this group\n' +
+        '<code>/ptigroups</code> — List all registered groups\n' +
+        '<code>/chatid</code> — Show this group\'s ID\n\n' +
+        '<i>Add this bot to any group — it auto-registers and starts sending reports.</i>',
+        'HTML',
       )
       return NextResponse.json({ ok: true })
     }
@@ -150,40 +150,29 @@ export async function POST(req: NextRequest) {
       const groupLink = `${APP_URL}/inspection/start?group=${chatId}`
       await sendMessage(
         chatId,
-        `📌 *Universal Inspection Link*\n\n` +
-        `Drivers can use this link any time — no command needed\\.\n\n` +
-        `[Open PTI Inspection](${groupLink})\n\n` +
-        `\`${groupLink}\`\n\n` +
-        `_Pin this message so drivers can find it easily\\._`,
-        'MarkdownV2',
+        `📌 <b>Universal Inspection Link</b>\n\n` +
+        `Drivers can use this link any time — no command needed.\n\n` +
+        `<a href="${groupLink}">Open PTI Inspection</a>\n\n` +
+        `<code>${groupLink}</code>\n\n` +
+        `<i>Pin this message so drivers can find it easily.</i>`,
+        'HTML',
       )
       return NextResponse.json({ ok: true })
     }
 
     // ── /pickup / /dropoff ────────────────────────────────────────────
     if (cmd === '/pickup' || cmd === '/dropoff') {
-      const unit       = parts[1]
-      const driverName = parts.slice(2).filter((w) => !w.startsWith('@')).join(' ')
-      const type       = cmd === '/pickup' ? 'PICKUP' : 'DROP_OFF'
-      const typeLabel  = type === 'PICKUP' ? '▲ PICKUP' : '▼ DROP\\-OFF'
+      const type      = cmd === '/pickup' ? 'PICKUP' : 'DROP_OFF'
+      const typeLabel = type === 'PICKUP' ? '▲ PICKUP' : '▼ DROP-OFF'
+      const link      = `${APP_URL}/inspection/start?type=${type}&group=${chatId}`
 
-      if (!unit) {
-        await sendMessage(chatId, `⚠️ Please include the unit number\\. Example: \`/${cmd.slice(1)} UNIT\``, 'MarkdownV2')
-        return NextResponse.json({ ok: true })
-      }
-
-      const params = new URLSearchParams({ unit, type, group: String(chatId) })
-      if (driverName) params.set('driver', driverName)
-      const link = `${APP_URL}/inspection/start?${params.toString()}`
-
-      const driverLine = driverName ? `\nDriver: *${escMd(driverName)}*` : ''
       await sendMessage(
         chatId,
-        `🔗 *${typeLabel} Inspection*\n` +
-        `Unit: *${escMd(unit)}*${driverLine}\n\n` +
-        `[Open on phone](${link})\n\n` +
-        `_Share this link with the driver — no login needed_`,
-        'MarkdownV2',
+        `🔗 <b>${typeLabel} Inspection</b>\n\n` +
+        `Tap the link to start — driver enters unit number in the app:\n\n` +
+        `<a href="${link}">Open PTI Inspection</a>\n\n` +
+        `<code>${link}</code>`,
+        'HTML',
       )
       return NextResponse.json({ ok: true })
     }
@@ -192,16 +181,16 @@ export async function POST(req: NextRequest) {
     if (cmd === '/status') {
       const unit = parts[1]
       if (!unit) {
-        await sendMessage(chatId, '⚠️ Usage: `/status UNIT`', 'MarkdownV2')
+        await sendMessage(chatId, '⚠️ Usage: <code>/status UNIT</code>', 'HTML')
         return NextResponse.json({ ok: true })
       }
-      await sendMessage(chatId, `📊 *Unit ${escMd(unit)}*\n_No inspections on record yet_`, 'MarkdownV2')
+      await sendMessage(chatId, `📊 <b>Unit ${unit}</b>\n<i>No inspections on record yet</i>`, 'HTML')
       return NextResponse.json({ ok: true })
     }
 
     // ── Unknown command (only reply to commands, ignore plain messages) ─
     if (cmd.startsWith('/')) {
-      await sendMessage(chatId, 'Unknown command\\. Send /help to see what I can do\\.', 'MarkdownV2')
+      await sendMessage(chatId, 'Unknown command. Send /help to see what I can do.', 'HTML')
     }
     return NextResponse.json({ ok: true })
 
