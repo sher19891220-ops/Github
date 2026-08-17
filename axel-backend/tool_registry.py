@@ -4,6 +4,7 @@ Add new tools here — one entry in TOOLS, one branch in dispatch().
 """
 
 import json
+import logging
 import os
 
 from tools import (
@@ -18,6 +19,8 @@ from tools import (
     system,
     tasks,
 )
+
+log = logging.getLogger(__name__)
 
 
 def _check_setup() -> dict:
@@ -53,7 +56,7 @@ def _check_setup() -> dict:
 
 # ── Tool definitions (sent to Claude) ─────────────────────────────────────────
 
-TOOLS = [
+_ALL_TOOLS = [
     # SYSTEM
     {
         "name": "run_shell",
@@ -581,6 +584,68 @@ TOOLS = [
         },
     },
 ]
+
+
+# ── Availability gating ───────────────────────────────────────────────────────
+#
+# Every tool below is only usable if its integration is configured. Advertising
+# one that isn't means Claude offers it, calls it, and gets a config error back
+# — burning a turn and misleading the user about what Axel can do. So the tool
+# list is filtered at startup to what actually works.
+#
+# Tools absent from this map have no external dependency and are always shown.
+# Configure an integration and restart, and its tools reappear on their own.
+
+_TOOL_INTEGRATION = {
+    **dict.fromkeys(
+        ["gmail_list", "gmail_read", "gmail_send",
+         "sheets_read", "sheets_write", "sheets_list",
+         "calendar_list", "calendar_create",
+         "drive_list", "drive_read"],
+        "gmail_drive_sheets_calendar",
+    ),
+    **dict.fromkeys(
+        ["outlook_list", "outlook_read", "outlook_send", "outlook_reply"],
+        "outlook",
+    ),
+    **dict.fromkeys(["bank_accounts", "bank_transactions"], "bank_accounts_plaid"),
+    **dict.fromkeys(
+        ["qb_invoices", "qb_expenses", "qb_profit_loss", "qb_customers"],
+        "quickbooks",
+    ),
+}
+
+
+def available_tools() -> list:
+    """_ALL_TOOLS filtered to integrations that are actually configured."""
+    statuses = _check_setup()["integrations"]
+    out = []
+    for t in _ALL_TOOLS:
+        integration = _TOOL_INTEGRATION.get(str(t["name"]), "")
+        if statuses.get(integration, {"ready": True})["ready"]:
+            out.append(t)
+    return out
+
+
+TOOLS = available_tools()
+
+
+def tool_summary() -> str:
+    """One-line availability report. Call after logging is configured —
+    this module is imported before main.py runs basicConfig, so logging
+    at import time is silently dropped."""
+    hidden = len(_ALL_TOOLS) - len(TOOLS)
+    if not hidden:
+        return f"Tools: all {len(TOOLS)} available"
+    shown = {str(t["name"]) for t in TOOLS}
+    missing = sorted({
+        _TOOL_INTEGRATION[str(t["name"])]
+        for t in _ALL_TOOLS if str(t["name"]) not in shown
+    })
+    return (
+        f"Tools: {len(TOOLS)} of {len(_ALL_TOOLS)} available — "
+        f"{hidden} hidden (unconfigured: {', '.join(missing)})"
+    )
 
 
 # ── Dispatcher ─────────────────────────────────────────────────────────────────

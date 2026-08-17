@@ -15,6 +15,7 @@ import axel_engine
 import conversation
 from config import BACKEND_API_KEY, HOST, PORT
 from db import init_db
+from tool_registry import tool_summary
 from tools.scheduler import check_and_send_due
 
 logging.basicConfig(
@@ -35,6 +36,7 @@ async def lifespan(app: FastAPI):
     # Check scheduled messages every minute
     scheduler.add_job(check_and_send_due, "interval", minutes=1, id="scheduled_msgs")
     scheduler.start()
+    log.info(tool_summary())
     log.info("AXEL backend online.")
     yield
     scheduler.shutdown()
