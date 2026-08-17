@@ -45,15 +45,27 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ ok: false, telegram: data }, { status: 500 })
 }
 
-// GET /api/bot/setup?action=info
-// Shows the current webhook info without making any changes.
+// POST /api/bot/setup — diagnostic: shows bot identity + webhook state from Vercel's perspective
 export async function POST(_req: NextRequest) {
   const botToken = process.env.TELEGRAM_BOT_TOKEN
   if (!botToken) return NextResponse.json({ error: 'TELEGRAM_BOT_TOKEN not set' }, { status: 500 })
 
-  const res  = await fetch(`https://api.telegram.org/bot${botToken}/getWebhookInfo`, { cache: 'no-store' })
-  const data = await res.json()
-  // Return url under an aliased key — lets us detect if the proxy strips the `url` field from responses
-  const webhookEndpoint: string = data?.result?.url ?? ''
-  return NextResponse.json({ ...data, webhook_endpoint: webhookEndpoint })
+  const [meRes, infoRes] = await Promise.all([
+    fetch(`https://api.telegram.org/bot${botToken}/getMe`, { cache: 'no-store' }),
+    fetch(`https://api.telegram.org/bot${botToken}/getWebhookInfo`, { cache: 'no-store' }),
+  ])
+  const me   = await meRes.json()
+  const info = await infoRes.json()
+
+  // Mask token — show only first 10 and last 4 chars for verification
+  const masked = `${botToken.slice(0, 10)}...${botToken.slice(-4)}`
+
+  const webhookEndpoint: string = info?.result?.url ?? ''
+  return NextResponse.json({
+    token_masked: masked,
+    bot_id: me?.result?.id,
+    bot_username: me?.result?.username,
+    webhook_endpoint: webhookEndpoint,
+    webhook_raw: info,
+  })
 }
