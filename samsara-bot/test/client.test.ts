@@ -40,6 +40,30 @@ describe('SamsaraClient.request', () => {
     expect(fetchImpl).toHaveBeenCalledTimes(1);
   });
 
+  it('surfaces the Samsara message and requestId on an error', async () => {
+    // Exactly the envelope api.samsara.com returns for a bad token.
+    const fetchImpl = vi.fn(async () =>
+      jsonResponse({ message: 'invalid token', requestId: 'blyieapo-nkfhthue' }, 401),
+    );
+
+    const error = await client(fetchImpl as unknown as typeof fetch)
+      .request('/fleet/vehicles')
+      .catch((err: unknown) => err as SamsaraError);
+
+    expect(error).toBeInstanceOf(SamsaraError);
+    expect((error as SamsaraError).status).toBe(401);
+    expect((error as SamsaraError).requestId).toBe('blyieapo-nkfhthue');
+    expect((error as SamsaraError).message).toContain('invalid token');
+    expect((error as SamsaraError).message).toContain('blyieapo-nkfhthue');
+  });
+
+  it('tolerates a non-JSON error body', async () => {
+    const fetchImpl = vi.fn(async () => new Response('<html>gateway</html>', { status: 502 }));
+    await expect(
+      client(fetchImpl as unknown as typeof fetch, { maxRetries: 0 }).request('/fleet/vehicles'),
+    ).rejects.toThrow(/returned 502/);
+  });
+
   it('retries a 429 and then succeeds', async () => {
     const fetchImpl = vi
       .fn()

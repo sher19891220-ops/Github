@@ -30,9 +30,24 @@ export class SamsaraError extends Error {
     message: string,
     readonly status: number,
     readonly body: string,
+    /** Samsara stamps every response with one; their support asks for it. */
+    readonly requestId?: string,
   ) {
     super(message);
     this.name = 'SamsaraError';
+  }
+}
+
+/** Samsara error bodies look like {"message":"...","requestId":"..."}. */
+export function parseErrorBody(body: string): { message?: string; requestId?: string } {
+  try {
+    const parsed = JSON.parse(body) as { message?: unknown; requestId?: unknown };
+    return {
+      message: typeof parsed.message === 'string' ? parsed.message : undefined,
+      requestId: typeof parsed.requestId === 'string' ? parsed.requestId : undefined,
+    };
+  } catch {
+    return {};
   }
 }
 
@@ -96,10 +111,14 @@ export class SamsaraClient {
 
       const body = await response.text();
       const retryable = response.status === 429 || response.status >= 500;
+      const { message, requestId } = parseErrorBody(body);
       lastError = new SamsaraError(
-        `Samsara ${path} returned ${response.status}`,
+        `Samsara ${path} returned ${response.status}${message ? `: ${message}` : ''}${
+          requestId ? ` (requestId ${requestId})` : ''
+        }`,
         response.status,
         body.slice(0, 500),
+        requestId,
       );
       if (!retryable || attempt === this.maxRetries) throw lastError;
 
