@@ -47,11 +47,13 @@ export async function GET(req: NextRequest) {
 
 // GET /api/bot/setup?action=info
 // Shows the current webhook info without making any changes.
-export async function POST(req: NextRequest) {
+export async function POST(_req: NextRequest) {
   const botToken = process.env.TELEGRAM_BOT_TOKEN
   if (!botToken) return NextResponse.json({ error: 'TELEGRAM_BOT_TOKEN not set' }, { status: 500 })
 
-  const res  = await fetch(`https://api.telegram.org/bot${botToken}/getWebhookInfo`)
+  const res  = await fetch(`https://api.telegram.org/bot${botToken}/getWebhookInfo`, { cache: 'no-store' })
   const data = await res.json()
-  return NextResponse.json(data)
+  // Return url under an aliased key — lets us detect if the proxy strips the `url` field from responses
+  const webhookEndpoint: string = data?.result?.url ?? ''
+  return NextResponse.json({ ...data, webhook_endpoint: webhookEndpoint })
 }
