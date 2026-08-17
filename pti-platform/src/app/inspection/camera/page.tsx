@@ -1,21 +1,20 @@
 'use client'
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Check, RotateCcw, ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react'
+import { Check, RotateCcw, ChevronLeft, ChevronRight, AlertCircle, X } from 'lucide-react'
 import { useInspectionStore } from '@/store/inspectionStore'
 import { INSPECTION_ANGLES } from '@/lib/angles'
 import { cn } from '@/lib/utils'
 import type { AngleKey, CapturedPhoto } from '@/lib/types'
 
-const MULTI_PHOTO_ANGLES: AngleKey[] = ['damage', 'extras']
-const REQUIRED_ANGLES = INSPECTION_ANGLES.filter(
-  (a) => !MULTI_PHOTO_ANGLES.includes(a.key)
-)
+// Positions 1–13 are required; extras (position 14) is optional/append-only
+const MAIN_ANGLES = INSPECTION_ANGLES.filter((a) => a.key !== 'extras')
+const REQUIRED_COUNT = MAIN_ANGLES.length
 
 export default function CameraPage() {
   const router = useRouter()
   const { photos, addPhoto, removePhoto, gps, setGPS } = useInspectionStore()
-  const [activeAngle, setActiveAngle] = useState<AngleKey>(INSPECTION_ANGLES[0].key)
+  const [activeIndex, setActiveIndex] = useState(0)
   const [cameraReady, setCameraReady] = useState(false)
   const [cameraError, setCameraError] = useState<string | null>(null)
   const [capturing, setCapturing] = useState(false)
@@ -25,15 +24,18 @@ export default function CameraPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
 
-  const currentAngleConfig = INSPECTION_ANGLES.find((a) => a.key === activeAngle)!
-  const currentIndex = INSPECTION_ANGLES.findIndex((a) => a.key === activeAngle)
-  const isMultiPhoto = MULTI_PHOTO_ANGLES.includes(activeAngle)
-  const currentPhoto = isMultiPhoto ? undefined : photos.find((p) => p.angle === activeAngle)
-  const multiPhotos = isMultiPhoto ? photos.filter((p) => p.angle === activeAngle) : []
-  const allCaptured = REQUIRED_ANGLES.every((a) => photos.some((p) => p.angle === a.key))
-  const requiredCaptured = photos.filter((p) => REQUIRED_ANGLES.some((a) => a.key === p.angle)).length
-
+  const totalSlots = INSPECTION_ANGLES.length // 14 (13 required + extras)
+  const currentAngleConfig = INSPECTION_ANGLES[activeIndex]
+  const activeAngle: AngleKey = currentAngleConfig.key
+  const isExtras = activeAngle === 'extras'
   const isTireAngle = activeAngle.startsWith('tire-')
+  const hasTemplate = !!currentAngleConfig.template
+
+  const currentPhoto = isExtras ? undefined : photos.find((p) => p.angle === activeAngle)
+  const extrasPhotos = photos.filter((p) => p.angle === 'extras')
+
+  const capturedRequired = MAIN_ANGLES.filter((a) => photos.some((p) => p.angle === a.key)).length
+  const allCaptured = capturedRequired >= REQUIRED_COUNT
 
   useEffect(() => {
     if (!gps && navigator.geolocation) {
@@ -78,6 +80,7 @@ export default function CameraPage() {
   const capturePhoto = useCallback(() => {
     if (!videoRef.current || !canvasRef.current || capturing) return
     setCapturing(true)
+
     const video = videoRef.current
     const canvas = canvasRef.current
     canvas.width = video.videoWidth || 1280
@@ -97,7 +100,8 @@ export default function CameraPage() {
     const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })
     const gpsStr = gps ? `${gps.lat.toFixed(4)}, ${gps.lng.toFixed(4)}` : 'GPS unavailable'
-    const watermark = `📍 ${gpsStr}   🕐 ${dateStr} ${timeStr}   ${currentAngleConfig.label}`
+    const labelLine = currentAngleConfig.label.replace('\n', ' ')
+    const watermark = `📍 ${gpsStr}   🕐 ${dateStr} ${timeStr}   ${labelLine}`
 
     const barH = Math.round(canvas.height * 0.055)
     ctx.fillStyle = 'rgba(0,0,0,0.65)'
@@ -112,7 +116,7 @@ export default function CameraPage() {
     const photo: CapturedPhoto = {
       id: Math.random().toString(36).slice(2),
       angle: activeAngle,
-      angleLabel: currentAngleConfig.label,
+      angleLabel: labelLine,
       dataUrl,
       timestamp: now.toISOString(),
       gps: gps ?? undefined,
@@ -122,60 +126,64 @@ export default function CameraPage() {
     addPhoto(photo)
     setCapturing(false)
     setJustCaptured(true)
-    setTimeout(() => setJustCaptured(false), 1200)
+    setTimeout(() => setJustCaptured(false), 1000)
+  }, [activeAngle, capturing, currentAngleConfig, addPhoto, gps])
 
-    if (!isBlurry && !isMultiPhoto && currentIndex < INSPECTION_ANGLES.length - 1) {
-      setTimeout(() => setActiveAngle(INSPECTION_ANGLES[currentIndex + 1].key), 800)
-    }
-  }, [activeAngle, capturing, currentAngleConfig, currentIndex, isMultiPhoto, addPhoto, gps])
-
-  const handleRemove = () => {
-    if (isMultiPhoto) {
-      if (multiPhotos.length > 0) {
-        const lastId = multiPhotos[multiPhotos.length - 1].id
-        useInspectionStore.getState().photos.filter((p) => p.id !== lastId)
-        // remove all then re-add all except last
-        const keep = photos.filter((p) => p.angle !== activeAngle || p.id !== lastId)
-        useInspectionStore.setState({ photos: keep })
+  const handleRemovePhoto = () => {
+    if (isExtras) {
+      if (extrasPhotos.length > 0) {
+        const lastId = extrasPhotos[extrasPhotos.length - 1].id
+        useInspectionStore.setState((s) => ({
+          photos: s.photos.filter((p) => p.id !== lastId),
+        }))
       }
     } else {
       removePhoto(activeAngle)
     }
   }
 
-  const goBack = () => {
-    if (currentIndex > 0) setActiveAngle(INSPECTION_ANGLES[currentIndex - 1].key)
-    else router.push('/inspection/start')
+  const goPrev = () => {
+    if (activeIndex > 0) setActiveIndex(activeIndex - 1)
   }
   const goNext = () => {
-    if (currentIndex < INSPECTION_ANGLES.length - 1) setActiveAngle(INSPECTION_ANGLES[currentIndex + 1].key)
+    if (activeIndex < totalSlots - 1) setActiveIndex(activeIndex + 1)
   }
 
-  const accentColor = activeAngle === 'extras'
-    ? 'text-blue-400'
-    : isTireAngle
-    ? 'text-amber-400'
-    : activeAngle === 'damage'
-    ? 'text-orange-400'
-    : 'text-white'
+  const canGoPrev = activeIndex > 0
+  const canGoNext = activeIndex < totalSlots - 1
+  const hasCurrentPhoto = isExtras ? extrasPhotos.length > 0 : !!currentPhoto
 
   return (
     <div className="flex flex-col h-screen bg-black">
-      <div className="flex items-center justify-between px-4 py-3 bg-black border-b border-slate-800 safe-top">
-        <button onClick={goBack} className="flex h-10 w-10 items-center justify-center text-slate-300">
-          <ChevronLeft className="h-6 w-6" />
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 bg-black border-b border-slate-800 safe-top z-20">
+        <button
+          onClick={() => router.push('/inspection/start')}
+          className="flex h-10 w-10 items-center justify-center text-slate-300"
+        >
+          <X className="h-5 w-5" />
         </button>
+
         <div className="text-center">
-          <p className="text-xs text-slate-400">{currentIndex + 1} of {INSPECTION_ANGLES.length}</p>
+          {isExtras ? (
+            <p className="text-sm font-semibold text-blue-400">Additional Photos</p>
+          ) : (
+            <>
+              <p className="text-xs text-slate-500 uppercase tracking-widest">Photo</p>
+              <p className="text-base font-bold text-white">{activeIndex + 1} / {REQUIRED_COUNT}</p>
+            </>
+          )}
         </div>
+
         <button
           onClick={() => router.push('/inspection/signature')}
-          className="text-xs text-blue-400 font-medium px-2"
+          className="text-xs text-blue-400 font-medium px-2 py-1"
         >
           Skip
         </button>
       </div>
 
+      {/* Camera viewport */}
       <div className="relative flex-1 overflow-hidden">
         {cameraError ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-slate-900 p-8 text-center">
@@ -185,87 +193,98 @@ export default function CameraPage() {
           </div>
         ) : (
           <>
-            <video ref={videoRef} autoPlay playsInline muted className="h-full w-full object-cover" />
+            {/* Live camera feed */}
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="absolute inset-0 h-full w-full object-cover"
+            />
 
             {cameraReady && (
               <>
+                {/* Template overlay for positions 1–9 */}
+                {hasTemplate && (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    key={currentAngleConfig.template}
+                    src={currentAngleConfig.template!}
+                    alt=""
+                    className="absolute inset-0 h-full w-full object-cover pointer-events-none select-none"
+                    style={{ opacity: 0.82 }}
+                  />
+                )}
+
                 {/* Angle label — top center */}
-                <div className="absolute top-4 inset-x-0 flex justify-center pointer-events-none">
-                  <div className={`rounded-2xl px-6 py-2 ${
-                    activeAngle === 'extras' ? 'bg-blue-600/80' :
-                    isTireAngle ? 'bg-amber-600/80' :
-                    activeAngle === 'damage' ? 'bg-orange-600/80' :
-                    'bg-black/70'
-                  }`}>
-                    <p className={`text-2xl font-black tracking-widest ${accentColor}`}>
-                      {currentAngleConfig.label}
-                    </p>
-                  </div>
+                <div className="absolute top-4 inset-x-0 flex justify-center pointer-events-none px-6">
+                  {isTireAngle ? (
+                    // Big directional text for tire shots
+                    <div className="rounded-2xl bg-black/75 px-8 py-5 text-center">
+                      <p
+                        className="text-4xl font-black text-white tracking-wide leading-tight whitespace-pre-line"
+                        style={{ textShadow: '0 2px 8px rgba(0,0,0,0.8)' }}
+                      >
+                        {currentAngleConfig.label}
+                      </p>
+                    </div>
+                  ) : isExtras ? (
+                    <div className="rounded-2xl bg-blue-600/85 px-6 py-3 text-center">
+                      <p className="text-2xl font-black text-white tracking-widest">+ EXTRAS</p>
+                      {extrasPhotos.length > 0 && (
+                        <p className="text-sm text-blue-200 mt-1">{extrasPhotos.length} photo{extrasPhotos.length !== 1 ? 's' : ''} taken</p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="rounded-2xl bg-black/70 px-6 py-2.5 text-center">
+                      <p className="text-2xl font-black text-white tracking-widest">
+                        {currentAngleConfig.label}
+                      </p>
+                    </div>
+                  )}
                 </div>
 
-                {/* Instruction banner for multi-photo angles */}
-                {isMultiPhoto && (
-                  <div className={`absolute top-20 inset-x-8 rounded-xl px-4 py-2 text-center pointer-events-none ${
-                    activeAngle === 'extras' ? 'bg-blue-500/80' : 'bg-orange-500/80'
-                  }`}>
-                    <p className="text-sm font-semibold text-white">
-                      {activeAngle === 'extras'
-                        ? 'Extra photos — capture any additional issues'
-                        : 'Free photo — capture any damage or issues'}
-                    </p>
-                    {multiPhotos.length > 0 && (
-                      <p className="text-xs text-white/80 mt-0.5">
-                        {multiPhotos.length} photo{multiPhotos.length !== 1 ? 's' : ''} taken
-                      </p>
+                {/* Captured thumbnail — top right */}
+                {hasCurrentPhoto && !justCaptured && (
+                  <div className="absolute top-20 right-4 pointer-events-none">
+                    <div className={cn(
+                      'w-20 h-14 rounded-lg overflow-hidden border-2',
+                      isExtras ? 'border-blue-400' : 'border-green-400'
+                    )}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={isExtras
+                          ? extrasPhotos[extrasPhotos.length - 1].dataUrl
+                          : currentPhoto!.dataUrl}
+                        alt="captured"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    {isExtras && extrasPhotos.length > 1 && (
+                      <div className="absolute bottom-0 right-0 bg-blue-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-tl-lg rounded-br-lg">
+                        ×{extrasPhotos.length}
+                      </div>
+                    )}
+                    {!isExtras && (
+                      <div className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-green-500">
+                        <Check className="h-3 w-3 text-white" />
+                      </div>
                     )}
                   </div>
                 )}
 
-                {/* Tire instruction */}
-                {isTireAngle && (
-                  <div className="absolute bottom-32 inset-x-8 rounded-xl bg-black/60 px-4 py-2 text-center pointer-events-none">
-                    <p className="text-xs text-amber-200">{currentAngleConfig.instruction}</p>
+                {/* Capture flash */}
+                {justCaptured && (
+                  <div className="absolute inset-0 bg-white/35 pointer-events-none" />
+                )}
+
+                {/* Blur warning */}
+                {blurWarning && (
+                  <div className="absolute bottom-36 inset-x-6 rounded-xl bg-yellow-500/90 px-4 py-2 text-center pointer-events-none">
+                    <p className="text-sm font-semibold text-white">⚠ Image may be blurry — retake recommended</p>
                   </div>
                 )}
               </>
-            )}
-
-            {justCaptured && (
-              <div className="absolute inset-0 bg-white/30 flex items-center justify-center pointer-events-none">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-500">
-                  <Check className="h-8 w-8 text-white" />
-                </div>
-              </div>
-            )}
-
-            {blurWarning && (
-              <div className="absolute top-20 inset-x-4 rounded-xl bg-yellow-500/90 px-4 py-2 text-center pointer-events-none">
-                <p className="text-sm font-semibold text-white">Image may be blurry — retake recommended</p>
-              </div>
-            )}
-
-            {/* Thumbnail */}
-            {isMultiPhoto ? (
-              multiPhotos.length > 0 && !justCaptured && (
-                <div className={`absolute top-16 right-4 w-20 h-14 rounded-lg overflow-hidden border-2 pointer-events-none ${
-                  activeAngle === 'extras' ? 'border-blue-400' : 'border-orange-400'
-                }`}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={multiPhotos[multiPhotos.length - 1].dataUrl} alt="captured" className="w-full h-full object-cover" />
-                  <div className={`absolute bottom-0 right-0 text-white text-xs font-bold px-1.5 py-0.5 rounded-tl ${
-                    activeAngle === 'extras' ? 'bg-blue-500' : 'bg-orange-500'
-                  }`}>
-                    ×{multiPhotos.length}
-                  </div>
-                </div>
-              )
-            ) : (
-              currentPhoto && !justCaptured && (
-                <div className="absolute top-16 right-4 w-20 h-14 rounded-lg overflow-hidden border-2 border-green-400 pointer-events-none">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={currentPhoto.dataUrl} alt="captured" className="w-full h-full object-cover" />
-                </div>
-              )
             )}
           </>
         )}
@@ -273,91 +292,102 @@ export default function CameraPage() {
 
       <canvas ref={canvasRef} className="hidden" />
 
-      <div className="bg-black px-4 py-3 space-y-3 safe-bottom">
+      {/* Bottom controls */}
+      <div className="bg-black px-4 pt-3 pb-4 safe-bottom z-20">
         {/* Progress dots */}
-        <div className="flex items-center justify-center gap-1 flex-wrap">
-          {INSPECTION_ANGLES.map((a) => {
-            const anglePhotos = photos.filter((p) => p.angle === a.key)
-            const captured = anglePhotos.length > 0
-            const active = a.key === activeAngle
-            const isMulti = MULTI_PHOTO_ANGLES.includes(a.key)
-            const isTire = a.key.startsWith('tire-')
-
-            if (isMulti) {
-              return (
-                <button
-                  key={a.key}
-                  onClick={() => setActiveAngle(a.key)}
-                  className={cn(
-                    'rounded-full px-2 py-0.5 text-xs font-bold transition-all border',
-                    active
-                      ? a.key === 'extras'
-                        ? 'bg-blue-500 border-blue-500 text-white'
-                        : 'bg-orange-500 border-orange-500 text-white'
-                      : captured
-                        ? a.key === 'extras'
-                          ? 'bg-blue-400 border-blue-400 text-white'
-                          : 'bg-orange-400 border-orange-400 text-white'
-                        : 'bg-slate-700 border-slate-600 text-slate-400'
-                  )}
-                >
-                  {anglePhotos.length > 0 ? `+${anglePhotos.length}` : a.key === 'extras' ? '+' : '⚠'}
-                </button>
-              )
-            }
-
+        <div className="flex items-center justify-center gap-1 flex-wrap mb-4">
+          {MAIN_ANGLES.map((a, i) => {
+            const captured = photos.some((p) => p.angle === a.key)
+            const active = i === activeIndex
             return (
               <button
                 key={a.key}
-                onClick={() => setActiveAngle(a.key)}
+                onClick={() => setActiveIndex(i)}
                 className={cn(
                   'rounded-full transition-all',
                   active
-                    ? 'h-3 w-8 ' + (isTire ? 'bg-amber-400' : 'bg-white')
+                    ? 'h-2.5 w-8 ' + (a.key.startsWith('tire-') ? 'bg-amber-400' : 'bg-white')
                     : captured
-                    ? 'h-2.5 w-2.5 ' + (isTire ? 'bg-amber-500' : 'bg-green-400')
-                    : 'h-2.5 w-2.5 bg-slate-600'
+                    ? 'h-2.5 w-2.5 ' + (a.key.startsWith('tire-') ? 'bg-amber-500' : 'bg-green-400')
+                    : 'h-2 w-2 bg-slate-600'
                 )}
               />
             )
           })}
+          {/* Extras pill */}
+          <button
+            onClick={() => setActiveIndex(totalSlots - 1)}
+            className={cn(
+              'rounded-full px-2 py-0.5 text-xs font-bold border transition-all',
+              activeIndex === totalSlots - 1
+                ? 'bg-blue-500 border-blue-500 text-white'
+                : extrasPhotos.length > 0
+                ? 'bg-blue-400/70 border-blue-400 text-white'
+                : 'bg-slate-700 border-slate-600 text-slate-400'
+            )}
+          >
+            {extrasPhotos.length > 0 ? `+${extrasPhotos.length}` : '+'}
+          </button>
         </div>
 
+        {/* Nav + shutter row */}
         <div className="flex items-center justify-between">
+          {/* Back arrow */}
           <button
-            onClick={handleRemove}
-            disabled={isMultiPhoto ? multiPhotos.length === 0 : !currentPhoto}
-            className="flex h-12 w-12 items-center justify-center rounded-full border border-slate-700 text-slate-400 disabled:opacity-30"
+            onClick={goPrev}
+            disabled={!canGoPrev}
+            className="flex h-14 w-14 items-center justify-center rounded-full border border-slate-700 text-slate-300 active:bg-slate-800 disabled:opacity-25 transition-colors"
           >
-            <RotateCcw className="h-5 w-5" />
+            <ChevronLeft className="h-8 w-8" />
           </button>
 
+          {/* Shutter */}
           <button
             onClick={capturePhoto}
             disabled={capturing || !cameraReady}
             className="flex h-20 w-20 items-center justify-center rounded-full border-4 border-white bg-white/10 transition-transform active:scale-95 disabled:opacity-50"
           >
-            <div className={cn('h-16 w-16 rounded-full bg-white transition-all', capturing && 'scale-90')} />
+            <div className={cn('h-16 w-16 rounded-full bg-white transition-all', capturing && 'scale-90 bg-slate-300')} />
           </button>
 
+          {/* Forward arrow */}
           <button
             onClick={goNext}
-            disabled={currentIndex >= INSPECTION_ANGLES.length - 1}
-            className="flex h-12 w-12 items-center justify-center rounded-full border border-slate-700 text-slate-400 disabled:opacity-30"
+            disabled={!canGoNext}
+            className="flex h-14 w-14 items-center justify-center rounded-full border border-slate-700 text-slate-300 active:bg-slate-800 disabled:opacity-25 transition-colors"
           >
-            <ChevronRight className="h-5 w-5" />
+            <ChevronRight className="h-8 w-8" />
           </button>
         </div>
 
-        {allCaptured ? (
-          <button onClick={() => router.push('/inspection/signature')} className="btn-primary w-full py-3">
-            <Check className="h-4 w-4" /> All {REQUIRED_ANGLES.length} photos — Next: Sign &amp; Submit
+        {/* Retake / Continue row */}
+        <div className="flex gap-3 mt-3">
+          <button
+            onClick={handleRemovePhoto}
+            disabled={!hasCurrentPhoto}
+            className="flex h-11 items-center justify-center gap-1.5 rounded-xl border border-slate-700 px-4 text-sm text-slate-400 disabled:opacity-30"
+          >
+            <RotateCcw className="h-4 w-4" />
+            Retake
           </button>
-        ) : (
-          <button onClick={() => router.push('/inspection/signature')} className="w-full rounded-xl border border-slate-700 py-3 text-sm font-medium text-slate-300">
-            Skip to Sign &amp; Submit ({requiredCaptured}/{REQUIRED_ANGLES.length} captured)
-          </button>
-        )}
+
+          {allCaptured ? (
+            <button
+              onClick={() => router.push('/inspection/signature')}
+              className="btn-primary flex-1 py-2.5 text-sm"
+            >
+              <Check className="h-4 w-4" />
+              All {REQUIRED_COUNT} Photos — Continue
+            </button>
+          ) : (
+            <button
+              onClick={() => router.push('/inspection/signature')}
+              className="flex-1 rounded-xl border border-slate-700 py-2.5 text-sm font-medium text-slate-400"
+            >
+              Skip ({capturedRequired}/{REQUIRED_COUNT})
+            </button>
+          )}
+        </div>
       </div>
     </div>
   )

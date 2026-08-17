@@ -80,7 +80,7 @@ export const useInspectionStore = create<InspectionState>()(
 
       addPhoto: (photo) =>
         set((s) => ({
-          photos: (photo.angle === 'damage' || photo.angle === 'extras')
+          photos: photo.angle === 'extras'
             ? [...s.photos, photo]
             : [...s.photos.filter((p) => p.angle !== photo.angle), photo],
         })),

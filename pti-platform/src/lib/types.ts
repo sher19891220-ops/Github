@@ -51,26 +51,18 @@ export interface CapturedPhoto {
 
 export type AngleKey =
   | 'front'
-  | 'front-right'
-  | 'right'
-  | 'rear-right'
-  | 'rear'
-  | 'rear-left'
-  | 'left'
-  | 'front-left'
-  | 'inside-roof'
-  | 'floor'
-  | 'inside-left-wall'
-  | 'inside-right-wall'
-  | 'damage'
-  | 'tire-a1-lo'
-  | 'tire-a1-li'
-  | 'tire-a1-ri'
-  | 'tire-a1-ro'
-  | 'tire-a2-lo'
-  | 'tire-a2-li'
-  | 'tire-a2-ri'
-  | 'tire-a2-ro'
+  | 'front-left-corner'
+  | 'front-right-corner'
+  | 'left-panel'
+  | 'back'
+  | 'back-right-corner'
+  | 'back-left-corner'
+  | 'right-panel'
+  | 'inside-overview'
+  | 'tire-fl'
+  | 'tire-bl'
+  | 'tire-fr'
+  | 'tire-br'
   | 'extras'
 
 export interface AngleConfig {
@@ -78,6 +70,7 @@ export interface AngleConfig {
   label: string
   instruction: string
   order: number
+  template?: string | null
 }
 
 export interface ChecklistItem {
