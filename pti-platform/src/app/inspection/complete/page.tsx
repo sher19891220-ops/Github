@@ -43,11 +43,13 @@ export default function CompletePage() {
   async function sendTelegramReport() {
     setReportStatus('sending')
     try {
+      const chatId = store.sourceChatId ?? undefined
+
       // 1. Send text summary
       const textRes = await fetch('/api/send-report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'text', text: summaryText }),
+        body: JSON.stringify({ action: 'text', text: summaryText, chatId }),
       })
       if (!textRes.ok) throw new Error('Text send failed')
 
@@ -59,7 +61,7 @@ export default function CompletePage() {
         const res = await fetch('/api/send-report', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'photos', photos: chunk }),
+          body: JSON.stringify({ action: 'photos', photos: chunk, chatId }),
         })
         if (!res.ok) {
           const err = await res.json().catch(() => ({}))

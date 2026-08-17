@@ -25,8 +25,9 @@ interface InspectionState {
   damageMarkers: DamageMarker[]
   signatureDataUrl: string | null
   comments: string
+  sourceChatId: number | null
 
-  initSession: (type: InspectionType, driver: Driver, vehicle: Vehicle) => void
+  initSession: (type: InspectionType, driver: Driver, vehicle: Vehicle, sourceChatId?: number | null) => void
   setGPS: (gps: GPSCoordinates) => void
   addPhoto: (photo: CapturedPhoto) => void
   removePhoto: (angleKey: AngleKey) => void
@@ -53,6 +54,7 @@ const defaultState = {
   damageMarkers: [] as DamageMarker[],
   signatureDataUrl: null,
   comments: '',
+  sourceChatId: null as number | null,
 }
 
 export const useInspectionStore = create<InspectionState>()(
@@ -60,7 +62,7 @@ export const useInspectionStore = create<InspectionState>()(
     (set) => ({
       ...defaultState,
 
-      initSession: (type, driver, vehicle) =>
+      initSession: (type, driver, vehicle, sourceChatId = null) =>
         set({
           sessionToken: generateSessionToken(),
           inspectionId: generateId(),
@@ -74,6 +76,7 @@ export const useInspectionStore = create<InspectionState>()(
           signatureDataUrl: null,
           gps: null,
           comments: '',
+          sourceChatId,
         }),
 
       setGPS: (gps) => set({ gps }),

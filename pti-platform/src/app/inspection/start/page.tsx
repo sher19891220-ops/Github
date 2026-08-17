@@ -25,6 +25,7 @@ function InspectionStartContent() {
   const urlType    = (searchParams.get('type')   ?? 'PICKUP') as InspectionType
   const urlDriver  = searchParams.get('driver')  ?? ''
   const urlCompany = normalizeCompany(searchParams.get('company'))
+  const urlGroup   = parseInt(searchParams.get('group') ?? '', 10) || null
 
   const store = useInspectionStore()
 
@@ -55,7 +56,8 @@ function InspectionStartContent() {
         model: '',
         year: new Date().getFullYear(),
         company: urlCompany,
-      }
+      },
+      urlGroup,
     )
     router.push('/inspection/camera')
   }

@@ -13,9 +13,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: 'Bot token not configured' }, { status: 500 })
     }
 
-    const chatIds = await getAllTargetChatIds()
-    if (chatIds.length === 0) {
-      return NextResponse.json({ ok: false, error: 'No target groups configured. Add bot to a group or set TELEGRAM_GROUP_CHAT_IDS.' }, { status: 400 })
+    // Use the specific source group if provided, otherwise fall back to all registered groups
+    let chatIds: number[]
+    if (body.chatId) {
+      chatIds = [body.chatId]
+    } else {
+      chatIds = await getAllTargetChatIds()
+      if (chatIds.length === 0) {
+        return NextResponse.json({ ok: false, error: 'No target groups configured. Add bot to a group or set TELEGRAM_GROUP_CHAT_IDS.' }, { status: 400 })
+      }
     }
 
     if (body.action === 'text') {
@@ -27,7 +33,6 @@ export async function POST(req: NextRequest) {
       const photos: { dataUrl: string; caption: string }[] = body.photos ?? []
       if (photos.length === 0) return NextResponse.json({ ok: true })
 
-      // Send in batches of 10 (Telegram limit) to ALL groups
       for (let i = 0; i < photos.length; i += 10) {
         const batch = photos.slice(i, i + 10)
         await Promise.allSettled(chatIds.map((id) => sendMediaGroup(id, batch)))

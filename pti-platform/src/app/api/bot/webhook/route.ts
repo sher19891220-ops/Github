@@ -156,7 +156,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ ok: true })
       }
 
-      const params = new URLSearchParams({ unit, type })
+      const params = new URLSearchParams({ unit, type, group: String(chatId) })
       if (driverName) params.set('driver', driverName)
       const link = `${APP_URL}/inspection/start?${params.toString()}`
 

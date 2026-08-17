@@ -90,10 +90,10 @@ export default function CameraPage() {
 
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
     const blurScore = computeBlurScore(imageData)
-    const isBlurry = blurScore < 80
+    const isBlurry = blurScore < 15
     if (isBlurry) {
       setBlurWarning(true)
-      setTimeout(() => setBlurWarning(false), 2500)
+      setTimeout(() => setBlurWarning(false), 1800)
     }
 
     const now = new Date()
@@ -285,8 +285,8 @@ export default function CameraPage() {
 
                 {/* Blur warning */}
                 {blurWarning && (
-                  <div className="absolute bottom-36 inset-x-6 rounded-xl bg-yellow-500/90 px-4 py-2 text-center pointer-events-none">
-                    <p className="text-sm font-semibold text-white">⚠ Image may be blurry — retake recommended</p>
+                  <div className="absolute bottom-36 inset-x-6 rounded-xl bg-black/70 px-4 py-2 text-center pointer-events-none">
+                    <p className="text-sm text-slate-300">Photo saved — may be blurry, use Retake if needed</p>
                   </div>
                 )}
               </>
