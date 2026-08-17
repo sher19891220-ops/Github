@@ -204,15 +204,20 @@ export default function CameraPage() {
 
             {cameraReady && (
               <>
-                {/* Template overlay for positions 1–9 */}
+                {/* Template overlay for positions 1–9 — full width, natural height, centered */}
                 {hasTemplate && (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img
                     key={currentAngleConfig.template}
                     src={currentAngleConfig.template!}
                     alt=""
-                    className="absolute inset-0 h-full w-full object-cover pointer-events-none select-none"
-                    style={{ opacity: 0.82 }}
+                    className="absolute left-0 right-0 w-full pointer-events-none select-none"
+                    style={{
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      height: 'auto',
+                      opacity: 0.85,
+                    }}
                   />
                 )}
 
