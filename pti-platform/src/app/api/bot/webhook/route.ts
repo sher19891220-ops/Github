@@ -6,25 +6,25 @@ const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
 const APP_URL   = process.env.NEXT_PUBLIC_APP_URL || 'https://pti-check.vercel.app'
 
 // GET /api/bot/webhook — self-registers this URL as the Telegram webhook.
-// Uses query-param form (not JSON body) to avoid any middleware stripping the `url` field.
+// Pass webhook url raw (not URLSearchParams-encoded) — Telegram rejects %3A%2F%2F in url param.
 export async function GET() {
   if (!BOT_TOKEN) return NextResponse.json({ error: 'Bot token not configured' }, { status: 500 })
   const webhookUrl = `${APP_URL}/api/bot/webhook`
-  const params = new URLSearchParams({
-    url: webhookUrl,
-    allowed_updates: JSON.stringify(['message', 'edited_message', 'my_chat_member']),
-    drop_pending_updates: 'false',
-  })
-  const res = await fetch(
-    `https://api.telegram.org/bot${BOT_TOKEN}/setWebhook?${params.toString()}`,
-    { method: 'GET', cache: 'no-store' },
-  )
+  // Build query string manually so the webhook URL itself is NOT percent-encoded.
+  // URLSearchParams would encode ':' → '%3A' and '/' → '%2F' in the url value,
+  // causing Telegram to reject the URL as invalid.
+  const tgUrl =
+    `https://api.telegram.org/bot${BOT_TOKEN}/setWebhook` +
+    `?url=${webhookUrl}` +
+    `&allowed_updates=${encodeURIComponent(JSON.stringify(['message', 'edited_message', 'my_chat_member']))}` +
+    `&drop_pending_updates=false`
+  const res = await fetch(tgUrl, { method: 'GET', cache: 'no-store' })
   const data = await res.json()
   const info = await fetch(
     `https://api.telegram.org/bot${BOT_TOKEN}/getWebhookInfo`,
     { cache: 'no-store' },
   ).then(r => r.json())
-  return NextResponse.json({ webhookUrl, telegram: data, info })
+  return NextResponse.json({ webhookUrl, tgUrl, telegram: data, info })
 }
 
 export async function POST(req: NextRequest) {
