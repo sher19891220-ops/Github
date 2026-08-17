@@ -253,6 +253,12 @@ export interface AlertLink {
   url: string;
 }
 
+/** A Samsara clip to forward into Telegram, kept apart from ordinary links. */
+export interface VideoRef {
+  label: string;
+  url: string;
+}
+
 export interface FleetAlert {
   /** Stable identity used for de-duplication. */
   fingerprint: string;
@@ -261,13 +267,17 @@ export interface FleetAlert {
   emoji: string;
   severity: Severity;
   occurredAt?: Date;
+  /** Display name, e.g. "Truck 12". */
   vehicle?: string;
+  /** Samsara vehicle ID — the reliable key for per-unit chat routing. */
+  vehicleId?: string;
   driver?: string;
   location?: string;
   speedMph?: number;
   /** Extra "Label: value" lines rendered under the header. */
   details: string[];
   links: AlertLink[];
+  videos: VideoRef[];
   source: 'webhook' | 'poll';
 }
 
@@ -307,16 +317,18 @@ export function fromSafetyEvent(event: SafetyEvent): FleetAlert {
   }
   if (event.coachingState) details.push(`Coaching: ${titleize(event.coachingState)}`);
 
-  const links: AlertLink[] = [];
+  const videos: VideoRef[] = [];
   if (event.downloadTriggerVideoUrl) {
-    links.push({ label: 'Trigger video', url: event.downloadTriggerVideoUrl });
+    videos.push({ label: 'Trigger clip', url: event.downloadTriggerVideoUrl });
   }
   if (event.downloadForwardVideoUrl) {
-    links.push({ label: 'Road-facing video', url: event.downloadForwardVideoUrl });
+    videos.push({ label: 'Road-facing', url: event.downloadForwardVideoUrl });
   }
   if (event.downloadInwardVideoUrl) {
-    links.push({ label: 'Driver-facing video', url: event.downloadInwardVideoUrl });
+    videos.push({ label: 'Driver-facing', url: event.downloadInwardVideoUrl });
   }
+
+  const links: AlertLink[] = [];
   if (typeof event.latitude === 'number' && typeof event.longitude === 'number') {
     links.push({
       label: 'Map',
@@ -342,11 +354,13 @@ export function fromSafetyEvent(event: SafetyEvent): FleetAlert {
     severity: primary.severity,
     occurredAt,
     vehicle: refName(event.vehicle, event.vehicleId),
+    vehicleId: event.vehicle?.id ?? event.vehicleId,
     driver: refName(event.driver, event.driverId),
     location: event.location,
     speedMph: event.speedMilesPerHour,
     details,
     links,
+    videos,
     source: 'poll',
   };
 }
@@ -371,9 +385,11 @@ export function fromDvir(dvir: Dvir): FleetAlert {
     severity: 'high',
     occurredAt: parseTime(dvir.endTime ?? dvir.startTime),
     vehicle: refName(dvir.vehicle) ?? refName(dvir.trailer),
+    vehicleId: dvir.vehicle?.id,
     driver: refName(dvir.driver),
     details,
     links: [],
+    videos: [],
     source: 'poll',
   };
 }
@@ -426,14 +442,19 @@ export function fromWebhook(payload: SamsaraWebhookPayload): FleetAlert | undefi
   if (typeof latitude === 'number' && typeof longitude === 'number') {
     links.push({ label: 'Map', url: `https://maps.google.com/?q=${latitude},${longitude}` });
   }
+  const dashboardUrl = merged['dashboardUrl'];
+  if (typeof dashboardUrl === 'string' && dashboardUrl.startsWith('http')) {
+    links.push({ label: 'Open in Samsara', url: dashboardUrl });
+  }
+
+  const videos: VideoRef[] = [];
   for (const [key, label] of [
-    ['downloadTriggerVideoUrl', 'Trigger video'],
-    ['downloadForwardVideoUrl', 'Road-facing video'],
-    ['downloadInwardVideoUrl', 'Driver-facing video'],
-    ['dashboardUrl', 'Open in Samsara'],
+    ['downloadTriggerVideoUrl', 'Trigger clip'],
+    ['downloadForwardVideoUrl', 'Road-facing'],
+    ['downloadInwardVideoUrl', 'Driver-facing'],
   ] as const) {
     const url = merged[key];
-    if (typeof url === 'string' && url.startsWith('http')) links.push({ label, url });
+    if (typeof url === 'string' && url.startsWith('http')) videos.push({ label, url });
   }
 
   const details: string[] = [];
@@ -463,6 +484,7 @@ export function fromWebhook(payload: SamsaraWebhookPayload): FleetAlert | undefi
     severity: spec.severity,
     occurredAt,
     vehicle: refName(vehicle),
+    vehicleId: vehicle?.id,
     driver: refName(driver),
     location: typeof formattedLocation === 'string' ? formattedLocation : undefined,
     speedMph:
@@ -471,6 +493,7 @@ export function fromWebhook(payload: SamsaraWebhookPayload): FleetAlert | undefi
         : undefined,
     details,
     links,
+    videos,
     source: 'webhook',
   };
 }

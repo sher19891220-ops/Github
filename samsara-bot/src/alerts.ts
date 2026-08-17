@@ -1,10 +1,12 @@
 import { createHash } from 'node:crypto';
 import { config } from './config';
 import { log } from './logger';
+import { parseUnitChatMap, resolveRoutes, type Route } from './routing';
 import { shouldDeliver, type FleetAlert } from './samsara/events';
 import { getStore } from './store';
 import { getTelegramClient } from './telegram/api';
-import { renderAlert } from './telegram/format';
+import { escapeHtml, link, renderAlert } from './telegram/format';
+import { deliverVideos, undelivered, type VideoDelivery } from './video';
 
 export interface DispatchResult {
   considered: number;
@@ -12,21 +14,29 @@ export interface DispatchResult {
   duplicates: number;
   sent: number;
   failed: number;
+  videosSent: number;
+  videosFailed: number;
+  /** Chats an alert actually reached, for the response body and logs. */
+  routes: string[];
 }
 
-function dedupeKey(alert: FleetAlert): string {
-  return `alert:${createHash('sha1').update(alert.fingerprint).digest('hex')}`;
+/** De-duplication is per destination, so a retry cannot skip the unit group. */
+function dedupeKey(alert: FleetAlert, route: Route): string {
+  const hash = createHash('sha1').update(alert.fingerprint).digest('hex');
+  return `alert:${hash}:${route.chatId}`;
 }
 
 /**
- * Filters, de-duplicates and delivers alerts to the configured Telegram chat.
+ * Filters, de-duplicates and delivers alerts.
  *
- * Delivery is sequential on purpose: Telegram throttles bursts to a channel,
- * and alert volume is low enough that ordering is worth more than throughput.
+ * Every alert goes to the central events group; when the vehicle is mapped in
+ * UNIT_CHAT_MAP it also goes to that unit's own group. Clips are pushed after
+ * the text so the message lands immediately even if video takes a while, and
+ * any clip that could not be delivered is appended to the alert as a link.
  */
 export async function dispatchAlerts(
   alerts: FleetAlert[],
-  options: { chatId?: string } = {},
+  options: { chatId?: string; deadline?: number; sendVideos?: boolean } = {},
 ): Promise<DispatchResult> {
   const result: DispatchResult = {
     considered: alerts.length,
@@ -34,13 +44,20 @@ export async function dispatchAlerts(
     duplicates: 0,
     sent: 0,
     failed: 0,
+    videosSent: 0,
+    videosFailed: 0,
+    routes: [],
   };
   if (!alerts.length) return result;
 
   const policy = { behaviors: config.alertBehaviors, minSeverity: config.minSeverity };
   const store = getStore();
   const telegram = getTelegramClient();
-  const chatId = options.chatId ?? config.telegramChatId;
+  const centralChatId = options.chatId ?? config.telegramChatId;
+  const unitMap = parseUnitChatMap(config.unitChatMap);
+  const sendVideos = options.sendVideos ?? config.sendVideos;
+  const deadline = options.deadline ?? Date.now() + 45_000;
+  const reached = new Set<string>();
 
   // Oldest first, so a batch reads as a timeline in the channel.
   const ordered = [...alerts].sort((a, b) => {
@@ -55,26 +72,59 @@ export async function dispatchAlerts(
       continue;
     }
 
-    const fresh = await store.claim(dedupeKey(alert), config.dedupeTtlSeconds).catch((error) => {
-      log.warn('De-duplication lookup failed; delivering anyway', { error });
-      return true;
-    });
-    if (!fresh) {
-      result.duplicates += 1;
-      continue;
-    }
+    const routes = resolveRoutes(alert, { centralChatId, unitMap });
 
-    try {
-      await telegram.sendMessage(chatId, renderAlert(alert), {
-        disableWebPagePreview: true,
-        disableNotification: alert.severity === 'low',
-      });
-      result.sent += 1;
-    } catch (error) {
-      result.failed += 1;
-      log.error('Failed to send alert', { error, behavior: alert.behaviorKey });
+    for (const route of routes) {
+      const fresh = await store
+        .claim(dedupeKey(alert, route), config.dedupeTtlSeconds)
+        .catch((error) => {
+          log.warn('De-duplication lookup failed; delivering anyway', { error });
+          return true;
+        });
+      if (!fresh) {
+        result.duplicates += 1;
+        continue;
+      }
+
+      let deliveries: VideoDelivery[] = [];
+      if (sendVideos && alert.videos.length) {
+        deliveries = await deliverVideos(
+          telegram,
+          route.chatId,
+          alert.videos,
+          `${alert.emoji} ${escapeHtml(alert.title)}${
+            alert.vehicle ? ` — ${escapeHtml(alert.vehicle)}` : ''
+          }`,
+          { deadline },
+        );
+        result.videosSent += deliveries.length - undelivered(deliveries).length;
+        result.videosFailed += undelivered(deliveries).length;
+      }
+
+      // Anything the clip pipeline could not deliver still gets linked.
+      const stragglers = undelivered(deliveries);
+      const body = stragglers.length
+        ? `${renderAlert(alert)}\n\n${stragglers
+            .map((item) => link(`${item.label} (clip)`, item.url))
+            .join(' · ')}`
+        : renderAlert(alert);
+
+      try {
+        await telegram.sendMessage(route.chatId, body, { disableWebPagePreview: true,
+          disableNotification: alert.severity === 'low' });
+        result.sent += 1;
+        reached.add(`${route.kind}:${route.label}`);
+      } catch (error) {
+        result.failed += 1;
+        log.error('Failed to send alert', {
+          error,
+          behavior: alert.behaviorKey,
+          route: route.kind,
+        });
+      }
     }
   }
 
+  result.routes = [...reached];
   return result;
 }

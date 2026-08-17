@@ -132,6 +132,60 @@ Vercel authenticates cron invocations with `Authorization: Bearer $CRON_SECRET`.
 Set `CRON_SECRET` so the endpoints are not publicly callable. All three cron
 endpoints can also be triggered by hand with `?secret=<ADMIN_SECRET>`.
 
+## Per-unit routing
+
+Every event goes to the central events group (`TELEGRAM_CHAT_ID`). When the
+vehicle is recognised, the same event **also** goes to that unit's own group:
+
+```
+UNIT_CHAT_MAP={"Truck 12":"-1001111111111","Truck 8":"-1002222222222","281":"-1003333333333"}
+```
+
+Keys may be either the Samsara **vehicle ID** or the **vehicle name**, matched
+case- and space-insensitively — `"Truck 12"`, `"truck12"` and `"TRUCK 12"` are
+the same key. The vehicle ID is checked first because names get edited in the
+Samsara dashboard and IDs don't.
+
+Add the bot to each unit group as an administrator, then run `/whoami` in that
+group to read its chat ID.
+
+Behaviour worth knowing:
+
+- An unmapped vehicle still reaches the central group; a warning is logged
+  naming the vehicle, so gaps in the map surface in the logs rather than
+  silently dropping alerts.
+- If a unit group *is* the central group, the alert is sent once, not twice.
+- De-duplication is per destination, so a Samsara retry cannot deliver to the
+  central group while skipping the unit group.
+
+## Video
+
+Clips are forwarded into both groups, using the first strategy that works:
+
+1. **Telegram fetches the URL** — no bytes pass through the bot. Capped around
+   20 MB, and only possible if the Samsara URL needs no auth header.
+2. **Download then upload** — fetched with the Samsara bearer token and
+   uploaded. Capped at 50 MB on hosted `api.telegram.org`.
+3. **Link it** — any clip that could not be sent is appended to the alert
+   message as a link, so nothing is silently lost.
+
+Set `SEND_VIDEOS=false` for links only.
+
+> **The 2 GB figure often quoted for Telegram is wrong for bots.** The Bot API
+> upload limit is **50 MB**; 2000 MB requires running your own
+> [Local Bot API server](https://github.com/tdlib/telegram-bot-api). At 480p a
+> Samsara clip is normally a few MB, so tier 1 or 2 should carry it — but a long
+> clip will fall through to a link.
+
+**This is the part of the build most in need of a live test.** Whether tier 1 or
+tier 2 fires depends on whether Samsara's `download*VideoUrl` values are
+pre-signed or bearer-protected, and whether they are populated at webhook time
+at all — Samsara media retrieval can be asynchronous, in which case a URL may
+not be ready the instant the event fires. If clips consistently arrive as links,
+that asynchrony is the reason, and the fix is a queue that retries retrieval
+after a delay rather than anything in the alert path. A Vercel function cannot
+wait around for it; a worker can.
+
 ## Filtering alerts
 
 - `ALERT_BEHAVIORS` — comma-separated allow-list of behaviour keys. Empty means

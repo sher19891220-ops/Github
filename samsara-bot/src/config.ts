@@ -69,6 +69,19 @@ export const config = {
   get telegramWebhookSecret(): string | undefined {
     return read('TELEGRAM_WEBHOOK_SECRET');
   },
+  /**
+   * JSON object mapping a Samsara vehicle ID or name to that unit's Telegram
+   * group, e.g. {"Truck 12": "-1001234567890"}. Alerts go to the central chat
+   * and, when mapped, to the unit's own group.
+   */
+  get unitChatMap(): string | undefined {
+    return read('UNIT_CHAT_MAP');
+  },
+  /** Forward Samsara clips into Telegram rather than only linking them. */
+  get sendVideos(): boolean {
+    return (read('SEND_VIDEOS') ?? 'true').toLowerCase() !== 'false';
+  },
+
   /** Telegram user IDs allowed to issue commands. Empty means "anyone". */
   get allowedUserIds(): string[] {
     return optionalList('TELEGRAM_ALLOWED_USER_IDS');

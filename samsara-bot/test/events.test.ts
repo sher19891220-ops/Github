@@ -161,6 +161,7 @@ describe('shouldDeliver', () => {
     emoji: '🔔',
     details: [],
     links: [],
+    videos: [],
     source: 'poll' as const,
   };
 

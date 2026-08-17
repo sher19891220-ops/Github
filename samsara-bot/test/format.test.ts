@@ -61,6 +61,7 @@ describe('renderAlert', () => {
     speedMph: 63.4,
     details: ['Coaching: Needed'],
     links: [{ label: 'Map', url: 'https://maps.google.com/?q=1,2' }],
+    videos: [],
     source: 'poll',
   };
 
