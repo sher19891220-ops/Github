@@ -48,30 +48,54 @@ describe('formatTime', () => {
 });
 
 describe('renderAlert', () => {
+  // Mirrors a real Samsara Events message, including the composite vehicle
+  // label and the one deliberate change: a specific behaviour, not "Harsh Event".
   const alert: FleetAlert = {
     fingerprint: 'safety:1',
     behaviorKey: 'mobileUsage',
     title: 'Mobile phone usage',
     emoji: '📱',
     severity: 'high',
-    occurredAt: new Date('2026-08-17T18:30:00Z'),
-    vehicle: 'Truck <12>',
+    occurredAt: new Date('2026-08-14T02:08:20Z'),
+    vehicle: '5269 (GZP5W69Z75) 281474991641331',
     driver: 'Sam & Co',
-    location: 'I-55 near Joliet',
-    speedMph: 63.4,
-    details: ['Coaching: Needed'],
-    links: [{ label: 'Map', url: 'https://maps.google.com/?q=1,2' }],
+    location: 'I 99;US 220, Allegheny Township, PA, 16648',
+    latitude: 40.449877,
+    longitude: -78.421974,
+    speedMph: 61,
+    incidentUrl: 'https://cloud.samsara.com/o/7002595/fleet/workflows/incidents/abc',
+    eventId: '36757615-df83-4f8d-8ebb-31a45a92d5be',
+    details: [],
+    links: [],
     videos: [],
-    source: 'poll',
+    source: 'webhook',
   };
 
-  it('escapes user-supplied values and includes the key fields', () => {
+  it('matches the field layout the events group already reads', () => {
     const output = renderAlert(alert);
-    expect(output).toContain('Truck &lt;12&gt;');
-    expect(output).toContain('Sam &amp; Co');
+    expect(output).toContain('🚗 <b>Vehicle:</b> 5269 (GZP5W69Z75) 281474991641331');
+    expect(output).toContain('🗺 <b>Location:</b> I 99;US 220, Allegheny Township, PA, 16648');
+    expect(output).toContain('🏃 <b>Speed:</b> 61.0 Mph');
+    expect(output).toContain('View Incident');
+    expect(output).toContain('🆔 <code>36757615-df83-4f8d-8ebb-31a45a92d5be</code>');
+  });
+
+  it('names the actual behaviour rather than a generic "Harsh Event"', () => {
+    const output = renderAlert(alert);
+    expect(output).toContain('Mobile phone usage');
     expect(output).toContain('HIGH');
-    expect(output).toContain('63 mph');
-    expect(output).toContain('<a href="https://maps.google.com/?q=1,2">Map</a>');
+    expect(output).not.toContain('Harsh Event');
+  });
+
+  it('links the coordinates to a map', () => {
+    expect(renderAlert(alert)).toContain(
+      '<a href="https://maps.google.com/?q=40.449877,-78.421974">40.449877, -78.421974</a>',
+    );
+  });
+
+  it('escapes user-supplied values', () => {
+    const output = renderAlert({ ...alert, driver: 'Sam & <Co>' });
+    expect(output).toContain('Sam &amp; &lt;Co&gt;');
   });
 });
 

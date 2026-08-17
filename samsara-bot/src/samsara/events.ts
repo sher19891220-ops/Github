@@ -267,13 +267,19 @@ export interface FleetAlert {
   emoji: string;
   severity: Severity;
   occurredAt?: Date;
-  /** Display name, e.g. "Truck 12". */
+  /** Display name, e.g. "5269 (GZP5W69Z75) 281474991641331". */
   vehicle?: string;
   /** Samsara vehicle ID — the reliable key for per-unit chat routing. */
   vehicleId?: string;
   driver?: string;
   location?: string;
+  latitude?: number;
+  longitude?: number;
   speedMph?: number;
+  /** Deep link into the Samsara incident view. */
+  incidentUrl?: string;
+  /** Samsara's own event/incident ID, echoed so alerts can be cross-referenced. */
+  eventId?: string;
   /** Extra "Label: value" lines rendered under the header. */
   details: string[];
   links: AlertLink[];
@@ -329,12 +335,6 @@ export function fromSafetyEvent(event: SafetyEvent): FleetAlert {
   }
 
   const links: AlertLink[] = [];
-  if (typeof event.latitude === 'number' && typeof event.longitude === 'number') {
-    links.push({
-      label: 'Map',
-      url: `https://maps.google.com/?q=${event.latitude},${event.longitude}`,
-    });
-  }
 
   const occurredAt = parseTime(event.time);
   const identity =
@@ -357,7 +357,10 @@ export function fromSafetyEvent(event: SafetyEvent): FleetAlert {
     vehicleId: event.vehicle?.id ?? event.vehicleId,
     driver: refName(event.driver, event.driverId),
     location: event.location,
+    latitude: event.latitude,
+    longitude: event.longitude,
     speedMph: event.speedMilesPerHour,
+    eventId: event.id,
     details,
     links,
     videos,
@@ -439,13 +442,9 @@ export function fromWebhook(payload: SamsaraWebhookPayload): FleetAlert | undefi
   const longitude = merged['longitude'];
 
   const links: AlertLink[] = [];
-  if (typeof latitude === 'number' && typeof longitude === 'number') {
-    links.push({ label: 'Map', url: `https://maps.google.com/?q=${latitude},${longitude}` });
-  }
-  const dashboardUrl = merged['dashboardUrl'];
-  if (typeof dashboardUrl === 'string' && dashboardUrl.startsWith('http')) {
-    links.push({ label: 'Open in Samsara', url: dashboardUrl });
-  }
+  const incidentUrl = [merged['incidentUrl'], merged['dashboardUrl'], merged['url']].find(
+    (value): value is string => typeof value === 'string' && value.startsWith('http'),
+  );
 
   const videos: VideoRef[] = [];
   for (const [key, label] of [
@@ -487,6 +486,10 @@ export function fromWebhook(payload: SamsaraWebhookPayload): FleetAlert | undefi
     vehicleId: vehicle?.id,
     driver: refName(driver),
     location: typeof formattedLocation === 'string' ? formattedLocation : undefined,
+    latitude: typeof latitude === 'number' ? latitude : undefined,
+    longitude: typeof longitude === 'number' ? longitude : undefined,
+    incidentUrl,
+    eventId: payload.eventId,
     speedMph:
       typeof merged['speedMilesPerHour'] === 'number'
         ? (merged['speedMilesPerHour'] as number)

@@ -67,7 +67,9 @@ describe('fromSafetyEvent', () => {
     expect(alert.vehicle).toBe('Truck 12');
     expect(alert.driver).toBe('Sam Rivera');
     expect(alert.details.join(' ')).toContain('Harsh braking');
-    expect(alert.links.some((item) => item.label === 'Map')).toBe(true);
+    expect(alert.latitude).toBe(41.88);
+    expect(alert.longitude).toBe(-87.63);
+    expect(alert.eventId).toBe('evt-1');
     expect(alert.fingerprint).toBe('safety:evt-1');
   });
 

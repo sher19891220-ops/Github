@@ -69,6 +69,14 @@ export const config = {
   get telegramWebhookSecret(): string | undefined {
     return read('TELEGRAM_WEBHOOK_SECRET');
   },
+  /** Forum topic in the central group to post every alert into. */
+  get telegramTopicId(): number | undefined {
+    const raw = read('TELEGRAM_TOPIC_ID');
+    if (!raw) return undefined;
+    const parsed = Number(raw);
+    return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined;
+  },
+
   /**
    * JSON object mapping a Samsara vehicle ID or name to that unit's Telegram
    * group, e.g. {"Truck 12": "-1001234567890"}. Alerts go to the central chat

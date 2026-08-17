@@ -62,19 +62,37 @@ const SEVERITY_BADGE: Record<string, string> = {
   low: 'INFO',
 };
 
-/** Renders a single alert as a Telegram HTML message. */
+/**
+ * Renders an alert in the layout the Samsara Events group already reads —
+ * same fields, same order, same emoji — with one deliberate change: the header
+ * names the *actual* behaviour ("Mobile Phone Usage") instead of labelling
+ * every event "Harsh Event", so the message says what happened without anyone
+ * having to open the clip.
+ */
 export function renderAlert(alert: FleetAlert): string {
   const lines: string[] = [];
   const badge = SEVERITY_BADGE[alert.severity] ?? alert.severity.toUpperCase();
   lines.push(`${alert.emoji} ${bold(alert.title)} · ${escapeHtml(badge)}`);
   lines.push('');
 
-  if (alert.vehicle) lines.push(`🚛 ${bold('Vehicle:')} ${escapeHtml(alert.vehicle)}`);
+  if (alert.vehicle) lines.push(`🚗 ${bold('Vehicle:')} ${escapeHtml(alert.vehicle)}`);
   if (alert.driver) lines.push(`👤 ${bold('Driver:')} ${escapeHtml(alert.driver)}`);
-  lines.push(`🕒 ${bold('When:')} ${escapeHtml(formatTime(alert.occurredAt))}`);
-  if (alert.location) lines.push(`📍 ${bold('Where:')} ${escapeHtml(alert.location)}`);
+  lines.push(`📅 ${bold('Time:')} ${escapeHtml(formatTime(alert.occurredAt))}`);
+  if (alert.location) lines.push(`🗺 ${bold('Location:')} ${escapeHtml(alert.location)}`);
+  if (typeof alert.latitude === 'number' && typeof alert.longitude === 'number') {
+    const coords = `${alert.latitude}, ${alert.longitude}`;
+    lines.push(
+      `📍 ${bold('Coordinates:')} ${link(
+        coords,
+        `https://maps.google.com/?q=${alert.latitude},${alert.longitude}`,
+      )}`,
+    );
+  }
   if (typeof alert.speedMph === 'number') {
-    lines.push(`💨 ${bold('Speed:')} ${Math.round(alert.speedMph)} mph`);
+    lines.push(`🏃 ${bold('Speed:')} ${alert.speedMph.toFixed(1)} Mph`);
+  }
+  if (alert.incidentUrl) {
+    lines.push(`🔗 ${bold('Incident URL:')} ${link('View Incident', alert.incidentUrl)}`);
   }
 
   if (alert.details.length) {
@@ -85,6 +103,11 @@ export function renderAlert(alert: FleetAlert): string {
   if (alert.links.length) {
     lines.push('');
     lines.push(alert.links.map((item) => link(item.label, item.url)).join(' · '));
+  }
+
+  if (alert.eventId) {
+    lines.push('');
+    lines.push(`🆔 ${code(alert.eventId)}`);
   }
 
   return lines.join('\n');

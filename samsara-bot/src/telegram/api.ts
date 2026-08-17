@@ -58,6 +58,8 @@ export interface SendOptions {
   disableWebPagePreview?: boolean;
   disableNotification?: boolean;
   replyToMessageId?: number;
+  /** Forum topic to post into, for supergroups that use topics. */
+  messageThreadId?: number;
 }
 
 export class TelegramClient {
@@ -112,6 +114,7 @@ export class TelegramClient {
           parse_mode: options.parseMode ?? 'HTML',
           disable_web_page_preview: options.disableWebPagePreview ?? true,
           disable_notification: options.disableNotification ?? false,
+          ...(options.messageThreadId ? { message_thread_id: options.messageThreadId } : {}),
           ...(index === 0 && options.replyToMessageId
             ? { reply_to_message_id: options.replyToMessageId }
             : {}),
@@ -129,9 +132,11 @@ export class TelegramClient {
     chatId: string | number,
     url: string,
     caption: string,
+    threadId?: number,
   ): Promise<TelegramMessage> {
     return this.call<TelegramMessage>('sendVideo', {
       chat_id: chatId,
+      ...(threadId ? { message_thread_id: threadId } : {}),
       video: url,
       caption: truncateCaption(caption),
       parse_mode: 'HTML',
@@ -145,9 +150,11 @@ export class TelegramClient {
     bytes: Uint8Array,
     filename: string,
     caption: string,
+    threadId?: number,
   ): Promise<TelegramMessage> {
     const form = new FormData();
     form.append('chat_id', String(chatId));
+    if (threadId) form.append('message_thread_id', String(threadId));
     form.append('caption', truncateCaption(caption));
     form.append('parse_mode', 'HTML');
     form.append('supports_streaming', 'true');

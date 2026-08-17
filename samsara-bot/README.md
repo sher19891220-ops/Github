@@ -138,13 +138,18 @@ Every event goes to the central events group (`TELEGRAM_CHAT_ID`). When the
 vehicle is recognised, the same event **also** goes to that unit's own group:
 
 ```
-UNIT_CHAT_MAP={"Truck 12":"-1001111111111","Truck 8":"-1002222222222","281":"-1003333333333"}
+UNIT_CHAT_MAP={"5269":"-1001111111111","1645":"-1002922384236:42"}
 ```
 
-Keys may be either the Samsara **vehicle ID** or the **vehicle name**, matched
-case- and space-insensitively — `"Truck 12"`, `"truck12"` and `"TRUCK 12"` are
-the same key. The vehicle ID is checked first because names get edited in the
-Samsara dashboard and IDs don't.
+Samsara vehicle labels are composite — `5269 (GZP5W69Z75) 281474991641331` is
+unit number, plate, then Samsara vehicle ID. All three are matched, so you can
+key the map by the number dispatch actually says out loud (`"5269"`). Matching
+ignores case and spacing. The Samsara vehicle ID is tried first, since names get
+edited in the dashboard and IDs don't.
+
+A value may be a bare chat ID, or `chatId:topicId` to target a **forum topic**
+inside a supergroup — useful when per-unit topics are preferable to per-unit
+groups. `TELEGRAM_TOPIC_ID` does the same for the central group.
 
 Add the bot to each unit group as an administrator, then run `/whoami` in that
 group to read its chat ID.
@@ -177,9 +182,28 @@ Set `SEND_VIDEOS=false` for links only.
 > Samsara clip is normally a few MB, so tier 1 or 2 should carry it — but a long
 > clip will fall through to a link.
 
-**This is the part of the build most in need of a live test.** Whether tier 1 or
-tier 2 fires depends on whether Samsara's `download*VideoUrl` values are
-pre-signed or bearer-protected, and whether they are populated at webhook time
+### Measured behaviour in a live fleet
+
+Timings taken from a production Samsara Events group (four consecutive events)
+show a **0.8–1.7 minute gap (mean 1.3 min) between the event timestamp and the
+clip appearing in Telegram**. Samsara media retrieval is therefore
+**asynchronous** — the clip is not ready at the instant the webhook fires.
+
+That has a hard consequence for this deployment target: a Vercel function
+(60s ceiling) cannot wait for retrieval inside the webhook invocation. Two
+workable shapes:
+
+- **Two-phase** (fits serverless): the webhook posts the alert text
+  immediately, records the pending clip, and a frequent cron re-checks and posts
+  the clip as a follow-up once Samsara has it. Needs the Redis store, and needs
+  cron more often than daily — i.e. Vercel Pro.
+- **Worker** (what the existing Django + Celery stack already does): queue the
+  retrieval and retry until the clip is available. No scheduling constraints.
+
+Observed clips are 2–6 seconds long, so size is not the constraint — latency is.
+
+Whether tier 1 or tier 2 fires depends on whether Samsara's `download*VideoUrl`
+values are pre-signed or bearer-protected, and whether they are populated at webhook time
 at all — Samsara media retrieval can be asynchronous, in which case a URL may
 not be ready the instant the event fires. If clips consistently arrive as links,
 that asynchrony is the reason, and the fix is a queue that retries retrieval

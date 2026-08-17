@@ -37,6 +37,8 @@ export interface VideoOptions {
   deadline?: number;
   fetchImpl?: typeof fetch;
   maxUploadBytes?: number;
+  /** Forum topic to post the clip into. */
+  threadId?: number;
 }
 
 async function download(
@@ -90,7 +92,7 @@ export async function deliverVideos(
 
     // Tier 1 — let Telegram fetch it.
     try {
-      await telegram.sendVideoByUrl(chatId, video.url, videoCaption);
+      await telegram.sendVideoByUrl(chatId, video.url, videoCaption, options.threadId);
       results.push({ ...video, status: 'sent-by-url' });
       continue;
     } catch (error) {
@@ -118,7 +120,13 @@ export async function deliverVideos(
         });
         continue;
       }
-      await telegram.sendVideoUpload(chatId, downloaded.bytes, `${label}.mp4`, videoCaption);
+      await telegram.sendVideoUpload(
+        chatId,
+        downloaded.bytes,
+        `${label}.mp4`,
+        videoCaption,
+        options.threadId,
+      );
       results.push({ ...video, status: 'sent-by-upload', bytes: downloaded.bytes.byteLength });
     } catch (error) {
       const reason = error instanceof Error ? error.message : String(error);

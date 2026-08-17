@@ -20,10 +20,14 @@ export interface DispatchResult {
   routes: string[];
 }
 
-/** De-duplication is per destination, so a retry cannot skip the unit group. */
+/**
+ * De-duplication is per destination, so a retry cannot skip the unit group.
+ * The topic is part of the key too — two topics in one supergroup are two
+ * distinct destinations.
+ */
 function dedupeKey(alert: FleetAlert, route: Route): string {
   const hash = createHash('sha1').update(alert.fingerprint).digest('hex');
-  return `alert:${hash}:${route.chatId}`;
+  return `alert:${hash}:${route.chatId}:${route.threadId ?? 0}`;
 }
 
 /**
@@ -72,7 +76,11 @@ export async function dispatchAlerts(
       continue;
     }
 
-    const routes = resolveRoutes(alert, { centralChatId, unitMap });
+    const routes = resolveRoutes(alert, {
+      centralChatId,
+      centralThreadId: config.telegramTopicId,
+      unitMap,
+    });
 
     for (const route of routes) {
       const fresh = await store
@@ -95,7 +103,7 @@ export async function dispatchAlerts(
           `${alert.emoji} ${escapeHtml(alert.title)}${
             alert.vehicle ? ` — ${escapeHtml(alert.vehicle)}` : ''
           }`,
-          { deadline },
+          { deadline, threadId: route.threadId },
         );
         result.videosSent += deliveries.length - undelivered(deliveries).length;
         result.videosFailed += undelivered(deliveries).length;
@@ -110,8 +118,11 @@ export async function dispatchAlerts(
         : renderAlert(alert);
 
       try {
-        await telegram.sendMessage(route.chatId, body, { disableWebPagePreview: true,
-          disableNotification: alert.severity === 'low' });
+        await telegram.sendMessage(route.chatId, body, {
+          disableWebPagePreview: true,
+          disableNotification: alert.severity === 'low',
+          messageThreadId: route.threadId,
+        });
         result.sent += 1;
         reached.add(`${route.kind}:${route.label}`);
       } catch (error) {
