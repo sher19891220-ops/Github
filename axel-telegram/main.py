@@ -14,6 +14,13 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(message)s",
     level=logging.INFO,
 )
+# httpx logs every request URL at INFO, and the Telegram API embeds the bot
+# token in the path — so this writes the token to disk on every poll (~4x/min).
+# Silence it; python-telegram-bot still reports real failures through its own
+# loggers, and errors here are handled explicitly below.
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("httpcore").setLevel(logging.WARNING)
+
 log = logging.getLogger(__name__)
 
 _headers = {"x-api-key": BACKEND_API_KEY} if BACKEND_API_KEY else {}
