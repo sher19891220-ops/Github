@@ -21,18 +21,15 @@ export async function GET(req: NextRequest) {
   }
 
   const webhookUrl = `${appUrl}/api/bot/webhook`
+  const params = new URLSearchParams({
+    url: webhookUrl,
+    allowed_updates: JSON.stringify(['message', 'edited_message', 'my_chat_member']),
+    drop_pending_updates: 'true',
+  })
 
   const res = await fetch(
-    `https://api.telegram.org/bot${botToken}/setWebhook`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        url: webhookUrl,
-        allowed_updates: ['message', 'edited_message', 'my_chat_member'],
-        drop_pending_updates: true,
-      }),
-    }
+    `https://api.telegram.org/bot${botToken}/setWebhook?${params.toString()}`,
+    { method: 'GET', cache: 'no-store' },
   )
 
   const data = await res.json()
