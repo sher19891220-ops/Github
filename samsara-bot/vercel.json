@@ -1,0 +1,23 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "api/**/*.ts": {
+      "memory": 1024,
+      "maxDuration": 60
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/safety",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/pti",
+      "schedule": "0 13 * * *"
+    },
+    {
+      "path": "/api/cron/digest",
+      "schedule": "0 12 * * *"
+    }
+  ]
+}
