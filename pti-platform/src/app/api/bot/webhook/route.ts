@@ -68,9 +68,15 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json()
-
     if (!BOT_TOKEN) return NextResponse.json({ ok: false, error: 'Bot token not configured' })
+
+    // Gracefully handle non-JSON bodies (e.g. Telegram's webhook validation ping)
+    let body: Record<string, unknown>
+    try {
+      body = await req.json()
+    } catch {
+      return NextResponse.json({ ok: true })
+    }
 
     // ── Handle bot added/removed from a group ────────────────────────────
     const memberUpdate = body?.my_chat_member
