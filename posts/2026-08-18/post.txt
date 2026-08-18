@@ -1,0 +1,19 @@
+🚨 Freight rail theft just hit $200 million a year — and carriers are fighting back with AI
+
+Bloomberg's Kiel Porter dug into the numbers behind America's freight theft crisis, and the scale (and the corporate response) is staggering.
+
+📊 The stats/facts:
+• $200 million+ in cargo stolen from US freight rail networks in 2025, across 75,000+ theft incidents
+• Theft has quadrupled since pre-pandemic (pre-2020) levels
+• Union Pacific has spent $30M+ on security since Jan 2023 — drones, AI cameras, 41,000 linear feet of barriers
+• CSX invested $7.5M+ at its Memphis Leewood Yard alone (14,000 ft of razor wire, 30 AI-powered cameras) and saw an 80% drop in Memphis-area thefts YoY
+• A single BNSF heist netted $440,000 of unreleased Nikes; the Combating Organized Retail Crime Act passed the House in May with bipartisan support
+
+💡 Why marketers should care:
+• Security and loss-prevention spend is now a board-level freight budget line — B2B freight-tech and insurtech marketers have a live, provable ROI story (CSX's 80% drop) to build campaigns around right now
+• This is a masterclass in data-driven PR: granular, quotable specifics (fencing footage, camera counts, exact dollar losses) are what got one story syndicated across Bloomberg, Fortune, Insurance Journal and Transport Topics — vague claims don't travel, specifics do
+• Pending legislation (Combating Organized Retail Crime Act) gives security/insurtech vendors a timely news-hook to message around compliance and risk-mitigation right now
+
+🔗 Source: Transport Topics (via Bloomberg), published August 17, 2026 — https://www.ttnews.com/articles/train-thieves-millions-cargo
+
+#FounderHub #Freight #SupplyChain #CargoTheft #Logistics
