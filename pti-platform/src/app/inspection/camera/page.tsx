@@ -80,53 +80,55 @@ export default function CameraPage() {
   const capturePhoto = useCallback(() => {
     if (!videoRef.current || !canvasRef.current || capturing) return
     setCapturing(true)
+    try {
+      const video = videoRef.current
+      const canvas = canvasRef.current
+      canvas.width = video.videoWidth || 1280
+      canvas.height = video.videoHeight || 720
+      const ctx = canvas.getContext('2d')!
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
 
-    const video = videoRef.current
-    const canvas = canvasRef.current
-    canvas.width = video.videoWidth || 1280
-    canvas.height = video.videoHeight || 720
-    const ctx = canvas.getContext('2d')!
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+      const blurScore = computeBlurScore(imageData)
+      const isBlurry = blurScore < 15
+      if (isBlurry) {
+        setBlurWarning(true)
+        setTimeout(() => setBlurWarning(false), 1800)
+      }
 
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-    const blurScore = computeBlurScore(imageData)
-    const isBlurry = blurScore < 15
-    if (isBlurry) {
-      setBlurWarning(true)
-      setTimeout(() => setBlurWarning(false), 1800)
+      const now = new Date()
+      const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+      const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })
+      const gpsStr = gps ? `${gps.lat.toFixed(4)}, ${gps.lng.toFixed(4)}` : 'GPS unavailable'
+      const labelLine = currentAngleConfig.label.replace('\n', ' ')
+      const watermark = `📍 ${gpsStr}   🕐 ${dateStr} ${timeStr}   ${labelLine}`
+
+      const barH = Math.round(canvas.height * 0.055)
+      ctx.fillStyle = 'rgba(0,0,0,0.65)'
+      ctx.fillRect(0, canvas.height - barH, canvas.width, barH)
+      ctx.fillStyle = '#ffffff'
+      const fontSize = Math.round(barH * 0.52)
+      ctx.font = `bold ${fontSize}px Arial, sans-serif`
+      ctx.textBaseline = 'middle'
+      ctx.fillText(watermark, 16, canvas.height - barH / 2)
+
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.92)
+      const photo: CapturedPhoto = {
+        id: Math.random().toString(36).slice(2),
+        angle: activeAngle,
+        angleLabel: labelLine,
+        dataUrl,
+        timestamp: now.toISOString(),
+        gps: gps ?? undefined,
+        blurScore,
+        passed: !isBlurry,
+      }
+      addPhoto(photo)
+      setJustCaptured(true)
+      setTimeout(() => setJustCaptured(false), 1000)
+    } finally {
+      setCapturing(false)
     }
-
-    const now = new Date()
-    const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-    const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })
-    const gpsStr = gps ? `${gps.lat.toFixed(4)}, ${gps.lng.toFixed(4)}` : 'GPS unavailable'
-    const labelLine = currentAngleConfig.label.replace('\n', ' ')
-    const watermark = `📍 ${gpsStr}   🕐 ${dateStr} ${timeStr}   ${labelLine}`
-
-    const barH = Math.round(canvas.height * 0.055)
-    ctx.fillStyle = 'rgba(0,0,0,0.65)'
-    ctx.fillRect(0, canvas.height - barH, canvas.width, barH)
-    ctx.fillStyle = '#ffffff'
-    const fontSize = Math.round(barH * 0.52)
-    ctx.font = `bold ${fontSize}px Arial, sans-serif`
-    ctx.textBaseline = 'middle'
-    ctx.fillText(watermark, 16, canvas.height - barH / 2)
-
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.92)
-    const photo: CapturedPhoto = {
-      id: Math.random().toString(36).slice(2),
-      angle: activeAngle,
-      angleLabel: labelLine,
-      dataUrl,
-      timestamp: now.toISOString(),
-      gps: gps ?? undefined,
-      blurScore,
-      passed: !isBlurry,
-    }
-    addPhoto(photo)
-    setCapturing(false)
-    setJustCaptured(true)
-    setTimeout(() => setJustCaptured(false), 1000)
   }, [activeAngle, capturing, currentAngleConfig, addPhoto, gps])
 
   const handleRemovePhoto = () => {

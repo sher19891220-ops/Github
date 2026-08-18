@@ -91,11 +91,11 @@ export default function CompletePage() {
     ]
 
     const photosHtml = store.photos.length > 0
-      ? `<h3 style="margin:16px 0 8px">Inspection Photos</h3>
-         <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px">
-           ${store.photos.map((p) => `<div style="text-align:center">
-             <div style="font-size:10px;color:#64748b;margin-bottom:3px;font-weight:600">${p.angleLabel}</div>
-             <img src="${p.dataUrl}" style="width:190px;height:auto;border:1px solid #e2e8f0;border-radius:4px"/>
+      ? `<h3 style="margin:16px 0 8px">Inspection Photos (${store.photos.length})</h3>
+         <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:16px">
+           ${store.photos.map((p) => `<div style="break-inside:avoid;page-break-inside:avoid">
+             <div style="font-size:11px;color:#64748b;margin-bottom:4px;font-weight:600;text-align:center">${p.angleLabel}</div>
+             <img src="${p.dataUrl}" style="width:100%;height:auto;border:1px solid #e2e8f0;border-radius:4px;display:block"/>
            </div>`).join('')}
          </div>`
       : ''

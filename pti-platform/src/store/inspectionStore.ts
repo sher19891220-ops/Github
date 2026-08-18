@@ -118,6 +118,24 @@ export const useInspectionStore = create<InspectionState>()(
       setSignature: (dataUrl) => set({ signatureDataUrl: dataUrl }),
       reset: () => set(defaultState),
     }),
-    { name: 'pti-inspection-session' }
+    {
+      name: 'pti-inspection-session',
+      // photos and signatureDataUrl are large data URLs that blow past the 5 MB
+      // localStorage limit — keep them in memory only for the current session.
+      partialize: (state) => ({
+        sessionToken: state.sessionToken,
+        inspectionType: state.inspectionType,
+        inspectionId: state.inspectionId,
+        driver: state.driver,
+        vehicle: state.vehicle,
+        gps: state.gps,
+        currentAngle: state.currentAngle,
+        checklist: state.checklist,
+        tireInspections: state.tireInspections,
+        damageMarkers: state.damageMarkers,
+        comments: state.comments,
+        sourceChatId: state.sourceChatId,
+      }),
+    }
   )
 )
