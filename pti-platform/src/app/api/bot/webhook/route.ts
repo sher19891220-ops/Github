@@ -11,15 +11,18 @@ export async function GET() {
   if (!BOT_TOKEN) return NextResponse.json({ error: 'Bot token not configured' }, { status: 500 })
   const webhookUrl = `${APP_URL}/api/bot/webhook`
 
+  // Confirm which bot this token belongs to
+  const me = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getMe`, { cache: 'no-store' }).then(r => r.json())
+
   // Clear any existing webhook first, then set fresh
-  await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/deleteWebhook`, {
+  const deleted = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/deleteWebhook`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ drop_pending_updates: false }),
     cache: 'no-store',
-  })
+  }).then(r => r.json())
 
-  // Use POST with JSON body — more reliable than GET query params for URLs with special chars
+  // Use POST with JSON body
   const data = await fetch(
     `https://api.telegram.org/bot${BOT_TOKEN}/setWebhook`,
     {
@@ -28,14 +31,13 @@ export async function GET() {
       body: JSON.stringify({
         url: webhookUrl,
         allowed_updates: ['message', 'edited_message', 'my_chat_member'],
-        drop_pending_updates: false,
       }),
       cache: 'no-store',
     },
   ).then(r => r.json())
 
-  // Wait briefly so Telegram's state propagates before we check
-  await new Promise(r => setTimeout(r, 1500))
+  // Wait for Telegram to propagate the change
+  await new Promise(r => setTimeout(r, 3000))
 
   // Register commands so they appear in Telegram's "/" autocomplete menu
   const commands = [
@@ -63,7 +65,7 @@ export async function GET() {
     { cache: 'no-store' },
   ).then(r => r.json())
 
-  return NextResponse.json({ webhookUrl, telegram: data, commands: cmdRes, info })
+  return NextResponse.json({ webhookUrl, me, deleted, telegram: data, commands: cmdRes, info })
 }
 
 export async function POST(req: NextRequest) {
