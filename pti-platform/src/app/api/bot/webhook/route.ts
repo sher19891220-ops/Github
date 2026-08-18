@@ -20,11 +20,33 @@ export async function GET() {
     `&drop_pending_updates=false`
   const res = await fetch(tgUrl, { method: 'GET', cache: 'no-store' })
   const data = await res.json()
+
+  // Register commands so they appear in Telegram's "/" autocomplete menu
+  const commands = [
+    { command: 'pickup',       description: 'Send a pickup inspection link' },
+    { command: 'dropoff',      description: 'Send a drop-off inspection link' },
+    { command: 'link',         description: 'Get a pinnable universal inspection link' },
+    { command: 'chatid',       description: 'Show this group\'s Telegram ID' },
+    { command: 'help',         description: 'Show all commands' },
+    { command: 'ptiregister',  description: 'Register this group for PTI reports' },
+    { command: 'ptiunregister',description: 'Unregister this group from PTI reports' },
+    { command: 'ptigroups',    description: 'List all registered groups' },
+  ]
+  const cmdRes = await fetch(
+    `https://api.telegram.org/bot${BOT_TOKEN}/setMyCommands`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ commands }),
+      cache: 'no-store',
+    },
+  ).then(r => r.json())
+
   const info = await fetch(
     `https://api.telegram.org/bot${BOT_TOKEN}/getWebhookInfo`,
     { cache: 'no-store' },
   ).then(r => r.json())
-  return NextResponse.json({ webhookUrl, tgUrl, telegram: data, info })
+  return NextResponse.json({ webhookUrl, tgUrl, telegram: data, commands: cmdRes, info })
 }
 
 export async function POST(req: NextRequest) {
