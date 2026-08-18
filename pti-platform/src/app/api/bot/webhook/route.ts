@@ -10,27 +10,32 @@ const APP_URL   = process.env.NEXT_PUBLIC_APP_URL || 'https://pti-check.vercel.a
 export async function GET() {
   if (!BOT_TOKEN) return NextResponse.json({ error: 'Bot token not configured' }, { status: 500 })
   const webhookUrl = `${APP_URL}/api/bot/webhook`
-  // Build query string manually so the webhook URL itself is NOT percent-encoded.
-  // URLSearchParams would encode ':' → '%3A' and '/' → '%2F' in the url value,
-  // causing Telegram to reject the URL as invalid.
-  const tgUrl =
-    `https://api.telegram.org/bot${BOT_TOKEN}/setWebhook` +
-    `?url=${webhookUrl}` +
-    `&allowed_updates=${encodeURIComponent(JSON.stringify(['message', 'edited_message', 'my_chat_member']))}` +
-    `&drop_pending_updates=false`
-  const res = await fetch(tgUrl, { method: 'GET', cache: 'no-store' })
-  const data = await res.json()
+
+  // Use POST with JSON body — more reliable than GET query params for URLs with special chars
+  const data = await fetch(
+    `https://api.telegram.org/bot${BOT_TOKEN}/setWebhook`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        url: webhookUrl,
+        allowed_updates: ['message', 'edited_message', 'my_chat_member'],
+        drop_pending_updates: false,
+      }),
+      cache: 'no-store',
+    },
+  ).then(r => r.json())
 
   // Register commands so they appear in Telegram's "/" autocomplete menu
   const commands = [
-    { command: 'pickup',       description: 'Send a pickup inspection link' },
-    { command: 'dropoff',      description: 'Send a drop-off inspection link' },
-    { command: 'link',         description: 'Get a pinnable universal inspection link' },
-    { command: 'chatid',       description: 'Show this group\'s Telegram ID' },
-    { command: 'help',         description: 'Show all commands' },
-    { command: 'ptiregister',  description: 'Register this group for PTI reports' },
-    { command: 'ptiunregister',description: 'Unregister this group from PTI reports' },
-    { command: 'ptigroups',    description: 'List all registered groups' },
+    { command: 'pickup',        description: 'Send a pickup inspection link' },
+    { command: 'dropoff',       description: 'Send a drop-off inspection link' },
+    { command: 'link',          description: 'Get a pinnable universal inspection link' },
+    { command: 'chatid',        description: "Show this group's Telegram ID" },
+    { command: 'help',          description: 'Show all commands' },
+    { command: 'ptiregister',   description: 'Register this group for PTI reports' },
+    { command: 'ptiunregister', description: 'Unregister this group from PTI reports' },
+    { command: 'ptigroups',     description: 'List all registered groups' },
   ]
   const cmdRes = await fetch(
     `https://api.telegram.org/bot${BOT_TOKEN}/setMyCommands`,
@@ -46,7 +51,8 @@ export async function GET() {
     `https://api.telegram.org/bot${BOT_TOKEN}/getWebhookInfo`,
     { cache: 'no-store' },
   ).then(r => r.json())
-  return NextResponse.json({ webhookUrl, tgUrl, telegram: data, commands: cmdRes, info })
+
+  return NextResponse.json({ webhookUrl, telegram: data, commands: cmdRes, info })
 }
 
 export async function POST(req: NextRequest) {
