@@ -11,6 +11,14 @@ export async function GET() {
   if (!BOT_TOKEN) return NextResponse.json({ error: 'Bot token not configured' }, { status: 500 })
   const webhookUrl = `${APP_URL}/api/bot/webhook`
 
+  // Clear any existing webhook first, then set fresh
+  await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/deleteWebhook`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ drop_pending_updates: false }),
+    cache: 'no-store',
+  })
+
   // Use POST with JSON body — more reliable than GET query params for URLs with special chars
   const data = await fetch(
     `https://api.telegram.org/bot${BOT_TOKEN}/setWebhook`,
@@ -25,6 +33,9 @@ export async function GET() {
       cache: 'no-store',
     },
   ).then(r => r.json())
+
+  // Wait briefly so Telegram's state propagates before we check
+  await new Promise(r => setTimeout(r, 1500))
 
   // Register commands so they appear in Telegram's "/" autocomplete menu
   const commands = [
