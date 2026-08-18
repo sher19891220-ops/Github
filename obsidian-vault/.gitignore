@@ -1,0 +1,9 @@
+# Obsidian per-machine state — not worth syncing, causes merge conflicts
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/cache
+.trash/
+
+# Never commit credentials
+.env
+*.key
