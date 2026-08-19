@@ -1,8 +1,7 @@
 import Database from 'better-sqlite3';
 import fs from 'node:fs';
 import path from 'node:path';
-
-const SCHEMA_PATH = path.join(process.cwd(), 'src', 'db', 'schema.sql');
+import { SCHEMA_SQL } from './schema';
 
 let cached: Database.Database | null = null;
 
@@ -19,7 +18,7 @@ export function openDatabase(dbPath?: string): Database.Database {
   }
   const db = new Database(file);
   db.pragma('foreign_keys = ON');
-  db.exec(fs.readFileSync(SCHEMA_PATH, 'utf8'));
+  db.exec(SCHEMA_SQL);
   return db;
 }
 

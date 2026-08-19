@@ -1,0 +1,33 @@
+# Render blueprint for DriverQual.
+#
+# The database is SQLite on a mounted persistent disk. Render disks require a
+# paid instance type — on the free tier the filesystem is wiped on every deploy
+# and restart, which would silently discard every company and applicant. If you
+# need a free deployment, see DEPLOY.md for the hosted-database alternative.
+
+services:
+  - type: web
+    name: driverqual
+    runtime: node
+    plan: starter          # required for `disk` below; `free` has no persistent storage
+    rootDir: driverqual
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start
+    healthCheckPath: /team # a static screen, so the check never depends on the database
+    autoDeploy: true
+    disk:
+      name: driverqual-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      - key: DRIVERQUAL_DB
+        value: /var/data/driverqual.db
+      # Set these in the Render dashboard, not here — never commit a secret.
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: FMCSA_API_KEY
+        sync: false

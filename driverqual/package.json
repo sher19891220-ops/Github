@@ -2,10 +2,11 @@
   "name": "driverqual",
   "version": "1.0.0",
   "private": true,
+  "engines": { "node": ">=20.0.0" },
   "scripts": {
     "dev": "next dev -p 3000",
     "build": "next build",
-    "start": "next start -p 3000",
+    "start": "next start",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:unit": "vitest run tests/unit",

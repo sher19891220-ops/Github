@@ -1,4 +1,12 @@
-PRAGMA journal_mode = WAL;
+/**
+ * Database schema, embedded as a string rather than read from disk at runtime.
+ *
+ * A deployed build does not always ship the source tree alongside the server
+ * bundle (standalone output, container images, serverless bundles), so reading
+ * `schema.sql` from `process.cwd()` fails in exactly the environments hardest to
+ * debug. Keeping it here means the schema travels with the code that applies it.
+ */
+export const SCHEMA_SQL = String.raw`PRAGMA journal_mode = WAL;
 PRAGMA foreign_keys = ON;
 
 CREATE TABLE IF NOT EXISTS companies (
@@ -171,3 +179,4 @@ CREATE TABLE IF NOT EXISTS expiration_notifications (
   created_at    TEXT NOT NULL,
   UNIQUE(coverage_id, severity)
 );
+`;
