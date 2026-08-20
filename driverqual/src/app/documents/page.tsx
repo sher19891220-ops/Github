@@ -4,13 +4,15 @@ import { CURRENT_EXTRACTION_FORMAT_VERSION } from '@/domain/types';
 
 export const dynamic = 'force-dynamic';
 
-export default function DocumentsPage() {
-  const db = getDb();
-  const companies = new Map(listCompanies(db).map((c) => [c.id, c.name]));
-  const applicants = listApplicants(db).map((applicant) => {
-    const current = getCurrentEvidence(db, applicant.id);
-    return { applicant, evidence: current?.evidence ?? null };
-  });
+export default async function DocumentsPage() {
+  const db = await getDb();
+  const companies = new Map((await listCompanies(db)).map((c) => [c.id, c.name]));
+  const applicants = await Promise.all(
+    (await listApplicants(db)).map(async (applicant) => {
+      const current = await getCurrentEvidence(db, applicant.id);
+      return { applicant, evidence: current?.evidence ?? null };
+    }),
+  );
 
   return (
     <>

@@ -10,7 +10,8 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const companyId = url.searchParams.get('companyId') ?? undefined;
   const status = url.searchParams.get('status') ?? undefined;
-  return NextResponse.json({ guidelines: listGuidelines(getDb(), { companyId, status }) });
+  const db = await getDb();
+  return NextResponse.json({ guidelines: await listGuidelines(db, { companyId, status }) });
 }
 
 export async function POST(request: Request) {
@@ -44,8 +45,9 @@ export async function POST(request: Request) {
     ruleSet = parsed.ruleSet;
   }
 
-  const guideline = createGuideline(
-    getDb(),
+  const db = await getDb();
+  const guideline = await createGuideline(
+    db,
     { ...body, coverageType: coverageType as CoverageType, ruleSet },
     'safety.admin',
   );

@@ -10,12 +10,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (body.action !== 'approve') {
     return NextResponse.json({ error: `Unknown action "${body.action}".` }, { status: 400 });
   }
-  approveGuideline(getDb(), id, 'safety.admin');
+  await approveGuideline(await getDb(), id, 'safety.admin');
   return NextResponse.json({ ok: true });
 }
 
 export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  removeGuideline(getDb(), id, 'safety.admin');
+  await removeGuideline(await getDb(), id, 'safety.admin');
   return NextResponse.json({ ok: true });
 }

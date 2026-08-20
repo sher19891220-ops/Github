@@ -39,6 +39,6 @@ export async function POST(request: Request) {
     })),
   );
 
-  const result = await extractDocuments(getDb(), encoded);
+  const result = await extractDocuments(await getDb(), encoded);
   return NextResponse.json(result, { status: result.ok ? 200 : 422 });
 }

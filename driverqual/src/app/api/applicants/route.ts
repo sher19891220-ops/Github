@@ -6,7 +6,8 @@ import { emptyEvidence, type DriverEvidence } from '@/domain/types';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  return NextResponse.json({ rows: dashboardRows(getDb()) });
+  const db = await getDb();
+  return NextResponse.json({ rows: await dashboardRows(db) });
 }
 
 export async function POST(request: Request) {
@@ -21,12 +22,12 @@ export async function POST(request: Request) {
     );
   }
 
-  const db = getDb();
+  const db = await getDb();
   const evidence: DriverEvidence = { ...emptyEvidence(), ...(body.evidence ?? {}) };
 
   try {
-    const applicant = createApplicant(db, body, evidence, 'safety.reviewer');
-    const evaluation = evaluateApplicantForCompany(db, applicant.id, applicant.companyId, {
+    const applicant = await createApplicant(db, body, evidence, 'safety.reviewer');
+    const evaluation = await evaluateApplicantForCompany(db, applicant.id, applicant.companyId, {
       evaluationDate: body.evaluationDate,
       actor: 'safety.reviewer',
     });

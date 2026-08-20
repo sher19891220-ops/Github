@@ -15,7 +15,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Enter a numeric USDOT number.' }, { status: 400 });
   }
 
-  const key = getSecret(getDb(), SETTING_KEYS.fmcsaApiKey);
+  const key = await getSecret(await getDb(), SETTING_KEYS.fmcsaApiKey);
   if (!key) {
     return NextResponse.json(
       {

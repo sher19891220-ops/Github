@@ -16,13 +16,14 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const db = getDb();
-  const applicant = getApplicant(db, id);
+  const db = await getDb();
+  const applicant = await getApplicant(db, id);
   if (!applicant) return NextResponse.json({ error: 'Applicant not found.' }, { status: 404 });
+  const current = await getCurrentEvidence(db, id);
   return NextResponse.json({
     applicant,
-    evidence: getCurrentEvidence(db, id)?.evidence ?? null,
-    evaluation: getStoredEvaluation(db, id, applicant.companyId),
+    evidence: current?.evidence ?? null,
+    evaluation: await getStoredEvaluation(db, id, applicant.companyId),
   });
 }
 
@@ -33,8 +34,8 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const body = await request.json().catch(() => ({}));
-  const db = getDb();
-  const applicant = getApplicant(db, id);
+  const db = await getDb();
+  const applicant = await getApplicant(db, id);
   if (!applicant) return NextResponse.json({ error: 'Applicant not found.' }, { status: 404 });
 
   const actor = 'safety.reviewer';
@@ -44,7 +45,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     switch (body.action) {
       case 'reevaluate':
         return NextResponse.json({
-          evaluation: evaluateApplicantForCompany(db, id, applicant.companyId, {
+          evaluation: await evaluateApplicantForCompany(db, id, applicant.companyId, {
             evaluationDate,
             actor,
           }),
@@ -55,15 +56,15 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           return NextResponse.json({ error: 'companyId is required.' }, { status: 400 });
         }
         return NextResponse.json({
-          evaluation: setApplicantCompany(db, id, body.companyId, { evaluationDate, actor }),
+          evaluation: await setApplicantCompany(db, id, body.companyId, { evaluationDate, actor }),
         });
       }
 
       case 'update_evidence': {
         const evidence = { ...emptyEvidence(), ...(body.evidence ?? {}) };
-        saveEvidence(db, id, evidence, actor);
+        await saveEvidence(db, id, evidence, actor);
         return NextResponse.json({
-          evaluation: evaluateApplicantForCompany(db, id, applicant.companyId, {
+          evaluation: await evaluateApplicantForCompany(db, id, applicant.companyId, {
             evaluationDate,
             actor,
           }),
@@ -76,7 +77,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           return NextResponse.json({ error: 'Select at least one company.' }, { status: 400 });
         }
         return NextResponse.json({
-          comparisons: compareCompanies(db, id, companyIds, { evaluationDate, actor }),
+          comparisons: await compareCompanies(db, id, companyIds, { evaluationDate, actor }),
         });
       }
 
@@ -93,6 +94,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
 export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  deleteApplicant(getDb(), id, 'safety.reviewer');
+  await deleteApplicant(await getDb(), id, 'safety.reviewer');
   return NextResponse.json({ ok: true });
 }

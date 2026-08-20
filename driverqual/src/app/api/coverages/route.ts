@@ -1,17 +1,22 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '@/db';
-import { createCoverage, listCoverages, listExpirationAlerts, refreshExpirationAlerts } from '@/db/repo';
+import {
+  createCoverage,
+  listCoverages,
+  listExpirationAlerts,
+  refreshExpirationAlerts,
+} from '@/db/repo';
 import { normalizeCoverageType } from '@/domain/types';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
   const companyId = new URL(request.url).searchParams.get('companyId') ?? undefined;
-  const db = getDb();
-  refreshExpirationAlerts(db, companyId);
+  const db = await getDb();
+  await refreshExpirationAlerts(db, companyId);
   return NextResponse.json({
-    coverages: listCoverages(db, companyId),
-    alerts: listExpirationAlerts(db),
+    coverages: await listCoverages(db, companyId),
+    alerts: await listExpirationAlerts(db),
   });
 }
 
@@ -27,8 +32,9 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
-  const coverage = createCoverage(
-    getDb(),
+  const db = await getDb();
+  const coverage = await createCoverage(
+    db,
     {
       companyId: body.companyId,
       coverageType,

@@ -1,4 +1,4 @@
-import type { Database } from 'better-sqlite3';
+import type { Db } from '@/db';
 import { nowIso } from '@/db/ids';
 
 /**
@@ -35,25 +35,28 @@ function envFor(key: string): string | undefined {
   }
 }
 
-export function setSetting(db: Database, key: string, value: string | null): void {
-  db.prepare(
+export async function setSetting(db: Db, key: string, value: string | null): Promise<void> {
+  await db.run(
     `INSERT INTO integration_settings (key, value, status, updated_at) VALUES (?, ?, ?, ?)
      ON CONFLICT(key) DO UPDATE SET value = excluded.value, status = excluded.status, updated_at = excluded.updated_at`,
-  ).run(key, value, value ? 'configured' : 'removed', nowIso());
+    [key, value, value ? 'configured' : 'removed', nowIso()],
+  );
 }
 
-export function getSecret(db: Database, key: string): string | null {
-  const row = db.prepare(`SELECT value FROM integration_settings WHERE key = ?`).get(key) as
-    | { value: string | null }
-    | undefined;
+export async function getSecret(db: Db, key: string): Promise<string | null> {
+  const row = await db.get<{ value: string | null }>(
+    `SELECT value FROM integration_settings WHERE key = ?`,
+    [key],
+  );
   return row?.value ?? envFor(key) ?? null;
 }
 
 /** The only shape a secret is allowed to take when leaving the server. */
-export function secretStatus(db: Database, key: string): SecretStatus {
-  const row = db
-    .prepare(`SELECT value, updated_at FROM integration_settings WHERE key = ?`)
-    .get(key) as { value: string | null; updated_at: string } | undefined;
+export async function secretStatus(db: Db, key: string): Promise<SecretStatus> {
+  const row = await db.get<{ value: string | null; updated_at: string }>(
+    `SELECT value, updated_at FROM integration_settings WHERE key = ?`,
+    [key],
+  );
 
   const stored = row?.value ?? null;
   const fromEnv = envFor(key) ?? null;
@@ -68,10 +71,11 @@ export function secretStatus(db: Database, key: string): SecretStatus {
   };
 }
 
-export function getExtractionModel(db: Database): string {
-  const row = db
-    .prepare(`SELECT value FROM integration_settings WHERE key = ?`)
-    .get(SETTING_KEYS.openaiModel) as { value: string | null } | undefined;
+export async function getExtractionModel(db: Db): Promise<string> {
+  const row = await db.get<{ value: string | null }>(
+    `SELECT value FROM integration_settings WHERE key = ?`,
+    [SETTING_KEYS.openaiModel],
+  );
   return row?.value || process.env.OPENAI_MODEL || DEFAULT_EXTRACTION_MODEL;
 }
 

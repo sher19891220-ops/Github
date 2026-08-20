@@ -14,11 +14,11 @@ export const dynamic = 'force-dynamic';
 
 /** Returns status only. A stored secret never leaves the server in full. */
 export async function GET() {
-  const db = getDb();
+  const db = await getDb();
   return NextResponse.json({
-    openai: secretStatus(db, SETTING_KEYS.openaiApiKey),
-    fmcsa: secretStatus(db, SETTING_KEYS.fmcsaApiKey),
-    extractionModel: getExtractionModel(db),
+    openai: await secretStatus(db, SETTING_KEYS.openaiApiKey),
+    fmcsa: await secretStatus(db, SETTING_KEYS.fmcsaApiKey),
+    extractionModel: await getExtractionModel(db),
     defaultModel: DEFAULT_EXTRACTION_MODEL,
     uploadPolicy: UPLOAD_POLICY,
   });
@@ -26,7 +26,7 @@ export async function GET() {
 
 export async function PUT(request: Request) {
   const body = await request.json().catch(() => null);
-  const db = getDb();
+  const db = await getDb();
 
   if (body?.key === undefined) {
     return NextResponse.json({ error: 'A setting key is required.' }, { status: 400 });
@@ -46,8 +46,8 @@ export async function PUT(request: Request) {
     );
   }
 
-  setSetting(db, body.key, value || null);
-  recordAudit(db, {
+  await setSetting(db, body.key, value || null);
+  await recordAudit(db, {
     actor: 'safety.admin',
     action: value ? 'setting.save' : 'setting.remove',
     entityType: 'setting',
@@ -61,6 +61,6 @@ export async function PUT(request: Request) {
     status:
       body.key === SETTING_KEYS.openaiModel
         ? { key: body.key, configured: Boolean(value) }
-        : secretStatus(db, body.key),
+        : await secretStatus(db, body.key),
   });
 }

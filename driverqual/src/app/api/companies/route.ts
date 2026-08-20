@@ -5,7 +5,8 @@ import { createCompany, listCompanyCards } from '@/db/repo';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  return NextResponse.json({ companies: listCompanyCards(getDb()) });
+  const db = await getDb();
+  return NextResponse.json({ companies: await listCompanyCards(db) });
 }
 
 export async function POST(request: Request) {
@@ -13,6 +14,7 @@ export async function POST(request: Request) {
   if (!body || typeof body.name !== 'string' || body.name.trim() === '') {
     return NextResponse.json({ error: 'Company name is required.' }, { status: 400 });
   }
-  const company = createCompany(getDb(), { ...body, name: body.name.trim() }, 'safety.admin');
+  const db = await getDb();
+  const company = await createCompany(db, { ...body, name: body.name.trim() }, 'safety.admin');
   return NextResponse.json({ company }, { status: 201 });
 }

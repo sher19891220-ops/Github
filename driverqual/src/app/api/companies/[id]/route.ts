@@ -6,14 +6,16 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const company = getCompany(getDb(), id);
+  const db = await getDb();
+  const company = await getCompany(db, id);
   if (!company) return NextResponse.json({ error: 'Company not found.' }, { status: 404 });
-  return NextResponse.json({ company, impact: companyDeletionImpact(getDb(), id) });
+  return NextResponse.json({ company, impact: await companyDeletionImpact(db, id) });
 }
 
 export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const result = deleteCompany(getDb(), id, 'safety.admin');
+  const db = await getDb();
+  const result = await deleteCompany(db, id, 'safety.admin');
   if (!result.ok) {
     return NextResponse.json({ error: result.error, impact: result.impact }, { status: 409 });
   }

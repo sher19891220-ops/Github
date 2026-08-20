@@ -3,12 +3,12 @@ import { listCompanies, listCoverages, listExpirationAlerts, refreshExpirationAl
 
 export const dynamic = 'force-dynamic';
 
-export default function InsuranceProgramsPage() {
-  const db = getDb();
-  refreshExpirationAlerts(db);
-  const companies = new Map(listCompanies(db).map((c) => [c.id, c.name]));
-  const coverages = listCoverages(db);
-  const alerts = new Map(listExpirationAlerts(db).map((a) => [a.coverageId, a]));
+export default async function InsuranceProgramsPage() {
+  const db = await getDb();
+  await refreshExpirationAlerts(db);
+  const companies = new Map((await listCompanies(db)).map((c) => [c.id, c.name]));
+  const coverages = await listCoverages(db);
+  const alerts = new Map((await listExpirationAlerts(db)).map((a) => [a.coverageId, a]));
 
   return (
     <>

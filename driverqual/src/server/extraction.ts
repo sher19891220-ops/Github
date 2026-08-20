@@ -1,4 +1,4 @@
-import type { Database } from 'better-sqlite3';
+import type { Db } from '@/db';
 import { z } from 'zod';
 import { getExtractionModel, getSecret, SETTING_KEYS } from './settings';
 import {
@@ -153,11 +153,11 @@ export function toEvidence(payload: ExtractionPayload): DriverEvidence {
  * placeholder data — a safety file must never contain invented evidence.
  */
 export async function extractDocuments(
-  db: Database,
+  db: Db,
   files: Array<{ name: string; mimeType: string; base64: string }>,
 ): Promise<ExtractionResult> {
-  const apiKey = getSecret(db, SETTING_KEYS.openaiApiKey);
-  const model = getExtractionModel(db);
+  const apiKey = await getSecret(db, SETTING_KEYS.openaiApiKey);
+  const model = await getExtractionModel(db);
 
   if (!apiKey) {
     return {

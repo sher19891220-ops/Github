@@ -6,10 +6,7 @@
  * `schema.sql` from `process.cwd()` fails in exactly the environments hardest to
  * debug. Keeping it here means the schema travels with the code that applies it.
  */
-export const SCHEMA_SQL = String.raw`PRAGMA journal_mode = WAL;
-PRAGMA foreign_keys = ON;
-
-CREATE TABLE IF NOT EXISTS companies (
+export const SCHEMA_SQL = String.raw`CREATE TABLE IF NOT EXISTS companies (
   id              TEXT PRIMARY KEY,
   name            TEXT NOT NULL,
   dba             TEXT,

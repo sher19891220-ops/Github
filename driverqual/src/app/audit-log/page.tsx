@@ -3,8 +3,8 @@ import { listAuditEvents } from '@/db/repo';
 
 export const dynamic = 'force-dynamic';
 
-export default function AuditLogPage() {
-  const events = listAuditEvents(getDb(), 300);
+export default async function AuditLogPage() {
+  const events = await listAuditEvents(await getDb(), 300);
 
   return (
     <>

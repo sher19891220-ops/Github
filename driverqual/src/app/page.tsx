@@ -4,11 +4,11 @@ import { ApplicantsView } from '@/components/ApplicantsView';
 
 export const dynamic = 'force-dynamic';
 
-export default function DashboardPage() {
-  const db = getDb();
-  refreshExpirationAlerts(db);
-  const stats = dashboardStats(db);
-  const alerts = listExpirationAlerts(db);
+export default async function DashboardPage() {
+  const db = await getDb();
+  await refreshExpirationAlerts(db);
+  const stats = await dashboardStats(db);
+  const alerts = await listExpirationAlerts(db);
 
   const tiles = [
     { label: 'Total applicants', value: stats.totalApplicants },

@@ -3,12 +3,12 @@ import { dashboardRows, dashboardStats, listCompanyCards, listExpirationAlerts }
 
 export const dynamic = 'force-dynamic';
 
-export default function ReportsPage() {
-  const db = getDb();
-  const stats = dashboardStats(db);
-  const rows = dashboardRows(db);
-  const companies = listCompanyCards(db);
-  const alerts = listExpirationAlerts(db);
+export default async function ReportsPage() {
+  const db = await getDb();
+  const stats = await dashboardStats(db);
+  const rows = await dashboardRows(db);
+  const companies = await listCompanyCards(db);
+  const alerts = await listExpirationAlerts(db);
 
   const byCompany = companies.map((company) => {
     const companyRows = rows.filter((r) => r.applicant.companyId === company.id);

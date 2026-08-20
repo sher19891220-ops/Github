@@ -38,7 +38,7 @@ model in the path. Models transcribe documents; they never decide anything.
 | `domain/guideline.ts` | Rule-tree schema, review gate |
 | `domain/engine.ts` | Tri-state conditions, coverage decision, overall decision |
 | `domain/guard.ts` | Numeric-claim guard, model-output validation |
-| `db/` | SQLite schema, repositories, append-only audit |
+| `db/` | libSQL schema, async repositories, append-only audit |
 | `server/` | Settings and secrets, upload validation, extraction |
 | `app/` | Next.js routes and screens |
 
@@ -54,9 +54,14 @@ model in the path. Models transcribe documents; they never decide anything.
 
 ## Configuration
 
+Storage is libSQL. With no configuration the app uses a local file; point it at a
+hosted [Turso](https://turso.tech) database and the same code path serves
+production. See `DEPLOY.md` for free hosting.
+
 | Variable | Purpose |
 | --- | --- |
-| `DRIVERQUAL_DB` | SQLite path (default `.data/driverqual.db`) |
+| `TURSO_DATABASE_URL` | `libsql://…` for hosted, or `file:…` for local (default `file:.data/driverqual.db`) |
+| `TURSO_AUTH_TOKEN` | Required with a `libsql://` URL |
 | `OPENAI_API_KEY` | Extraction; can also be set in Settings |
 | `OPENAI_MODEL` | Extraction model (default `gpt-4.1-mini`) |
 | `FMCSA_API_KEY` | USDOT lookup; can also be set in Settings |
@@ -75,3 +80,6 @@ a coincidentally correct answer.
 Playwright runs against a real production build with a real database, resetting
 it in the web-server command (Playwright starts the server before `globalSetup`,
 so a setup hook would unlink the file out from under a live connection).
+
+Integration tests run against a throwaway libSQL file per test — libSQL has no
+in-memory mode — so they exercise the same client and dialect as production.

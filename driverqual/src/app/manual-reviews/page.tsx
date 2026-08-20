@@ -4,9 +4,19 @@ import { DecisionBadge } from '@/components/Badge';
 
 export const dynamic = 'force-dynamic';
 
-export default function ManualReviewsPage() {
-  const db = getDb();
-  const rows = dashboardRows(db).filter((row) => row.overall === 'Manual Review');
+export default async function ManualReviewsPage() {
+  const db = await getDb();
+  const allRows = await dashboardRows(db);
+  const rows = allRows.filter((row) => row.overall === 'Manual Review');
+
+  // Resolve each row's stored coverages up front; a server component cannot
+  // await inside the JSX it returns.
+  const detailed = await Promise.all(
+    rows.map(async (row) => ({
+      row,
+      stored: await getStoredEvaluation(db, row.applicant.id, row.applicant.companyId),
+    })),
+  );
 
   return (
     <>
@@ -22,8 +32,7 @@ export default function ManualReviewsPage() {
           <p>Applicants appear here when their evidence cannot decide a guideline’s criteria.</p>
         </div>
       ) : (
-        rows.map((row) => {
-          const stored = getStoredEvaluation(db, row.applicant.id, row.applicant.companyId);
+        detailed.map(({ row, stored }) => {
           const auto = stored.coverages.find((c) => c.coverageType === 'Auto Liability');
           return (
             <div className="card" key={row.applicant.id} style={{ marginBottom: 14 }}>
