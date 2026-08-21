@@ -40,6 +40,10 @@ automatically.
    variables marked `sync: false`. Fill in:
    - `TURSO_DATABASE_URL` — the `libsql://…` URL from step 1
    - `TURSO_AUTH_TOKEN` — the token from step 1
+   - `APP_ACCESS_CODE` — the code everyone types to get in. **Set this.** Left
+     blank, the app is open to anyone with the URL and says so on every screen.
+     See "On the length of your code" in `docs/USER-GUIDE.md` before choosing a
+     short one.
    - `OPENAI_API_KEY` and `FMCSA_API_KEY` — optional; leave blank for now
 4. Approve. The first build takes roughly 3–5 minutes.
 
@@ -119,6 +123,8 @@ on Vercel, Railway, Fly.io or any container host.
 | --- | :-: | --- |
 | `TURSO_DATABASE_URL` | for hosting | `libsql://…`, or `file:…` for a local file (default `file:.data/driverqual.db`) |
 | `TURSO_AUTH_TOKEN` | with a `libsql://` URL | Database credential |
+| `APP_ACCESS_CODE` | for any shared URL | Shared code required to enter; unset means no authentication |
+| `SESSION_SECRET` | no | Extra signing entropy; unset means a restart signs everyone out |
 | `OPENAI_API_KEY` | no | Document extraction |
 | `OPENAI_MODEL` | no | Extraction model (default `gpt-4.1-mini`) |
 | `FMCSA_API_KEY` | no | USDOT lookup |
@@ -151,9 +157,12 @@ This is a working application with a tested decision engine, but it has not had
 the hardening a system holding personal driving records deserves. Treat these as
 prerequisites, not polish:
 
-- **There is no authentication.** Anyone with the URL has full access. The role
-  model on the Team & roles screen documents intended permissions; it is not
-  enforced yet. Put authentication in front before the app is publicly reachable.
+- **Authentication is one shared code, not user accounts.** Set
+  `APP_ACCESS_CODE`; without it the app is open to anyone with the URL. The code
+  gates the whole application and failed attempts are locked out, but it cannot
+  tell you *who* did something — the audit log records addresses, not people. The
+  role model on the Team & roles screen documents intended permissions and is not
+  enforced yet.
 - **Uploaded files are not retained.** Documents are read and discarded; only the
   extracted evidence is stored. If your retention policy requires keeping source
   documents, wire up private object storage.

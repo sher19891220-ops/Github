@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { Nav } from '@/components/Nav';
+import { AppFrame } from '@/components/AppFrame';
+import { isAuthEnabled } from '@/server/auth';
 
 export const metadata: Metadata = {
   title: 'DriverQual — Driver Qualification Platform',
@@ -15,10 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       </head>
       <body>
-        <div className="shell">
-          <Nav />
-          <main className="main">{children}</main>
-        </div>
+        <AppFrame authEnabled={isAuthEnabled()}>{children}</AppFrame>
       </body>
     </html>
   );

@@ -248,3 +248,24 @@ ul.reasons li { margin-bottom: 4px; }
   background: #fff7ed; border: 1px solid #fed7aa; color: #9a3412;
   border-radius: 8px; padding: 10px 12px; font-size: 13px; margin-top: 18px;
 }
+
+/* ---------- login ---------- */
+
+.login-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: var(--navy-900);
+}
+.login-card { width: min(380px, 100%); }
+
+.auth-banner {
+  background: var(--red-100);
+  color: var(--red-700);
+  border-bottom: 1px solid #fca5a5;
+  padding: 8px 14px;
+  font-size: 13px;
+  text-align: center;
+}

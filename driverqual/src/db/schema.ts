@@ -176,4 +176,14 @@ CREATE TABLE IF NOT EXISTS expiration_notifications (
   created_at    TEXT NOT NULL,
   UNIQUE(coverage_id, severity)
 );
+
+-- Failed access-code attempts, per address. This is what makes a short code
+-- survivable: without it, a four-digit code is a few seconds of scripting.
+CREATE TABLE IF NOT EXISTS auth_attempts (
+  address           TEXT PRIMARY KEY,
+  failed_attempts   INTEGER NOT NULL DEFAULT 0,
+  first_attempt_at  INTEGER NOT NULL,
+  locked_until      INTEGER,
+  updated_at        TEXT NOT NULL
+);
 `;

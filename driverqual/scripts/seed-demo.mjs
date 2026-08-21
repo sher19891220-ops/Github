@@ -11,7 +11,7 @@
  * refuses to run against anything but a local instance unless explicitly forced.
  *
  *   npm run demo                          # http://localhost:3000
- *   npm run demo -- --url http://…        # another instance
+ *   npm run demo -- --code 1029           # when APP_ACCESS_CODE is set
  *   npm run demo -- --url http://… --force
  */
 
@@ -23,6 +23,10 @@ const flag = (name) => {
 
 const BASE = (flag('--url') || process.env.BASE_URL || 'http://localhost:3000').replace(/\/$/, '');
 const FORCE = args.includes('--force');
+const ACCESS_CODE = flag('--code') || process.env.APP_ACCESS_CODE || null;
+
+/** Session cookie, once signed in. */
+let sessionCookie = null;
 /**
  * Every seeded date is derived from today rather than hardcoded.
  *
@@ -51,10 +55,17 @@ if (!isLocal && !FORCE) {
 }
 
 async function api(path, init) {
-  const response = await fetch(`${BASE}${path}`, {
-    ...init,
-    headers: init?.body ? { 'Content-Type': 'application/json' } : undefined,
-  });
+  const headers = {};
+  if (init?.body) headers['Content-Type'] = 'application/json';
+  if (sessionCookie) headers['Cookie'] = sessionCookie;
+
+  const response = await fetch(`${BASE}${path}`, { ...init, headers });
+
+  if (response.status === 401 && !sessionCookie) {
+    throw new Error(
+      'This instance requires an access code. Pass it with --code, or set APP_ACCESS_CODE.',
+    );
+  }
   const text = await response.text();
   let data;
   try {
@@ -163,8 +174,27 @@ async function addCompany(name, extra, rules) {
   return company;
 }
 
+/** Signs in if the instance is protected, and keeps the session for later calls. */
+async function signIn() {
+  if (!ACCESS_CODE) return;
+  const response = await fetch(`${BASE}/api/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code: ACCESS_CODE }),
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(`Could not sign in: ${data.error ?? response.status}`);
+  }
+  const raw = response.headers.get('set-cookie');
+  if (!raw) throw new Error('Sign-in succeeded but returned no session cookie.');
+  sessionCookie = raw.split(';')[0];
+  console.log('Signed in.');
+}
+
 async function main() {
   console.log(`Seeding demo data into ${BASE}\n`);
+  await signIn();
 
   const zone = await addCompany('Zone-OH LLC', { usdotNumber: '3456789' }, ZONE_RULES);
   const xtrack = await addCompany('Xtrack LLC', { usdotNumber: '9876543' }, XTRACK_RULES);

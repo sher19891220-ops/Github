@@ -15,7 +15,9 @@ services:
     rootDir: driverqual
     buildCommand: npm ci && npm run build
     startCommand: npm run start
-    healthCheckPath: /team # a static screen, so the check never depends on the database
+    # Public, and touches neither the session nor the database, so protecting
+    # the app does not make Render think it has died.
+    healthCheckPath: /api/health
     autoDeploy: true
     envVars:
       - key: NODE_VERSION
@@ -27,6 +29,14 @@ services:
         sync: false
       - key: TURSO_AUTH_TOKEN
         sync: false
+      # The shared access code. Without it the app runs open to anyone with the
+      # URL and shows a warning banner on every screen.
+      - key: APP_ACCESS_CODE
+        sync: false
+      # Optional extra entropy for session signing. Sessions stay valid across
+      # restarts only if this is set; leave unset and a restart signs everyone out.
+      - key: SESSION_SECRET
+        generateValue: true
       # Optional integrations; the app runs without them.
       - key: OPENAI_API_KEY
         sync: false

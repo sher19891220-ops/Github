@@ -34,6 +34,11 @@ export function GuidelinesView() {
   const [notice, setNotice] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
 
+  const [files, setFiles] = useState<File[]>([]);
+  const [dragActive, setDragActive] = useState(false);
+  const [interpreting, setInterpreting] = useState(false);
+  const [draftWarnings, setDraftWarnings] = useState<string[]>([]);
+
   const [form, setForm] = useState({
     coverageType: 'Auto Liability' as CoverageType,
     carrier: '',
@@ -67,6 +72,50 @@ export function GuidelinesView() {
   async function selectCompany(companyId: string) {
     setSelectedCompany(companyId);
     await loadGuidelines(companyId);
+  }
+
+  /**
+   * Reads the uploaded guideline and drafts criteria into the editor.
+   *
+   * The draft is never saved directly — it lands in the textarea for a person
+   * to correct, and still has to be approved before it decides anything.
+   */
+  async function interpretDocument() {
+    setError(null);
+    setNotice(null);
+    setDraftWarnings([]);
+    if (files.length === 0) {
+      setError('Attach the guideline document before reading it.');
+      return;
+    }
+
+    setInterpreting(true);
+    const body = new FormData();
+    for (const file of files) body.append('files', file);
+    const response = await fetch('/api/guidelines/interpret', { method: 'POST', body });
+    const data = (await response.json().catch(() => ({}))) as {
+      ok?: boolean;
+      ruleSet?: unknown;
+      warnings?: string[];
+      errors?: string[];
+      error?: string;
+    };
+    setInterpreting(false);
+
+    if (!response.ok || !data.ruleSet) {
+      setError(data.errors?.join(' ') ?? data.error ?? 'The guideline could not be read.');
+      return;
+    }
+
+    setForm((current) => ({
+      ...current,
+      ruleSet: JSON.stringify(data.ruleSet, null, 2),
+      fileName: current.fileName || (files[0]?.name ?? ''),
+    }));
+    setDraftWarnings(data.warnings ?? []);
+    setNotice(
+      'Draft criteria written below. Check every path and threshold against the document before saving — this is a reading of the file, not an authority.',
+    );
   }
 
   async function submit() {
@@ -177,7 +226,23 @@ export function GuidelinesView() {
 
       {showForm && (
         <div className="card" style={{ marginBottom: 18 }}>
-          <div className="dropzone" style={{ marginBottom: 14 }}>
+          <div
+            className="dropzone"
+            style={{ marginBottom: 14 }}
+            data-active={dragActive}
+            data-testid="guideline-dropzone"
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragActive(true);
+            }}
+            onDragLeave={() => setDragActive(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setDragActive(false);
+              setFiles(Array.from(e.dataTransfer.files));
+            }}
+            onClick={() => document.getElementById('guideline-file')?.click()}
+          >
             <p style={{ margin: 0 }}>
               <strong>Drag and drop the guideline document</strong>
             </p>
@@ -185,7 +250,49 @@ export function GuidelinesView() {
               PDF, JPG, PNG or HEIC. The display name is derived from the company, coverage,
               carrier or filename — there is no separate name field to get wrong.
             </p>
+            <input
+              id="guideline-file"
+              data-testid="guideline-file"
+              type="file"
+              multiple
+              accept=".pdf,.jpg,.jpeg,.png,.heic,.heif"
+              style={{ display: 'none' }}
+              onChange={(e) => setFiles(Array.from(e.target.files ?? []))}
+            />
           </div>
+
+          {files.length > 0 && (
+            <ul className="reasons" data-testid="guideline-file-list">
+              {files.map((f) => (
+                <li key={f.name}>
+                  {f.name} <span className="muted">({(f.size / 1024).toFixed(0)} KB)</span>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <div className="row" style={{ marginBottom: 14 }}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={interpretDocument}
+              disabled={interpreting}
+              data-testid="interpret-guideline"
+            >
+              {interpreting ? 'Reading guideline…' : 'Read guideline and draft criteria'}
+            </button>
+          </div>
+
+          {draftWarnings.length > 0 && (
+            <div className="alert alert-warn" data-testid="draft-warnings">
+              <strong>Check these before approving:</strong>
+              <ul className="reasons">
+                {draftWarnings.map((w) => (
+                  <li key={w}>{w}</li>
+                ))}
+              </ul>
+            </div>
+          )}
           <div className="form-grid">
             <div className="field">
               <label htmlFor="glCoverage">Coverage</label>

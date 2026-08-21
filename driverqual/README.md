@@ -80,7 +80,8 @@ model in the path. Models transcribe documents; they never decide anything.
 | `domain/engine.ts` | Tri-state conditions, coverage decision, overall decision |
 | `domain/guard.ts` | Numeric-claim guard, model-output validation |
 | `db/` | libSQL schema, async repositories, append-only audit |
-| `server/` | Settings and secrets, upload validation, extraction |
+| `server/` | Settings and secrets, upload validation, extraction, guideline interpretation |
+| `server/auth.ts` | Access code, signed sessions, lockout accounting |
 | `app/` | Next.js routes and screens |
 
 ### Invariants worth knowing
@@ -92,6 +93,8 @@ model in the path. Models transcribe documents; they never decide anything.
 - **Company isolation is structural.** The evaluator receives one guideline and throws if it belongs to a different company or coverage; it has no way to reach another's rules.
 - **Unapproved interpretations cannot decide.** A guideline whose rule set is missing or unapproved returns Manual Review.
 - **The engine decides; models only draft prose.** A drafted explanation that disagrees with the engine, cites an absent criterion, or fails the numeric guard is rejected.
+- **Drafted guideline criteria are never self-approving.** Interpreting a guideline document produces a draft that is schema-validated, shown for correction, and still requires human approval before it decides anything.
+- **Sessions are signed with a key derived from the access code**, so rotating the code revokes every outstanding session.
 
 ## Configuration
 
@@ -103,6 +106,8 @@ production. See `DEPLOY.md` for free hosting.
 | --- | --- |
 | `TURSO_DATABASE_URL` | `libsql://…` for hosted, or `file:…` for local (default `file:.data/driverqual.db`) |
 | `TURSO_AUTH_TOKEN` | Required with a `libsql://` URL |
+| `APP_ACCESS_CODE` | Shared code required to enter. Unset means the app is open, with a warning banner |
+| `SESSION_SECRET` | Optional extra signing entropy; unset means a restart signs everyone out |
 | `OPENAI_API_KEY` | Extraction; can also be set in Settings |
 | `OPENAI_MODEL` | Extraction model (default `gpt-4.1-mini`) |
 | `FMCSA_API_KEY` | USDOT lookup; can also be set in Settings |

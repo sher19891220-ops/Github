@@ -206,6 +206,47 @@ test.describe('guidelines', () => {
     await expect(row.getByTestId('overall-decision')).toHaveText('Qualified');
   });
 
+  test('drafting criteria from a document reports when extraction is unconfigured', async ({
+    page,
+  }, testInfo) => {
+    const company = `Interpret Co ${testInfo.project.name}`;
+    await createCompany(page, company);
+
+    await page.goto('/guidelines');
+    await page.getByTestId('guideline-company-filter').selectOption({ label: company });
+    await page.getByTestId('add-guideline').click();
+
+    await page.getByTestId('guideline-file').setInputFiles({
+      name: 'zone-guideline.pdf',
+      mimeType: 'application/pdf',
+      buffer: Buffer.from('%PDF-1.4 driver qualification guideline'),
+    });
+    await expect(page.getByTestId('guideline-file-list')).toContainText('zone-guideline.pdf');
+
+    await page.getByTestId('interpret-guideline').click();
+
+    // No key is configured in the test environment, so it must say so rather
+    // than inventing criteria.
+    await expect(page.getByTestId('guideline-error')).toContainText('No OpenAI API key');
+    await expect(page.getByTestId('guideline-ruleset')).toHaveValue('');
+  });
+
+  test('refuses to draft criteria from an unsupported file type', async ({ page }, testInfo) => {
+    const company = `Interpret Bad ${testInfo.project.name}`;
+    await createCompany(page, company);
+
+    await page.goto('/guidelines');
+    await page.getByTestId('guideline-company-filter').selectOption({ label: company });
+    await page.getByTestId('add-guideline').click();
+    await page.getByTestId('guideline-file').setInputFiles({
+      name: 'criteria.txt',
+      mimeType: 'text/plain',
+      buffer: Buffer.from('two years experience'),
+    });
+    await page.getByTestId('interpret-guideline').click();
+    await expect(page.getByTestId('guideline-error')).toContainText('unsupported');
+  });
+
   test('rejects an invalid rule set with a specific message', async ({ page }, testInfo) => {
     const company = `Bad Rules Co ${testInfo.project.name}`;
     await createCompany(page, company);

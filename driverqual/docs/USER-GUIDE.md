@@ -9,6 +9,40 @@ instance will hold real people's data.
 
 ---
 
+## Signing in
+
+If the server has `APP_ACCESS_CODE` set, everyone entering the system types that
+code once per browser; the session lasts 12 hours. **Sign out** is at the bottom
+of the navigation (behind the menu button on a phone).
+
+Five wrong codes from one address triggers a 15-minute lockout, during which even
+the correct code is refused. Attempts age out after 15 minutes, so an occasional
+typo never accumulates into one.
+
+If no code is configured, the app runs open and shows a red banner saying so on
+every screen.
+
+### On the length of your code
+
+A four-digit code is ten thousand possibilities. The lockout is what makes that
+survivable rather than trivial — without it, a script exhausts the space in
+seconds. With it, an attacker gets five guesses per quarter-hour per address.
+
+That is adequate for a small team on a URL nobody else knows. It is not adequate
+on its own for a public URL holding real driver records, for two reasons: the
+address a lockout is keyed to comes from a header a determined attacker can
+change, and one shared code cannot tell you *who* did something in the audit log.
+
+Practical advice, in order of value:
+
+1. **Use more than four digits.** Eight characters costs nothing extra to type
+   once per session and removes the arithmetic entirely.
+2. **Change it when someone leaves.** Rotating the code signs everyone out
+   immediately — the signing key is derived from it, so old sessions die the
+   moment it changes.
+3. **Ask for per-user accounts** before this holds records for many drivers.
+   The audit log will then name people rather than addresses.
+
 ## The shape of the work
 
 Two loops, at different frequencies.
@@ -51,11 +85,25 @@ guideline.**
 Fill in the coverage (Auto Liability for driver qualification), carrier, version
 and dates, then write the criteria as a rule tree in the JSON box.
 
-> **Today this is manual.** The system stores your insurer's PDF for the record,
-> but it does not read it — you translate the criteria yourself, once. That is a
-> deliberate limit rather than an oversight: a decision that rejects a driver
-> should rest on criteria a human wrote down and approved, not on a machine's
-> unreviewed reading of a PDF.
+### Drafting the criteria from the document
+
+If `OPENAI_API_KEY` is configured, drag the guideline in and press **Read
+guideline and draft criteria**. The criteria are written into the editor for you
+to check.
+
+**A draft is a reading, not an authority.** It is validated against the rule
+schema before you see it — anything the engine could not evaluate is discarded
+rather than shown as usable — but it is never saved on its own and never
+approved on its own. You correct it, then you approve it. That sequence is the
+point: a decision that rejects a driver rests on criteria a person signed off,
+not on a machine's unreviewed reading of a PDF.
+
+Read any warnings above the editor. The most common one — *"Only one eligibility
+path was found"* — is worth taking seriously every time, for the reason in the
+next section.
+
+Without a key, the panel says extraction is unconfigured and you write the
+criteria yourself. It never invents them.
 
 ### The two shapes a rule takes
 

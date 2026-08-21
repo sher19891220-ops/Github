@@ -18,9 +18,14 @@ const LINKS = [
   { href: '/settings', label: 'Settings' },
 ];
 
-export function Nav() {
+export function Nav({ authEnabled = false }: { authEnabled?: boolean }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+
+  async function signOut() {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    window.location.href = '/login';
+  }
 
   return (
     <>
@@ -60,6 +65,18 @@ export function Nav() {
             </Link>
           ))}
         </nav>
+
+        {authEnabled && (
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm"
+            style={{ width: '100%', marginTop: 14 }}
+            onClick={signOut}
+            data-testid="sign-out"
+          >
+            Sign out
+          </button>
+        )}
       </aside>
     </>
   );
