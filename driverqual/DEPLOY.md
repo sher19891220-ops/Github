@@ -159,10 +159,11 @@ prerequisites, not polish:
 
 - **Authentication is one shared code, not user accounts.** Set
   `APP_ACCESS_CODE`; without it the app is open to anyone with the URL. The code
-  gates the whole application and failed attempts are locked out, but it cannot
-  tell you *who* did something — the audit log records addresses, not people. The
-  role model on the Team & roles screen documents intended permissions and is not
-  enforced yet.
+  gates the whole application and failed attempts are locked out. It identifies
+  the instance, not the person: the audit log records what changed, when, and
+  against which guideline version, with an address rather than a name. The role
+  model on the Team & roles screen documents intended permissions and is not
+  enforced.
 - **Uploaded files are not retained.** Documents are read and discarded; only the
   extracted evidence is stored. If your retention policy requires keeping source
   documents, wire up private object storage.

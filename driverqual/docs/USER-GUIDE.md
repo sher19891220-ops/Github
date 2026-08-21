@@ -28,20 +28,24 @@ A four-digit code is ten thousand possibilities. The lockout is what makes that
 survivable rather than trivial — without it, a script exhausts the space in
 seconds. With it, an attacker gets five guesses per quarter-hour per address.
 
-That is adequate for a small team on a URL nobody else knows. It is not adequate
-on its own for a public URL holding real driver records, for two reasons: the
-address a lockout is keyed to comes from a header a determined attacker can
-change, and one shared code cannot tell you *who* did something in the audit log.
+That is adequate for a small team on a URL nobody else knows. Two things it does
+not give you, worth knowing rather than discovering:
 
-Practical advice, in order of value:
+- The address a lockout is keyed to comes from a request header, which a
+  determined attacker can change. Lockout slows an honest attacker; it does not
+  stop a patient one. Code length is what carries the rest.
+- One shared code cannot identify a person. The audit log records **what changed
+  and when**, with the guideline version and evidence snapshot behind every
+  decision, but the actor is an address rather than a name. Everything needed to
+  reconstruct or challenge a decision is there; who typed it is not.
+
+Two habits worth keeping:
 
 1. **Use more than four digits.** Eight characters costs nothing extra to type
    once per session and removes the arithmetic entirely.
 2. **Change it when someone leaves.** Rotating the code signs everyone out
    immediately — the signing key is derived from it, so old sessions die the
    moment it changes.
-3. **Ask for per-user accounts** before this holds records for many drivers.
-   The audit log will then name people rather than addresses.
 
 ## The shape of the work
 
