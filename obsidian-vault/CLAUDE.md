@@ -8,7 +8,14 @@ Read this file first in every session.
 A vertically integrated trucking group: carriers + an asset-holding company that
 owns the equipment + an in-house brokerage + an in-house truck shop. Entities are
 titled under different family members and partners. Plus a freight-media side
-project (Founder Hub).
+project (Founder Hub), and a consulting line advising other carriers.
+
+### Business lines
+
+1. **Operating the group** — five carriers, holding co, brokerage, shop (below)
+2. **Consulting** — advising outside carriers. See `[[15-Consulting]]`.
+   I-TEAM Trucking and Forward are CLIENTS, not group entities.
+3. **Founder Hub** — freight-media content brand
 
 ### Entities
 
@@ -41,8 +48,6 @@ Log them in `[[_Intercompany]]`. Never net them away silently.
 
 ### Open questions about the map
 
-- `P&L for I-TEAM & FORWARD` (accounting@iteamtrucking.net) — not on the list
-  above. Own entity, partner, or customer? **Unresolved.**
 - `fleetzonellc@gmail.com` owns `Fuel Avrg Company Report` and `Cases 2026` —
   is Fleet Zone an entity, or just an ops mailbox? **Unresolved.**
 - `Parts Pice & Quantity` is owned by the dissolved Truck Max account.
@@ -55,7 +60,8 @@ This vault holds **conclusions, history, and narrative** — the layer Sheets ca
 
 Key sheets:
 - `ZONE Profit & Loss 2024 and 2025 and 2026`, `Xtrack LLC Profit and Loss Weekly`,
-  `AFG Profit and Loss Weekly`, `P&L for I-TEAM & FORWARD`, `P&L yearly`
+  `AFG Profit and Loss Weekly`, `P&L yearly`
+- CLIENT sheet, not ours: `P&L for I-TEAM & FORWARD` — see `[[15-Consulting]]`
 - `Fixed costs and OO, LO costs`, `Fixed costs by company`
 - `Truck and trailer expenses ZONE (2025)`, `Odometers of trucks`, `Parts Pice & Quantity`
 - `Fuel Avrg Company Report`, `Drivers Pay list (Zone LLC)`, `Dispatch Sheet 2026`
@@ -74,6 +80,12 @@ Key sheets:
    question — do not silently correct upstream data.
 6. **Personal notes (`70-Personal/`) are never published, summarized externally,
    or included in Founder Hub content.**
+6b. **Client data in `15-Consulting/` is confidential and firewalled.**
+   - Never include client numbers in group consolidation or any weekly close.
+   - Never use a client's situation, numbers, or story in Founder Hub content,
+     even anonymized, unless I explicitly say that client approved it.
+   - `P&L for I-TEAM & FORWARD` belongs to clients. Read it only for client work;
+     it is NOT one of our P&Ls.
 7. Founder Hub drafts: check `60-Founder-Hub/Covered-Topics.md` before drafting so
    we don't repeat a story we already ran.
 
