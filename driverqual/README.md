@@ -14,6 +14,15 @@ The application starts empty — no sample companies, applicants or guidelines. 
 a company, upload a guideline for a coverage, approve its interpreted criteria,
 then add an applicant.
 
+## Documentation
+
+| Document | For |
+| --- | --- |
+| `docs/USER-GUIDE.md` | Running real qualification work: setting up a company, writing guideline criteria, reading a decision |
+| `DEPLOY.md` | Hosting it, free, on Render + Turso |
+| `docs/spec-review.md` | The defects found in the original specification and how each was resolved |
+| `docs/master-implementation-prompt-v2.md` | The corrected specification this implements |
+
 ## Trying it out
 
 Three ways to exercise the app, in increasing order of realism.

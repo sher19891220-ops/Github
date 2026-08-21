@@ -139,6 +139,12 @@ real driver records.
 
 ---
 
+## Using it
+
+Once deployed, `docs/USER-GUIDE.md` covers the day-to-day workflow — adding a
+company, translating an insurer's criteria into a rule tree, and reading a
+decision.
+
 ## Before real driver records go in
 
 This is a working application with a tested decision engine, but it has not had
