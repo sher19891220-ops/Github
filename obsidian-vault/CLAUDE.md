@@ -5,21 +5,48 @@ Read this file first in every session.
 
 ## What this business is
 
-A multi-entity trucking / fleet operation plus a freight-media side project.
+A vertically integrated trucking group: carriers + an asset-holding company that
+owns the equipment + an in-house brokerage + an in-house truck shop. Entities are
+titled under different family members and partners. Plus a freight-media side
+project (Founder Hub).
 
-| Entity | Role |
-|---|---|
-| Zone LLC | Primary carrier (accounting, safety, HR each have own Google account) |
-| Xtrack LLC | Carrier — weekly P&L tracked separately |
-| AFG | Carrier — weekly P&L tracked separately |
-| I-TEAM / Forward | Carrier — P&L shared from accounting@iteamtrucking.net |
-| Iron Lease LLC | Truck leasing entity (leases units to the carriers) |
-| TruckMax USA | Parts / maintenance |
-| FleetZone | Fleet ops — fuel reports, claims/cases |
-| Founder Hub | Content brand: B2B freight-marketing intel, published to Telegram |
+### Entities
 
-> CORRECT THIS TABLE. It was inferred from Google Drive file ownership,
-> not stated by me. Fix the roles and relationships before relying on it.
+| Entity | Function | Titled under |
+|---|---|---|
+| **Zone-OH LLC** | Carrier | Me |
+| **Xtrack LLC** | Carrier | My wife |
+| **AFG Transport Co** | Carrier | Marat |
+| **Runstar LLC** | Carrier — newly started | Timur |
+| **Sher Trucking LLC** | Carrier — original entity, held since 2014 (started as a driver) | Me |
+| **Iron Lease LLC** | Asset holding — owns ALL trucks in the group, leases to the carriers | — |
+| **Shaeffer Technologies LLC** | Freight brokerage | Timur |
+| **Fleet Prime LLC** | Truck shop | Me |
+| ~~Truck Max USA LLC~~ | Former shop entity — **dissolved**, replaced by Fleet Prime | — |
+
+### Group structure — the thing spreadsheets cannot show
+
+Iron Lease owns the equipment and leases it to the carriers.
+Fleet Prime services that equipment.
+Shaeffer Technologies brokers freight to the carriers.
+
+So a single truck generates entries in **three or four different entities'
+books**. No individual P&L is the truth. Whenever a question is about
+profitability, ask "at which level?" — unit, entity, or group — and say which
+one you answered.
+
+Because entities sit under different names, treat every Iron Lease ↔ carrier,
+Fleet Prime ↔ carrier, and Shaeffer ↔ carrier transaction as **related-party**.
+Log them in `[[_Intercompany]]`. Never net them away silently.
+
+### Open questions about the map
+
+- `P&L for I-TEAM & FORWARD` (accounting@iteamtrucking.net) — not on the list
+  above. Own entity, partner, or customer? **Unresolved.**
+- `fleetzonellc@gmail.com` owns `Fuel Avrg Company Report` and `Cases 2026` —
+  is Fleet Zone an entity, or just an ops mailbox? **Unresolved.**
+- `Parts Pice & Quantity` is owned by the dissolved Truck Max account.
+  Migration to Fleet Prime not confirmed. **Unresolved.**
 
 ## Where the real data lives
 
