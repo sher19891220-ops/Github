@@ -18,6 +18,7 @@ interface InspectionState {
   driver: Driver | null
   vehicle: Vehicle | null
   gps: GPSCoordinates | null
+  locationStr: string | null
   photos: CapturedPhoto[]
   currentAngle: AngleKey | null
   checklist: ChecklistItem[]
@@ -29,6 +30,7 @@ interface InspectionState {
 
   initSession: (type: InspectionType, driver: Driver, vehicle: Vehicle, sourceChatId?: number | null) => void
   setGPS: (gps: GPSCoordinates) => void
+  setLocationStr: (s: string) => void
   addPhoto: (photo: CapturedPhoto) => void
   removePhoto: (angleKey: AngleKey) => void
   setCurrentAngle: (angle: AngleKey | null) => void
@@ -47,6 +49,7 @@ const defaultState = {
   driver: null,
   vehicle: null,
   gps: null,
+  locationStr: null,
   photos: [] as CapturedPhoto[],
   currentAngle: null as AngleKey | null,
   checklist: [] as ChecklistItem[],
@@ -80,6 +83,7 @@ export const useInspectionStore = create<InspectionState>()(
         }),
 
       setGPS: (gps) => set({ gps }),
+      setLocationStr: (s) => set({ locationStr: s }),
 
       addPhoto: (photo) =>
         set((s) => ({
@@ -129,6 +133,7 @@ export const useInspectionStore = create<InspectionState>()(
         driver: state.driver,
         vehicle: state.vehicle,
         gps: state.gps,
+        locationStr: state.locationStr,
         currentAngle: state.currentAngle,
         checklist: state.checklist,
         tireInspections: state.tireInspections,

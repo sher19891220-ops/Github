@@ -16,20 +16,33 @@ export default function CompletePage() {
 
   const driver     = store.driver
   const vehicle    = store.vehicle
-  const inspType   = store.inspectionType === 'PICKUP' ? 'PICKUP' : 'DROP-OFF'
-  const dateStr    = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-  const gpsStr     = store.gps ? `${store.gps.lat.toFixed(4)}, ${store.gps.lng.toFixed(4)}` : 'N/A'
+  const inspType   = store.inspectionType === 'PICKUP' ? 'PICKUP' : store.inspectionType === 'DROP_OFF' ? 'DROP-OFF' : null
+  const now        = new Date()
+  const dateStr    = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+  const timeStr    = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
+  const gpsCoords  = store.gps ? `${store.gps.lat.toFixed(5)}, ${store.gps.lng.toFixed(5)}` : 'N/A'
+  const locationLine = store.locationStr
+    ? `${store.locationStr} (${gpsCoords})`
+    : gpsCoords
   const photoCount = store.photos.length
 
+  // Guard: if session was never initialized, go back to start
+  useEffect(() => {
+    if (!store.driver || !store.vehicle || !store.inspectionType) {
+      router.replace('/inspection/start')
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   const summaryText = [
-    `🚛 *PTI INSPECTION REPORT*`,
+    `🚛 PTI INSPECTION REPORT`,
     `━━━━━━━━━━━━━━━━━━━━`,
-    `Type:    ${inspType}`,
+    `Type:    ${inspType ?? '—'}`,
     `Trailer: ${vehicle?.unitNumber ?? '—'}`,
     `Driver:  ${driver?.name ?? '—'}`,
     `Company: ${driver?.company ?? vehicle?.company ?? '—'}`,
     `Date:    ${dateStr}`,
-    `GPS:     ${gpsStr}`,
+    `Time:    ${timeStr}`,
+    `Location: ${locationLine}`,
     `Photos:  ${photoCount}`,
     store.comments.trim() ? `Notes:   ${store.comments.trim()}` : '',
   ].filter(Boolean).join('\n')
@@ -41,6 +54,7 @@ export default function CompletePage() {
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function sendTelegramReport() {
+    if (!store.driver || !store.vehicle) return
     setReportStatus('sending')
     try {
       const chatId = store.sourceChatId ?? undefined
@@ -51,11 +65,14 @@ export default function CompletePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'text', text: summaryText, chatId }),
       })
-      if (!textRes.ok) throw new Error('Text send failed')
+      if (!textRes.ok) {
+        const errBody = await textRes.json().catch(() => ({}))
+        throw new Error(`Text send failed: ${JSON.stringify(errBody)}`)
+      }
 
-      // 2. Send photos in chunks of 4 to stay under body size limits
+      // 2. Send photos in chunks of 2 (each ~500 KB–1 MB base64, keep body <3 MB)
       const allPhotos = store.photos.map((p) => ({ dataUrl: p.dataUrl, caption: p.angleLabel }))
-      const CHUNK = 4
+      const CHUNK = 2
       for (let i = 0; i < allPhotos.length; i += CHUNK) {
         const chunk = allPhotos.slice(i, i + CHUNK)
         const res = await fetch('/api/send-report', {
@@ -69,6 +86,19 @@ export default function CompletePage() {
         }
       }
 
+      // 3. Send driver signature if present
+      if (store.signatureDataUrl) {
+        await fetch('/api/send-report', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'photos',
+            photos: [{ dataUrl: store.signatureDataUrl, caption: `✍️ Signature — ${driver?.name ?? 'Driver'}` }],
+            chatId,
+          }),
+        }).catch(() => {})
+      }
+
       setReportStatus('sent')
     } catch (err) {
       console.error('Telegram report error:', err)
@@ -80,12 +110,13 @@ export default function CompletePage() {
     const sig = store.signatureDataUrl
 
     const rows = [
-      ['Type', inspType],
+      ['Type', inspType ?? '—'],
       ['Trailer', vehicle?.unitNumber ?? '—'],
       ['Driver', driver?.name ?? '—'],
       ['Company', driver?.company ?? vehicle?.company ?? '—'],
       ['Date', dateStr],
-      ['GPS', gpsStr],
+      ['Time', timeStr],
+      ['Location', locationLine],
       ['Photos', String(photoCount)],
       ...(store.comments.trim() ? [['Notes', store.comments.trim()]] : []),
     ]
@@ -207,7 +238,7 @@ ${photosHtml}${sigHtml}
             </div>
             <h1 className="text-2xl font-black">Inspection Complete!</h1>
             <p className="text-green-100 mt-1 text-sm">
-              {inspType} · Trailer {vehicle?.unitNumber ?? '—'}
+              {inspType ?? '—'} · Trailer {vehicle?.unitNumber ?? '—'}
             </p>
           </div>
         </div>

@@ -13,7 +13,7 @@ const REQUIRED_COUNT = MAIN_ANGLES.length
 
 export default function CameraPage() {
   const router = useRouter()
-  const { photos, addPhoto, removePhoto, gps, setGPS } = useInspectionStore()
+  const { photos, addPhoto, removePhoto, gps, setGPS, setLocationStr } = useInspectionStore()
   const [activeIndex, setActiveIndex] = useState(0)
   const [cameraReady, setCameraReady] = useState(false)
   const [cameraError, setCameraError] = useState<string | null>(null)
@@ -41,12 +41,25 @@ export default function CameraPage() {
     if (!gps && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
-          setGPS({
+          const coords = {
             lat: pos.coords.latitude,
             lng: pos.coords.longitude,
             accuracy: pos.coords.accuracy,
             timestamp: new Date().toISOString(),
-          })
+          }
+          setGPS(coords)
+          // Reverse-geocode to get city/state for the report
+          fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${coords.lat}&lon=${coords.lng}&format=json&accept-language=en`,
+          )
+            .then((r) => r.json())
+            .then((d: { address?: { city?: string; town?: string; village?: string; state?: string } }) => {
+              const city = d.address?.city || d.address?.town || d.address?.village || ''
+              const state = d.address?.state || ''
+              const loc = [city, state].filter(Boolean).join(', ')
+              if (loc) setLocationStr(loc)
+            })
+            .catch(() => {})
         },
         () => {},
         { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
