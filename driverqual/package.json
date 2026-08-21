@@ -9,6 +9,7 @@
     "dev": "next dev -p 3000",
     "build": "next build",
     "start": "next start",
+    "demo": "node scripts/seed-demo.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:unit": "vitest run tests/unit",

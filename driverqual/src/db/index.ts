@@ -1,4 +1,6 @@
 import { createClient, type Client, type InArgs } from '@libsql/client';
+import fs from 'node:fs';
+import path from 'node:path';
 import { SCHEMA_SQL } from './schema';
 
 /**
@@ -61,6 +63,22 @@ function wrap(client: Client): Db {
 }
 
 /**
+ * Creates the parent directory of a local database file.
+ *
+ * libSQL opens a file but will not create the directory holding it, so a fresh
+ * checkout using the default `file:.data/driverqual.db` fails on first run with
+ * a bare "unable to open" until `.data` happens to exist.
+ */
+function ensureLocalDirectory(url: string): void {
+  if (!url.startsWith('file:')) return;
+  // Strip the scheme and any `?mode=` style parameters to get the bare path.
+  const filePath = url.slice('file:'.length).split('?')[0];
+  if (!filePath) return;
+  const dir = path.dirname(filePath);
+  if (dir && dir !== '.') fs.mkdirSync(dir, { recursive: true });
+}
+
+/**
  * Wraps a connection failure with something a person deploying can act on.
  *
  * The underlying errors are accurate but anonymous ("Server returned HTTP status
@@ -85,6 +103,7 @@ function connectionError(url: string, cause: unknown): Error {
 export async function openDatabase(url?: string, authToken?: string): Promise<Db> {
   const resolved = url ?? resolveUrl();
   try {
+    ensureLocalDirectory(resolved);
     const client = createClient({
       url: resolved,
       authToken: authToken ?? process.env.TURSO_AUTH_TOKEN,

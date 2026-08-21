@@ -26,20 +26,43 @@ describe('database connection', () => {
     fs.rmSync(dir, { recursive: true, force: true });
   });
 
+  it('creates the parent directory of a local database file', async () => {
+    // libSQL opens files but does not create directories, so a fresh checkout
+    // using the default path must not fail merely because .data is absent.
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'driverqual-mkdir-'));
+    const nested = path.join(root, 'does', 'not', 'exist', 'app.db');
+    expect(fs.existsSync(path.dirname(nested))).toBe(false);
+
+    const db = await openDatabase(`file:${nested}`);
+    expect(fs.existsSync(nested)).toBe(true);
+    db.close();
+
+    fs.rmSync(root, { recursive: true, force: true });
+  });
+
   it('reports a malformed database URL with the setting to fix', async () => {
     await expect(openDatabase('not-a-url')).rejects.toThrow(/Could not open the database/);
     await expect(openDatabase('not-a-url')).rejects.toThrow(/TURSO_DATABASE_URL/);
   });
 
   it('names the path, not the credential, when a local file cannot be opened', async () => {
+    // A regular file standing where a directory needs to be: the parent cannot
+    // be created, so opening must fail with the path named.
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'driverqual-blocked-'));
+    const blocker = path.join(root, 'not-a-directory');
+    fs.writeFileSync(blocker, 'occupied');
+
     let message = '';
     try {
-      await openDatabase('file:/proc/nonexistent-dir/x.db');
+      await openDatabase(`file:${path.join(blocker, 'app.db')}`);
     } catch (error) {
       message = (error as Error).message;
     }
     expect(message).toMatch(/Could not open the database/);
     expect(message).toMatch(/writable/);
+    expect(message).not.toMatch(/TURSO_AUTH_TOKEN/);
+
+    fs.rmSync(root, { recursive: true, force: true });
   });
 
   it('defaults to a local file when nothing is configured', () => {

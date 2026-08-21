@@ -14,6 +14,37 @@ The application starts empty — no sample companies, applicants or guidelines. 
 a company, upload a guideline for a coverage, approve its interpreted criteria,
 then add an applicant.
 
+## Trying it out
+
+Three ways to exercise the app, in increasing order of realism.
+
+**1. Run the checks.** `npm run test:all` runs typecheck, 123 unit and
+integration tests, a production build, and 51 Playwright tests at phone, tablet
+and desktop widths. This is what proves the engine, not the screenshots.
+
+**2. Run the built app.** `npm run build && npm run start`, then open
+<http://localhost:3000>. It starts empty by design.
+
+**3. Seed the acceptance scenario and click through it.** With the app running:
+
+```bash
+npm run demo
+```
+
+This creates three companies, an approved Auto Liability guideline for two of
+them, a coverage 90 days from expiry, and the two acceptance-case drivers — all
+through the HTTP API, so it goes through the same validation, evaluation and
+audit path as a real user's clicks. Every date is relative to today, so the
+scenario behaves the same whenever it is run.
+
+It refuses to run against a non-local URL unless passed `--force`: the
+specification forbids fictional drivers in a deployed system.
+
+What to look at afterwards is printed when it finishes. The most informative
+screen is **Phenias → Compare**: one driver and one set of documents produce
+Qualified at Zone, Not Qualified at Xtrack and Manual Review at Acme, each
+explained against that company's own guideline.
+
 ## Commands
 
 | Command | What it does |
@@ -22,6 +53,7 @@ then add an applicant.
 | `npm run test` | 118 unit + integration tests (vitest) |
 | `npm run build` | Production build |
 | `npm run test:ui` | 51 Playwright tests at phone, tablet and desktop widths |
+| `npm run demo` | Seed the acceptance scenario into a running local instance |
 | `npm run test:all` | All four, in order |
 
 ## Architecture

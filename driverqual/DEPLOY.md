@@ -86,6 +86,15 @@ npm install
 npm run dev            # http://localhost:3000
 ```
 
+To populate the acceptance scenario and click through it:
+
+```bash
+npm run demo            # with the app running on :3000
+```
+
+It refuses to target a deployed URL without `--force`, so it cannot quietly put
+fictional drivers into a system holding real records.
+
 To run locally against your hosted database instead:
 
 ```bash
