@@ -41,60 +41,48 @@ export default function CameraPage() {
   useEffect(() => {
     if (gps) { setGpsStatus('ok'); return }
 
-    async function reverseGeocode(lat: number, lng: number) {
-      try {
-        const d: { address?: { city?: string; town?: string; village?: string; state?: string } } =
-          await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=en`,
-          ).then((r) => r.json())
-        const city  = d.address?.city || d.address?.town || d.address?.village || ''
-        const state = d.address?.state || ''
-        const loc   = [city, state].filter(Boolean).join(', ')
-        if (loc) setLocationStr(loc)
-      } catch { /* silent */ }
-    }
+    // Track whether GPS has resolved so IP result is not applied after GPS
+    let gpsResolved = false
 
-    async function ipFallback() {
-      try {
-        // IP geolocation — city-level accuracy, no permission needed
-        const d: { success?: boolean; latitude?: number; longitude?: number; city?: string; region?: string } =
-          await fetch('https://ipwho.is/').then((r) => r.json())
+    // ── IP geolocation: fires immediately, no permission needed ──────────
+    // This is the reliable baseline — GPS upgrades it if available.
+    fetch('https://ipwho.is/')
+      .then((r) => r.json())
+      .then((d: { success?: boolean; latitude?: number; longitude?: number; city?: string; region?: string }) => {
+        if (gpsResolved) return // GPS already won, discard IP result
         if (d.success && d.latitude && d.longitude) {
           setGPS({ lat: d.latitude, lng: d.longitude, accuracy: 50000, timestamp: new Date().toISOString() })
           const loc = [d.city, d.region].filter(Boolean).join(', ')
           if (loc) setLocationStr(loc)
           setGpsStatus('approx')
-        } else {
-          setGpsStatus('failed')
         }
-      } catch {
-        setGpsStatus('failed')
-      }
-    }
+      })
+      .catch(() => {})
 
-    function onGpsSuccess(pos: GeolocationPosition, status: 'ok' | 'approx') {
+    // ── Device GPS: higher accuracy, overrides IP result if it resolves ──
+    function applyGps(pos: GeolocationPosition) {
+      gpsResolved = true
       const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy, timestamp: new Date().toISOString() }
       setGPS(coords)
-      setGpsStatus(status)
-      reverseGeocode(coords.lat, coords.lng)
+      setGpsStatus('ok')
+      // Reverse-geocode to get city/state (replaces IP city name)
+      fetch(`https://nominatim.openstreetmap.org/reverse?lat=${coords.lat}&lon=${coords.lng}&format=json&accept-language=en`)
+        .then((r) => r.json())
+        .then((d: { address?: { city?: string; town?: string; village?: string; state?: string } }) => {
+          const city = d.address?.city || d.address?.town || d.address?.village || ''
+          const state = d.address?.state || ''
+          const loc = [city, state].filter(Boolean).join(', ')
+          if (loc) setLocationStr(loc)
+        })
+        .catch(() => {})
     }
 
     if (navigator.geolocation) {
-      // 1st attempt: high accuracy
       navigator.geolocation.getCurrentPosition(
-        (pos) => onGpsSuccess(pos, 'ok'),
-        () => {
-          // 2nd attempt: low accuracy (faster, works in more environments)
-          navigator.geolocation.getCurrentPosition(
-            (pos) => onGpsSuccess(pos, 'approx'),
-            ipFallback,
-            { enableHighAccuracy: false, timeout: 8000, maximumAge: 120000 },
-          )
-        },
+        applyGps,
+        () => navigator.geolocation.getCurrentPosition(applyGps, () => {}, { enableHighAccuracy: false, timeout: 8000, maximumAge: 120000 }),
         { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 },
       )
-    } else {
-      ipFallback()
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 

@@ -78,6 +78,7 @@ export const useInspectionStore = create<InspectionState>()(
           damageMarkers: [],
           signatureDataUrl: null,
           gps: null,
+          locationStr: null,
           comments: '',
           sourceChatId,
         }),
