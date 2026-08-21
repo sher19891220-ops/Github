@@ -1,4 +1,11 @@
 {
+  "mcpServers": {
+    "axel": {
+      "command": "/Users/sher/Github/axel-backend/venv/bin/python",
+      "args": ["/Users/sher/Github/axel-backend/mcp_server.py"],
+      "cwd": "/Users/sher/Github/axel-backend"
+    }
+  },
   "permissions": {
     "allow": [
       "Bash(git *)",
@@ -6,20 +13,35 @@
       "Bash(python3 *)",
       "Bash(pip *)",
       "Bash(pip3 *)",
+      "Bash(npm *)",
+      "Bash(node *)",
       "Bash(uvicorn *)",
       "Bash(pytest *)",
       "Bash(ruff *)",
       "Bash(mypy *)",
-      "Bash(curl http://localhost:8000/*)",
-      "Bash(mkdir -p *)",
+      "Bash(curl *)",
+      "Bash(mkdir *)",
       "Bash(ls *)",
       "Bash(cat *)",
       "Bash(cp *)",
-      "Bash(chmod +x *)",
+      "Bash(mv *)",
+      "Bash(rm *)",
+      "Bash(chmod *)",
       "Bash(source *)",
       "Bash(bash *)",
+      "Bash(sh *)",
       "Bash(launchctl *)",
-      "Bash(tail *)"
+      "Bash(tail *)",
+      "Bash(head *)",
+      "Bash(grep *)",
+      "Bash(find *)",
+      "Bash(echo *)",
+      "Bash(ps *)",
+      "Bash(kill *)",
+      "Bash(docker *)",
+      "Bash(brew *)",
+      "Bash(open *)",
+      "mcp__axel__*"
     ]
   }
 }
