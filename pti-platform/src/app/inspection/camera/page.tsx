@@ -20,6 +20,7 @@ export default function CameraPage() {
   const [capturing, setCapturing] = useState(false)
   const [justCaptured, setJustCaptured] = useState(false)
   const [blurWarning, setBlurWarning] = useState(false)
+  const [gpsStatus, setGpsStatus] = useState<'acquiring' | 'ok' | 'approx' | 'failed'>('acquiring')
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
@@ -38,32 +39,62 @@ export default function CameraPage() {
   const allCaptured = capturedRequired >= REQUIRED_COUNT
 
   useEffect(() => {
-    if (!gps && navigator.geolocation) {
+    if (gps) { setGpsStatus('ok'); return }
+
+    async function reverseGeocode(lat: number, lng: number) {
+      try {
+        const d: { address?: { city?: string; town?: string; village?: string; state?: string } } =
+          await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=en`,
+          ).then((r) => r.json())
+        const city  = d.address?.city || d.address?.town || d.address?.village || ''
+        const state = d.address?.state || ''
+        const loc   = [city, state].filter(Boolean).join(', ')
+        if (loc) setLocationStr(loc)
+      } catch { /* silent */ }
+    }
+
+    async function ipFallback() {
+      try {
+        // IP geolocation — city-level accuracy, no permission needed
+        const d: { success?: boolean; latitude?: number; longitude?: number; city?: string; region?: string } =
+          await fetch('https://ipwho.is/').then((r) => r.json())
+        if (d.success && d.latitude && d.longitude) {
+          setGPS({ lat: d.latitude, lng: d.longitude, accuracy: 50000, timestamp: new Date().toISOString() })
+          const loc = [d.city, d.region].filter(Boolean).join(', ')
+          if (loc) setLocationStr(loc)
+          setGpsStatus('approx')
+        } else {
+          setGpsStatus('failed')
+        }
+      } catch {
+        setGpsStatus('failed')
+      }
+    }
+
+    function onGpsSuccess(pos: GeolocationPosition, status: 'ok' | 'approx') {
+      const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy, timestamp: new Date().toISOString() }
+      setGPS(coords)
+      setGpsStatus(status)
+      reverseGeocode(coords.lat, coords.lng)
+    }
+
+    if (navigator.geolocation) {
+      // 1st attempt: high accuracy
       navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const coords = {
-            lat: pos.coords.latitude,
-            lng: pos.coords.longitude,
-            accuracy: pos.coords.accuracy,
-            timestamp: new Date().toISOString(),
-          }
-          setGPS(coords)
-          // Reverse-geocode to get city/state for the report
-          fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${coords.lat}&lon=${coords.lng}&format=json&accept-language=en`,
+        (pos) => onGpsSuccess(pos, 'ok'),
+        () => {
+          // 2nd attempt: low accuracy (faster, works in more environments)
+          navigator.geolocation.getCurrentPosition(
+            (pos) => onGpsSuccess(pos, 'approx'),
+            ipFallback,
+            { enableHighAccuracy: false, timeout: 8000, maximumAge: 120000 },
           )
-            .then((r) => r.json())
-            .then((d: { address?: { city?: string; town?: string; village?: string; state?: string } }) => {
-              const city = d.address?.city || d.address?.town || d.address?.village || ''
-              const state = d.address?.state || ''
-              const loc = [city, state].filter(Boolean).join(', ')
-              if (loc) setLocationStr(loc)
-            })
-            .catch(() => {})
         },
-        () => {},
-        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 },
       )
+    } else {
+      ipFallback()
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -192,9 +223,20 @@ export default function CameraPage() {
 
         <button
           onClick={() => router.push('/inspection/signature')}
-          className="text-xs text-blue-400 font-medium px-2 py-1"
+          className="flex flex-col items-end gap-0.5"
         >
-          Skip
+          <span className="text-xs text-blue-400 font-medium">Skip</span>
+          <span className={`text-xs font-medium ${
+            gpsStatus === 'ok'     ? 'text-green-400' :
+            gpsStatus === 'approx' ? 'text-yellow-400' :
+            gpsStatus === 'failed' ? 'text-red-400' :
+            'text-slate-500'
+          }`}>
+            {gpsStatus === 'ok'     ? '📍 GPS' :
+             gpsStatus === 'approx' ? '📍 ~city' :
+             gpsStatus === 'failed' ? '📍 off' :
+             '📍…'}
+          </span>
         </button>
       </div>
 
