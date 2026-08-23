@@ -265,6 +265,23 @@ HMAC verification and endpoint auth, message rendering and escaping, message
 splitting, client retry/pagination, the KV store, command parsing and
 timezone/DST day boundaries.
 
+## Discovering what your org exposes
+
+```bash
+SAMSARA_API_TOKEN=... node scripts/discover-samsara.mjs
+SAMSARA_API_TOKEN=... node scripts/discover-samsara.mjs --json > capabilities.json
+```
+
+Probes ~28 endpoints across identity, fleet, drivers, safety, video, compliance,
+maintenance, places and webhook configuration, and reports which ones your token
+can actually reach and what fields come back. Entitlements, scopes and API
+versions differ per organisation, so this replaces assumptions with a measured
+list.
+
+Read-only — every probe is a GET, and write endpoints (media retrieval) are
+listed but never called. It distinguishes *not entitled* (403) from *not on this
+API version* (404), and prints field names only, never values.
+
 ## Verifying against your Samsara org
 
 The endpoint paths and response field names below are written from the
