@@ -4,15 +4,26 @@ import { useRouter } from 'next/navigation'
 import {
   CheckCircle2, Download, Share2, LogOut,
   MessageCircle, Smartphone, Info, Loader2, AlertTriangle,
+  ScanSearch, CheckCircle, XCircle, TriangleAlert,
 } from 'lucide-react'
 import { useInspectionStore } from '@/store/inspectionStore'
+
+type PhotoAnalysis = {
+  angleLabel: string
+  status: 'OK' | 'WARNING' | 'CRITICAL' | 'analyzing' | 'failed'
+  issues: string[]
+  details: string
+}
 
 export default function CompletePage() {
   const router = useRouter()
   const store = useInspectionStore()
   const [shareMsg, setShareMsg] = useState('')
   const [reportStatus, setReportStatus] = useState<'sending' | 'sent' | 'failed' | 'idle'>('idle')
+  const [analyses, setAnalyses] = useState<PhotoAnalysis[]>([])
+  const [analysisStatus, setAnalysisStatus] = useState<'idle' | 'running' | 'done'>('idle')
   const sentRef = useRef(false)
+  const analysisRef = useRef(false)
 
   const driver     = store.driver
   const vehicle    = store.vehicle
@@ -52,6 +63,53 @@ export default function CompletePage() {
     sentRef.current = true
     sendTelegramReport()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (analysisRef.current || store.photos.length === 0) return
+    analysisRef.current = true
+    runPhotoAnalysis()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function runPhotoAnalysis() {
+    setAnalysisStatus('running')
+    const initial: PhotoAnalysis[] = store.photos.map((p) => ({
+      angleLabel: p.angleLabel,
+      status: 'analyzing',
+      issues: [],
+      details: '',
+    }))
+    setAnalyses(initial)
+
+    await Promise.all(
+      store.photos.map(async (photo, idx) => {
+        try {
+          const res = await fetch('/api/analyze-photos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ dataUrl: photo.dataUrl, angleLabel: photo.angleLabel }),
+          })
+          const data = await res.json()
+          setAnalyses((prev) => {
+            const next = [...prev]
+            next[idx] = {
+              angleLabel: photo.angleLabel,
+              status: data.ok ? (data.status as PhotoAnalysis['status']) : 'failed',
+              issues: data.issues ?? [],
+              details: data.details ?? (data.ok ? '' : 'Analysis failed'),
+            }
+            return next
+          })
+        } catch {
+          setAnalyses((prev) => {
+            const next = [...prev]
+            next[idx] = { angleLabel: photo.angleLabel, status: 'failed', issues: [], details: 'Could not analyze' }
+            return next
+          })
+        }
+      })
+    )
+    setAnalysisStatus('done')
+  }
 
   async function sendTelegramReport() {
     if (!store.driver || !store.vehicle) return
@@ -106,6 +164,44 @@ export default function CompletePage() {
     }
   }
 
+  // Send AI findings as a follow-up Telegram message once analysis is done
+  useEffect(() => {
+    if (analysisStatus !== 'done' || reportStatus === 'idle' || reportStatus === 'sending') return
+    const findings = analyses.filter((a) => a.status === 'WARNING' || a.status === 'CRITICAL')
+    if (findings.length === 0) return
+
+    const chatId = store.sourceChatId ?? undefined
+    const criticals = findings.filter((a) => a.status === 'CRITICAL')
+    const warnings  = findings.filter((a) => a.status === 'WARNING')
+
+    const lines = [
+      `🔍 AI DAMAGE ANALYSIS`,
+      `━━━━━━━━━━━━━━━━━━━━`,
+      `Trailer: ${vehicle?.unitNumber ?? '—'}`,
+      criticals.length > 0 ? `🚨 CRITICAL (${criticals.length}): ${criticals.map((a) => a.angleLabel).join(', ')}` : '',
+      warnings.length > 0  ? `⚠️ WARNING (${warnings.length}): ${warnings.map((a) => a.angleLabel).join(', ')}` : '',
+      ``,
+      ...findings.map((a) => `${a.status === 'CRITICAL' ? '🚨' : '⚠️'} ${a.angleLabel}:\n${a.issues.map((i) => `  • ${i}`).join('\n')}`),
+    ].filter((l) => l !== undefined && l !== null)
+
+    fetch('/api/send-report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'text', text: lines.join('\n'), chatId }),
+    }).catch(() => {})
+  }, [analysisStatus, reportStatus]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  function buildAiFindingsHtml() {
+    if (analyses.length === 0 || analysisStatus !== 'done') return ''
+    const issues = analyses.filter((a) => a.status === 'WARNING' || a.status === 'CRITICAL')
+    if (issues.length === 0) return `<div style="margin:16px 0;padding:12px;background:#f0fdf4;border:1px solid #86efac;border-radius:6px;font-size:13px;color:#166534">✅ AI Analysis: No significant damage detected</div>`
+    return `<h3 style="margin:16px 0 8px">AI Damage Analysis</h3>
+      ${issues.map((a) => `<div style="margin-bottom:8px;padding:10px 12px;background:${a.status === 'CRITICAL' ? '#fef2f2' : '#fffbeb'};border:1px solid ${a.status === 'CRITICAL' ? '#fca5a5' : '#fcd34d'};border-radius:6px">
+        <div style="font-size:12px;font-weight:700;color:${a.status === 'CRITICAL' ? '#991b1b' : '#92400e'};margin-bottom:4px">${a.status === 'CRITICAL' ? '🚨' : '⚠️'} ${a.angleLabel}</div>
+        <div style="font-size:12px;color:#374151">${a.issues.map((i) => `• ${i}`).join('<br>')}</div>
+      </div>`).join('')}`
+  }
+
   function handleDownloadPDF() {
     const sig = store.signatureDataUrl
 
@@ -135,6 +231,8 @@ export default function CompletePage() {
       ? `<h3 style="margin:16px 0 6px">Driver Signature</h3><img src="${sig}" style="height:80px;border:1px solid #ccc" />`
       : ''
 
+    const aiFindingsHtml = buildAiFindingsHtml()
+
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
 <title>PTI Inspection Report — ${vehicle?.unitNumber ?? 'Trailer'}</title>
 <style>
@@ -149,6 +247,7 @@ export default function CompletePage() {
 <h1>PTI Trailer Inspection Report</h1>
 <h2>${inspType} Inspection</h2>
 <table>${rows.map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join('')}</table>
+${aiFindingsHtml}
 ${photosHtml}${sigHtml}
 <div class="footer">Generated by PTI Inspection System · ${new Date().toISOString()}</div>
 <script>window.onload=function(){window.print();}<\/script>
@@ -202,6 +301,10 @@ ${photosHtml}${sigHtml}
     store.reset()
     router.push('/inspection/start')
   }
+
+  const criticalCount = analyses.filter((a) => a.status === 'CRITICAL').length
+  const warningCount  = analyses.filter((a) => a.status === 'WARNING').length
+  const okCount       = analyses.filter((a) => a.status === 'OK').length
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -260,6 +363,75 @@ ${photosHtml}${sigHtml}
               </div>
             </div>
           </div>
+
+          {/* AI Analysis card */}
+          {photoCount > 0 && (
+            <div className="card">
+              <div className="flex items-center gap-2 mb-3">
+                <ScanSearch className="h-5 w-5 text-purple-600" />
+                <h3 className="font-semibold text-slate-800">AI Damage Analysis</h3>
+                {analysisStatus === 'running' && (
+                  <Loader2 className="h-4 w-4 text-purple-500 animate-spin ml-auto" />
+                )}
+                {analysisStatus === 'done' && criticalCount === 0 && warningCount === 0 && (
+                  <span className="ml-auto text-xs font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">All Clear</span>
+                )}
+                {analysisStatus === 'done' && (criticalCount > 0 || warningCount > 0) && (
+                  <span className="ml-auto text-xs font-semibold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
+                    {criticalCount > 0 ? `${criticalCount} Critical` : `${warningCount} Warning`}
+                  </span>
+                )}
+              </div>
+
+              {analysisStatus === 'running' && (
+                <p className="text-xs text-slate-500">Analyzing {photoCount} photo{photoCount !== 1 ? 's' : ''} for damage…</p>
+              )}
+
+              {analyses.length > 0 && (
+                <div className="space-y-2">
+                  {analyses.map((a, i) => (
+                    <div key={i} className={`rounded-lg p-3 text-sm ${
+                      a.status === 'CRITICAL' ? 'bg-red-50 border border-red-200' :
+                      a.status === 'WARNING'  ? 'bg-yellow-50 border border-yellow-200' :
+                      a.status === 'OK'       ? 'bg-green-50 border border-green-100' :
+                      a.status === 'failed'   ? 'bg-slate-50 border border-slate-200' :
+                      'bg-slate-50 border border-slate-100'
+                    }`}>
+                      <div className="flex items-center gap-2">
+                        {a.status === 'analyzing' && <Loader2 className="h-4 w-4 text-slate-400 animate-spin flex-shrink-0" />}
+                        {a.status === 'CRITICAL'  && <XCircle className="h-4 w-4 text-red-500 flex-shrink-0" />}
+                        {a.status === 'WARNING'   && <TriangleAlert className="h-4 w-4 text-yellow-500 flex-shrink-0" />}
+                        {a.status === 'OK'        && <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />}
+                        {a.status === 'failed'    && <AlertTriangle className="h-4 w-4 text-slate-400 flex-shrink-0" />}
+                        <span className="font-semibold text-slate-700 text-xs">{a.angleLabel}</span>
+                        {a.status !== 'analyzing' && a.status !== 'failed' && (
+                          <span className={`ml-auto text-xs font-bold ${
+                            a.status === 'CRITICAL' ? 'text-red-600' :
+                            a.status === 'WARNING'  ? 'text-yellow-700' :
+                            'text-green-600'
+                          }`}>{a.status}</span>
+                        )}
+                      </div>
+                      {a.issues.length > 0 && (
+                        <ul className="mt-1.5 space-y-0.5 pl-6">
+                          {a.issues.map((issue, j) => (
+                            <li key={j} className="text-xs text-slate-600">• {issue}</li>
+                          ))}
+                        </ul>
+                      )}
+                      {a.details && a.status !== 'OK' && (
+                        <p className="mt-1 text-xs text-slate-500 pl-6">{a.details}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {analysisStatus === 'done' && criticalCount === 0 && warningCount === 0 && okCount > 0 && (
+                <p className="text-xs text-green-700 mt-2">No damage or issues detected in any photo.</p>
+              )}
+            </div>
+          )}
 
           {/* Telegram status */}
           <div className={`card border ${
