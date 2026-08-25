@@ -74,7 +74,7 @@ describe('validateModelExplanation', () => {
         reason:
           'The driver has 26 completed months of CDL experience, at least the 24 months required by the two-year experience path, with no countable moving violations in the 36-month window.',
         criteria_applied: ['At least 24 completed months of CDL experience'],
-        eligibility_path: 'Two-year experience path',
+        eligibility_path: '2-year driver criteria',
         evidence_used: ['Original CDL issue date 2024-06-15'],
         excluded_evidence: [],
         data_gaps: [],
@@ -113,6 +113,64 @@ describe('validateModelExplanation', () => {
     );
     expect(result.accepted).toBe(false);
     expect(result.rejectionReasons.join(' ')).toMatch(/too vague/);
+  });
+
+  it('rejects a band the driver is not in, however plausible the prose', () => {
+    // 26 months is a two-year driver; claiming the one-year branch describes a
+    // different driver than the one the engine decided about.
+    const result = validateModelExplanation(
+      {
+        decision: 'Qualified',
+        reason: 'Driver qualifies under the one-year branch with 26 completed months.',
+        eligibility_path: '1-year driver criteria',
+      },
+      evaluation,
+    );
+    expect(result.accepted).toBe(false);
+    expect(result.rejectionReasons.join(' ')).toMatch(/place them in "2-year driver criteria"/);
+  });
+
+  it('rejects a passed threshold described as a failure', () => {
+    const result = validateModelExplanation(
+      {
+        decision: 'Qualified',
+        reason: 'Driver has 2 minor violations against a maximum of 3, within the limit.',
+        minor_violation_count: 2,
+        maximum_minor_violations: 3,
+        failed_criteria: ['Exceeded the minor violation limit'],
+      },
+      evaluation,
+    );
+    expect(result.accepted).toBe(false);
+    expect(result.rejectionReasons.join(' ')).toMatch(/must not be described as failed/);
+  });
+
+  it('rejects a major classification with no cited authority', () => {
+    const result = validateModelExplanation(
+      {
+        decision: 'Qualified',
+        reason: 'Driver has one elevated offence on record but remains within limits.',
+        major_violation_matches: [
+          { event: 'FAIL TO HAVE VEHICLE UNDER CONTROL', matched_category: 'Careless', guideline_reference: '   ' },
+        ],
+      },
+      evaluation,
+    );
+    expect(result.accepted).toBe(false);
+    expect(result.rejectionReasons.join(' ')).toMatch(/without citing the guideline wording/);
+  });
+
+  it('rejects an underwriting condition the applied path does not carry', () => {
+    const result = validateModelExplanation(
+      {
+        decision: 'Qualified',
+        reason: 'Driver qualifies with 26 completed months of verified experience.',
+        underwriting_conditions: ['Increase deductible by 100%.'],
+      },
+      evaluation,
+    );
+    expect(result.accepted).toBe(false);
+    expect(result.rejectionReasons.join(' ')).toMatch(/does not carry/);
   });
 
   it('rejects malformed payloads', () => {

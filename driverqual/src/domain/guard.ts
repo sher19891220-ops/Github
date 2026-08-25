@@ -164,7 +164,24 @@ export const modelExplanationSchema = z.object({
   decision: z.enum(DECISIONS),
   reason: z.string().min(1),
   criteria_applied: z.array(z.string()).default([]),
-  eligibility_path: z.string().nullable().default(null),
+  eligibility_path: z
+    .enum(['2-year driver criteria', '1-year driver criteria', 'Under 1 year', 'Not specified'])
+    .default('Not specified'),
+  minor_violation_count: z.number().int().min(0).default(0),
+  maximum_minor_violations: z.number().int().min(0).default(0),
+  accident_count: z.number().int().min(0).default(0),
+  maximum_accidents: z.number().int().min(0).default(0),
+  major_violation_matches: z
+    .array(
+      z.object({
+        event: z.string(),
+        matched_category: z.string(),
+        guideline_reference: z.string(),
+      }),
+    )
+    .default([]),
+  failed_criteria: z.array(z.string()).default([]),
+  underwriting_conditions: z.array(z.string()).default([]),
   evidence_used: z.array(z.string()).default([]),
   excluded_evidence: z.array(z.string()).default([]),
   data_gaps: z.array(z.string()).default([]),
@@ -243,6 +260,55 @@ export function validateModelExplanation(
         .map((c) => c.text)
         .join('; ')}.`,
     );
+  }
+
+  // Recomputed independently rather than trusted: a narrative that reports the
+  // wrong band or the wrong threshold is describing a different driver than the
+  // one the engine decided about, and storing it would make the record lie.
+  if (explanation.eligibility_path !== 'Not specified') {
+    const engineBand = evaluation.experienceBandLabel;
+    if (explanation.eligibility_path !== engineBand) {
+      rejectionReasons.push(
+        `Model reported eligibility path "${explanation.eligibility_path}" but the driver's ${evaluation.completedExperienceMonths} completed months place them in "${engineBand}".`,
+      );
+    }
+  }
+
+  if (
+    explanation.minor_violation_count > explanation.maximum_minor_violations &&
+    evaluation.decision === 'Qualified'
+  ) {
+    rejectionReasons.push(
+      `Model reported ${explanation.minor_violation_count} minor violations against a maximum of ${explanation.maximum_minor_violations}, which cannot support a Qualified decision.`,
+    );
+  }
+
+  if (
+    explanation.minor_violation_count <= explanation.maximum_minor_violations &&
+    explanation.failed_criteria.some((c) => /minor/i.test(c))
+  ) {
+    rejectionReasons.push(
+      `Model listed a minor-violation failure while reporting ${explanation.minor_violation_count} ≤ ${explanation.maximum_minor_violations}, which passes. A satisfied threshold must not be described as failed.`,
+    );
+  }
+
+  // A major classification without its authority is exactly the silent
+  // strengthening the guideline safeguard exists to prevent.
+  for (const match of explanation.major_violation_matches) {
+    if (!match.guideline_reference.trim()) {
+      rejectionReasons.push(
+        `Model classified "${match.event}" as ${match.matched_category} without citing the guideline wording that authorises it.`,
+      );
+    }
+  }
+
+  const engineConditions = new Set(evaluation.underwritingConditions);
+  for (const condition of explanation.underwriting_conditions) {
+    if (!engineConditions.has(condition)) {
+      rejectionReasons.push(
+        `Model reported an underwriting condition the applied path does not carry: "${condition}".`,
+      );
+    }
   }
 
   return {

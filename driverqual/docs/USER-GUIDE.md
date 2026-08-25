@@ -173,6 +173,79 @@ Put the insurer's actual words in `sourceText`. It is quoted back in the
 explanation, so anyone auditing a decision sees the rule as written next to the
 decision it produced.
 
+### Experience tiers
+
+Most carrier guidelines tier drivers by experience. Give each tier its own path
+and set `appliesToExperienceBand`:
+
+| Band | Covers | Value |
+| --- | --- | --- |
+| 2-year driver criteria | 24+ completed months | `"two_year"` |
+| 1-year driver criteria | 12–23 completed months | `"one_year"` |
+| Under 1 year | fewer than 12 months | `"under_one_year"` |
+
+The bands are mutually exclusive, so exactly one applies to any driver. The
+others are reported as **not applicable** with the reason — not as failures.
+That is what stops a 17-month driver being told they failed a two-year rule they
+were never eligible for, and what keeps their violation count measured against
+their own tier's limit.
+
+Where a tier carries an underwriting term rather than a stricter test, put it in
+`underwritingConditions`:
+
+```json
+{
+  "id": "path.one_year",
+  "label": "1-year driver criteria",
+  "appliesToExperienceBand": "one_year",
+  "underwritingConditions": [
+    "Increase deductible by 100%, with a minimum deductible of $5,000, whichever is greater."
+  ],
+  "conditions": [
+    { "type": "max_events", "category": "minor_moving_violation", "lookbackMonths": 36, "max": 1 },
+    { "type": "max_events", "category": "accident", "lookbackMonths": 36, "max": 0 }
+  ]
+}
+```
+
+A driver who meets those limits is **Qualified**, and the deductible term is
+displayed beside the decision. It is a condition on the placement, never a
+reason to reject the driver — encoding it as a condition or a disqualifier would
+turn an underwriting term into a rejection.
+
+If a guideline defines no tier covering a driver — someone with eight months
+against the table above — the result is **Manual Review**, not Not Qualified. A
+guideline that does not address a driver has not rejected them.
+
+### Thresholds are inclusive
+
+`max: 3` means three passes. Explanations show the comparison both ways round,
+so a passing check reads `2 ≤ 3` and a failing one reads `4 > 3`. There is no
+"any violation disqualifies" rule anywhere in the engine.
+
+### Elevating an offence to major
+
+Offences such as **fail to have vehicle under control**, *careless*,
+*inattentive*, *negligent* and *improper driving* are treated as **minor** by
+default. They describe ordinary moving violations in most states and listed
+major categories in some guidelines — a difference the guideline decides, not
+one that can be read off the words.
+
+To elevate one, say so explicitly and cite the wording:
+
+```json
+"majorCategoryMappings": [
+  {
+    "matches": "vehicle under control",
+    "category": "Careless / Improper Driving",
+    "guidelineReference": "Zone AL guideline §3.2: \"loss of vehicle control is treated as improper driving\"."
+  }
+]
+```
+
+Unambiguous majors — DUI, reckless, leaving the scene — are recognised from the
+record itself and need no mapping.
+
 ### Every condition available
 
 | Condition | Fields | Means |
@@ -225,10 +298,14 @@ unconfigured and you type the evidence in — it never invents values.
 
 Extraction is an assistant, not an authority. Four things are worth your eyes:
 
-- **Original CDL issue date.** The one field most often wrong, because licences
-  show several dates. It must be the *first* issue date — "CDL since" — not the
-  current card's issue or renewal date. The panel shows the derived month count
-  beside it; if that number looks far off, this date is why.
+- **The CDL issue-date table.** Every issue date found across the documents is
+  listed with the document it came from and the label exactly as printed, and
+  one is marked **Original**. Only a date a document explicitly calls the
+  first/original issue can be used; an MVR's *state issue date* is a transfer,
+  not a start, and using it would silently cost the driver years of credited
+  experience. If nothing is marked Original the panel says so and the result is
+  Manual Review rather than a guess. The derived month count and experience tier
+  appear directly beneath.
 - **MVR order date.** Anchors every lookback window. An MVR older than 90 days
   holds the driver for review.
 - **Each violation description**, kept exactly as printed. The classification

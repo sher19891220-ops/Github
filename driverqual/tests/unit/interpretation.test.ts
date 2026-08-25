@@ -8,6 +8,8 @@ function payload(overrides: Partial<Interpretation> = {}): Interpretation {
         id: 'path.two_year',
         label: 'Two-year experience path',
         sourceText: 'Two years of verifiable CDL experience, maximum three moving violations in 36 months.',
+        appliesToExperienceBand: null,
+        underwritingConditions: [],
         conditions: [
           { type: 'min_experience_months', months: 24 },
           { type: 'max_events', category: 'moving_violation', lookbackMonths: 36, max: 3 },
@@ -17,6 +19,8 @@ function payload(overrides: Partial<Interpretation> = {}): Interpretation {
         id: 'path.one_year',
         label: 'One-year experience path',
         sourceText: 'One year considered with no more than one moving violation.',
+        appliesToExperienceBand: null,
+        underwritingConditions: [],
         conditions: [
           { type: 'min_experience_months', months: 12 },
           { type: 'max_events', category: 'moving_violation', lookbackMonths: 36, max: 1 },
@@ -24,6 +28,7 @@ function payload(overrides: Partial<Interpretation> = {}): Interpretation {
       },
     ],
     disqualifiers: [],
+    majorCategoryMappings: [],
     notes: '',
     warnings: [],
     ...overrides,
@@ -51,6 +56,8 @@ describe('buildDraft', () => {
             id: 'p',
             label: 'Invented condition',
             sourceText: 'Driver must be nice.',
+            appliesToExperienceBand: null,
+            underwritingConditions: [],
             // Not a condition type the engine knows.
             conditions: [{ type: 'driver_seems_reliable', level: 'high' }],
           },

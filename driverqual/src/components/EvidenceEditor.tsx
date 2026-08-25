@@ -1,7 +1,9 @@
 'use client';
 
 import { completedMonths, isValidIsoDate } from '@/domain/dates';
+import { resolveOriginalIssueDate } from '@/domain/cdl-dates';
 import { normalizeEvidence } from '@/domain/evidence';
+import { bandLabel, experienceBand } from '@/domain/experience';
 import type { DriverEvidence, LicenseStatus, MvrEvent } from '@/domain/types';
 
 const LICENSE_STATUSES: LicenseStatus[] = [
@@ -62,10 +64,16 @@ export function EvidenceEditor({
     });
 
   const normalized = normalizeEvidence(evidence, todayIso());
-  const months =
-    evidence.cdlOriginalIssueDate && isValidIsoDate(evidence.cdlOriginalIssueDate)
-      ? completedMonths(evidence.cdlOriginalIssueDate, todayIso())
+  const resolved =
+    evidence.cdlIssueDateCandidates.length > 0
+      ? resolveOriginalIssueDate(evidence.cdlIssueDateCandidates)
       : null;
+  const effectiveOriginal = resolved ? resolved.date : evidence.cdlOriginalIssueDate;
+  const months =
+    effectiveOriginal && isValidIsoDate(effectiveOriginal)
+      ? completedMonths(effectiveOriginal, todayIso())
+      : null;
+  const band = experienceBand(months);
 
   return (
     <div>
@@ -154,15 +162,60 @@ export function EvidenceEditor({
           />
         </div>
       </div>
+      {evidence.cdlIssueDateCandidates.length > 0 && (
+        <div className="table-scroll" data-testid="issue-date-candidates">
+          <table>
+            <thead>
+              <tr>
+                <th>Issue date found</th>
+                <th>Document</th>
+                <th>Printed as</th>
+                <th>Used</th>
+              </tr>
+            </thead>
+            <tbody>
+              {evidence.cdlIssueDateCandidates.map((candidate) => {
+                const chosen = resolved?.chosen;
+                const isChosen =
+                  chosen !== null &&
+                  chosen !== undefined &&
+                  chosen.date === candidate.date &&
+                  chosen.sourceDocument === candidate.sourceDocument &&
+                  chosen.printedLabel === candidate.printedLabel;
+                const rejection = resolved?.rejected.find((r) => r.candidate === candidate);
+                return (
+                  <tr key={`${candidate.sourceDocument}-${candidate.date}-${candidate.printedLabel}`}>
+                    <td className="mono">{candidate.date}</td>
+                    <td>{candidate.sourceDocument}</td>
+                    <td>{candidate.printedLabel}</td>
+                    <td>
+                      {isChosen ? (
+                        <span className="badge badge-qualified">Original</span>
+                      ) : (
+                        <span className="muted" title={rejection?.reason}>
+                          Not used
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+
       <div className="alert alert-info" data-testid="experience-summary">
         {months === null ? (
           <>
-            <strong>Cannot calculate</strong> — no original CDL issue date has been entered.
+            <strong>Cannot calculate</strong> —{' '}
+            {resolved ? resolved.reason : 'no original CDL issue date has been entered.'}
           </>
         ) : (
           <>
             <strong>{months} completed months</strong> of CDL experience, calculated from{' '}
-            {evidence.cdlOriginalIssueDate} to {todayIso()}.
+            {effectiveOriginal} to {todayIso()} — <strong>{bandLabel(band)}</strong>.
+            {resolved ? ` ${resolved.reason}` : ''}
           </>
         )}
       </div>

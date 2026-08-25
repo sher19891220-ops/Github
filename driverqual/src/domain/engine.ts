@@ -1,4 +1,5 @@
 import { lookbackWindow, type IsoDate } from './dates';
+import { bandLabel, describeThreshold, experienceBand, withinThreshold, type ExperienceBand } from './experience';
 import {
   countEvents,
   normalizeEvidence,
@@ -32,12 +33,20 @@ export interface ConditionOutcome {
   dataGaps: string[];
 }
 
+export type PathStatus = ConditionStatus | 'not_applicable';
+
 export interface PathOutcome {
   pathId: string;
   label: string;
   sourceText: string;
-  status: ConditionStatus;
+  status: PathStatus;
   conditions: ConditionOutcome[];
+  /** The band this path is restricted to, when it is banded. */
+  appliesToExperienceBand: ExperienceBand | null;
+  /** Underwriting terms that attach if this path is the one satisfied. */
+  underwritingConditions: string[];
+  /** Why the path was skipped, when not applicable. */
+  notApplicableReason: string | null;
 }
 
 export interface CoverageEvaluation {
@@ -55,6 +64,12 @@ export interface CoverageEvaluation {
   dataGaps: string[];
   paths: PathOutcome[];
   disqualifiersTriggered: string[];
+  /** Underwriting terms attached by the satisfied path. Never a rejection. */
+  underwritingConditions: string[];
+  /** The band the driver's verified experience places them in. */
+  experienceBand: ExperienceBand;
+  experienceBandLabel: string;
+  completedExperienceMonths: number | null;
   engineVersion: string;
   extractionFormatVersion: number;
   evaluationDate: IsoDate;
@@ -152,11 +167,11 @@ function evaluateCondition(
       const { counted, count } = countEvents(evidence.events, condition.category, window);
       const countable = counted.filter((c) => c.countable);
       const excluded = counted.filter((c) => !c.countable);
-      const pass = count <= condition.max;
+      const pass = withinThreshold(count, condition.max);
       return {
         ...base,
         status: pass ? 'pass' : 'fail',
-        detail: `Requires no more than ${condition.max} ${condition.category.replace(/_/g, ' ')}(s) in the ${condition.lookbackMonths}-month window ${window.start} to ${window.end} (anchored on the MVR order date). Countable: ${count}.`,
+        detail: `Requires no more than ${condition.max} ${condition.category.replace(/_/g, ' ')}(s) in the ${condition.lookbackMonths}-month window ${window.start} to ${window.end} (anchored on the MVR order date). Countable: ${count} — ${describeThreshold(count, condition.max)}, so this ${pass ? 'passes' : 'fails'}.`,
         evidenceUsed: countable.map(
           (c) =>
             `${c.event.effectiveDate} — ${c.event.description} (${c.event.eventType}${
@@ -191,11 +206,11 @@ function evaluateCondition(
           ),
         };
       }
-      const pass = total <= condition.max;
+      const pass = withinThreshold(total, condition.max);
       return {
         ...base,
         status: pass ? 'pass' : 'fail',
-        detail: `Requires no more than ${condition.max} ${label} points in the ${condition.lookbackMonths}-month window ${window.start} to ${window.end}. Total: ${total}.`,
+        detail: `Requires no more than ${condition.max} ${label} points in the ${condition.lookbackMonths}-month window ${window.start} to ${window.end}. Total: ${total} — ${describeThreshold(total, condition.max)}.`,
         evidenceUsed: [`${total} ${label} points in ${window.start} to ${window.end}`],
       };
     }
@@ -294,11 +309,11 @@ function evaluateCondition(
           dataGaps: undated.map((s) => `Suspension record "${s.description}" has no usable date.`),
         };
       }
-      const pass = inWindow.length <= condition.max;
+      const pass = withinThreshold(inWindow.length, condition.max);
       return {
         ...base,
         status: pass ? 'pass' : 'fail',
-        detail: `Requires no more than ${condition.max} suspension(s) in the ${condition.lookbackMonths}-month window ${window.start} to ${window.end}. Explicit suspension records found: ${inWindow.length}.`,
+        detail: `Requires no more than ${condition.max} suspension(s) in the ${condition.lookbackMonths}-month window ${window.start} to ${window.end}. Explicit suspension records found: ${inWindow.length} — ${describeThreshold(inWindow.length, condition.max)}.`,
         evidenceUsed: inWindow.map(
           (s) => `Suspension: ${s.description} (${s.startDate ?? 'undated'})`,
         ),
@@ -321,8 +336,9 @@ export interface EngineEvidence extends NormalizedEvidence {
 export function buildEngineEvidence(
   evidence: DriverEvidence,
   evaluationDate: IsoDate,
+  options: { majorCategoryMappings?: Array<{ matches: string; category: string; guidelineReference: string }> } = {},
 ): EngineEvidence {
-  const normalized = normalizeEvidence(evidence, evaluationDate);
+  const normalized = normalizeEvidence(evidence, evaluationDate, options);
   return {
     ...normalized,
     licenseStatus: evidence.licenseStatus,
@@ -357,6 +373,10 @@ function notEvaluated(
     dataGaps: [reason],
     paths: [],
     disqualifiersTriggered: [],
+    underwritingConditions: [],
+    experienceBand: 'unknown',
+    experienceBandLabel: bandLabel('unknown'),
+    completedExperienceMonths: null,
     engineVersion: ENGINE_VERSION,
     extractionFormatVersion,
     evaluationDate,
@@ -406,11 +426,22 @@ export function evaluateCoverage(params: {
   }
 
   const guidelineName = guidelineDisplayName(guideline);
-  const engineEvidence = buildEngineEvidence(evidence, evaluationDate);
+
+  // The guideline's own major mappings are applied while normalising, so a
+  // severity only ever rises where that guideline authorises it.
+  const majorCategoryMappings = guideline.ruleSet?.majorCategoryMappings ?? [];
+  const engineEvidence = buildEngineEvidence(evidence, evaluationDate, { majorCategoryMappings });
+
+  const months = engineEvidence.experience.months;
+  const band = experienceBand(months);
 
   const shell = {
     companyId,
     coverageType,
+    underwritingConditions: [] as string[],
+    experienceBand: band,
+    experienceBandLabel: bandLabel(band),
+    completedExperienceMonths: months,
     guidelineId: guideline.id,
     guidelineVersion: guideline.version,
     guidelineName,
@@ -467,21 +498,70 @@ export function evaluateCoverage(params: {
     outcome: evaluateCondition(d.condition, engineEvidence),
   }));
 
+  // Banded paths cover mutually exclusive experience ranges, so at most one can
+  // apply. Skipping the others as "not applicable" rather than evaluating them
+  // is what stops a 17-month driver being reported against a two-year rule they
+  // were never eligible for — and keeps their violation count compared with
+  // their own band's limit.
+  const guidelineIsBanded = ruleSet.eligibilityPaths.some(
+    (p) => p.appliesToExperienceBand !== null,
+  );
+
   const paths: PathOutcome[] = ruleSet.eligibilityPaths.map((path) => {
+    const shared = {
+      pathId: path.id,
+      label: path.label,
+      sourceText: path.sourceText,
+      appliesToExperienceBand: path.appliesToExperienceBand,
+      underwritingConditions: path.underwritingConditions,
+    };
+
+    if (path.appliesToExperienceBand !== null && path.appliesToExperienceBand !== band) {
+      return {
+        ...shared,
+        status: 'not_applicable' as const,
+        conditions: [],
+        notApplicableReason:
+          band === 'unknown'
+            ? 'Experience could not be verified, so no experience-based branch applies.'
+            : `This branch covers ${bandLabel(path.appliesToExperienceBand)}; the driver's ${months} completed months place them in ${bandLabel(band)}.`,
+      };
+    }
+
     const conditions = path.conditions.map((c) => evaluateCondition(c, engineEvidence));
     const status: ConditionStatus = conditions.some((c) => c.status === 'fail')
       ? 'fail'
       : conditions.some((c) => c.status === 'indeterminate')
         ? 'indeterminate'
         : 'pass';
-    return {
-      pathId: path.id,
-      label: path.label,
-      sourceText: path.sourceText,
-      status,
-      conditions,
-    };
+    return { ...shared, status, conditions, notApplicableReason: null };
   });
+
+  const applicablePaths = paths.filter((p) => p.status !== 'not_applicable');
+
+  // A banded guideline with no applicable branch has not rejected the driver —
+  // it simply does not cover them. That is a review item, not a failure.
+  if (guidelineIsBanded && applicablePaths.length === 0) {
+    return {
+      ...shell,
+      decision: 'Manual Review',
+      reason:
+        band === 'unknown'
+          ? `Held for manual review under ${guidelineName}: the original CDL issue date could not be verified, so the applicable experience branch cannot be determined. ${engineEvidence.experience.reason}`
+          : `Held for manual review under ${guidelineName}: the driver has ${months} completed months (${bandLabel(band)}) and this guideline defines no branch covering that experience. Confirm whether another path applies before deciding.`,
+      eligibilityPath: null,
+      criteriaApplied: [],
+      evidenceUsed: [],
+      excludedEvidence: [],
+      dataGaps: [
+        band === 'unknown'
+          ? engineEvidence.experience.reason
+          : `No eligibility branch covers ${bandLabel(band)}.`,
+      ],
+      paths,
+      disqualifiersTriggered: [],
+    };
+  }
 
   // A disqualifier fires when its condition *fails* — the condition states the
   // acceptable state, so failing it is the disqualifying event.
@@ -515,13 +595,18 @@ export function evaluateCoverage(params: {
     };
   }
 
-  const passingPath = paths.find((p) => p.status === 'pass');
+  const passingPath = applicablePaths.find((p) => p.status === 'pass');
 
   if (passingPath && unresolvedDisqualifiers.length === 0) {
     return {
       ...shell,
       decision: 'Qualified',
-      reason: `Qualified under ${guidelineName} via ${passingPath.label}: every condition on this eligibility path is satisfied by verified evidence, and no disqualifier applies.`,
+      underwritingConditions: passingPath.underwritingConditions,
+      reason: `Qualified under ${guidelineName} via ${passingPath.label}: every condition on this eligibility path is satisfied by verified evidence, and no disqualifier applies.${
+        passingPath.underwritingConditions.length
+          ? ` This branch carries underwriting condition(s): ${passingPath.underwritingConditions.join('; ')}. These are terms on the placement, not grounds for rejecting the driver.`
+          : ''
+      }`,
       eligibilityPath: passingPath.label,
       criteriaApplied: passingPath.conditions.map((c) => describeCondition(c.condition)),
       evidenceUsed: collect(passingPath.conditions, 'evidenceUsed'),
@@ -550,7 +635,7 @@ export function evaluateCoverage(params: {
     };
   }
 
-  const indeterminatePaths = paths.filter((p) => p.status === 'indeterminate');
+  const indeterminatePaths = applicablePaths.filter((p) => p.status === 'indeterminate');
   if (indeterminatePaths.length > 0) {
     const outcomes = indeterminatePaths.flatMap((p) =>
       p.conditions.filter((c) => c.status === 'indeterminate'),
@@ -585,12 +670,12 @@ export function evaluateCoverage(params: {
     };
   }
 
-  // Every path was decidable and every one failed.
-  const allConditions = paths.flatMap((p) => p.conditions);
+  // Every applicable path was decidable and every one failed.
+  const allConditions = applicablePaths.flatMap((p) => p.conditions);
   return {
     ...shell,
     decision: 'Not Qualified',
-    reason: `Not qualified under ${guidelineName}: every eligibility path was evaluated on verified evidence and each one fails. ${paths
+    reason: `Not qualified under ${guidelineName}: every applicable eligibility path was evaluated on verified evidence and each one fails. ${applicablePaths
       .map(
         (p) =>
           `${p.label} fails because ${p.conditions
@@ -600,7 +685,9 @@ export function evaluateCoverage(params: {
       )
       .join(' ')}`,
     eligibilityPath: null,
-    criteriaApplied: paths.map((p) => (p.sourceText ? `${p.label}: "${p.sourceText}"` : p.label)),
+    criteriaApplied: applicablePaths.map((p) =>
+      p.sourceText ? `${p.label}: "${p.sourceText}"` : p.label,
+    ),
     evidenceUsed: collect(allConditions, 'evidenceUsed'),
     excludedEvidence: collect(allConditions, 'excludedEvidence'),
     dataGaps: [],

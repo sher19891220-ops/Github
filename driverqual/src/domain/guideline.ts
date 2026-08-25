@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { COVERAGE_TYPES } from './types';
+import { EXPERIENCE_BANDS } from './experience';
 
 /**
  * A guideline is stored twice: the original file (authoritative, immutable) and
@@ -94,6 +95,24 @@ export const eligibilityPathSchema = z.object({
   /** Verbatim guideline text this path was derived from, for the explanation. */
   sourceText: z.string().default(''),
   conditions: z.array(conditionSchema).min(1),
+  /**
+   * Restricts this path to one experience band.
+   *
+   * Bands are mutually exclusive, so when paths are banded exactly one applies
+   * and the others are reported as not applicable rather than failed. That is
+   * what keeps a 17-month driver from being told they failed a two-year rule
+   * they were never eligible for, and keeps their violation count compared
+   * against their own band's limit.
+   *
+   * Omit it for guidelines whose paths are plain alternatives.
+   */
+  appliesToExperienceBand: z.enum(EXPERIENCE_BANDS).nullable().default(null),
+  /**
+   * Underwriting terms that attach when this path is satisfied — a raised
+   * deductible, for example. These are conditions on the placement, never
+   * grounds for rejecting the driver.
+   */
+  underwritingConditions: z.array(z.string()).default([]),
 });
 
 export type EligibilityPath = z.infer<typeof eligibilityPathSchema>;
@@ -108,8 +127,28 @@ export const disqualifierSchema = z.object({
 
 export type Disqualifier = z.infer<typeof disqualifierSchema>;
 
+/**
+ * An explicit authorisation to treat one offence as major.
+ *
+ * Ambiguous wording — "careless", "improper", "fail to have vehicle under
+ * control" — is minor by default. It becomes major only where the guideline
+ * says so, and only with the quoted wording that says it, so the mapping can be
+ * audited rather than taken on trust.
+ */
+export const majorCategoryMappingSchema = z.object({
+  /** Matched case-insensitively against the record's exact description. */
+  matches: z.string().min(1),
+  category: z.string().min(1),
+  /** Page, section or quoted criterion authorising the mapping. Required. */
+  guidelineReference: z.string().min(1),
+});
+
+export type MajorCategoryMapping = z.infer<typeof majorCategoryMappingSchema>;
+
 export const ruleSetSchema = z.object({
   schemaVersion: z.literal(1),
+  /** Offences this guideline explicitly elevates to major. */
+  majorCategoryMappings: z.array(majorCategoryMappingSchema).default([]),
   /**
    * Paths are alternatives (OR). Conditions inside a path are conjunctive (AND).
    */

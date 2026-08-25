@@ -43,7 +43,7 @@ export const MAJOR_RULES: ClassificationRule[] = [
   { id: 'major.dui', label: 'DUI / DWI / OWI / OVI', pattern: /\b(dui|dwi|owi|oui|ovi)\b|\bunder\s+the\s+influence\b|\bintoxicat\w*\b|\bimpaired\s+driving\b|\bdriving\s+impaired\b|\bbac\b/i, eventType: 'Moving Violation', severity: 'Major' },
   { id: 'major.refusal', label: 'Refusal to submit to testing', pattern: /\brefus\w*\s+(to\s+)?(submit|test|chemical|breath|blood)\b|\bimplied\s+consent\b/i, eventType: 'Moving Violation', severity: 'Major' },
   { id: 'major.controlled_substance', label: 'Controlled substance while driving', pattern: /\bcontrolled\s+substance\b|\bdrug\s+possession\s+.*vehicle\b/i, eventType: 'Moving Violation', severity: 'Major' },
-  { id: 'major.reckless', label: 'Reckless driving', pattern: /\breckless\b|\bcareless\s+and\s+wanton\b|\bwilful\s+disregard\b/i, eventType: 'Moving Violation', severity: 'Major' },
+  { id: 'major.reckless', label: 'Reckless driving', pattern: /\breckless\b|\bwilful\s+disregard\b|\bwanton\b/i, eventType: 'Moving Violation', severity: 'Major' },
   { id: 'major.leaving_scene', label: 'Leaving the scene / hit and run', pattern: /\b(leav\w*\s+the\s+scene|hit\s*(and|&)\s*run|hit\s*-?\s*skip)\b/i, eventType: 'Moving Violation', severity: 'Major' },
   { id: 'major.felony_vehicle', label: 'Felony involving a motor vehicle', pattern: /\bfelony\b|\bvehicular\s+(homicide|manslaughter|assault)\b/i, eventType: 'Moving Violation', severity: 'Major' },
   { id: 'major.driving_while_suspended', label: 'Driving while suspended / revoked', pattern: /\bdriving\s+(while|with|on|under)\s+.*\b(suspend\w*|revok\w*|disqualif\w*)\b|\bdws\b|\bdwlsr?\b/i, eventType: 'Moving Violation', severity: 'Major' },
@@ -61,6 +61,26 @@ export const SERIOUS_RULES: ClassificationRule[] = [
 ];
 
 /** Ordinary moving violations. */
+/**
+ * Offences a carrier guideline may elevate to major, but which are minor until
+ * one explicitly does.
+ *
+ * "Fail to have vehicle under control", "careless", "improper" and the like
+ * describe ordinary moving violations in most states, and describe listed major
+ * categories in some guidelines. The difference is a decision the guideline
+ * makes, not one a classifier can read off the words — and guessing upward
+ * rejects drivers on an offence their insurer treats as minor. So these stay
+ * minor here, and only an explicit mapping (with its guideline reference) can
+ * raise them.
+ */
+export const ELEVATABLE_RULES: ClassificationRule[] = [
+  { id: 'elevatable.no_control', label: 'Fail to have vehicle under control', pattern: /\b(vehicle\s+under\s+control|control\s+of\s+vehicle)\b/i, eventType: 'Moving Violation', severity: 'Minor' },
+  { id: 'elevatable.careless', label: 'Careless driving', pattern: /\bcareless\b/i, eventType: 'Moving Violation', severity: 'Minor' },
+  { id: 'elevatable.inattentive', label: 'Inattentive driving', pattern: /\binattentive\b|\bdistracted\b/i, eventType: 'Moving Violation', severity: 'Minor' },
+  { id: 'elevatable.negligent', label: 'Negligent driving', pattern: /\bnegligent\b/i, eventType: 'Moving Violation', severity: 'Minor' },
+  { id: 'elevatable.improper', label: 'Improper driving', pattern: /\bimproper\s+driving\b/i, eventType: 'Moving Violation', severity: 'Minor' },
+];
+
 export const MINOR_RULES: ClassificationRule[] = [
   { id: 'minor.speeding', label: 'Speeding', pattern: /\bspeed\w*\b|\bexceed\w*\s+(posted|maximum)\b/i, eventType: 'Moving Violation', severity: 'Minor' },
   { id: 'minor.backing', label: 'Improper backing', pattern: /\bback(ing|ed|up)\b|\blimitations?\s+on\s+backing\b/i, eventType: 'Moving Violation', severity: 'Minor' },
@@ -83,6 +103,9 @@ export const ACCIDENT_RULES: ClassificationRule[] = [
 export const CLASSIFICATION_RULES: ClassificationRule[] = [
   ...ADMINISTRATIVE_RULES,
   ...MAJOR_RULES,
+  // Ahead of SERIOUS and MINOR so their generic patterns cannot claim an
+  // elevatable offence and hide the fact that a guideline could raise it.
+  ...ELEVATABLE_RULES,
   ...SERIOUS_RULES,
   ...ACCIDENT_RULES,
   ...MINOR_RULES,
@@ -123,6 +146,39 @@ export function classifyEvent(event: MvrEvent): MvrEvent & { matchedRuleId: stri
   }
   const c = classifyDescription(event.description);
   return { ...event, eventType: c.eventType, severity: c.severity, matchedRuleId: c.matchedRuleId };
+}
+
+/** True when a description is one a guideline may explicitly elevate. */
+export function isElevatable(description: string): boolean {
+  return ELEVATABLE_RULES.some((rule) => rule.pattern.test(description ?? ''));
+}
+
+/**
+ * Applies a guideline's explicit major mappings to a classified event.
+ *
+ * A mapping may only raise severity, never lower it, and it must record the
+ * record text, the category and the guideline wording that authorises it — so
+ * every major classification can be audited back to the sentence permitting it.
+ */
+export function applyMajorMappings(
+  event: MvrEvent,
+  mappings: Array<{ matches: string; category: string; guidelineReference: string }>,
+): MvrEvent {
+  if (event.eventType !== 'Moving Violation' || event.severity === 'Major') return event;
+
+  const description = (event.description ?? '').toLowerCase();
+  const mapping = mappings.find((m) => description.includes(m.matches.trim().toLowerCase()));
+  if (!mapping) return event;
+
+  return {
+    ...event,
+    severity: 'Major',
+    majorClassification: {
+      eventDescription: event.description,
+      matchedCategory: mapping.category,
+      guidelineReference: mapping.guidelineReference,
+    },
+  };
 }
 
 /**

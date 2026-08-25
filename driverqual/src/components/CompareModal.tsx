@@ -152,6 +152,28 @@ export function CompareModal({
                           {auto.guidelineVersion ? ` — version ${auto.guidelineVersion}` : ''}
                         </p>
 
+                        <p className="stat-label">Experience</p>
+                        <p style={{ margin: '2px 0 10px' }}>
+                          {auto.completedExperienceMonths === null
+                            ? 'Cannot calculate'
+                            : `${auto.completedExperienceMonths} completed months`}{' '}
+                          — {auto.experienceBandLabel}
+                        </p>
+
+                        {auto.underwritingConditions.length > 0 && (
+                          <div className="alert alert-warn" data-testid="underwriting-conditions">
+                            <strong>Underwriting conditions</strong>
+                            <ul className="reasons">
+                              {auto.underwritingConditions.map((c) => (
+                                <li key={c}>{c}</li>
+                              ))}
+                            </ul>
+                            <p className="muted" style={{ margin: '6px 0 0' }}>
+                              Terms on the placement — not grounds for rejecting the driver.
+                            </p>
+                          </div>
+                        )}
+
                         <p className="stat-label">Decision</p>
                         <p style={{ margin: '2px 0 10px' }}>{auto.reason}</p>
 
@@ -186,6 +208,22 @@ export function CompareModal({
                               {auto.excludedEvidence.map((c) => (
                                 <li key={c}>{c}</li>
                               ))}
+                            </ul>
+                          </>
+                        )}
+                        {auto.paths.some((p) => p.status === 'not_applicable') && (
+                          <>
+                            <p className="stat-label" style={{ marginTop: 10 }}>
+                              Branches not applicable
+                            </p>
+                            <ul className="reasons">
+                              {auto.paths
+                                .filter((p) => p.status === 'not_applicable')
+                                .map((p) => (
+                                  <li key={p.pathId}>
+                                    {p.label} — {p.notApplicableReason}
+                                  </li>
+                                ))}
                             </ul>
                           </>
                         )}

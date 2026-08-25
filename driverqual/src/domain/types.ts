@@ -98,9 +98,25 @@ export type LicenseStatus =
   | 'Disqualified'
   | 'Unknown';
 
+/** Which uploaded document a record or field came from. */
+export type SourceDocument = 'CDL' | 'MVR' | 'PSP' | 'Other';
+
+/**
+ * Why an event was classified as a major violation.
+ *
+ * A major classification may only stand when all three are present: the exact
+ * record text, the category it was matched to, and the guideline wording that
+ * authorises the mapping. Without those, an ambiguous offence stays minor.
+ */
+export interface MajorClassification {
+  eventDescription: string;
+  matchedCategory: string;
+  guidelineReference: string;
+}
+
 export interface MvrEvent {
   id: string;
-  /** Verbatim text from the MVR. Never rewritten, never summarised. */
+  /** Verbatim text from the MVR or PSP. Never rewritten, never summarised. */
   description: string;
   violationDate: IsoDate | null;
   convictionDate: IsoDate | null;
@@ -116,6 +132,33 @@ export interface MvrEvent {
   /** Present on accident records only; never inferred from a description. */
   atFault?: boolean | null;
   preventable?: boolean | null;
+  /** Which document this record came from. Defaults to MVR. */
+  source?: SourceDocument;
+  /**
+   * PSP roadside inspections. They are records of an inspection taking place,
+   * not convictions, and never count toward a violation threshold.
+   */
+  isInspection?: boolean;
+  /** Set only when a guideline explicitly authorises a major classification. */
+  majorClassification?: MajorClassification | null;
+}
+
+/**
+ * One date that could be the original CDL issue date, with enough provenance to
+ * choose between candidates and to show a reviewer why one was chosen.
+ *
+ * An MVR commonly prints the most recent state issuance or transfer date. Held
+ * as a bare date it is indistinguishable from an original issue date, and
+ * choosing it silently costs a driver years of credited experience — which is
+ * why the label and the source are carried alongside the date itself.
+ */
+export interface CdlIssueDateCandidate {
+  date: IsoDate;
+  sourceDocument: SourceDocument;
+  /** The label exactly as printed, e.g. "ORIG ISS" or "STATE ISSUE DATE". */
+  printedLabel: string;
+  /** True only when the document itself says this is the first/original issue. */
+  explicitlyOriginal: boolean;
 }
 
 /**
@@ -149,7 +192,7 @@ export interface MedicalCardEvidence {
  * stored evidence unsafe to evaluate. Evidence below this version is forced to
  * Manual Review until the documents are re-read.
  */
-export const CURRENT_EXTRACTION_FORMAT_VERSION = 3;
+export const CURRENT_EXTRACTION_FORMAT_VERSION = 4;
 
 /** Field-level confidence below this makes a dependent condition indeterminate. */
 export const MIN_FIELD_CONFIDENCE = 0.8;
@@ -169,8 +212,14 @@ export interface DriverEvidence {
   cdlNumber: string | null;
   cdlState: string | null;
   cdlClass: string | null;
-  /** First/original CDL issue date. Never a renewal, duplicate or expiry date. */
+  /**
+   * The resolved first/original CDL issue date. Never a renewal, duplicate or
+   * expiry date. When `cdlIssueDateCandidates` is populated this is derived from
+   * them by `resolveOriginalIssueDate`, not entered independently.
+   */
   cdlOriginalIssueDate: IsoDate | null;
+  /** Every issue date found across the uploaded documents, with provenance. */
+  cdlIssueDateCandidates: CdlIssueDateCandidate[];
   /** Kept for display and audit only — never used to compute experience. */
   cdlCurrentIssueDate: IsoDate | null;
   cdlExpirationDate: IsoDate | null;
@@ -188,6 +237,7 @@ export function emptyEvidence(): DriverEvidence {
   return {
     extractionFormatVersion: CURRENT_EXTRACTION_FORMAT_VERSION,
     mvrOrderDate: null,
+    cdlIssueDateCandidates: [],
     dateOfBirth: null,
     cdlNumber: null,
     cdlState: null,

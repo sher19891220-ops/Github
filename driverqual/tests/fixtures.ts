@@ -1,4 +1,4 @@
-import type { Guideline, RuleSet } from '@/domain/guideline';
+import { ruleSetSchema, type Guideline, type RuleSet } from '@/domain/guideline';
 import {
   CURRENT_EXTRACTION_FORMAT_VERSION,
   emptyEvidence,
@@ -22,6 +22,9 @@ export function event(partial: Partial<MvrEvent> & { description: string }): Mvr
     reviewerConfirmed: partial.reviewerConfirmed,
     atFault: partial.atFault ?? null,
     preventable: partial.preventable ?? null,
+    source: partial.source,
+    isInspection: partial.isInspection,
+    majorClassification: partial.majorClassification ?? null,
   };
 }
 
@@ -60,7 +63,7 @@ export function guideline(overrides: Partial<Guideline> & { companyId: string; r
  * two alternative paths — the shape that makes "two years" a branch rather than
  * an absolute requirement.
  */
-export const ZONE_AUTO_LIABILITY: RuleSet = {
+export const ZONE_AUTO_LIABILITY: RuleSet = ruleSetSchema.parse({
   schemaVersion: 1,
   notes: 'Zone-OH LLC Auto Liability driver criteria.',
   eligibilityPaths: [
@@ -90,10 +93,10 @@ export const ZONE_AUTO_LIABILITY: RuleSet = {
     },
   ],
   disqualifiers: [],
-};
+});
 
 /** Xtrack LLC is deliberately stricter, so company isolation is observable. */
-export const XTRACK_AUTO_LIABILITY: RuleSet = {
+export const XTRACK_AUTO_LIABILITY: RuleSet = ruleSetSchema.parse({
   schemaVersion: 1,
   notes: 'Xtrack LLC Auto Liability driver criteria.',
   eligibilityPaths: [
@@ -110,7 +113,7 @@ export const XTRACK_AUTO_LIABILITY: RuleSet = {
     },
   ],
   disqualifiers: [],
-};
+});
 
 /** Phenias Mugisha — acceptance case 5.1. */
 export function pheniasEvidence(overrides: Partial<DriverEvidence> = {}): DriverEvidence {

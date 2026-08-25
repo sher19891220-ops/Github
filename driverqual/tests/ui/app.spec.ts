@@ -145,7 +145,11 @@ test.describe('applicants', () => {
     await expect(page.getByTestId('file-list')).toContainText('mvr.pdf');
 
     await page.getByTestId('read-documents').click();
-    await expect(page.getByTestId('drawer-error')).toContainText('No OpenAI API key is configured');
+    // The message is deliberately vendor-neutral: which provider is configured
+    // is an operator's concern, not something the copy should hard-code.
+    await expect(page.getByTestId('drawer-error')).toContainText(
+      'No document-intelligence provider is configured',
+    );
   });
 
   test('rejects an unsupported file type on the server', async ({ page }, testInfo) => {
@@ -227,7 +231,9 @@ test.describe('guidelines', () => {
 
     // No key is configured in the test environment, so it must say so rather
     // than inventing criteria.
-    await expect(page.getByTestId('guideline-error')).toContainText('No OpenAI API key');
+    await expect(page.getByTestId('guideline-error')).toContainText(
+      'No document-intelligence provider is configured',
+    );
     await expect(page.getByTestId('guideline-ruleset')).toHaveValue('');
   });
 

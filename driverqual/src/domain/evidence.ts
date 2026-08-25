@@ -8,7 +8,8 @@ import {
   type IsoDate,
   type LookbackWindow,
 } from './dates';
-import { classifyEvent } from './classification';
+import { applyMajorMappings, classifyEvent } from './classification';
+import { resolveOriginalIssueDate } from './cdl-dates';
 import {
   CURRENT_EXTRACTION_FORMAT_VERSION,
   MIN_FIELD_CONFIDENCE,
@@ -74,7 +75,24 @@ export function calculateExperience(
   evidence: DriverEvidence,
   evaluationDate: IsoDate,
 ): ExperienceResult {
-  const original = evidence.cdlOriginalIssueDate;
+  // When candidates were captured, the original date is *derived* from them by
+  // the documented precedence rather than trusted as a loose field — that is
+  // what keeps an MVR's state-issuance date from quietly replacing the real one.
+  const resolved =
+    evidence.cdlIssueDateCandidates.length > 0
+      ? resolveOriginalIssueDate(evidence.cdlIssueDateCandidates)
+      : null;
+
+  if (resolved && !resolved.date) {
+    return {
+      months: null,
+      originalIssueDate: null,
+      reason: `Cannot calculate: ${resolved.reason}`,
+      reportedValueIgnored: false,
+    };
+  }
+
+  const original = resolved?.date ?? evidence.cdlOriginalIssueDate;
 
   if (!original || !isValidIsoDate(original)) {
     return {
@@ -106,14 +124,66 @@ export function calculateExperience(
   }
 
   const months = completedMonths(original, evaluationDate);
+  const provenance = resolved ? ` ${resolved.reason}` : '';
   return {
     months,
     originalIssueDate: original,
-    reason: `${months} completed months between the original CDL issue date ${original} and the evaluation date ${evaluationDate}.`,
+    reason: `${months} completed months between the original CDL issue date ${original} and the evaluation date ${evaluationDate}.${provenance}`,
     reportedValueIgnored:
       evidence.reportedExperienceMonths !== null &&
       evidence.reportedExperienceMonths !== months,
   };
+}
+
+/**
+ * A key identifying the same real-world incident however it is worded.
+ *
+ * MVR and PSP describe one event differently — abbreviations, casing, extra
+ * statute codes — so matching on the raw text would count it twice and push a
+ * driver over a threshold they never crossed.
+ */
+export function eventIdentity(event: { description: string; violationDate: IsoDate | null; convictionDate: IsoDate | null }): string {
+  const date = event.convictionDate ?? event.violationDate ?? 'undated';
+  const text = (event.description ?? '')
+    .toLowerCase()
+    .replace(/[^a-z0-9 ]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return `${date}::${text}`;
+}
+
+/**
+ * Collapses the same incident appearing on more than one document.
+ *
+ * The MVR is the conviction record, so where both describe an event the MVR
+ * copy is kept and the PSP copy is recorded as a duplicate rather than dropped
+ * silently — a reviewer should be able to see that both documents reported it.
+ */
+export function deduplicateEvents(events: MvrEvent[]): {
+  kept: MvrEvent[];
+  duplicates: Array<{ event: MvrEvent; duplicateOf: string }>;
+} {
+  const bySource = [...events].sort((a, b) => {
+    const rank = (e: MvrEvent) => (e.source === 'PSP' ? 1 : 0);
+    return rank(a) - rank(b);
+  });
+
+  const seen = new Map<string, MvrEvent>();
+  const duplicates: Array<{ event: MvrEvent; duplicateOf: string }> = [];
+
+  for (const event of bySource) {
+    const key = eventIdentity(event);
+    const existing = seen.get(key);
+    if (existing) {
+      duplicates.push({ event, duplicateOf: existing.id });
+      continue;
+    }
+    seen.set(key, event);
+  }
+
+  // Preserve the caller's ordering for everything that survived.
+  const keptIds = new Set([...seen.values()].map((e) => e.id));
+  return { kept: events.filter((e) => keptIds.has(e.id)), duplicates };
 }
 
 export function normalizeEvent(event: MvrEvent): NormalizedEvent {
@@ -131,9 +201,15 @@ export function normalizeEvent(event: MvrEvent): NormalizedEvent {
   return { ...classified, effectiveDate, effectiveDateSource };
 }
 
+export interface NormalizeOptions {
+  /** The applied guideline's explicit major mappings, when one is in play. */
+  majorCategoryMappings?: Array<{ matches: string; category: string; guidelineReference: string }>;
+}
+
 export function normalizeEvidence(
   evidence: DriverEvidence,
   evaluationDate: IsoDate,
+  options: NormalizeOptions = {},
 ): NormalizedEvidence {
   const blockers: EvidenceBlocker[] = [];
   const warnings = [...evidence.warnings];
@@ -145,7 +221,24 @@ export function normalizeEvidence(
     });
   }
 
-  const events = evidence.events.map(normalizeEvent);
+  const { kept, duplicates } = deduplicateEvents(evidence.events);
+  if (duplicates.length > 0) {
+    warnings.push(
+      `${duplicates.length} record(s) appeared on more than one document and were counted once: ${duplicates
+        .map((d) => `"${d.event.description}" (${d.event.source ?? 'MVR'})`)
+        .join(', ')}.`,
+    );
+  }
+
+  // Classification runs first: a mapping can only raise an event that is already
+  // a moving violation, so applying it to an unclassified record would silently
+  // do nothing.
+  const mappings = options.majorCategoryMappings ?? [];
+  const events = kept
+    .map(normalizeEvent)
+    .map((event) =>
+      mappings.length ? { ...event, ...applyMajorMappings(event, mappings) } : event,
+    );
 
   const undatedEvents = events.filter((e) => e.effectiveDate === null);
   if (undatedEvents.length > 0) {
@@ -242,6 +335,11 @@ export interface CountedEvent {
 }
 
 export function matchesCategory(event: NormalizedEvent, category: EventCategory): boolean {
+  // A PSP roadside inspection records that an inspection happened. It is not a
+  // conviction, and counting one as a violation penalises a driver for having
+  // been stopped.
+  if (event.isInspection) return false;
+
   switch (category) {
     case 'moving_violation':
       return event.eventType === 'Moving Violation';
@@ -290,6 +388,13 @@ export function countEvents(
         event,
         countable: false,
         exclusionReason: `Dated ${event.effectiveDate} (${event.effectiveDateSource} date), ${relation} the ${window.months}-month window ${window.start} to ${window.end}.`,
+      };
+    }
+    if (event.isInspection) {
+      return {
+        event,
+        countable: false,
+        exclusionReason: `PSP roadside inspection, not a conviction; inspections never count toward violation limits.`,
       };
     }
     if (!matchesCategory(event, category)) {

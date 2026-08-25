@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { evaluateCoverage, overallDecision } from '@/domain/engine';
+import { ruleSetSchema } from '@/domain/guideline';
 import { normalizeCoverageType } from '@/domain/types';
 import {
   ZONE_AUTO_LIABILITY,
@@ -42,34 +43,34 @@ describe('missing evidence never produces Not Qualified', () => {
   });
 
   it('returns Manual Review, not Not Qualified, for a missing medical card', () => {
-    const ruleSet = {
+    const ruleSet = ruleSetSchema.parse({
       ...ZONE_AUTO_LIABILITY,
       eligibilityPaths: [
         {
           id: 'p',
           label: 'Medical path',
           sourceText: 'A current medical card is required.',
-          conditions: [{ type: 'requires_valid_medical_card' as const }],
+          conditions: [{ type: 'requires_valid_medical_card' }],
         },
       ],
-    };
+    });
     const result = zoneEval(pheniasEvidence({ medicalCard: null }), ruleSet);
     expect(result.decision).toBe('Manual Review');
     expect(result.dataGaps.join(' ')).toMatch(/Medical examiner/);
   });
 
   it('returns Manual Review for an expired medical card rather than rejecting', () => {
-    const ruleSet = {
+    const ruleSet = ruleSetSchema.parse({
       ...ZONE_AUTO_LIABILITY,
       eligibilityPaths: [
         {
           id: 'p',
           label: 'Medical path',
           sourceText: 'A current medical card is required.',
-          conditions: [{ type: 'requires_valid_medical_card' as const }],
+          conditions: [{ type: 'requires_valid_medical_card' }],
         },
       ],
-    };
+    });
     const result = zoneEval(
       pheniasEvidence({
         medicalCard: { present: true, expirationDate: '2026-01-01', examinerName: 'Dr. Lee' },
@@ -131,17 +132,17 @@ describe('suspensions only matter when the guideline says so', () => {
   });
 
   it('applies a suspension criterion when the guideline contains one', () => {
-    const ruleSet = {
+    const ruleSet = ruleSetSchema.parse({
       ...ZONE_AUTO_LIABILITY,
       disqualifiers: [
         {
           id: 'dq.suspension',
           label: 'No suspensions in 36 months',
           sourceText: 'Any license suspension within the preceding 36 months is disqualifying.',
-          condition: { type: 'max_suspensions' as const, lookbackMonths: 36, max: 0 },
+          condition: { type: 'max_suspensions', lookbackMonths: 36, max: 0 },
         },
       ],
-    };
+    });
     const result = zoneEval(explicitSuspension, ruleSet);
     expect(result.decision).toBe('Not Qualified');
     expect(result.disqualifiersTriggered).toContain('No suspensions in 36 months');
@@ -164,7 +165,7 @@ describe('alternative eligibility paths', () => {
       }),
     );
     expect(result.decision).toBe('Not Qualified');
-    expect(result.reason).toMatch(/every eligibility path was evaluated/);
+    expect(result.reason).toMatch(/every applicable eligibility path was evaluated/);
     expect(result.reason).toMatch(/Two-year experience path fails/);
     expect(result.reason).toMatch(/One-year experience path fails/);
   });
