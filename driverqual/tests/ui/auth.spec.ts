@@ -57,7 +57,18 @@ test.describe('access control', () => {
   }) => {
     const response = await request.get('/api/health');
     expect(response.status()).toBe(200);
-    expect(await response.json()).toEqual({ status: 'ok' });
+
+    const body = await response.json();
+    expect(body.status).toBe('ok');
+    // Versions make a deploy verifiable from outside; they must not be
+    // accompanied by anything that needs a session to see.
+    expect(body.engineVersion).toMatch(/^\d+\.\d+\.\d+$/);
+    expect(typeof body.extractionFormatVersion).toBe('number');
+    expect(Object.keys(body).sort()).toEqual([
+      'engineVersion',
+      'extractionFormatVersion',
+      'status',
+    ]);
   });
 
   test('a wrong code is refused and says how many attempts remain', async ({

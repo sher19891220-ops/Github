@@ -18,8 +18,13 @@ import {
 /**
  * Version of the decision logic itself. Stored on every evaluation so a past
  * decision can be reproduced against the exact engine that produced it.
+ *
+ * Bumped to 2.0.0 for specification v2.0: experience-band selection, inclusive
+ * threshold reporting, the major-classification safeguard and PSP handling all
+ * change what the engine decides, so a 1.x evaluation is not comparable to a
+ * 2.x one and the stored version must say which produced it.
  */
-export const ENGINE_VERSION = '1.0.0';
+export const ENGINE_VERSION = '2.0.0';
 
 export type ConditionStatus = 'pass' | 'fail' | 'indeterminate';
 
