@@ -27,6 +27,16 @@ const ACCESS_CODE = flag('--code') || process.env.APP_ACCESS_CODE || null;
 
 /** Session cookie, once signed in. */
 let sessionCookie = null;
+
+/**
+ * The extraction format the running app expects.
+ *
+ * Asked for rather than hardcoded: a literal here drifts the moment the format
+ * is bumped, and stale-stamped evidence trips the staleness guard — so the demo
+ * comes back Manual Review while the script's own notes promise Qualified,
+ * which reads as a broken engine rather than a stale seed.
+ */
+let extractionFormatVersion = null;
 /**
  * Every seeded date is derived from today rather than hardcoded.
  *
@@ -132,17 +142,17 @@ const XTRACK_RULES = {
   disqualifiers: [],
 };
 
-const baseEvidence = {
-  extractionFormatVersion: 4,
+const baseEvidence = () => ({
   licenseStatus: 'Valid',
   cdlState: 'OH',
   cdlClass: 'A',
   medicalCard: { present: true, expirationDate: '2027-06-30', examinerName: 'Dr. Lee' },
+  extractionFormatVersion,
   suspensions: [],
   reportedExperienceMonths: null,
   confidence: {},
   warnings: [],
-};
+});
 
 const event = (description, violationDate, convictionDate, statePoints, mvrPoints) => ({
   id: description.toLowerCase().replace(/\W+/g, '_'),
@@ -194,6 +204,17 @@ async function signIn() {
 
 async function main() {
   console.log(`Seeding demo data into ${BASE}\n`);
+
+  // Public, and needs no session, so this works before signing in.
+  const health = await fetch(`${BASE}/api/health`).then((r) => r.json());
+  extractionFormatVersion = health.extractionFormatVersion;
+  if (typeof extractionFormatVersion !== 'number') {
+    throw new Error(
+      'The app did not report an extraction format version, so seeded evidence cannot be stamped correctly.',
+    );
+  }
+  console.log(`Seeding for extraction format v${extractionFormatVersion}.`);
+
   await signIn();
 
   const zone = await addCompany('Zone-OH LLC', { usdotNumber: '3456789' }, ZONE_RULES);
@@ -221,7 +242,7 @@ async function main() {
     lastName: 'Mugisha',
     driverType: 'Company driver',
     evidence: {
-      ...baseEvidence,
+      ...baseEvidence(),
       mvrOrderDate: shift({ days: -10 }),
       dateOfBirth: shift({ months: -436 }),
       cdlNumber: 'OH1234567',
@@ -246,7 +267,7 @@ async function main() {
     lastName: 'Karambizi',
     driverType: 'Owner operator',
     evidence: {
-      ...baseEvidence,
+      ...baseEvidence(),
       mvrOrderDate: shift({ days: -10 }),
       dateOfBirth: shift({ months: -378 }),
       cdlNumber: 'OH7654321',
