@@ -133,7 +133,7 @@ const XTRACK_RULES = {
 };
 
 const baseEvidence = {
-  extractionFormatVersion: 3,
+  extractionFormatVersion: 4,
   licenseStatus: 'Valid',
   cdlState: 'OH',
   cdlClass: 'A',
