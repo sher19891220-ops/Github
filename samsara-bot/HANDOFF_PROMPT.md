@@ -68,8 +68,8 @@ Incident URLs look like:
    distraction, following_distance, seatbelt`. Absent: **crash, mobile/phone
    usage, unassigned ("unattended") driving, rollover, panic button** — several
    of which are exactly what we need.
-6. No idempotency is documented. Samsara retries on non-2xx, so a retry likely
-   double-posts.
+6. Duplicate delivery is already handled: the model is idempotent on
+   `samsara_event_id`. This is one of the things the codebase gets right.
 
 ---
 
@@ -106,8 +106,12 @@ re-sending that ID to the second chat is instant and re-uploads nothing, so
 Samsara is never asked for the clip twice.
 
 ### 2.3 Security
-Implement HMAC signature verification on the Samsara webhook with a replay
-window, and idempotency so a Samsara retry cannot double-post.
+Implement authentication on the Samsara webhook. `create_webhook()` already
+accepts a `customHeaders` argument — `setup_safety_event_webhooks()` simply
+never passes one. Generate a shared secret, pass it at webhook creation, and
+verify it in `post()` before any processing. Note that `WebhookLog.headers`
+currently persists the entire `request.META`, so adding an auth header without
+whitelisting fields would write the secret to the database on every request.
 
 ### 2.4 Additional capabilities
 - **PTI / DVIR compliance**: daily report of pre-trip inspections submitted,
@@ -183,3 +187,68 @@ production service.
 - Never hardcode tokens. Never log tokens, driver PII, or raw payloads.
 - The fleet operates in US Eastern time; event timestamps are local, and the
   Samsara incident URL carries the UTC epoch in milliseconds.
+
+
+---
+
+## 7. Confirmed by direct code review
+
+A review of the Django repo confirmed the following. Treat as established.
+
+**Flow.** Samsara fires an `AlertIncident` webhook → `SamsaraWebhookView` →
+`SamsaraEvent` row → Celery task pulls media from `/cameras/media` and GPS/speed
+from `/fleet/vehicles/stats/history` → downloads the video → `telegram_bot`
+posts it as a **media group**. Three apps, clean separation, full audit trail
+(`SamsaraAPILog`, `WebhookLog`), idempotent on `samsara_event_id`. The structure
+is sound; the defects are in configuration and edge handling.
+
+**Critical**
+1. Webhook is `AllowAny` + `csrf_exempt` with no signature check. Anyone with
+   the URL can inject fake incidents, each one burning real Samsara API calls.
+2. `process_incident_event_task.delay()` is called inside an open
+   `@transaction.atomic` block — the worker can pick up the task before commit,
+   raising `SamsaraEvent.DoesNotExist`. Wrap in `transaction.on_commit`.
+3. **`DATABASES` is SQLite in production**, despite the setup guide documenting
+   PostgreSQL. Web + workers + beat write concurrently; SQLite serialises writes
+   and will throw `database is locked` under real event volume.
+4. `SECRET_KEY` defaults to `"1"`, `DEBUG` defaults to `True`, `ALLOWED_HOSTS`
+   defaults to `"*"`. A missing or mistyped env var serves public tracebacks.
+
+**High**
+5. `request_media()` fires immediately, before Samsara's asynchronous retrieval
+   has produced the file. This reconciles with the measured 0.8–1.7 minute
+   spread: media is not ready on first call, and the internal retry ladder is
+   what eventually delivers. Schedule the media pull with a delay and back off —
+   the measurements suggest a first attempt around 60s rather than a flat 180s.
+6. `cleanup_old_videos` is commented out of both `tasks.py` and the beat
+   schedule, so dashcam video accumulates forever. It also references
+   `event.video_file`, removed in migration 0004/0005, so it breaks if simply
+   uncommented. Rewrite against `SamsaraEventMedia.downloaded_file`.
+7. Driver attribution is broken twice over: the lookup is commented out in
+   `tasks.py`, and `get_driver_name()` queries `/fleet/vehicles/{id}` and reads
+   `data.name` — the *vehicle* name, not the driver. Combined with the generic
+   "Harsh Event" title, an alert currently states neither what happened nor who
+   did it.
+8. The Telegram send loop only accepts `VIDEO_HIGH_RES`. When Samsara returns
+   stills, they download and save, then the event is marked FAILED and nothing
+   is sent. Add `InputMediaPhoto`. `telegram_message_link` is declared on the
+   model and never populated.
+9. `retry_failed_events` runs hourly over failed events while the task itself
+   has `max_retries=3`, so a permanently-broken event is retried roughly 120
+   times a day against the Samsara API. Add a `retry_count` field and cap it.
+
+**Medium**
+- `datetime.now()` used for `telegram_sent_at` under `USE_TZ=True` — naive
+  datetimes. Use `django.utils.timezone.now()`.
+- `_parse_timestamp` falls back to `timezone.utc`, removed in Django 5.
+- `SamsaraEventTypes.HARSH_EVENT = "Harsh Event"` — spaces and capitals where
+  the rest of the codebase is snake_case; display works, DB filtering does not.
+- `asyncio.run()` builds and tears down a `Bot` session per event; this throws
+  "Event loop is closed" under prefork concurrency.
+
+**Still unanswered — resolve before implementing labelling.** Does the
+`AlertIncident` payload carry behaviour labels (mobile usage, seat belt, crash)
+that the code discards, or does Samsara only send the generic incident? Check a
+stored `WebhookLog` payload for an event whose clip clearly shows phone use. If
+the labels are present, correct titling is a formatting fix. If absent, the
+webhook subscription itself must change.
