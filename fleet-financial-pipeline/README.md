@@ -84,6 +84,33 @@ statement memos alone. Bank/card data is best used as the cash-movement
 reconciliation layer on top of that, not the primary source for per-truck cost.
 
 
+## Bulk intake
+
+Point it at a folder (or a zip — archives are expanded) of mixed financial files:
+
+```
+python ingest/bulk_intake.py scan /path/to/upload
+```
+
+Every file is fingerprinted on **content**, not extension. A `.csv` can be a bank
+statement, a P&L, an odometer log, a fuel report or a toll report, and the
+extension says nothing about which — routing on extension silently loads a P&L
+into the transactions table. Anything that cannot be identified confidently is
+quarantined rather than guessed at.
+
+It reports: what each file is, byte-identical duplicates, statements whose
+account could not be read from the filename, entities with no files at all, and
+scanned PDFs with no text layer (which need OCR — check the bank portal for a
+CSV/OFX download of the same period first).
+
+Output is `data/processed/intake_manifest.csv`. Fill in `period_start`,
+`period_end`, `beginning_balance`, `ending_balance` per statement — those four
+columns drive the statement-total control, which is what proves the parse was
+correct. Without them a bad parse is invisible.
+
+Name files `<ENTITY>_<BANK>_<LAST4>_<period>` and entity/account are inferred
+automatically.
+
 ## QuickBooks ingestion + reconciliation
 
 ```
