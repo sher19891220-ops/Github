@@ -1,0 +1,19 @@
+🚛 FMCSA's Broker Transparency Rule Just Cleared Its Last Checkpoint
+
+After a four-year fight, FMCSA sent its "Transparency in Broker Transactions" proposal to the White House on Aug. 27 — the final internal step before it hits the Federal Register.
+
+📊 The stats/facts:
+• FMCSA submitted the supplemental rulemaking to OMB/OIRA on Thursday, Aug. 27, 2026 — clearing the last checkpoint before public release
+• OMB review is capped at 90 days (extendable 30 more), but the rule's "economically nonsignificant" classification could fast-track it — Federal Register publication is expected within 1-2 weeks
+• The rule would require brokers to keep electronic transaction records and hand over copies within 48 hours of a carrier's request
+• It reframes broker transparency as a regulatory duty rather than a waivable "right," closing a loophole brokers use today via contract waivers and in-person-only access
+• The 2024 version of this proposal drew roughly 7,000 public comments — expect another surge once the new version reopens for comment
+
+💡 Why marketers should care:
+• Brokers and 3PLs that already operate transparently have a ready-made trust narrative — get ahead of the rule with proactive comms now instead of reacting once it's mandatory
+• Freight-tech, compliance, and insurtech vendors: this is a direct pitch window for document-automation and audit-trail tools built to solve the 48-hour disclosure requirement
+• PR lesson: this story has stayed alive for four-plus years by getting fresh coverage at every procedural milestone — a slow-moving regulatory story can be kept newsworthy by pegging content to each new checkpoint
+
+🔗 Source: Land Line Media, published Aug. 28, 2026 — https://landline.media/wheels-are-turning-on-broker-transparency-proposal/
+
+#FounderHub #FreightNews #Trucking #Logistics #SupplyChain
