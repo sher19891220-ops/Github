@@ -1,0 +1,21 @@
+# Live financial credentials — never commit
+config/quickbooks_credentials.json
+config/quickbooks_tokens.json
+config/*_credentials.json
+config/*_tokens.json
+.env
+
+# Real bank/card statements and the database built from them
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+db/*.db
+db/*.sqlite
+db/*.sqlite3
+
+__pycache__/
+*.pyc
+.venv/
+venv/
+.DS_Store
