@@ -182,3 +182,23 @@ CREATE INDEX IF NOT EXISTS idx_qbtxn_entity ON qb_transactions(entity_id);
 CREATE INDEX IF NOT EXISTS idx_qbtxn_amount ON qb_transactions(amount);
 CREATE INDEX IF NOT EXISTS idx_recon_run ON reconciliation_results(run_id);
 CREATE INDEX IF NOT EXISTS idx_recon_type ON reconciliation_results(mismatch_type);
+
+-- ---------------------------------------------------------------------------
+-- Statements — the basis of the statement-total control.
+-- Every ingested file must satisfy: sum(transactions) == ending - beginning.
+-- A statement that fails is a bad parse. Fix the parser; do not ingest.
+-- (SQLite joins transactions on source_file; the Postgres schema uses statement_id.)
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS statements (
+    statement_id      INTEGER PRIMARY KEY AUTOINCREMENT,
+    account_id        TEXT REFERENCES accounts(account_id),
+    period_start      TEXT,
+    period_end        TEXT,
+    beginning_balance REAL,
+    ending_balance    REAL,
+    source_file       TEXT UNIQUE,
+    source_file_hash  TEXT,
+    ingested_at       TEXT,
+    notes             TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_statements_account ON statements(account_id);

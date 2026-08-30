@@ -1,0 +1,78 @@
+-- Read-only bridge from the finance schema to operational data in aiops.
+--
+-- THIS IS A TEMPLATE. It will fail if applied unedited — that is deliberate.
+-- Run 000_discover_aiops.sql first, then replace every @@PLACEHOLDER@@ with the
+-- real schema/table/column names and save as 002_ops_views.sql.
+--
+-- The rule: units, maintenance, miles and revenue are READ from operations.
+-- Never copied into finance, never synced. One roster, one maintenance history.
+-- Copying is what creates drift, and drift in a forensic pipeline means two
+-- different answers to "what did this truck cost" with no way to tell which is right.
+
+BEGIN;
+
+-- --- Unit roster -----------------------------------------------------------
+-- Expected source: the Samsara/QuickManage vehicle table already in aiops.
+CREATE OR REPLACE VIEW finance.v_units AS
+SELECT
+    @@UNIT_NUMBER_COL@@::text        AS unit_number,
+    @@UNIT_TYPE_COL@@::text          AS unit_type,        -- 'truck' | 'trailer'
+    @@UNIT_ENTITY_COL@@::text        AS entity_id,
+    @@UNIT_VIN_COL@@::text           AS vin,
+    @@UNIT_IN_SERVICE_COL@@::date    AS in_service_date,
+    @@UNIT_OUT_SERVICE_COL@@::date   AS out_service_date
+FROM @@OPS_SCHEMA@@.@@UNITS_TABLE@@;
+
+-- If entity is not on the ops unit table, map it here instead and drop the
+-- column above:
+--   LEFT JOIN finance.unit_entity_override o ON o.unit_number = ...
+
+-- --- Maintenance -----------------------------------------------------------
+-- QuickManage repair orders are the cost source. Samsara fault codes are the
+-- downtime/severity signal. If aiops carries only fault codes and no repair
+-- COST, say so explicitly in the recon report — maintenance cost then has to
+-- come from card statements and per-unit cost is materially less reliable.
+CREATE OR REPLACE VIEW finance.v_maintenance_events AS
+SELECT
+    @@MAINT_ID_COL@@                 AS event_id,
+    @@MAINT_UNIT_COL@@::text         AS unit_number,
+    @@MAINT_DATE_COL@@::date         AS event_date,
+    @@MAINT_COST_COL@@::numeric(14,2) AS cost,
+    @@MAINT_DOWNTIME_COL@@::numeric  AS downtime_days,
+    @@MAINT_TYPE_COL@@::text         AS breakdown_type
+FROM @@OPS_SCHEMA@@.@@MAINTENANCE_TABLE@@;
+
+-- --- Miles per unit per month ---------------------------------------------
+-- The single most important bridge. Without it there is no cost per mile and
+-- no break-even, and "which truck is bleeding" stays unanswerable.
+-- Source is Samsara odometer or trip distance already landing in aiops.
+CREATE OR REPLACE VIEW finance.v_unit_miles_monthly AS
+SELECT
+    @@MILES_UNIT_COL@@::text                        AS unit_number,
+    DATE_TRUNC('month', @@MILES_DATE_COL@@)::date    AS month,
+    SUM(@@MILES_VALUE_COL@@)::numeric(12,1)          AS miles
+FROM @@OPS_SCHEMA@@.@@MILES_TABLE@@
+GROUP BY 1, 2;
+
+-- If aiops stores cumulative odometer rather than per-trip distance, use the
+-- monthly delta instead:
+--   SELECT unit_number, month,
+--          MAX(odometer) - MIN(odometer) AS miles
+--   FROM ... GROUP BY 1,2;
+-- Watch for odometer resets and ECU swaps — a negative delta means a hardware
+-- change, not negative mileage. Clamp those to NULL rather than zero so they
+-- are visibly missing instead of silently understating cost per mile.
+
+-- --- Revenue per unit per month -------------------------------------------
+-- QuickManage loads/settlements. Needed for contribution per truck, which is
+-- the real "which trucks are bleeding" answer. Without it you only ever see
+-- cost, and every truck looks like a cost center.
+CREATE OR REPLACE VIEW finance.v_unit_revenue_monthly AS
+SELECT
+    @@REV_UNIT_COL@@::text                          AS unit_number,
+    DATE_TRUNC('month', @@REV_DATE_COL@@)::date      AS month,
+    SUM(@@REV_AMOUNT_COL@@)::numeric(14,2)           AS revenue
+FROM @@OPS_SCHEMA@@.@@REVENUE_TABLE@@
+GROUP BY 1, 2;
+
+COMMIT;
