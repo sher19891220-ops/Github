@@ -83,24 +83,33 @@ and pass silently. Both are excluded (`is_tainted`).
 
 ## Taxonomy invariants
 
-1. **`intercompany` is evaluated FIRST**, before every other rule. Entity names
-   collide with generic keywords and lose otherwise. Confirmed failures if it
-   runs last: `TRANSFER TO IRON LEASE LLC` → `lease_rent` (the entity name
-   literally contains "lease"), `ACH XTRACK LLC LOAN REPAYMENT` → `loan_finance`,
-   `WIRE TO ZONE LLC INSURANCE REIMB` → `insurance_premium`. A transfer
-   miscategorized this way never reaches the intercompany matcher and stays in
-   the P&L as a real expense forever.
+`taxonomy/categorize.py` was rewritten to satisfy these. **Run
+`python tests/test_categorize.py` after any edit to it** — rule order is
+first-match-wins, so a new rule near the top silently steals matches from every
+rule below it. The suite is 59 cases covering exactly the failures observed.
+
+1. **`intercompany` is evaluated FIRST.** Entity names collide with generic
+   keywords and lose otherwise: `TRANSFER TO IRON LEASE LLC` went to
+   `lease_rent` (the entity name literally contains "lease"), `ACH XTRACK LLC
+   LOAN REPAYMENT` to `loan_finance`, `WIRE TO ZONE LLC INSURANCE REIMB` to
+   `insurance_premium`. A transfer miscategorized this way never reaches the
+   intercompany matcher and stays in the P&L as a real expense forever.
+   An entity name **with** a transfer verb is high confidence; an entity name
+   alone is medium and lands in `review_flag` rather than being trusted.
 2. A QuickBooks GL account beats a memo keyword. `categorize()` fills gaps only.
-3. Chain names need apostrophe variants — `LOVE'S TRAVEL STOP` must match.
-4. **Rules must match plurals.** Accounting and P&L line labels are almost always
-   plural, and `\btoll\b` does not match "Tolls". Confirmed misses: `Tolls`,
-   `Repairs`, `Permits`, `Settlements`, `Subscriptions` all fall to
-   `uncategorized`. There is also no `maintenance` keyword in the maintenance
-   rule at all, so `Repairs and Maintenance` — a near-universal P&L line — misses
-   entirely.
-5. **The taxonomy is expense-only.** There is no `revenue` category, and a P&L
-   cannot be built without one. Revenue and owner draws need adding before the
-   Sheets P&L can reconcile.
+3. **Patterns must match plurals.** `\btoll\b` does not match "Tolls" — the
+   word boundary needs a non-word character after "toll", and "s" is one.
+   Accounting labels are almost always plural.
+4. **Sign disambiguates revenue from expense.** Money arriving from Triumph is a
+   factoring advance; money leaving is a fee. Always pass `amount` to
+   `categorize()` — without it a trucking company's whole revenue line books as
+   factoring fees. Wording that can only mean income (`Revenue`, `Linehaul`)
+   classifies without an amount, because sheet rows and GL names have none.
+5. **Specific beats general in rule order.** `ifta` sits above `fuel` so
+   "FUEL TAX PAYMENT" is not diesel; `capex_truck_trailer` sits above
+   `maintenance` so "TRUCK PURCHASE - PETERBILT 579" is not a repair. Dealer
+   brand names alone stay `maintenance` — most dealer charges are service, not
+   a truck.
 4. When adding rules, drive `uncategorized_dollars_by_entity.csv` toward zero and
    report in **dollars, not row counts**.
 
@@ -129,19 +138,28 @@ as a temporary stand-in.
 
 ## Known defects in the original modules — do not reintroduce
 
-These were found by review and are **not yet fixed** in `ingest_excel.py`,
-`ingest_pdf.py`, `match_intercompany.py`, `build_pnl.py`:
+**Fixed:** the taxonomy defects (plurals, missing `maintenance` keyword, no
+revenue category, `LOVE'S` apostrophe, `\bts?a\b` matching TSA airport charges
+as fuel, intercompany ordering, dealer names booking as capex). `ingest_excel.py`
+and `ingest_pdf.py` now pass `amount` into the classifier and write
+medium-confidence matches to `review_flag`.
+
+**Still open** in `ingest_pdf.py`, `match_intercompany.py`, `build_pnl.py`:
 
 - `ingest_pdf.py` appends from **both** `extract_tables()` and `extract_text()`
-  on the same page with no dedup → every transaction inserted twice.
+  on the same page with no dedup → every transaction inserted twice. The
+  statement-total control now catches this as `double_counted`, but the parser
+  is still wrong.
 - `match_intercompany.py` defines `DATE_TOLERANCE_DAYS = 3` and never uses it.
   Verified: it pairs a $25,000 transfer across **199 days**. Also restarts
-  `pair_id` at 1 every run, colliding with existing pairs.
+  `pair_id` at 1 every run, colliding with existing pairs. (The Postgres schema
+  fixes the id collision with a sequence; the date bug is still live.)
 - `build_pnl.py` `bleeding_flag = (txn_net < 0) | (breakdown_count >= 4)` fires
-  for nearly every unit, because unit-tagged transactions are almost all
-  expenses. Needs revenue and miles per unit to mean anything.
+  for nearly every unit. Superseded by `finance.v_bleeding_units`, but the
+  SQLite path still uses the old rule.
 - `uncategorized_summary()` sums a **signed** amount, so a −$9,500 unknown debit
   and a +$9,500 unknown credit report as $0.00 uncategorized. Needs `abs()`.
+  (`finance.v_uncategorized_by_entity` does this correctly.)
 - PDF dates parse without a year (`03/14`) and default to the current year.
 - SQLite ships with `PRAGMA foreign_keys` OFF, so every `REFERENCES` in the
   original schema is unenforced. New code turns it on.

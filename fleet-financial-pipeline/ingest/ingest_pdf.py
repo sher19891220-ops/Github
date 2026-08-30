@@ -14,7 +14,7 @@ import pdfplumber
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
-from taxonomy.categorize import categorize, extract_unit_number
+from taxonomy.categorize import classify, extract_unit_number
 
 DB_PATH = Path(__file__).resolve().parent.parent / "db" / "fleet_financials.db"
 
@@ -56,10 +56,14 @@ def ingest_pdf(filepath: str, account_id: str, entity_id: str):
     for r in rows:
         memo = r["memo"].strip()
         amt = _parse_amount(r["amount"])
+        # classify() once, with the amount, so inflows are distinguishable from
+        # outflows (the old code also called categorize() twice per row).
+        c = classify(memo, amt)
         txns.append((
             filepath.name, account_id, entity_id, r["date"], amt, memo, memo,
-            extract_unit_number(memo), categorize(memo), 0, None,
-            "uncategorized" if categorize(memo) == "uncategorized" else None
+            extract_unit_number(memo), c.category, 0, None,
+            "uncategorized" if c.category == "uncategorized"
+            else ("anomaly" if c.confidence == "medium" else None)
         ))
 
     if not txns:

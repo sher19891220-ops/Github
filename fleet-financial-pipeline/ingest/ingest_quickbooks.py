@@ -40,7 +40,7 @@ from datetime import datetime
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
-from taxonomy.categorize import categorize, extract_unit_number
+from taxonomy.categorize import categorize, classify, extract_unit_number
 
 DB_PATH = Path(__file__).resolve().parent.parent / "db" / "fleet_financials.db"
 CREDS_PATH = Path(__file__).resolve().parent.parent / "config" / "quickbooks_credentials.json"
@@ -288,7 +288,7 @@ def resolve_entity(row):
     return REALM_TO_ENTITY.get(row.get("realm_id"))
 
 
-def resolve_category(row, account_map, account_type=None):
+def resolve_category(row, account_map, account_type=None, amount=None):
     """GL account first, then keyword fallback.
 
     A booked GL account beats a memo keyword — that's the whole reason
@@ -299,8 +299,9 @@ def resolve_category(row, account_map, account_type=None):
         return None      # the cash leg is money movement, not a spend category
     if row.get("qb_account_id") and row["qb_account_id"] in account_map:
         return account_map[row["qb_account_id"]]
-    guess = categorize(f"{row.get('qb_account_name','')} {row.get('vendor_name','')} {row.get('memo','')}")
-    return guess
+    return categorize(
+        f"{row.get('qb_account_name','')} {row.get('vendor_name','')} {row.get('memo','')}",
+        amount)
 
 
 def load_account_map(conn):
@@ -392,7 +393,7 @@ def upsert_qb_transactions(conn, rows):
             r["qb_txn_id"], r["qb_line_id"], r["realm_id"], r["txn_type"], r["txn_date"],
             amount, r["qb_account_id"], r["qb_account_name"], resolve_entity(r),
             r.get("class_name"), r.get("location_name"), unit,
-            r.get("vendor_name"), r.get("memo"), resolve_category(r, account_map, acct_type),
+            r.get("vendor_name"), r.get("memo"), resolve_category(r, account_map, acct_type, amount),
             r.get("bank_account_ref"), r["source_report"],
             datetime.now().isoformat(timespec="seconds"),
         ))

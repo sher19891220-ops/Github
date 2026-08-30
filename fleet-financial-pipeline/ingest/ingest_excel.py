@@ -9,7 +9,7 @@ import pandas as pd
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
-from taxonomy.categorize import categorize, extract_unit_number
+from taxonomy.categorize import classify, extract_unit_number
 
 DB_PATH = Path(__file__).resolve().parent.parent / "db" / "fleet_financials.db"
 
@@ -55,10 +55,17 @@ def ingest_excel(filepath: str, account_id: str, entity_id: str):
             amt = (float(credit) if pd.notna(credit) else 0) - (float(debit) if pd.notna(debit) else 0)
         if pd.isna(amt):
             continue
+        amt = float(amt)
+        # Amount is passed so inflows can be told from outflows: without the sign
+        # an incoming factoring advance categorizes as a factoring fee, which is
+        # the entire revenue line booked as an expense.
+        c = classify(memo, amt)
         rows.append((
             filepath.name, account_id, entity_id, str(r.get(date_col)),
-            float(amt), memo, memo,  # counterparty defaults to raw memo; clean later
-            extract_unit_number(memo), categorize(memo), 0, None, None
+            amt, memo, memo,  # counterparty defaults to raw memo; clean later
+            extract_unit_number(memo), c.category, 0, None,
+            "uncategorized" if c.category == "uncategorized"
+            else ("anomaly" if c.confidence == "medium" else None)
         ))
 
     conn = sqlite3.connect(DB_PATH)
