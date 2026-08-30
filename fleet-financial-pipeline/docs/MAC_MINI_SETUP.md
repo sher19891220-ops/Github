@@ -105,6 +105,36 @@ Drive uncategorized dollars toward zero, reporting in **dollars, not row counts*
 SELECT * FROM finance.v_uncategorized_by_entity;
 ```
 
+## Phase 2b — Google Sheets and odometer
+
+```bash
+psql "$AIOPS_DSN" -f db/postgres/004_multi_source.sql
+python ingest/ingest_gsheets.py pnl --dsn "$AIOPS_DSN" --csv exports/zone_pnl.csv --entity ZONE
+python ingest/ingest_gsheets.py odo --dsn "$AIOPS_DSN" --csv exports/odometer.csv
+python analysis/reconcile_all_sources.py derive-bank --dsn "$AIOPS_DSN"
+python analysis/reconcile_all_sources.py pnl     --dsn "$AIOPS_DSN" --min-spread 500
+python analysis/reconcile_all_sources.py mileage --dsn "$AIOPS_DSN"
+```
+
+Both P&L layouts auto-detect: wide (categories down, months across — the usual
+hand-built shape) and tidy. Total/subtotal rows are dropped and reported; summing
+them back in would double-count the whole sheet.
+
+**Run `mileage` before anything per-mile.** It names odometer anomalies by cause
+(`rollback_or_typo` is a correctable transposed digit; `ecu_or_dash_swap` is real
+hardware history to clamp, not negative mileage) and excludes both deltas a bad
+reading corrupts.
+
+Unmapped Sheets categories are reported in **dollars of sheet value**. Map them in
+`source_category_map` — an unmapped line is dollars silently missing from the
+comparison, which is worse than a visibly wrong one.
+
+**Google Sheets access:** a Google Cloud service account with the Sheets API
+enabled, JSON key at `config/gsheets_service_account.json` (gitignored). Each
+spreadsheet must be **shared with that service account's `client_email`** as
+Viewer — that is the step people forget, and without it the API 404s on a sheet
+that plainly exists. `--csv` needs no auth and is the fastest way to start.
+
 ## Phase 3 — QuickBooks
 
 ```bash

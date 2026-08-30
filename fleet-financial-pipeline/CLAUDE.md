@@ -52,6 +52,35 @@ types the sign is a guess, and the ingest warns when it had to guess.
 
 ---
 
+## Sources — four, all permanent
+
+| Source | Role | Nature |
+|---|---|---|
+| Google Sheets | the P&L the business has been deciding on | hand-maintained — an assertion to test, never truth |
+| QuickBooks | categorized GL | stated |
+| Bank/card | independent cash movement | derived — cannot be miscoded like a manual entry |
+| QuickManage / Samsara | odometer, repair orders, revenue | measured |
+
+They all normalize into `pnl_observations` / `odometer_readings` with a `source`
+column. **Do not write pairwise reconcilers.** Two sources is one pair; four is
+six, and six scripts that disagree with each other is worse than none. One N-way
+variance view compares them; a fifth source is a loader, not a reconciler.
+
+`v_pnl_source_variance.outlier_source` names the odd one out when two sources
+agree and one does not. Agreement between an independent cash feed and a GL is
+hard to achieve by accident, so that column is the strongest signal in the
+pipeline.
+
+**Mileage before money.** Cost-per-mile is linear in mileage — a 10% mileage
+error moves cost-per-mile 10%, larger than most effects being hunted. Reconcile
+odometer readings before trusting any per-mile figure. Source preference:
+Samsara (telematics) > QuickManage > Google Sheets (hand-keyed).
+
+A bad odometer reading corrupts **two** deltas — the one into it and the one out
+of it. A transposed digit shows as a negative delta, then the correction back to
+reality shows as a large positive one that can sit under any plausibility ceiling
+and pass silently. Both are excluded (`is_tainted`).
+
 ## Taxonomy invariants
 
 1. **`intercompany` is evaluated FIRST**, before every other rule. Entity names
@@ -63,6 +92,15 @@ types the sign is a guess, and the ingest warns when it had to guess.
    the P&L as a real expense forever.
 2. A QuickBooks GL account beats a memo keyword. `categorize()` fills gaps only.
 3. Chain names need apostrophe variants — `LOVE'S TRAVEL STOP` must match.
+4. **Rules must match plurals.** Accounting and P&L line labels are almost always
+   plural, and `\btoll\b` does not match "Tolls". Confirmed misses: `Tolls`,
+   `Repairs`, `Permits`, `Settlements`, `Subscriptions` all fall to
+   `uncategorized`. There is also no `maintenance` keyword in the maintenance
+   rule at all, so `Repairs and Maintenance` — a near-universal P&L line — misses
+   entirely.
+5. **The taxonomy is expense-only.** There is no `revenue` category, and a P&L
+   cannot be built without one. Revenue and owner draws need adding before the
+   Sheets P&L can reconcile.
 4. When adding rules, drive `uncategorized_dollars_by_entity.csv` toward zero and
    report in **dollars, not row counts**.
 

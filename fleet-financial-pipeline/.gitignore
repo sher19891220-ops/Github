@@ -3,6 +3,8 @@ config/quickbooks_credentials.json
 config/quickbooks_tokens.json
 config/*_credentials.json
 config/*_tokens.json
+config/gsheets_service_account.json
+config/*service_account*.json
 .env
 
 # Real bank/card statements and the database built from them

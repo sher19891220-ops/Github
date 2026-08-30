@@ -202,3 +202,46 @@ CREATE TABLE IF NOT EXISTS statements (
     notes             TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_statements_account ON statements(account_id);
+
+-- ---------------------------------------------------------------------------
+-- Multi-source reconciliation (SQLite mirror of db/postgres/004_multi_source.sql).
+-- Every P&L source normalizes into one observation table with a `source` column.
+-- Four sources would otherwise mean six pairwise reconcilers that disagree with
+-- each other -- worse than no reconciliation at all.
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS source_category_map (
+    source          TEXT NOT NULL,
+    source_category TEXT NOT NULL,
+    category        TEXT NOT NULL,
+    mapped_by       TEXT,
+    mapped_date     TEXT,
+    PRIMARY KEY (source, source_category)
+);
+
+CREATE TABLE IF NOT EXISTS pnl_observations (
+    obs_id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    source          TEXT NOT NULL,   -- 'gsheets' | 'quickbooks' | 'bank' | 'quickmanage'
+    source_detail   TEXT,
+    entity_id       TEXT REFERENCES entities(entity_id),
+    month           TEXT NOT NULL,   -- ISO first-of-month
+    category        TEXT NOT NULL,
+    amount          REAL NOT NULL,
+    is_stated       INTEGER NOT NULL DEFAULT 1,  -- 0 = derived from cash movement
+    raw_category    TEXT,
+    loaded_at       TEXT,
+    UNIQUE (source, source_detail, entity_id, month, category)
+);
+
+CREATE TABLE IF NOT EXISTS odometer_readings (
+    reading_id      INTEGER PRIMARY KEY AUTOINCREMENT,
+    source          TEXT NOT NULL,   -- 'gsheets' | 'quickmanage' | 'samsara'
+    unit_number     TEXT NOT NULL,
+    reading_date    TEXT NOT NULL,
+    odometer        REAL NOT NULL,
+    source_detail   TEXT,
+    loaded_at       TEXT,
+    UNIQUE (source, unit_number, reading_date)
+);
+
+CREATE INDEX IF NOT EXISTS idx_pnl_obs_key ON pnl_observations(entity_id, month, category);
+CREATE INDEX IF NOT EXISTS idx_odo_unit ON odometer_readings(unit_number, reading_date);
