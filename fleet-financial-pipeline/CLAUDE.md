@@ -23,12 +23,39 @@ This file is the set of conventions that must not be re-derived or guessed.
 `IRON_LEASE` leasing to `ZONE`/`XTRACK`/`AFG` is **intercompany**. Those lease
 payments are not a group-level expense and must not be counted as one.
 
-`TRUCKMAX` (the Shop) is the same pattern if it bills the operating companies for
-repairs: the Shop's parts purchases are the real group cost, and the operating
-company's payment to the Shop is an internal transfer. Counting both doubles your
-maintenance spend — the single largest bleeding point being investigated.
-**Confirm whether Truck Max invoices the other entities before trusting any
-group-level maintenance total.**
+`TRUCKMAX` (the Shop) **is confirmed to bill out.** Its repair log
+(Drive: "Truck Max", owner joshuafleet.zone@) carries one column per payer:
+
+    Date | Truck | Trailer | Invoice number | Issue | Labor | Zone | Iron Lease | Driver | Inv amount | Paid date
+
+Every invoice lands in exactly one of three payer columns, and they are NOT
+equivalent:
+
+| Payer column | Treatment |
+|---|---|
+| **Zone** | intercompany — Zone's real cost, but internal at group level |
+| **Iron Lease** | intercompany — same |
+| **Driver** | **NOT intercompany.** Billed to an owner/lease operator, i.e. a third party. Revenue to Truck Max, and not a group cost at all if the driver actually pays. |
+
+So group-level maintenance cost is Truck Max's **parts and labor input**, plus
+driver-billed work only to the extent it was never recovered. Summing the
+operating companies' payments to Truck Max on top of Truck Max's own spend
+double-counts every repair.
+
+Some rows carry `no need to pay` in the Zone column — work performed and
+written off. Those are real absorbed costs with no offsetting receipt.
+
+The sheet also tracks a **running intercompany receivable** (a block of
+`debt … paid $5000` lines, e.g. `$24,721.24 debt 12.04.2025` →
+`$721.24 debt 12.12.2025`). That is exactly the undocumented inter-entity
+balance PROMPT.md asks to surface — reconcile it against the matched
+intercompany transfers rather than trusting either side alone.
+
+**Data quality in this sheet:** `Paid date` is unreliable. Several December 2025
+invoices show paid dates of `01/15/2025` (a year behind the invoice — should be
+2026), and a run of rows shows `12.12.18`, `12.12.19`, `12.12.20` … which is
+spreadsheet auto-fill, not real dates. Do not use `Paid date` for cash timing
+without cleaning it; use the bank/card side for when money actually moved.
 
 ### Payment rails are itemization, not extra spend
 Relay Payments, Comdata and EFS are payment *rails*, not vendors. Their reports
