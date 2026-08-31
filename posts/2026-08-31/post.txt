@@ -1,0 +1,19 @@
+⚖️ A Carrier Just Got Held Liable for a Truck It Never Knew Existed
+
+A Fifth Circuit ruling on a fatal 2018 Texas crash says a carrier can be on the hook for a downstream truck it had zero knowledge of — and now two of trucking's biggest trade groups are fighting back.
+
+📊 The stats/facts:
+• Case: Crane v. Liberty Lane — Aug. 4, 2026 Fifth Circuit panel decision, remanded to the Southern District of Texas
+• 5-party freight chain: Adient (shipper) → Penske Logistics (carrier) → PTM (broker) → Liberty Lane (carrier) → OK Trans (double-brokered carrier)
+• Crash: Dec. 2018, Bee County, TX — OK Trans driver Satnam Singh Lehal collided with and killed Lyndon Dean Meyer
+• Ruling: Penske Logistics deemed the driver's "statutory employer" despite having no knowledge OK Trans was involved
+• Response: ATA + Truckload Carriers Association filed a joint amicus brief Aug. 31 asking the full Fifth Circuit to rehear the case en banc
+
+💡 Why marketers should care:
+• Compliance/insurtech buying triggers just got real — "downstream visibility" and chain-of-custody tracking are now urgent messaging angles, not nice-to-haves
+• This is a live, unresolved legal fight — content that clearly explains "what changed and what it means" wins trust right when brokers and carriers are actively searching for answers
+• ATA and TCA are setting the industry's talking points right now — echoing their framing (unauthorized re-brokering, capacity constraints, FLR compliance) keeps your outbound aligned with what decision-makers are already reading
+
+🔗 Source: FreightWaves, published Aug. 31, 2026 — https://www.freightwaves.com/news/2-key-trucking-groups-in-filing-raise-alarm-on-penske-decision-fallout
+
+#FounderHub #Trucking #FreightBroker #SupplyChain #Logistics
