@@ -214,8 +214,8 @@ def detect_kind(path: Path):
         kind = "bank_statement_tabular" if best == "bank_statement" else best
         return kind, conf, f"header signature score {best_score} (next {runner_up})"
 
-    if suffix == ".zip":
-        return "archive", "high", "zip archive — will be expanded"
+    if suffix in ARCHIVE_SUFFIXES:
+        return "archive", "high", f"{suffix} archive — will be expanded"
 
     return QUARANTINE, "none", f"unsupported extension {suffix}"
 
@@ -262,22 +262,48 @@ def infer_account(path: Path):
 
 SKIP_NAMES = {".DS_Store", "Thumbs.db", "__MACOSX"}
 
+# Archives people actually send. .zip is handled in-process; the rest go through
+# the 7z binary, which reads RAR5 (what modern WinRAR produces) as well as 7z.
+ARCHIVE_SUFFIXES = {".zip", ".rar", ".7z"}
+
+
+def _expand_archive(src: Path, dest: Path):
+    """Extract src into dest. Returns (ok, message)."""
+    dest.mkdir(parents=True, exist_ok=True)
+    if src.suffix.lower() == ".zip":
+        try:
+            with zipfile.ZipFile(src) as z:
+                z.extractall(dest)
+            return True, ""
+        except Exception as e:
+            return False, f"bad zip: {e}"
+    import shutil
+    import subprocess
+    if not shutil.which("7z"):
+        return False, (f"{src.suffix} archive needs the 7z binary "
+                       f"(apt-get install p7zip-full p7zip-rar)")
+    r = subprocess.run(["7z", "x", "-y", f"-o{dest}", str(src)],
+                       capture_output=True, text=True)
+    if r.returncode != 0:
+        tail = (r.stderr or r.stdout).strip().splitlines()[-1:] or [""]
+        return False, f"{src.suffix} extract failed: {tail[0][:120]}"
+    return True, ""
+
 
 def walk(root: Path, expand_zips=True, workdir=None):
     files = []
     for p in sorted(root.rglob("*")):
         if p.is_dir() or p.name in SKIP_NAMES or any(s in SKIP_NAMES for s in p.parts):
             continue
-        if p.suffix.lower() == ".zip" and expand_zips:
+        if p.suffix.lower() in ARCHIVE_SUFFIXES and expand_zips:
             dest = (workdir or root.parent) / "_expanded" / p.stem
-            dest.mkdir(parents=True, exist_ok=True)
-            try:
-                with zipfile.ZipFile(p) as z:
-                    z.extractall(dest)
-                files.extend(walk(dest, expand_zips=False, workdir=workdir))
-            except Exception as e:
+            ok, err = _expand_archive(p, dest)
+            if ok:
+                # Nested archives are expanded too: people zip a folder of rars.
+                files.extend(walk(dest, expand_zips=True, workdir=workdir))
+            else:
                 files.append({"path": p, "kind": QUARANTINE, "confidence": "none",
-                              "evidence": f"bad zip: {e}", "size": p.stat().st_size})
+                              "evidence": err, "size": p.stat().st_size})
             continue
         files.append({"path": p, "size": p.stat().st_size})
     return files

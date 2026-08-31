@@ -86,7 +86,9 @@ reconciliation layer on top of that, not the primary source for per-truck cost.
 
 ## Bulk intake
 
-Point it at a folder (or a zip — archives are expanded) of mixed financial files:
+Point it at a folder of mixed financial files. Archives are expanded, including
+nested ones — `.zip` in-process, `.rar` (RAR5) and `.7z` via the 7z binary
+(`apt-get install p7zip-full p7zip-rar`):
 
 ```
 python ingest/bulk_intake.py scan /path/to/upload
