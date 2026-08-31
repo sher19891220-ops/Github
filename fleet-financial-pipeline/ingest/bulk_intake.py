@@ -85,6 +85,16 @@ SIGNATURES = {
         "weak": ["unit", "driver", "date", "cost"],
         "min": 1,
     },
+    # Payment rails (Relay Payments, Comdata, EFS): itemized fuel / lumper /
+    # roadside charges that later hit the bank as ONE consolidated draft. The
+    # itemization and the draft are the same money, so these must reconcile
+    # against each other, never be summed together.
+    "payment_platform": {
+        "strong": ["lumper", "relay", "detention", "roadside", "advance code",
+                   "check number", "trip number", "load number"],
+        "weak": ["date", "amount", "driver", "unit", "location", "type"],
+        "min": 1,
+    },
     "chart_of_accounts": {
         "strong": ["account type", "accnt. type", "detail type", "account number",
                    "accnt type"],
@@ -229,6 +239,9 @@ ENTITY_ALIASES = {
     "iron_lease": "IRON_LEASE", "ironleasellc": "IRON_LEASE",
     "truckmax": "TRUCKMAX", "truck_max": "TRUCKMAX", "shaeffer": "SHAEFFER",
     "runstar": "RUNSTAR",
+    # "Shop" is how Truck Max USA LLC is referred to internally — the parts and
+    # repair side of the business. Statements arrive named Shop_*, not Truckmax_*.
+    "shop": "TRUCKMAX",
 }
 BANK_ALIASES = ["chase", "amex", "bofa", "bankofamerica", "wellsfargo", "wf", "pnc",
                 "huntington", "usbank", "citi", "capitalone", "novo", "mercury",

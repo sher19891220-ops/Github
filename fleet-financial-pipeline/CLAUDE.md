@@ -16,12 +16,29 @@ This file is the set of conventions that must not be re-derived or guessed.
 | `XTRACK` | Xtrack LLC | 4086204 | ~45 trucks |
 | `AFG` | AFG Transportco LLC | — | ~18 trucks |
 | `IRON_LEASE` | Iron Lease LLC | — | leasing entity — leases units to the operating companies |
-| `TRUCKMAX` | Truck Max USA LLC | — | |
+| `TRUCKMAX` | Truck Max USA LLC | — | the parts/repair **Shop**; files arrive named `Shop_*` |
 | `SHAEFFER` | Shaeffer Technologies LLC | — | brokerage |
 | `RUNSTAR` | RunStar LLC | — | |
 
 `IRON_LEASE` leasing to `ZONE`/`XTRACK`/`AFG` is **intercompany**. Those lease
 payments are not a group-level expense and must not be counted as one.
+
+`TRUCKMAX` (the Shop) is the same pattern if it bills the operating companies for
+repairs: the Shop's parts purchases are the real group cost, and the operating
+company's payment to the Shop is an internal transfer. Counting both doubles your
+maintenance spend — the single largest bleeding point being investigated.
+**Confirm whether Truck Max invoices the other entities before trusting any
+group-level maintenance total.**
+
+### Payment rails are itemization, not extra spend
+Relay Payments, Comdata and EFS are payment *rails*, not vendors. Their reports
+itemize fuel, lumper, detention and roadside charges that later hit the bank as
+ONE consolidated draft. The itemization and the draft are the same money:
+reconcile them against each other, never sum them. Summing double-counts every
+charge that flows through a rail.
+
+The rail is never the category — `RELAY PAYMENTS FUEL PURCHASE` is `fuel`,
+`LUMPER FEE CHICAGO` is `lumper_fees`. Categorize the charge, not the pipe.
 
 ## Account naming
 

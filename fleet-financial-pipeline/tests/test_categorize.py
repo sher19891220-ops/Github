@@ -61,6 +61,13 @@ CASES = [
     ("WIRE OUT DEPOSIT REF 5521", -18000, "uncategorized",
      "the word deposit on an OUTFLOW must not book as income"),
 
+    # --- over-the-road payment rails (Relay Payments) --------------------
+    ("LUMPER FEE CHICAGO IL", -150, "lumper_fees", "paid at the dock, not driver pay"),
+    ("Lumpers", None, "lumper_fees", "plural sheet label"),
+    ("DETENTION PAYMENT", -220, "lumper_fees", ""),
+    ("UNLOADING FEE", -180, "lumper_fees", ""),
+    ("RELAY PAYMENTS FUEL PURCHASE", -640, "fuel", "rail is not the category — the charge is"),
+
     # --- sheet/GL labels arrive with no amount ---------------------------
     ("Revenue", None, "revenue", "P&L sheet row, no amount available"),
     ("Gross Revenue", None, "revenue", ""),

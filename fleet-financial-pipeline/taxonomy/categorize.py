@@ -141,6 +141,12 @@ CATEGORY_RULES = [
                               r"\bdrivers?\s+settlements?\b", r"\bwages?\b", r"\bper\s+diem\b",
                               r"\bescrow\b", r"\bgusto\b", r"\badp\b"]),
 
+    # Loading/unloading fees paid at the dock, usually through a payment rail
+    # (Relay Payments) rather than a card. Distinct from driver pay and from
+    # platform fees — it is a cost of the load, not of the driver or the board.
+    ("lumper_fees",          [r"\blumpers?\b", r"\blumper\s+fees?\b",
+                              r"\bunload(ing)?\s+fees?\b", r"\bdetention\b"]),
+
     ("tolls",                [r"\btolls?\b", r"\bprepass\b", r"\bbestpass\b",
                               r"\bez\s*-?\s*pass\b", r"\bi\s*-?\s*pass\b", r"\btoll\s*tags?\b",
                               r"\bturnpike\b", r"\bpike\s+pass\b"]),
