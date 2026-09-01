@@ -148,7 +148,16 @@ CATEGORY_RULES = [
                               r"\bdown\s*payments?\b", r"\bpurchase\s+of\s+(truck|trailer|tractor)\b",
                               r"\bwabash\b", r"\bgreat\s+dane\b", r"\butility\s+trailers?\b",
                               r"\bhyundai\s+translead\b",
-                              r"\bright\s+truck\s+deal\b"]),
+                              r"\bright\s+truck\s+deal\b",
+                              # Iron Lease BUYS trucks from these and places them
+                              # with drivers on lease-purchase. Their payment
+                              # shape says asset, not rent: four and six
+                              # irregular lump wires ($100,400 / $421,200 /
+                              # $81,800 / $208,000) out of the leasing entity,
+                              # alongside a truck auction house. A rental would
+                              # be a repeating amount on a monthly cycle.
+                              r"\bfleet\s+advantage\b", r"\bequiplinc\b",
+                              r"\britchie\s+bros\b"]),
 
     # IFTA before fuel: "FUEL TAX PAYMENT" is a quarterly tax filing, not diesel.
     ("ifta",                 [r"\bifta\b", r"\bfuel\s+tax(es)?\b", r"\bmileage\s+tax\b",
@@ -202,10 +211,14 @@ CATEGORY_RULES = [
                               r"\bpaccar\s+financial\b", r"\bdaimler\s+truck\s+financial\b",
                               r"\bttl\s+financial\b", r"\bryder\b", r"\bpenske\b",
                               r"\bstl\s+truckers?\b", r"\btransport\s+enterp\w*\b",
-                              r"\bbowman\s+sales\b", r"\bfleet\s+advantage\b",
-                              r"\bequiplinc\b", r"\bten\s+leasing\b", r"\btel\s+leasing\b"]),
+                              r"\bbowman\s+sales\b", r"\bten\s+leasing\b",
+                              r"\btel\s+leasing\b"]),
 
-    ("loan_finance",         [r"\bloans?\b", r"\bfinanc(e|ing)\b", r"\bnote\s+payments?\b",
+    # Equipment finance on trucks the group OWNS. $14,443.50 seventeen times
+    # on a monthly cycle is an amortisation schedule; the truck is an asset and
+    # this is debt service on it, not rent for someone else's equipment.
+    ("loan_finance",         [r"\btbk\s+bank\b",
+                              r"\bloans?\b", r"\bfinanc(e|ing)\b", r"\bnote\s+payments?\b",
                               r"\binterest\s+(charge|payment|expense)\b", r"\bprincipal\s+payment\b"]),
 
     ("driver_settlement",    [r"\bsettlements?\b", r"\bpayrolls?\b", r"\bdrivers?\s+pay\b",
@@ -256,7 +269,24 @@ _TRANSFER = re.compile(TRANSFER_TOKENS, re.IGNORECASE)
 _REVENUE = [re.compile(p, re.IGNORECASE) for p in REVENUE_PATTERNS]
 _INTERNAL = [re.compile(p, re.IGNORECASE) for p in INTERNAL_TRANSFER_PATTERNS]
 _CARD_PAYMENT = [re.compile(p, re.IGNORECASE) for p in CARD_PAYMENT_PATTERNS]
+# Unambiguous third-party vendors that carry one of our entity names in the
+# ACH INDN: field -- which names the account being DEBITED, us, not the party
+# being paid. Checked BEFORE intercompany, because "TBK BANK, SSB DES:ACH
+# INDN:IRON LEASE LLC" is Iron Lease paying its truck loan, not a transfer
+# between our companies. Kept as an explicit short list rather than stripping
+# INDN wholesale: a blunt strip also removed the originator name from genuine
+# intercompany ACH and moved $29M into the wrong buckets.
+NAMED_VENDOR_PATTERNS = [
+    (r"\btbk\s+bank\b", "loan_finance"),
+    (r"\bfleet\s+advantage\b", "capex_truck_trailer"),
+    (r"\bequiplinc\b", "capex_truck_trailer"),
+    (r"\britchie\s+bros\b", "capex_truck_trailer"),
+]
+
 _RELATED_REVIEW = [re.compile(p, re.IGNORECASE) for p in RELATED_PARTY_REVIEW_PATTERNS]
+_NAMED_VENDORS = [(re.compile(p, re.IGNORECASE), c) for p, c in NAMED_VENDOR_PATTERNS]
+
+
 
 
 def classify(memo: str, amount: float | None = None) -> Classification:
@@ -276,6 +306,12 @@ def classify(memo: str, amount: float | None = None) -> Classification:
     for pat in _RELATED_REVIEW:
         if pat.search(memo):
             return Classification("related_party_review", "medium", pat.pattern)
+
+    # 0b. Named third-party vendors whose ACH memo carries one of our entity
+    #     names in INDN:. Without this they read as intercompany.
+    for pat, cat in _NAMED_VENDORS:
+        if pat.search(memo):
+            return Classification(cat, "high", pat.pattern)
 
     # 1. Intercompany, before anything else.
     for pat in _INTERCOMPANY:

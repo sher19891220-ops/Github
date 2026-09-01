@@ -24,6 +24,9 @@ CASES = [
      "into intercompany"),
     ("WIRE TYPE:BOOK IN ORIG:1/AFG TRANSPORT CO. ID:291043084504", 40312.33,
      "intercompany", "inbound wire really is from a sister company"),
+    ("ZONE LLC DES:PAYROLL ID:618095317748NHB INDN:,TRUCK MAX USA LLC CO ID:X",
+     -4917.21, "intercompany",
+     "originator is Zone, before DES: -- still intercompany with INDN stripped"),
 
     # --- movement that is not spend --------------------------------------
     # These carry no counterparty name at all, which is why they sat in
@@ -59,8 +62,17 @@ CASES = [
      "TEL truck leasing, $700K"),
     ("BOWMAN SALES AND DES:Debits ID:C123", -17566.49, "lease_rent",
      "trailer lessor, $439K"),
-    ("WIRE TYPE:WIRE OUT BNF:FLEET ADVANTAGE LLC ID", -202850, "lease_rent",
-     "truck lessor"),
+    ("WIRE TYPE:WIRE OUT BNF:FLEET ADVANTAGE LLC ID", -421200,
+     "capex_truck_trailer",
+     "Iron Lease BUYING trucks -- four irregular lump wires out of the leasing "
+     "entity, not a repeating monthly rent"),
+    ("WIRE TYPE:WIRE OUT BNF:EQUIPLINC LLC ID", -208830, "capex_truck_trailer",
+     "same purchase pattern, six irregular lumps"),
+    ("WIRE TYPE:WIRE OUT BNF:RITCHIE BROS ID", -5124, "capex_truck_trailer",
+     "truck auction house"),
+    ("TBK BANK, SSB DES:ACH ID: INDN:IRON LEASE LLC", -14443.50, "loan_finance",
+     "$14,443.50 x17 monthly is an amortisation schedule on an owned truck, "
+     "not rent"),
     ("WIRE TYPE:WIRE OUT BNF:RIGHT TRUCK DEAL ID", -150000,
      "capex_truck_trailer", "buying trucks, not renting them"),
     ("RELAY PAYMENTS DES:AJ4NTKSURZ ID:XYZ INDN:ZONE", -50000, "fuel",
