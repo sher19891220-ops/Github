@@ -1,0 +1,552 @@
+<title>Zone Group Console</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Sans+3:wght@400;600&display=swap">
+<style>
+:root{
+  --ground:#eef0f2; --surface:#ffffff; --surface-2:#f5f7f8; --surface-3:#e7ebee;
+  --ink:#14181c; --body:#39424a; --muted:#5b6670; --faint:#8a949c;
+  --rule:#d3d9de; --rule-soft:#e4e9ec;
+  --accent:#1a5c7a; --accent-soft:#dbe8ee;
+  --ok:#2c6e49; --warn:#9a6114; --critical:#a33327;
+  --ok-bg:#e2efe7; --warn-bg:#f6ecd9; --critical-bg:#f6e3e0;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#0f1316; --surface:#161c21; --surface-2:#1b2229; --surface-3:#232c34;
+  --ink:#e6ebef; --body:#bcc6ce; --muted:#8896a1; --faint:#67757f;
+  --rule:#2b353d; --rule-soft:#222a31;
+  --accent:#5fb4d8; --accent-soft:#16303d;
+  --ok:#6cc296; --warn:#d5a44f; --critical:#e08479;
+  --ok-bg:#152a20; --warn-bg:#2c2413; --critical-bg:#2e1d1a;
+}}
+:root[data-theme="dark"]{
+  --ground:#0f1316; --surface:#161c21; --surface-2:#1b2229; --surface-3:#232c34;
+  --ink:#e6ebef; --body:#bcc6ce; --muted:#8896a1; --faint:#67757f;
+  --rule:#2b353d; --rule-soft:#222a31;
+  --accent:#5fb4d8; --accent-soft:#16303d;
+  --ok:#6cc296; --warn:#d5a44f; --critical:#e08479;
+  --ok-bg:#152a20; --warn-bg:#2c2413; --critical-bg:#2e1d1a;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--body);
+  font-family:'Source Sans 3',system-ui,sans-serif;font-size:15px;line-height:1.5;
+  -webkit-font-smoothing:antialiased}
+h1,h2,h3,.ui{font-family:'Archivo',system-ui,sans-serif;color:var(--ink);margin:0;text-wrap:balance}
+.mono,.n{font-family:'IBM Plex Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
+
+/* shell */
+.shell{display:grid;grid-template-columns:228px 1fr;min-height:100vh}
+@media(max-width:840px){.shell{grid-template-columns:1fr}.rail{position:static!important;height:auto!important}}
+
+/* left rail */
+.rail{background:var(--surface);border-right:1px solid var(--rule);position:sticky;top:0;
+  height:100vh;overflow-y:auto;padding:18px 0 28px}
+.brand{padding:0 18px 16px;border-bottom:1px solid var(--rule-soft);margin-bottom:14px}
+.brand h1{font-size:17px;font-weight:700;letter-spacing:-.01em}
+.brand p{margin:3px 0 0;font-size:11.5px;color:var(--faint);font-family:'IBM Plex Mono',monospace}
+.navgroup{padding:0 12px;margin-bottom:16px}
+.navlabel{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--faint);padding:0 6px 7px;font-weight:600}
+.navbtn{display:flex;width:100%;align-items:baseline;gap:8px;padding:7px 10px;border-radius:4px;
+  text-align:left;font-size:14px;color:var(--body);font-family:'Archivo',sans-serif}
+.navbtn:hover{background:var(--surface-2);color:var(--ink)}
+.navbtn[aria-current="true"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.navbtn .tag{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--faint)}
+.navbtn[aria-current="true"] .tag{color:var(--accent)}
+
+/* main */
+main{padding:26px 30px 70px;max-width:1180px}
+.head{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;
+  padding-bottom:16px;border-bottom:2px solid var(--ink);margin-bottom:22px}
+.head h2{font-size:27px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.head .sub{color:var(--muted);font-size:14px;margin-left:auto;font-family:'IBM Plex Mono',monospace}
+.lede{margin:0 0 22px;max-width:72ch;color:var(--body)}
+
+/* kpi strip */
+.kpis{display:flex;flex-wrap:wrap;gap:1px;
+  background:var(--rule);border:1px solid var(--rule);margin-bottom:26px}
+.kpi{background:var(--surface);padding:14px 16px;display:flex;flex-direction:column;gap:2px;
+  flex:1 1 158px}
+.kpi .k{font-size:11.5px;color:var(--muted);font-family:'IBM Plex Mono',monospace;
+  letter-spacing:.03em}
+.kpi .v{font-family:'IBM Plex Mono',monospace;font-size:23px;font-weight:600;color:var(--ink);
+  font-variant-numeric:tabular-nums;letter-spacing:-.02em;line-height:1.15}
+.kpi .d{font-size:12.5px;color:var(--muted)}
+.kpi .d.up{color:var(--critical)}.kpi .d.down{color:var(--ok)}
+
+/* panels */
+.panel{background:var(--surface);border:1px solid var(--rule);margin-bottom:22px}
+.panel > h3{font-size:14px;font-weight:600;padding:13px 16px;border-bottom:1px solid var(--rule-soft);
+  display:flex;align-items:center;gap:10px}
+.panel > h3 .note{margin-left:auto;font-size:11.5px;color:var(--faint);font-weight:400;
+  font-family:'IBM Plex Mono',monospace}
+.pad{padding:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+@media(max-width:900px){.grid2{grid-template-columns:1fr}}
+
+/* table */
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:440px}
+th{text-align:left;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--muted);font-weight:600;padding:10px 12px;
+  border-bottom:1px solid var(--rule);white-space:nowrap;background:var(--surface-2)}
+td{padding:9px 12px;border-bottom:1px solid var(--rule-soft);vertical-align:middle}
+td.n,th.n{text-align:right;font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;
+  white-space:nowrap;color:var(--ink)}
+tbody tr:last-child td{border-bottom:none}
+tr.click{cursor:pointer}
+tr.click:hover td{background:var(--surface-2)}
+tr.tot td{font-weight:600;background:var(--surface-2);border-top:1px solid var(--rule)}
+
+/* severity chips */
+.chip{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;
+  font-family:'IBM Plex Mono',monospace;letter-spacing:.02em;white-space:nowrap}
+.chip.ok{background:var(--ok-bg);color:var(--ok)}
+.chip.warn{background:var(--warn-bg);color:var(--warn)}
+.chip.crit{background:var(--critical-bg);color:var(--critical)}
+.chip.flat{background:var(--surface-3);color:var(--muted)}
+
+/* severity stripe on alert rows */
+.alert{display:grid;grid-template-columns:3px 1fr auto;gap:0 14px;align-items:center;
+  border-bottom:1px solid var(--rule-soft)}
+.alert:last-child{border-bottom:none}
+.alert .stripe{align-self:stretch;background:var(--muted)}
+.alert.crit .stripe{background:var(--critical)}
+.alert.warn .stripe{background:var(--warn)}
+.alert.ok .stripe{background:var(--ok)}
+.alert .body{padding:12px 0}
+.alert .t{font-family:'Archivo',sans-serif;font-weight:600;color:var(--ink);font-size:14.5px}
+.alert .s{font-size:13px;color:var(--muted);margin-top:2px}
+.alert .amt{padding-right:16px;font-family:'IBM Plex Mono',monospace;font-weight:600;
+  color:var(--ink);font-variant-numeric:tabular-nums;text-align:right;font-size:15px}
+
+/* charts */
+svg{display:block;width:100%;height:auto}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);
+  padding:0 16px 14px;font-family:'IBM Plex Mono',monospace}
+.legend i{display:inline-block;width:10px;height:10px;margin-right:6px;vertical-align:baseline}
+
+/* drawer */
+.scrim{position:fixed;inset:0;background:rgba(10,14,17,.42);opacity:0;pointer-events:none;
+  transition:opacity .16s;z-index:40}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;height:100vh;width:min(430px,92vw);background:var(--surface);
+  border-left:1px solid var(--rule);transform:translateX(100%);transition:transform .2s ease;
+  z-index:41;overflow-y:auto;box-shadow:-8px 0 26px rgba(10,14,17,.10)}
+.drawer.on{transform:none}
+.drawer header{padding:18px 20px 14px;border-bottom:1px solid var(--rule);
+  display:flex;align-items:flex-start;gap:12px;position:sticky;top:0;background:var(--surface)}
+.drawer header h3{font-size:17px;font-weight:700;line-height:1.2}
+.drawer header .k{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:4px}
+.drawer .x{margin-left:auto;font-size:22px;line-height:1;color:var(--muted);padding:0 4px}
+.drawer .x:hover{color:var(--ink)}
+.dsec{padding:16px 20px;border-bottom:1px solid var(--rule-soft)}
+.dsec:last-child{border-bottom:none}
+.dl{display:grid;grid-template-columns:1fr auto;gap:7px 14px;font-size:14px}
+.dl dt{color:var(--muted);margin:0}
+.dl dd{margin:0;font-family:'IBM Plex Mono',monospace;color:var(--ink);
+  font-variant-numeric:tabular-nums;text-align:right}
+.dsec p{margin:0;font-size:13.5px;color:var(--muted)}
+.dsec p + p{margin-top:9px}
+.src{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--faint);
+  text-transform:uppercase;letter-spacing:.09em;margin-bottom:7px}
+@media(prefers-reduced-motion:reduce){.scrim,.drawer{transition:none}}
+</style>
+
+<div class="shell">
+  <nav class="rail">
+    <div class="brand">
+      <h1>Zone Group Console</h1>
+      <p id="brandsub">7 entities &middot; 128 trucks/wk</p>
+    </div>
+    <div class="navgroup">
+      <div class="navlabel">Group</div>
+      <button class="navbtn" data-view="overview">CEO overview</button>
+      <button class="navbtn" data-view="cash">Cash &amp; cost structure</button>
+    </div>
+    <div class="navgroup">
+      <div class="navlabel">Companies</div>
+      <div id="navents"></div>
+    </div>
+    <div class="navgroup">
+      <div class="navlabel">Segments</div>
+      <button class="navbtn" data-view="utilization">Utilization<span class="tag">odometer</span></button>
+      <button class="navbtn" data-view="fuel">Fuel<span class="tag">2 rails</span></button>
+      <button class="navbtn" data-view="maintenance">Breakdowns<span class="tag">1,661</span></button>
+      <button class="navbtn" data-view="tolls">Tolls<span class="tag">103k</span></button>
+      <button class="navbtn" data-view="ironlease">Iron Lease<span class="tag">leasing</span></button>
+    </div>
+  </nav>
+  <main id="main"></main>
+</div>
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="dtitle"></aside>
+
+<script id="payload" type="application/json">{"entities":{"ZONE":{"months":["2024-01","2024-02","2024-03","2024-04","2024-05","2024-06","2024-07","2024-08","2024-09","2024-10","2024-11","2024-12","2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07","2026-08"],"series":{"gross":[1307562.45,1272094.3,1372006.4,1542910.5,1372192.7,1590020.31,1806444.29,1583233.64,2259159.85,1784612.33,1717911.81,1805185.48,1202903.56,1118827.16,1363202.2,1134989.99,1424581.04,2202913.82,1993190.08,2032710.25,2458358.97,2032416.76,1903852.67,1747973.76,1194796.66,1019439.7,1398319.93,930850.18,782376.68,1158668.86,1361455.49,1241130.39],"driver_salary":[467514.98,454714.24,499508.19,546784.42,495807.03,581183.48,612495.08,582887.07,830807.11,640869.35,612317.16,624765.34,409032.36,410034.78,536384.99,420165.47,526616.21,822924.14,767430.99,815753.01,999953.43,869836.38,801006.99,743295.54,474016.97,415138.2,535498.1,348966.93,259540.79,373299.96,500093.03,498990.35],"def_fuel_fee":[310772.92,360521.31,390739.63,429099.68,340273.92,390215.63,454893.19,386023.87,557771.15,485633.61,465763.67,426816.73,298270.28,289763.1,330885.3,294890.69,335625.79,549747.97,506845.96,515263.46,615291.41,499157.93,493359.4,366857.06,253515.02,214615.2,404303.84,273054.96,229450.95,289301.14,317829.78,227094.14],"truck_rental":[273749.51,239875.24,248642.71,297312.94,243647.93,252532.67,321260.95,266687.55,391245.45,333277.22,315781.96,305588.18,199546.03,197987.63,250058.65,221373.3,282491.29,347943.1,305272.11,331303.37,414790.85,340690.33,316250.59,279353.41,178533.99,152359.41,197728.24,136940.04,123747.3,155943.44,162497.69,169050.94],"toll_scale":[42773.73,38121.02,38339.18,53251.27,40086.97,53997.98,93036.34,57293.48,88286.0,68767.01,69896.94,68032.7,37449.77,50962.36,50466.33,23555.46,62559.32,94480.68,74386.43,72954.33,87212.38,66422.91,69868.57,45251.9,32797.36,28596.81,39537.96,25181.37,15371.91,30155.4,33938.05,35229.6],"insur_admin_trl":[117403.14,101053.16,100407.26,116351.92,92406.67,92928.18,115114.33,91772.33,126557.77,103401.33,103796.69,118235.88,86362.46,83041.71,109025.47,93893.85,97327.5,115261.08,91660.98,89737.3,113592.06,107211.41,135128.59,149137.11,115423.08,92364.96,107214.8,81089.51,81540.56,86343.16,59887.54,49485.2],"total":[0.0,0.0,49499.85,87100.07,144664.43,194387.45,198051.25,187671.71,252505.1,147711.57,145605.25,254521.31,167424.4,81404.23,85744.6,76492.26,107808.0,254217.93,235995.43,203821.94,263552.6,196796.64,128087.76,204562.12,167467.18,146004.03,140578.82,74819.6,74521.04,220668.11,280943.24,266346.04],"mileage":[502704.0,538851.34,635230.0,764379.26,681315.0,762481.39,829297.0,760427.0,1102756.0,883705.0,850822.0,814733.0,533553.0,520356.0,655579.0,555534.0,670491.0,1036030.0,936643.0,966748.0,1177225.0,970316.0,905445.06,747314.0,503228.0,419500.0,568540.0,362306.0,287957.0,395285.0,452108.0,416057.0]},"units":[77,79,81,75,78,82,84,84,93,85,86,82,66,69,65,68,87,77,84,82,89,89,88,71,53,45,44,44,37,39,45,46],"unit_weeks":9356,"period":["2024-01","2026-08"],"idle_unit_weeks":1066,"idle_cost":-1424074.34},"XTRACK":{"months":["2023-11","2023-12","2024-01","2024-02","2024-03","2024-04","2024-05","2024-06","2024-07","2024-08","2024-09","2024-10","2024-11","2024-12","2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07","2026-08"],"series":{"gross":[11530.0,18075.0,28140.0,15500.0,22059.0,67480.14,44664.0,114448.0,187710.0,161736.0,160823.0,117561.0,87086.0,69294.0,32700.0,86831.0,153519.0,112643.0,79166.0,103316.0,93198.0,46891.0,99678.0,125977.5,273072.5,537864.39,553714.75,733662.68,1352406.16,1228846.02,1439266.75,2095633.23,1523582.55,1389364.94],"driver_salary":[4153.96,5945.0,7778.38,4832.56,7082.76,23401.23,14406.11,34288.7,57127.17,50835.12,52925.0,36358.52,27107.63,19870.49,9306.7,26428.09,47645.5,36658.05,25043.85,31815.55,29761.8,14517.1,32110.65,42328.3,91189.3,163445.95,165642.75,286254.4,576543.87,498838.33,591750.89,1060296.77,816101.37,872049.65],"def_fuel_fee":[5061.41,7128.14,8040.69,5697.09,8415.15,24674.76,13079.36,32564.06,54984.66,48202.64,46182.69,36181.47,24347.29,18518.23,8695.24,28623.93,43352.4,32983.52,24315.3,30731.48,28986.07,13435.09,29698.06,37509.62,84496.26,145523.69,142482.4,154408.23,343239.87,335080.52,336011.45,335605.23,251333.35,137817.86],"truck_rental":[2960.84,5268.54,6401.2,4919.3,6977.2,18916.54,13709.0,25500.88,40043.51,32787.82,40422.67,27681.75,20735.89,14640.21,5726.86,17040.32,34625.32,24146.06,17844.31,21140.72,17685.73,8970.5,19522.31,23492.38,48302.52,98048.48,92620.38,106682.1,162413.33,147382.63,147795.02,221801.95,177197.47,172593.91],"toll_scale":[267.35,411.35,545.63,505.66,309.68,3553.5,2112.78,4298.2,7441.31,6513.4,8237.96,5071.13,3552.61,3180.93,1339.03,2750.72,7270.9,2792.1,5393.66,3415.89,3923.76,1147.65,2804.97,4435.35,9776.09,22861.1,19753.63,23176.4,36675.04,41139.09,35961.81,49909.19,38761.66,37651.87],"insur_admin_trl":[1081.72,2313.44,2329.3,1863.44,2353.02,4777.2,3821.76,5270.76,13465.32,11748.92,14841.66,11126.88,9261.0,8621.76,4907.04,8017.02,13342.05,9611.02,8519.85,15551.25,18888.09,13846.08,16524.21,15938.16,27360.39,47711.61,45152.93,52770.96,50874.16,43007.75,44418.15,64755.54,49589.0,41295.4],"total":[0.0,0.0,0.0,0.0,-1776.13,-7087.37,-2137.0,13454.41,15341.55,11873.96,-2296.41,505.84,1570.82,4246.93,2755.12,4075.2,6550.98,6781.56,-2405.84,977.58,-5614.5,-4981.07,-484.36,2193.93,10469.9,59185.9,86380.89,113083.28,208661.09,150365.0,273821.37,314532.0,177146.49,110011.78],"mileage":[7162.0,10250.0,13411.0,8332.0,12147.0,38198.0,24265.0,55482.0,91191.0,80389.0,83271.0,57403.0,43083.0,32152.0,14318.0,42474.0,75896.0,56397.0,38529.0,48947.0,44774.0,22334.0,46205.0,60469.0,131284.0,235366.0,225607.0,291551.0,524068.0,463340.0,479335.0,655644.0,482729.0,444505.0]},"units":[15,15,16,15,17,16,16,20,19,20,21,20,19,17,15,18,20,18,20,17,18,16,18,19,29,29,34,41,41,45,49,60,55,58],"unit_weeks":3691,"period":["2023-11","2026-08"],"idle_unit_weeks":176,"idle_cost":-233571.95},"AFG":{"months":["2026-04","2026-05","2026-06","2026-07","2026-08"],"series":{"gross":[54046.0,235937.09,386783.69,396043.22,553656.16],"driver_salary":[17409.7,75078.98,144543.51,197999.64,298218.34],"def_fuel_fee":[17135.25,59364.75,72892.98,57266.18,76553.8],"truck_rental":[6246.79,23582.14,41779.85,44912.2,70634.65],"toll_scale":[1068.74,3794.15,9882.58,6397.78,12078.33],"insur_admin_trl":[4479.6,8214.44,10586.35,10314.19,13209.65],"total":[7564.4,64341.39,108060.42,49807.06,40046.16],"mileage":[22645.0,74555.0,116660.73,120348.0,170545.0]},"units":[9,14,15,23,25],"unit_weeks":300,"period":["2026-04","2026-08"],"idle_unit_weeks":12,"idle_cost":-20983.94}},"cash":{"outflow_by_category":[{"category":"intercompany","amount":-31879331.99,"txns":1307,"spend":false},{"category":"fuel","amount":-15416530.53,"txns":882,"spend":true},{"category":"lease_rent","amount":-6772941.09,"txns":541,"spend":true},{"category":"internal_transfer","amount":-3896937.58,"txns":322,"spend":false},{"category":"insurance_premium","amount":-2750447.87,"txns":84,"spend":true},{"category":"uncategorized","amount":-2675690.26,"txns":4706,"spend":true},{"category":"capex_truck_trailer","amount":-1923617.25,"txns":23,"spend":true},{"category":"card_payment","amount":-1275294.73,"txns":161,"spend":false},{"category":"related_party_review","amount":-965204.0,"txns":19,"spend":true},{"category":"loan_finance","amount":-505781.9,"txns":26,"spend":true},{"category":"driver_settlement","amount":-469044.95,"txns":180,"spend":true},{"category":"ifta","amount":-268434.03,"txns":63,"spend":true},{"category":"maintenance","amount":-255325.72,"txns":399,"spend":true},{"category":"subscriptions_saas","amount":-198141.63,"txns":227,"spend":true},{"category":"accident_incident","amount":-158944.13,"txns":13,"spend":true},{"category":"bank_fees","amount":-122399.91,"txns":180,"spend":true},{"category":"tolls","amount":-119174.23,"txns":6860,"spend":true},{"category":"platform_fees","amount":-56529.27,"txns":26,"spend":true},{"category":"registration","amount":-55202.37,"txns":27,"spend":true},{"category":"capex_shop_equipment","amount":-6124.44,"txns":2,"spend":true},{"category":"permits","amount":-4343.49,"txns":6,"spend":true},{"category":"revenue","amount":-102.96,"txns":1,"spend":true}],"revenue_in":41435265.72,"txns":18980,"period":["2023-08-30","2026-08-27"],"monthly":{"months":["2023-10","2023-11","2023-12","2024-01","2024-02","2024-03","2024-04","2024-05","2024-06","2024-07","2024-08","2024-09","2024-10","2024-11","2024-12","2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07","2026-08"],"revenue":[2000.0,2930.0,9680.0,528078.63,706888.76,914598.78,933517.44,861846.05,1154542.2,808024.7,1327180.43,1155531.05,2036603.69,1714264.6,1484895.93,1652494.82,1136086.49,1186722.3,1228964.1,1351146.6,1540230.63,1808405.42,1425328.25,1832243.14,2113498.67,1779307.35,1657634.22,1395560.29,1140867.33,1234051.6,1034934.56,1104796.35,1413313.97,1759097.37,0.0],"spend":[0.0,0.0,58.74,815783.84,871600.03,922051.6,831679.22,975129.04,984867.2,973934.88,950519.41,835510.49,1257581.42,939581.34,1073647.66,809297.66,656884.91,941980.33,1093073.31,860670.68,1156390.39,1314148.61,1152281.63,1012550.77,1369754.26,979602.47,1198161.86,924962.42,659497.03,1121556.74,1251541.23,1164482.95,1401253.55,2171411.18,52533.18]}},"utilization":[{"year":"2021","miles":871936,"unit_weeks":358,"trucks_per_week":17,"miles_per_truck_week":2436,"idle_pct":13.7,"miles_per_week":41521},{"year":"2022","miles":3417056,"unit_weeks":1504,"trucks_per_week":28,"miles_per_truck_week":2272,"idle_pct":19.7,"miles_per_week":64473},{"year":"2023","miles":7808808,"unit_weeks":2980,"trucks_per_week":57,"miles_per_truck_week":2620,"idle_pct":18.6,"miles_per_week":150169},{"year":"2024","miles":9780259,"unit_weeks":3785,"trucks_per_week":71,"miles_per_truck_week":2584,"idle_pct":24.9,"miles_per_week":184533},{"year":"2025","miles":9098551,"unit_weeks":4629,"trucks_per_week":89,"miles_per_truck_week":1966,"idle_pct":42.4,"miles_per_week":174972},{"year":"2026","miles":6381000,"unit_weeks":4356,"trucks_per_week":128,"miles_per_truck_week":1465,"idle_pct":51.0,"miles_per_week":187676}],"fuel":{"months":["2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07","2026-08"],"efs_gal":[82774,84741,91808,92994,111610,132663,148450,149002,143438,167057,158707,139525,114344,104792,136954,20768,0,0,0,0],"efs_amt":[315280.15,327678.14,340071.65,345293.19,401652.94,504024.19,596196.38,594966.57,575701.03,660938.43,650589.97,538226.66,434517.65,420101.66,726829.6,120430.21,0.0,0.0,0.0,0.0],"relay_gal":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,444,118093,134947,150330,170548,150767],"relay_amt":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1981.1,553994.09,657250.29,628947.86,765066.44,750103.8],"relay_discount":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,373.28,121942.46,123465.17,146949.55,129094.19,104188.85]},"breakdowns":{"by_service":[{"service":"In Shop","cost":620041.15,"events":1280},{"service":"Road Call","cost":100354.56,"events":240},{"service":"Towing","cost":41331.24,"events":39},{"service":"(Blank)","cost":1598.52,"events":71},{"service":"Tutorial","cost":0.0,"events":30},{"service":"13017590170","cost":0.0,"events":1}],"by_payer":{"zone":654238.81,"stl":69685.41,"driver":39401.25,"dealer":0.0},"months":["January","February","March","April","May","June","July","August","September"],"cost":[64775.84,28991.64,84377.02,91605.73,89562.24,146636.39,116376.98,140541.71,457.92],"events":[159,117,170,210,208,220,274,292,11],"roadside":[33,18,23,38,37,42,45,42,1],"total":763325.47},"iron_lease":{"invoiced":642095.51,"paid":863553.38,"by_entity":[{"entity":"ZONE","invoiced":453101.32,"paid":470069.61},{"entity":"XTRACK","invoiced":157383.39,"paid":176313.62},{"entity":"AFG","invoiced":31610.8,"paid":217170.15}],"truck_weeks":862,"idle_truck_weeks":235,"idle_rent":308005.4,"miles":1808081,"rent":694015.45,"efs_maint":297304.06},"tolls":{"total":1514426.55,"txns":103112,"top_agencies":[{"agency":"NJTP","amount":223189.67},{"agency":"NYSTA","amount":179155.46},{"agency":"PTC","amount":169182.07},{"agency":"MdTA","amount":137224.55},{"agency":"PANYNJ","amount":136976.23},{"agency":"ITRCC","amount":106825.58},{"agency":"ILTOLL","amount":94431.85},{"agency":"OTC","amount":76824.5}],"months":["2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07","2026-08"],"amount":[42170.71,55287.1,54920.98,32193.0,80189.66,128508.74,89599.42,92456.46,80297.43,89995.96,91823.58,79115.94,63894.3,57585.5,76239.21,76191.3,63732.42,80623.14,91879.11,87722.59]}}</script>
+<script>
+const D = JSON.parse(document.getElementById('payload').textContent);
+const $ = s => document.querySelector(s);
+const usd = (v,d=0) => (v<0?'-':'')+'$'+Math.abs(v).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+const num = (v,d=0) => v.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+const pct = v => v.toFixed(1)+'%';
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const ENTS = Object.keys(D.entities);
+const LABEL = {ZONE:'Zone LLC', XTRACK:'Xtrack LLC', AFG:'AFG Transportco'};
+const COST = [['def_fuel_fee','Fuel / DEF'],['driver_salary','Driver pay'],
+              ['truck_rental','Truck rental'],['toll_scale','Tolls &amp; scale'],
+              ['insur_admin_trl','Insurance / admin']];
+
+/* ---------- tiny SVG chart helpers, one scale for marks and labels ---------- */
+function niceMax(v){ if(v<=0) return 1; const p=Math.pow(10,Math.floor(Math.log10(v)));
+  const n=v/p; return (n<=1?1:n<=2?2:n<=2.5?2.5:n<=5?5:10)*p; }
+
+function barChart(labels, series, opts={}){
+  const W=760, H=opts.h||220, L=64, R=14, T=14, B=labels.length>16?42:28;
+  const max = niceMax(Math.max(...series.flatMap(s=>s.v)));
+  const iw=W-L-R, ih=H-T-B, n=labels.length, step=iw/n;
+  const bw = Math.max(2,(step-4)/series.length);
+  let g='';
+  for(let i=0;i<=4;i++){ const y=T+ih-ih*i/4;
+    g+=`<line x1="${L}" y1="${y}" x2="${W-R}" y2="${y}" stroke="${css('--rule-soft')}" stroke-width="1"/>`+
+       `<text x="${L-8}" y="${y+4}" text-anchor="end" font-size="10.5" fill="${css('--muted')}" font-family="IBM Plex Mono,monospace">${opts.fmt?opts.fmt(max*i/4):num(max*i/4)}</text>`; }
+  series.forEach((s,si)=>{ s.v.forEach((v,i)=>{ const h=Math.max(0,ih*v/max);
+    g+=`<rect x="${L+step*i+2+bw*si}" y="${T+ih-h}" width="${bw}" height="${h}" fill="${s.c}"><title>${labels[i]}: ${opts.fmt?opts.fmt(v):num(v)}</title></rect>`; }); });
+  const every = Math.ceil(n/13);
+  labels.forEach((lb,i)=>{ if(i%every) return;
+    g+=`<text x="${L+step*i+step/2}" y="${H-B+16}" text-anchor="middle" font-size="10" fill="${css('--muted')}" font-family="IBM Plex Mono,monospace">${lb}</text>`; });
+  g+=`<line x1="${L}" y1="${T+ih}" x2="${W-R}" y2="${T+ih}" stroke="${css('--rule')}" stroke-width="1"/>`;
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${opts.alt||''}">${g}</svg>`;
+}
+
+function lineChart(labels, series, opts={}){
+  const W=760, H=opts.h||210, L=64, R=14, T=14, B=30;
+  const max=niceMax(Math.max(...series.flatMap(s=>s.v))), min=0;
+  const iw=W-L-R, ih=H-T-B, n=labels.length;
+  const X=i=> n<2?L+iw/2 : L+iw*i/(n-1), Y=v=> T+ih-ih*(v-min)/(max-min||1);
+  let g='';
+  for(let i=0;i<=4;i++){ const y=T+ih-ih*i/4;
+    g+=`<line x1="${L}" y1="${y}" x2="${W-R}" y2="${y}" stroke="${css('--rule-soft')}"/>`+
+       `<text x="${L-8}" y="${y+4}" text-anchor="end" font-size="10.5" fill="${css('--muted')}" font-family="IBM Plex Mono,monospace">${opts.fmt?opts.fmt(max*i/4):num(max*i/4)}</text>`; }
+  series.forEach(s=>{
+    const pts=s.v.map((v,i)=>`${X(i)},${Y(v)}`).join(' ');
+    if(opts.area) g+=`<polygon points="${L},${T+ih} ${pts} ${X(n-1)},${T+ih}" fill="${s.c}" opacity=".13"/>`;
+    g+=`<polyline points="${pts}" fill="none" stroke="${s.c}" stroke-width="2" stroke-linejoin="round"/>`;
+    const li=s.v.length-1;
+    g+=`<circle cx="${X(li)}" cy="${Y(s.v[li])}" r="3.5" fill="${s.c}"/>`;
+    s.v.forEach((v,i)=>{ g+=`<circle cx="${X(i)}" cy="${Y(v)}" r="7" fill="transparent"><title>${labels[i]}: ${opts.fmt?opts.fmt(v):num(v)}</title></circle>`; });
+  });
+  const every=Math.ceil(n/12);
+  labels.forEach((lb,i)=>{ if(i%every) return;
+    g+=`<text x="${X(i)}" y="${H-B+16}" text-anchor="middle" font-size="10" fill="${css('--muted')}" font-family="IBM Plex Mono,monospace">${lb}</text>`; });
+  g+=`<line x1="${L}" y1="${T+ih}" x2="${W-R}" y2="${T+ih}" stroke="${css('--rule')}"/>`;
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${opts.alt||''}">${g}</svg>`;
+}
+const legend = items => `<div class="legend">${items.map(i=>`<span><i style="background:${i.c}"></i>${i.t}</span>`).join('')}</div>`;
+const short = m => m.slice(2).replace('-','/');
+
+/* ---------- drawer ---------- */
+function openDrawer(kicker, title, html){
+  $('#drawer').innerHTML = `<header><div><div class="k">${kicker}</div><h3 id="dtitle">${title}</h3></div>
+    <button class="x" aria-label="Close">&times;</button></header>${html}`;
+  $('#drawer').classList.add('on'); $('#scrim').classList.add('on');
+  $('#drawer .x').onclick = closeDrawer; $('#drawer .x').focus();
+}
+function closeDrawer(){ $('#drawer').classList.remove('on'); $('#scrim').classList.remove('on'); }
+$('#scrim').onclick = closeDrawer;
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeDrawer(); });
+
+/* ---------- views ---------- */
+const V = {};
+
+V.overview = () => {
+  const u = D.utilization, last = u[u.length-1], y24 = u.find(r=>r.year==='2024')||u[0];
+  const gross = ENTS.reduce((a,e)=>a+D.entities[e].series.gross.reduce((x,y)=>x+y,0),0);
+  const spend = D.cash.outflow_by_category.filter(c=>c.spend).reduce((a,c)=>a+c.amount,0);
+  const dMTW = (last.miles_per_truck_week/y24.miles_per_truck_week-1)*100;
+  const alerts = [
+    ['crit','Utilization has collapsed',`Trucks per week up ${Math.round((last.trucks_per_week/y24.trucks_per_week-1)*100)}% since 2024; miles per truck-week down ${Math.round(-dMTW)}%. Total miles moved is flat.`,pct(last.idle_pct)+' idle','utilization'],
+    ['crit','Fuel is 47% of every real dollar out',`${usd(-D.cash.outflow_by_category.find(c=>c.category==='fuel').amount)} across two rails. 99.5% of the card is genuinely diesel.`,'#1 cost','fuel'],
+    ['warn','Relay discount eroding',`$0.989/gal in April to $0.662 in August — about $49,000 a month at current volume.`,'-33%','fuel'],
+    ['warn','Rent charged on trucks that never moved',`Iron Lease billed ${num(D.iron_lease.idle_truck_weeks)} truck-weeks that logged zero miles.`,usd(D.iron_lease.idle_rent),'ironlease'],
+    ['warn','Breakdowns rising',`${num(D.breakdowns.events.reduce((a,b)=>a+b,0))} events, ${usd(D.breakdowns.total)}. Road calls and tows are 17% of them.`,usd(D.breakdowns.total),'maintenance'],
+    ['ok','Fuel figures agree across sources','P&L fuel and bank fuel land 0.2% apart from sources sharing no inputs.','verified','cash'],
+  ];
+  return `
+  <div class="head"><h2>CEO overview</h2><div class="sub">${D.cash.period[0]} → ${D.cash.period[1]}</div></div>
+  <p class="lede">Everything here is drawn from sources that passed a control: 147 of 147 bank statements
+  reconcile to their balance delta, and five years of odometer readings sit behind every mileage figure.
+  Click any row for the detail behind it.</p>
+  <div class="kpis">
+    <div class="kpi"><div class="k">P&amp;L gross</div><div class="v">${usd(gross)}</div><div class="d">3 operating companies</div></div>
+    <div class="kpi"><div class="k">Revenue banked</div><div class="v">${usd(D.cash.revenue_in)}</div><div class="d">verified deposits</div></div>
+    <div class="kpi"><div class="k">Real cash out</div><div class="v">${usd(-spend)}</div><div class="d">intercompany excluded</div></div>
+    <div class="kpi"><div class="k">Trucks / week</div><div class="v">${last.trucks_per_week}</div><div class="d up">+${Math.round((last.trucks_per_week/y24.trucks_per_week-1)*100)}% vs 2024</div></div>
+    <div class="kpi"><div class="k">Miles / truck / wk</div><div class="v">${num(last.miles_per_truck_week)}</div><div class="d up">${dMTW.toFixed(0)}% vs 2024</div></div>
+    <div class="kpi"><div class="k">Weeks at zero miles</div><div class="v">${pct(last.idle_pct)}</div><div class="d">2026 to date</div></div>
+  </div>
+  <div class="panel"><h3>What needs attention<span class="note">ranked by severity</span></h3>
+    ${alerts.map(a=>`<div class="alert ${a[0]}"><div class="stripe"></div>
+      <button class="body" style="text-align:left;width:100%" data-goto="${a[4]}">
+        <div class="t">${a[1]}</div><div class="s">${a[2]}</div></button>
+      <div class="amt">${a[3]}</div></div>`).join('')}
+  </div>
+  <div class="grid2">
+    <div class="panel"><h3>Miles per truck-week<span class="note">odometer</span></h3>
+      ${legend([{c:css('--accent'),t:'miles per truck per week'}])}
+      <div class="pad" style="padding-top:0">${lineChart(u.map(r=>r.year),[{v:u.map(r=>r.miles_per_truck_week),c:css('--accent')}],{area:true,alt:'Miles per truck-week by year'})}</div></div>
+    <div class="panel"><h3>Trucks running each week<span class="note">odometer</span></h3>
+      ${legend([{c:css('--warn'),t:'trucks on the road'}])}
+      <div class="pad" style="padding-top:0">${barChart(u.map(r=>r.year),[{v:u.map(r=>r.trucks_per_week),c:css('--warn')}],{alt:'Trucks per week by year'})}</div></div>
+  </div>
+  <div class="panel"><h3>Cash in and real cash out, by month<span class="note">verified bank</span></h3>
+    ${legend([{c:css('--ok'),t:'revenue banked'},{c:css('--critical'),t:'real outflow'}])}
+    <div class="pad" style="padding-top:0">${barChart(D.cash.monthly.months.map(short),
+      [{v:D.cash.monthly.revenue,c:css('--ok')},{v:D.cash.monthly.spend,c:css('--critical')}],
+      {fmt:v=>usd(v),alt:'Monthly revenue and outflow'})}</div></div>`;
+};
+
+V.cash = () => {
+  const rows = D.cash.outflow_by_category;
+  const spend = rows.filter(c=>c.spend), notspend = rows.filter(c=>!c.spend);
+  const tot = spend.reduce((a,c)=>a+c.amount,0);
+  return `
+  <div class="head"><h2>Cash &amp; cost structure</h2><div class="sub">${num(D.cash.txns)} verified transactions</div></div>
+  <p class="lede">Bank and card movement only — no P&amp;L, no assertions. Three kinds of movement are held
+  out of the ranking because they are not spend: transfers between your own companies, transfers between
+  your own accounts, and paying the credit card (the charges on that card are already counted).</p>
+  <div class="panel"><h3>Where the money actually went<span class="note">real outflow ${usd(-tot)}</span></h3>
+    <div class="scroll"><table><thead><tr><th>Category</th><th class="n">Amount</th><th class="n">Share</th><th class="n">Txns</th></tr></thead><tbody>
+    ${spend.map(c=>`<tr class="click" data-cat="${c.category}"><td>${c.category.replace(/_/g,' ')}</td>
+      <td class="n">${usd(-c.amount)}</td><td class="n">${pct(c.amount/tot*100)}</td><td class="n">${num(c.txns)}</td></tr>`).join('')}
+    <tr class="tot"><td>Real outflow</td><td class="n">${usd(-tot)}</td><td class="n">100.0%</td><td class="n"></td></tr>
+    </tbody></table></div></div>
+  <div class="panel"><h3>Held out of the ranking<span class="note">not spend</span></h3>
+    <div class="scroll"><table><thead><tr><th>Movement</th><th class="n">Amount</th><th class="n">Txns</th></tr></thead><tbody>
+    ${notspend.map(c=>`<tr><td>${c.category.replace(/_/g,' ')}</td><td class="n">${usd(-c.amount)}</td><td class="n">${num(c.txns)}</td></tr>`).join('')}
+    </tbody></table></div></div>`;
+};
+
+V.utilization = () => {
+  const u = D.utilization;
+  return `
+  <div class="head"><h2>Utilization</h2><div class="sub">37.4M verified miles</div></div>
+  <p class="lede">Five years of weekly odometer readings. A reading that moves backwards or exceeds 6,000
+  miles in a week is excluded <em>along with both its neighbours</em> — one bad reading corrupts two weeks,
+  and dropping only the negative leaves the matching positive behind.</p>
+  <div class="kpis">
+    <div class="kpi"><div class="k">Clean unit-weeks</div><div class="v">${num(u.reduce((a,r)=>a+r.unit_weeks,0))}</div><div class="d">2021 – 2026</div></div>
+    <div class="kpi"><div class="k">Verified miles</div><div class="v">${(u.reduce((a,r)=>a+r.miles,0)/1e6).toFixed(1)}M</div><div class="d">after exclusions</div></div>
+    <div class="kpi"><div class="k">Idle weeks, 2026</div><div class="v">${pct(u[u.length-1].idle_pct)}</div><div class="d up">from 25% in 2024</div></div>
+  </div>
+  <div class="panel"><h3>The whole story in one table</h3><div class="scroll"><table>
+    <thead><tr><th>Year</th><th class="n">Trucks/week</th><th class="n">Miles/truck/week</th><th class="n">Zero-mile weeks</th><th class="n">Total miles/week</th></tr></thead><tbody>
+    ${u.map(r=>`<tr><td class="mono">${r.year}</td><td class="n">${r.trucks_per_week}</td>
+      <td class="n">${num(r.miles_per_truck_week)}</td>
+      <td class="n">${pct(r.idle_pct)} <span class="chip ${r.idle_pct>45?'crit':r.idle_pct>30?'warn':'flat'}">${r.idle_pct>45?'half':r.idle_pct>30?'high':'ok'}</span></td>
+      <td class="n">${num(r.miles_per_week)}</td></tr>`).join('')}
+    </tbody></table></div></div>
+  <div class="panel"><h3>Fleet size against productivity<span class="note">the divergence</span></h3>
+    ${legend([{c:css('--warn'),t:'trucks running per week'},{c:css('--accent'),t:'miles per truck per week'}])}
+    <div class="pad" style="padding-top:0">${barChart(u.map(r=>r.year),
+      [{v:u.map(r=>r.trucks_per_week*10),c:css('--warn')},{v:u.map(r=>r.miles_per_truck_week),c:css('--accent')}],
+      {alt:'Trucks per week versus miles per truck-week',h:250})}</div>
+    <div class="pad" style="padding-top:0;color:var(--muted);font-size:13px">Trucks scaled ×10 so both series share one axis.</div></div>`;
+};
+
+V.fuel = () => {
+  const f = D.fuel;
+  const blended = f.months.map((m,i)=>{const g=f.efs_gal[i]+f.relay_gal[i]; return g? (f.efs_amt[i]+f.relay_amt[i])/g : 0;});
+  const dpg = f.months.map((m,i)=> f.relay_gal[i] ? f.relay_discount[i]/f.relay_gal[i] : 0);
+  const li = dpg.map((v,i)=>v?i:-1).filter(i=>i>=0);
+  return `
+  <div class="head"><h2>Fuel</h2><div class="sub">two rails</div></div>
+  <p class="lede">EFS carried every gallon through March 2026. Relay took over in April — EFS fell from
+  136,954 gallons to 20,768 while Relay went from 444 to 118,093. Any fuel figure reading one rail is
+  wrong for 2026.</p>
+  <div class="kpis">
+    <div class="kpi"><div class="k">Diesel + DEF share</div><div class="v">99.5%</div><div class="d">of the fuel card</div></div>
+    <div class="kpi"><div class="k">Discount, April</div><div class="v">$0.989</div><div class="d">per gallon</div></div>
+    <div class="kpi"><div class="k">Discount, August</div><div class="v">$0.662</div><div class="d up">-33%</div></div>
+    <div class="kpi"><div class="k">Worth per month</div><div class="v">$49k</div><div class="d">at August volume</div></div>
+  </div>
+  <div class="panel"><h3>Gallons by rail<span class="note">the switch</span></h3>
+    ${legend([{c:css('--muted'),t:'EFS / WEX'},{c:css('--accent'),t:'Relay Payments'}])}
+    <div class="pad" style="padding-top:0">${barChart(f.months.map(short),
+      [{v:f.efs_gal,c:css('--muted')},{v:f.relay_gal,c:css('--accent')}],{alt:'Gallons by rail'})}</div></div>
+  <div class="grid2">
+    <div class="panel"><h3>Blended price paid<span class="note">$/gallon</span></h3>
+      ${legend([{c:css('--critical'),t:'blended $/gal, both rails'}])}
+      <div class="pad" style="padding-top:0">${lineChart(f.months.map(short),[{v:blended,c:css('--critical')}],{fmt:v=>'$'+v.toFixed(2),area:true,alt:'Blended price per gallon'})}</div></div>
+    <div class="panel"><h3>Relay discount per gallon<span class="note">eroding</span></h3>
+      ${legend([{c:css('--warn'),t:'discount received per gallon'}])}
+      <div class="pad" style="padding-top:0">${lineChart(li.map(i=>short(f.months[i])),[{v:li.map(i=>dpg[i]),c:css('--warn')}],{fmt:v=>'$'+v.toFixed(2),area:true,alt:'Relay discount per gallon'})}</div></div>
+  </div>`;
+};
+
+const PAYER={zone:'Zone (the company)',stl:'STL',driver:'Driver',dealer:'Dealer / warranty'};
+V.maintenance = () => {
+  const b = D.breakdowns, tot = Object.values(b.by_payer).reduce((a,c)=>a+c,0);
+  return `
+  <div class="head"><h2>Breakdowns</h2><div class="sub">${num(b.events.reduce((a,c)=>a+c,0))} events, Jan–Sep 2026</div></div>
+  <p class="lede">Every unplanned event that stopped a truck. The service type is the severity scale —
+  a road call and a tow are not maintenance, they are a failure that already cost a load.</p>
+  <div class="panel"><h3>By severity</h3><div class="scroll"><table>
+    <thead><tr><th>Service</th><th class="n">Events</th><th class="n">Cost</th><th class="n">Average</th></tr></thead><tbody>
+    ${b.by_service.filter(s=>s.cost>0).map(s=>`<tr><td>${s.service}
+      <span class="chip ${s.service==='Towing'?'crit':s.service==='Road Call'?'warn':'flat'}">${s.service==='Towing'?'roadside':s.service==='Road Call'?'roadside':'planned'}</span></td>
+      <td class="n">${num(s.events)}</td><td class="n">${usd(s.cost)}</td><td class="n">${usd(s.cost/s.events)}</td></tr>`).join('')}
+    </tbody></table></div></div>
+  <div class="panel"><h3>Who bore the cost<span class="note">recovery</span></h3><div class="scroll"><table>
+    <thead><tr><th>Payer</th><th class="n">Cost</th><th class="n">Share</th></tr></thead><tbody>
+    ${Object.entries(b.by_payer).sort((a,c)=>c[1]-a[1]).map(([k,v])=>`<tr><td>${PAYER[k]||k}</td>
+      <td class="n">${usd(v)}</td><td class="n">${pct(v/tot*100)}</td></tr>`).join('')}
+    </tbody></table></div></div>
+  <div class="panel"><h3>Events and cost by month<span class="note">rising</span></h3>
+    ${legend([{c:css('--accent'),t:'all events'},{c:css('--critical'),t:'road calls and tows'}])}
+    <div class="pad" style="padding-top:0">${barChart(b.months.map(m=>m.slice(0,3)),
+      [{v:b.events,c:css('--accent')},{v:b.roadside,c:css('--critical')}],{alt:'Breakdown events by month'})}</div></div>`;
+};
+
+V.tolls = () => {
+  const t = D.tolls;
+  return `
+  <div class="head"><h2>Tolls</h2><div class="sub">${num(t.txns)} transactions</div></div>
+  <p class="lede">Bestpass itemization, ${t.months[0]} to ${t.months[t.months.length-1]}. Cost is the
+  discounted toll plus Bestpass's own fee — taking the posted amount alone understates it.</p>
+  <div class="kpis">
+    <div class="kpi"><div class="k">Total tolls</div><div class="v">${usd(t.total)}</div><div class="d">${num(t.txns)} crossings</div></div>
+    <div class="kpi"><div class="k">Per crossing</div><div class="v">${usd(t.total/t.txns,2)}</div><div class="d">average</div></div>
+    <div class="kpi"><div class="k">Northeast share</div><div class="v">56%</div><div class="d">NJTP, NYSTA, PTC, MdTA, PANYNJ</div></div>
+  </div>
+  <div class="panel"><h3>By agency<span class="note">where the lanes run</span></h3><div class="scroll"><table>
+    <thead><tr><th>Agency</th><th class="n">Amount</th><th class="n">Share</th></tr></thead><tbody>
+    ${t.top_agencies.map(a=>`<tr><td class="mono">${a.agency}</td><td class="n">${usd(a.amount)}</td>
+      <td class="n">${pct(a.amount/t.total*100)}</td></tr>`).join('')}
+    </tbody></table></div></div>
+  <div class="panel"><h3>Monthly toll spend</h3>
+    ${legend([{c:css('--accent'),t:'tolls charged'}])}
+    <div class="pad" style="padding-top:0">${barChart(t.months.map(short),[{v:t.amount,c:css('--accent')}],{fmt:v=>usd(v),alt:'Monthly tolls'})}</div></div>`;
+};
+
+V.ironlease = () => {
+  const L = D.iron_lease;
+  return `
+  <div class="head"><h2>Iron Lease</h2><div class="sub">${num(L.truck_weeks)} truck-weeks billed</div></div>
+  <p class="lede">The leasing entity. It buys trucks and lets them to the operating companies and to
+  drivers on lease-purchase. Its billing carries an opening and closing odometer per truck per week,
+  which is what makes idle time measurable.</p>
+  <div class="kpis">
+    <div class="kpi"><div class="k">Invoiced</div><div class="v">${usd(L.invoiced)}</div><div class="d">rent + mileage</div></div>
+    <div class="kpi"><div class="k">Paid to it</div><div class="v">${usd(L.paid)}</div><div class="d down">${usd(L.paid-L.invoiced)} over</div></div>
+    <div class="kpi"><div class="k">Idle truck-weeks</div><div class="v">${num(L.idle_truck_weeks)}</div><div class="d up">${pct(L.idle_truck_weeks/L.truck_weeks*100)} of billing</div></div>
+    <div class="kpi"><div class="k">Rent on zero miles</div><div class="v">${usd(L.idle_rent)}</div><div class="d">charged anyway</div></div>
+  </div>
+  <div class="panel"><h3>Billing by company<span class="note">invoiced vs paid</span></h3><div class="scroll"><table>
+    <thead><tr><th>Company</th><th class="n">Invoiced</th><th class="n">Paid</th><th class="n">Position</th></tr></thead><tbody>
+    ${L.by_entity.map(e=>`<tr><td>${LABEL[e.entity]||e.entity}</td><td class="n">${usd(e.invoiced)}</td>
+      <td class="n">${usd(e.paid)}</td><td class="n">${usd(e.invoiced-e.paid)}
+      <span class="chip ${e.paid>e.invoiced?'ok':'warn'}">${e.paid>e.invoiced?'funded':'owing'}</span></td></tr>`).join('')}
+    <tr class="tot"><td>Total</td><td class="n">${usd(L.invoiced)}</td><td class="n">${usd(L.paid)}</td><td class="n">${usd(L.invoiced-L.paid)}</td></tr>
+    </tbody></table></div></div>
+  <div class="panel"><h3>What the billing covers</h3><div class="pad"><dl class="dl">
+    <dt>Miles billed for</dt><dd>${num(L.miles)}</dd>
+    <dt>Truck rent</dt><dd>${usd(L.rent)}</dd>
+    <dt>EFS &amp; maintenance passed through</dt><dd>${usd(L.efs_maint)}</dd>
+    <dt>Truck-weeks with zero miles</dt><dd>${num(L.idle_truck_weeks)} of ${num(L.truck_weeks)}</dd>
+  </dl></div></div>`;
+};
+
+function entityView(e){
+  const E = D.entities[e], s = E.series, m = E.months;
+  const sum = k => s[k].reduce((a,b)=>a+b,0);
+  const gross = sum('gross'), miles = sum('mileage');
+  const rows = COST.map(([k,lb])=>({k,lb,v:sum(k)})).sort((a,b)=>b.v-a.v);
+  const direct = rows.reduce((a,r)=>a+r.v,0);
+  return `
+  <div class="head"><h2>${LABEL[e]||e}</h2><div class="sub">${E.period[0]} → ${E.period[1]}</div></div>
+  <p class="lede">${num(E.unit_weeks)} unit-weeks from the weekly P&amp;L workbook. These are the numbers
+  the business has been deciding on — an assertion the bank data exists to test, not cash.</p>
+  <div class="kpis">
+    <div class="kpi"><div class="k">Gross</div><div class="v">${usd(gross)}</div><div class="d">invoiced</div></div>
+    <div class="kpi"><div class="k">Direct cost</div><div class="v">${usd(direct)}</div><div class="d">${pct(direct/gross*100)} of gross</div></div>
+    <div class="kpi"><div class="k">Contribution</div><div class="v">${usd(gross-direct)}</div><div class="d">${pct((gross-direct)/gross*100)} before overhead</div></div>
+    <div class="kpi"><div class="k">Miles</div><div class="v">${num(miles)}</div><div class="d">${gross&&miles?usd(gross/miles,2)+'/mi':'—'}</div></div>
+    <div class="kpi"><div class="k">Idle unit-weeks</div><div class="v">${num(E.idle_unit_weeks)}</div><div class="d">${usd(E.idle_cost)} accrued</div></div>
+  </div>
+  <div class="panel"><h3>Cost structure<span class="note">click a line for detail</span></h3><div class="scroll"><table>
+    <thead><tr><th>Line</th><th class="n">Amount</th><th class="n">% of gross</th><th class="n">Per mile</th></tr></thead><tbody>
+    ${rows.map(r=>`<tr class="click" data-line="${r.k}" data-ent="${e}"><td>${r.lb}</td>
+      <td class="n">${usd(r.v)}</td><td class="n">${pct(r.v/gross*100)}</td>
+      <td class="n">${miles?usd(r.v/miles,3):'—'}</td></tr>`).join('')}
+    <tr class="tot"><td>Direct cost</td><td class="n">${usd(direct)}</td><td class="n">${pct(direct/gross*100)}</td>
+      <td class="n">${miles?usd(direct/miles,3):'—'}</td></tr>
+    </tbody></table></div></div>
+  <div class="panel"><h3>Gross and direct cost by month</h3>
+    ${legend([{c:css('--ok'),t:'gross'},{c:css('--critical'),t:'direct cost'}])}
+    <div class="pad" style="padding-top:0">${barChart(m.map(short),
+      [{v:s.gross,c:css('--ok')},{v:m.map((_,i)=>COST.reduce((a,[k])=>a+s[k][i],0)),c:css('--critical')}],
+      {fmt:v=>usd(v),alt:'Gross and direct cost by month'})}</div></div>
+  <div class="panel"><h3>Trucks on the road<span class="note">units appearing in the P&amp;L</span></h3>
+    ${legend([{c:css('--accent'),t:'units with a row that month'}])}
+    <div class="pad" style="padding-top:0">${barChart(m.map(short),[{v:E.units,c:css('--accent')}],{alt:'Units per month'})}</div></div>`;
+}
+
+/* ---------- routing ---------- */
+let current = 'overview';
+function render(v){
+  current = v;
+  $('#main').innerHTML = ENTS.includes(v) ? entityView(v) : (V[v]||V.overview)();
+  document.querySelectorAll('.navbtn').forEach(b=>b.setAttribute('aria-current', String(b.dataset.view===v)));
+  $('#main').scrollIntoView({block:'start'});
+  wire();
+}
+function wire(){
+  document.querySelectorAll('[data-goto]').forEach(b=> b.onclick = ()=>render(b.dataset.goto));
+  document.querySelectorAll('tr.click[data-cat]').forEach(tr=> tr.onclick = ()=>{
+    const c = D.cash.outflow_by_category.find(x=>x.category===tr.dataset.cat);
+    const tot = D.cash.outflow_by_category.filter(x=>x.spend).reduce((a,x)=>a+x.amount,0);
+    openDrawer('Cash category', c.category.replace(/_/g,' '), `
+      <div class="dsec"><div class="src">Verified bank &amp; card</div><dl class="dl">
+        <dt>Total out</dt><dd>${usd(-c.amount)}</dd>
+        <dt>Share of real outflow</dt><dd>${pct(c.amount/tot*100)}</dd>
+        <dt>Transactions</dt><dd>${num(c.txns)}</dd>
+        <dt>Average</dt><dd>${usd(-c.amount/c.txns,2)}</dd></dl></div>
+      <div class="dsec"><p>Every transaction in this category sits on a statement that reconciles to its
+      own beginning and ending balance. ${NOTE[c.category]||''}</p></div>`);
+  });
+  document.querySelectorAll('tr.click[data-line]').forEach(tr=> tr.onclick = ()=>{
+    const e = tr.dataset.ent, k = tr.dataset.line, E = D.entities[e], s = E.series;
+    const v = s[k].reduce((a,b)=>a+b,0), gross = s.gross.reduce((a,b)=>a+b,0);
+    const miles = s.mileage.reduce((a,b)=>a+b,0);
+    const lb = (COST.find(c=>c[0]===k)||[,k])[1];
+    const peak = s[k].indexOf(Math.max(...s[k]));
+    openDrawer(LABEL[e]||e, lb.replace('&amp;','&'), `
+      <div class="dsec"><div class="src">Weekly P&amp;L workbook</div><dl class="dl">
+        <dt>Total</dt><dd>${usd(v)}</dd>
+        <dt>Share of gross</dt><dd>${pct(v/gross*100)}</dd>
+        <dt>Per mile</dt><dd>${miles?usd(v/miles,3):'—'}</dd>
+        <dt>Per unit-week</dt><dd>${usd(v/E.unit_weeks,2)}</dd>
+        <dt>Highest month</dt><dd>${E.months[peak]} · ${usd(s[k][peak])}</dd></dl></div>
+      <div class="dsec"><div class="src">By month</div>
+        ${barChart(E.months.map(short),[{v:s[k],c:css('--accent')}],{fmt:x=>usd(x),h:170,alt:lb+' by month'})}</div>
+      <div class="dsec"><p>This is what the workbook asserts, not what left the bank. Driver pay here is
+      the <em>gross settlement</em>; the bank shows the net after deductions.</p></div>`);
+  });
+}
+const NOTE = {
+  fuel:'Two rails: EFS/WEX through March 2026, Relay after. The itemization confirms 99.5% is diesel and DEF.',
+  lease_rent:'Truck and trailer rental. Purchases of trucks are counted separately as capital, not rent.',
+  insurance_premium:'Largely financed rather than paid direct — $1.44M of it goes to a premium finance company as level instalments, so the bank shows loan payments, not premiums.',
+  uncategorized:'Every dollar has a named counterparty; what is missing is what they are for. Around forty names would clear most of it.',
+  related_party_review:'Wired internationally to a name outside the declared entity list. Held out of intercompany on purpose so it stays visible.',
+  capex_truck_trailer:'Truck purchases, mostly by Iron Lease from Fleet Advantage and EquipLinc.',
+  driver_settlement:'What actually left the bank for drivers. The P&L records the gross settlement; the gap between them is the deduction pool.',
+  maintenance:'Understated here — most repair spend rides the fuel card or Truck Max rather than appearing as a maintenance payment.',
+  tolls:'Bestpass settles as a lump; the itemization behind it is 103,112 crossings.',
+};
+document.querySelectorAll('.navbtn').forEach(b=> b.onclick = ()=>render(b.dataset.view));
+$('#navents').innerHTML = ENTS.map(e=>`<button class="navbtn" data-view="${e}">${LABEL[e]||e}<span class="tag">${(D.entities[e].unit_weeks/1000).toFixed(1)}k</span></button>`).join('');
+document.querySelectorAll('.navbtn').forEach(b=> b.onclick = ()=>render(b.dataset.view));
+render('overview');
+</script>
