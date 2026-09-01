@@ -186,6 +186,27 @@ recovery chain becomes measurable.
 
 ---
 
+## Intercompany says the money moved, NOT why it moved
+
+Classifying a transfer `intercompany` is a statement about the counterparty and
+nothing else. The bank proves Zone sent Truck Max $625,728; it cannot say
+whether that was Zone PAYING repair invoices or Zone FUNDING a shop that does
+not cover itself. Those two have opposite meanings and identical bank rows.
+
+Do not let the classification imply the reason. Truck Max was briefly written up
+as "net funded, not a drain, +$384,038" on exactly that slip. The memos do not
+support it: of 96 inbound transfers, 46 are bare `Online transfer from CHK 0271`,
+14 come from account 7024 (no statements), 10 are `ZONE LLC DES:PAYROLL INDN:
+TRUCK MAX` — Zone running the shop's payroll — and none reference an invoice.
+
+The rule: an intercompany inflow is evidence of a RELATIONSHIP, never of
+revenue earned. Only the settlement deduction lines can close it.
+
+Unverified accounts, no statements behind them: 0007, 0023, 1308, 2835, 3877,
+5215, 5557, 6222, 7024, 8344, and the 1008/2006 card.
+
+---
+
 ## Sources — four, all permanent
 
 | Source | Role | Nature |
