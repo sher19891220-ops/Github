@@ -12,7 +12,7 @@ This file is the set of conventions that must not be re-derived or guessed.
 
 | entity_id | Legal name | DOT | Notes |
 |---|---|---|---|
-| `ZONE` | Zone LLC | 3456354 | ~34 trucks |
+| `ZONE` | Zone LLC | 3456354 | ~34 trucks. Also appears as **"ZONE OH LLC"** / "Zone-OH" — same entity, not a separate company. `Zone_statements` and `ZONE_OH_statements` are two ACCOUNTS of this one entity. |
 | `XTRACK` | Xtrack LLC | 4086204 | ~45 trucks |
 | `AFG` | AFG Transportco LLC | — | ~18 trucks |
 | `IRON_LEASE` | Iron Lease LLC | — | leasing entity — leases units to the operating companies |

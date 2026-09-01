@@ -242,7 +242,11 @@ ENTITY_ALIASES = {
     # "Shop" is how Truck Max USA LLC is referred to internally — the parts and
     # repair side of the business. Statements arrive named Shop_*, not Truckmax_*.
     "shop": "TRUCKMAX",
+    # Zone OH is the same entity as Zone, under another name. Both statement
+    # sets belong to ZONE as separate accounts.
+    "zone_oh": "ZONE", "zoneoh": "ZONE", "oh": None,
 }
+ENTITY_ALIASES = {k: v for k, v in ENTITY_ALIASES.items() if v}
 BANK_ALIASES = ["chase", "amex", "bofa", "bankofamerica", "wellsfargo", "wf", "pnc",
                 "huntington", "usbank", "citi", "capitalone", "novo", "mercury",
                 "truist", "fifththird", "keybank", "comdata", "efs", "wex"]

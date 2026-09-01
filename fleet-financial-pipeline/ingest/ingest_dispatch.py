@@ -41,11 +41,19 @@ sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 DB_PATH = Path(__file__).resolve().parent.parent / "db" / "fleet_financials.db"
 
-# drivers.mc -> our entity_id
+# drivers.mc -> our entity_id.
+# "ZONE OH LLC" is the same legal entity as Zone LLC, confirmed by the owner —
+# it is a naming variant, not a separate company, so it maps to ZONE. The two
+# statement sets (Zone_statements, ZONE_OH_statements) are two ACCOUNTS of one
+# entity; keep them distinct as account_ids, never as entities.
 MC_TO_ENTITY = {
     "xtrack llc": "XTRACK",
-    "zone oh llc": "ZONE_OH",
+    "zone oh llc": "ZONE",
+    "zone llc": "ZONE",
+    "zone": "ZONE",
     "afg": "AFG",
+    "afg transportco": "AFG",
+    "afg transportco llc": "AFG",
 }
 
 REVENUE_ENTRY_TYPE = "loadday"
