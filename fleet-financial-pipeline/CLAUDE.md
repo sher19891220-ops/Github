@@ -37,10 +37,35 @@ equivalent:
 | **Iron Lease** | intercompany — same |
 | **Driver** | **NOT intercompany.** Billed to an owner/lease operator, i.e. a third party. Revenue to Truck Max, and not a group cost at all if the driver actually pays. |
 
-So group-level maintenance cost is Truck Max's **parts and labor input**, plus
-driver-billed work only to the extent it was never recovered. Summing the
-operating companies' payments to Truck Max on top of Truck Max's own spend
-double-counts every repair.
+### The full recovery chain (confirmed by the owner)
+
+    Truck Max buys parts/labor  ->  invoices ZONE / XTRACK / AFG
+      ->  that company deducts the bill from the DRIVER'S SETTLEMENT
+
+So a repair passes through two hands before landing on the driver:
+
+| Leg | Treatment |
+|---|---|
+| Truck Max's external parts + labor purchase | **the only real group cost** |
+| Truck Max invoices the operating company | intercompany — internal transfer |
+| Operating company deducts from driver settlement | **recovery** — reduces net driver pay, not a cost |
+
+At group level the repair nets to Truck Max's outside spend. The operating
+company is roughly whole (paid the invoice, recovered it from settlement);
+Truck Max keeps the margin; the driver bears the invoice.
+
+**The finding is the GAP, not the total.** Every invoice billed but never
+recovered from a settlement is unrecovered cost sitting in nobody's P&L.
+Reconcile the Truck Max invoice log against `Drivers Pay list (Zone LLC)`
+deductions per driver per period; the unmatched remainder is the real leak.
+Rows marked `no need to pay` are explicit write-offs and belong in that
+remainder.
+
+**Watch the pay type.** Recovery through settlement deduction is normal for
+OO and LO operators (47 of 130 drivers). It is not generally available against
+company drivers on CPM/%/Flat. Repairs on a CPM driver's truck that were
+routed to the driver column may therefore be unrecoverable in practice —
+check pay_type before assuming any deduction happened.
 
 Some rows carry `no need to pay` in the Zone column — work performed and
 written off. Those are real absorbed costs with no offsetting receipt.
