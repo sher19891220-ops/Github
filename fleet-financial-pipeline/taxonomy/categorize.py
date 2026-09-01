@@ -156,8 +156,13 @@ CATEGORY_RULES = [
                               # $81,800 / $208,000) out of the leasing entity,
                               # alongside a truck auction house. A rental would
                               # be a repeating amount on a monthly cycle.
-                              r"\bfleet\s+advantage\b", r"\bequiplinc\b",
-                              r"\britchie\s+bros\b"]),
+                              r"\bfleet\s+advantage\b", r"\bequiplinc\b"]),
+
+    # Shop tooling and fixtures. Real capital spend, but not fleet: keeping it
+    # separate stops a lifter being amortised across trucks.
+    ("capex_shop_equipment", [r"\blifts?\b", r"\blifter\b", r"\bhoists?\b",
+                              r"\bcompressors?\b", r"\bshop\s+equipment\b",
+                              r"\bjack\s+stands?\b", r"\bwelder\b"]),
 
     # IFTA before fuel: "FUEL TAX PAYMENT" is a quarterly tax filing, not diesel.
     ("ifta",                 [r"\bifta\b", r"\bfuel\s+tax(es)?\b", r"\bmileage\s+tax\b",
@@ -280,7 +285,11 @@ NAMED_VENDOR_PATTERNS = [
     (r"\btbk\s+bank\b", "loan_finance"),
     (r"\bfleet\s+advantage\b", "capex_truck_trailer"),
     (r"\bequiplinc\b", "capex_truck_trailer"),
-    (r"\britchie\s+bros\b", "capex_truck_trailer"),
+    # An auction house sells whatever is on the block. The Ritchie Bros
+    # purchase here was a LIFTER for the shop, not a tractor -- shop equipment
+    # does not earn revenue per mile and must not inflate fleet capex or the
+    # cost-per-truck it feeds.
+    (r"\britchie\s+bros\b", "capex_shop_equipment"),
 ]
 
 _RELATED_REVIEW = [re.compile(p, re.IGNORECASE) for p in RELATED_PARTY_REVIEW_PATTERNS]

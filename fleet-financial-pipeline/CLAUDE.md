@@ -207,6 +207,26 @@ Unverified accounts, no statements behind them: 0007, 0023, 1308, 2835, 3877,
 
 ---
 
+## Fuel runs on TWO rails, and they changed hands mid-2026
+
+EFS/WEX carried all diesel through March 2026. Relay Payments took over in
+April: EFS fell from 136,954 gallons to 20,768 in one month while Relay went
+from 444 to 118,093 -- an 85% switch in four weeks. Any fuel figure that reads
+only one rail is wrong for 2026. Both reconcile to the bank (Relay's rail
+itemization lands within $7,400 of the bank drafts across five months).
+
+Operator-confirmed facts that the sheets alone would misread:
+- Truck **8091 was sold to Judeler, broke down, and was replaced free of charge
+  with 8132**. The truck-number change mid-series in the lease-to-own register
+  is that swap, not a data-entry error -- and Iron Lease absorbed the cost of
+  the failed unit.
+- The **Ritchie Bros purchase was a lifter for the shop, not a tractor.** An
+  auction house sells whatever is on the block, so its invoices are not
+  automatically fleet capex; this one is `capex_shop_equipment` and must not be
+  amortised across trucks.
+
+---
+
 ## Sources — four, all permanent
 
 | Source | Role | Nature |

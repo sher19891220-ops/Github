@@ -68,8 +68,9 @@ CASES = [
      "entity, not a repeating monthly rent"),
     ("WIRE TYPE:WIRE OUT BNF:EQUIPLINC LLC ID", -208830, "capex_truck_trailer",
      "same purchase pattern, six irregular lumps"),
-    ("WIRE TYPE:WIRE OUT BNF:RITCHIE BROS ID", -5124, "capex_truck_trailer",
-     "truck auction house"),
+    ("WIRE TYPE:WIRE OUT BNF:RITCHIE BROS ID", -5124, "capex_shop_equipment",
+     "an auction house sells anything -- this purchase was a lifter for the "
+     "shop, not a tractor, and must not inflate fleet capex"),
     ("TBK BANK, SSB DES:ACH ID: INDN:IRON LEASE LLC", -14443.50, "loan_finance",
      "$14,443.50 x17 monthly is an amortisation schedule on an owned truck, "
      "not rent"),
