@@ -209,6 +209,92 @@ def check(conn, flavor, account=None):
     return bad
 
 
+def check_csv(txn_csv, meta_csv, account=None):
+    """Run the same control directly on the intake CSVs, before anything is
+    loaded into a database.
+
+    This is the gate between parsing and ingestion: it answers "is this parse
+    correct?" using only the parser's own output and the balances lifted off
+    page 1 of each statement. Joining on source_file means a statement that
+    parsed zero rows still appears — as a failure, which is what it is.
+
+    Joined on source_path, not filename: BofA names every statement
+    eStmt_<period-end>.pdf, so seven accounts share the same ~60 basenames and
+    a basename join silently pools every account's transactions together.
+
+    txn_csv  : source_path, source_file, account_last4, txn_date, amount, ...
+    meta_csv : file, path, account_last4, period_start, period_end,
+               beginning_balance, ending_balance
+    """
+    parsed = {}
+    rows_by_file = {}
+    for r in csv.DictReader(Path(txn_csv).open()):
+        f = r["source_path"]
+        parsed[f] = parsed.get(f, 0.0) + float(r["amount"])
+        rows_by_file[f] = rows_by_file.get(f, 0) + 1
+
+    results = []
+    for m in csv.DictReader(Path(meta_csv).open()):
+        if not m["beginning_balance"] or not m["ending_balance"]:
+            continue
+        acct = m["account_last4"]
+        if account and acct != account:
+            continue
+        f = m["path"]
+        expected = float(m["ending_balance"]) - float(m["beginning_balance"])
+        got = parsed.get(f, 0.0)
+        results.append((m["file"], acct, m["period_start"], expected, got,
+                        rows_by_file.get(f, 0), classify(got, expected),
+                        got - expected))
+    return report(results)
+
+
+def report(results):
+    """Shared presentation for the DB and CSV paths."""
+    if not results:
+        print("Nothing to check — no statement has both a balance pair and a parse.")
+        return []
+
+    ok = [r for r in results if r[6] == "ok"]
+    bad = [r for r in results if r[6] != "ok"]
+
+    print(f"\nStatement-total control: {len(ok)}/{len(results)} statements reconcile.\n")
+
+    # Per account, because a parser defect is almost always account-shaped:
+    # one bank's layout, one card's sign convention.
+    accts = sorted({r[1] for r in results})
+    print(f"{'account':<10}{'stmts':>7}{'pass':>7}{'fail':>7}{'rows':>9}{'unexplained $':>16}")
+    print("-" * 56)
+    for a in accts:
+        sub = [r for r in results if r[1] == a]
+        subok = [r for r in sub if r[6] == "ok"]
+        subbad = [r for r in sub if r[6] != "ok"]
+        print(f"{a:<10}{len(sub):>7}{len(subok):>7}{len(subbad):>7}"
+              f"{sum(r[5] for r in sub):>9,}"
+              f"{sum(abs(r[7]) for r in subbad if r[7] is not None):>16,.2f}")
+    print()
+
+    if bad:
+        print(f"{'file':<28}{'account':<10}{'period':<12}{'expected':>14}{'parsed':>14}{'variance':>14}  status")
+        print("-" * 106)
+        for f, acct, p0, exp, got, rows, status, var in sorted(
+                bad, key=lambda r: (r[1], r[2] or "")):
+            e = f"{exp:,.2f}" if exp is not None else "\u2014"
+            v = f"{var:,.2f}" if var is not None else "\u2014"
+            print(f"{f[:27]:<28}{acct[:9]:<10}{(p0 or '')[:11]:<12}{e:>14}{got:>14,.2f}{v:>14}  {status}")
+        print()
+        for status in sorted({r[6] for r in bad}):
+            n = sum(1 for r in bad if r[6] == status)
+            print(f"  {status} ({n}): {DIAGNOSIS.get(status, '')}")
+        print()
+        exposure = sum(abs(r[7]) for r in bad if r[7] is not None)
+        print(f"  Unexplained dollars across failing statements: ${exposure:,.2f}")
+        print("  Do not run P&L or reconciliation on this data \u2014 fix the parser first.")
+    else:
+        print("Every statement reconciles to its balance delta. The parse is verified.")
+    return bad
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -226,7 +312,20 @@ def main():
     chk.add_argument("--account", help="restrict to one account_id")
     chk.add_argument("--strict", action="store_true", help="exit 1 if any statement fails")
 
+    csvchk = sub.add_parser("check-csv", help="run the control on intake CSVs, pre-database")
+    csvchk.add_argument("--txns", required=True, help="parsed transactions CSV")
+    csvchk.add_argument("--meta", required=True, help="statement metadata CSV")
+    csvchk.add_argument("--account", help="restrict to one account last-4")
+    csvchk.add_argument("--strict", action="store_true", help="exit 1 if any statement fails")
+
     args = p.parse_args()
+
+    if args.cmd == "check-csv":
+        bad = check_csv(args.txns, args.meta, args.account)
+        if args.strict and bad:
+            sys.exit(1)
+        return
+
     conn, flavor = connect(args)
 
     if args.cmd == "register":
