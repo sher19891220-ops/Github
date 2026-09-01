@@ -46,7 +46,13 @@ QUARANTINE = "quarantine"
 SIGNATURES = {
     "bank_statement": {
         "strong": ["posted date", "transaction date", "posting date", "debit", "credit",
-                   "withdrawal", "deposit", "running balance", "balance"],
+                   "withdrawal", "deposit", "running balance", "balance",
+                   # Bank of America's export uses Spent/Received rather than
+                   # debit/credit; without these the file scored zero and its
+                   # classification depended on whether sample rows happened to
+                   # contain the word "Deposit" in a memo.
+                   "spent", "received", "money in", "money out",
+                   "paid in", "paid out", "transaction posted", "match/categorize"],
         "weak": ["date", "description", "amount", "memo", "payee", "reference"],
         "min": 2,
     },
@@ -95,13 +101,81 @@ SIGNATURES = {
         "weak": ["date", "amount", "driver", "unit", "location", "type"],
         "min": 1,
     },
+    # A real chart of accounts is identified by its TYPE columns. "account
+    # number" alone is not enough — AmEx exports carry an "Account Number"
+    # preamble above the transaction header, and it made every card statement
+    # look like a chart of accounts.
     "chart_of_accounts": {
-        "strong": ["account type", "accnt. type", "detail type", "account number",
-                   "accnt type"],
+        "strong": ["account type", "accnt. type", "detail type", "accnt type",
+                   "account subtype", "chart of accounts"],
         "weak": ["account", "name", "description", "balance"],
         "min": 1,
     },
+
+    # Per-unit expense ledgers. The richest per-truck source in the whole set:
+    # unit, amount, cost type, who it was issued to, and "expense side" —
+    # company or driver — which is the cost-recovery question answered in the
+    # data rather than inferred.
+    "unit_expense_ledger": {
+        "strong": ["expense side", "issued to", "cost type", "transfer code",
+                   "$ used", "unit type"],
+        "weak": ["unit", "date", "details", "id", "issued date"],
+        "min": 2,
+    },
+
+    # Dispatch board exports — handled by ingest_dispatch.py, not here.
+    "dispatch_export": {
+        "strong": ["week_id", "driver_id", "entry_type", "pickup_gross",
+                   "pickup_miles", "day_index", "original_truck", "sub_truck",
+                   "range_label"],
+        "weak": ["id", "created_at", "dispatcher", "pay_type", "truck"],
+        "min": 1,
+    },
+
+    # Iron Lease bills the operating companies; those PDFs are invoices, not
+    # statements, and previously fell to quarantine as "no known layout".
+    "invoice": {
+        "strong": ["invoice number", "invoice no", "invoice #", "bill to",
+                   "remit to", "amount due", "invoice date", "total due"],
+        "weak": ["date", "amount", "description", "qty", "rate", "terms", "subtotal"],
+        "min": 1,
+    },
 }
+
+
+_SHARED_STRINGS_STUB = (
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    '<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" '
+    'count="0" uniqueCount="0"/>'
+)
+
+
+def repair_xlsx(path: Path, workdir: Path):
+    """Some exporters (Bestpass among them) write .xlsx with every string inline
+    and no xl/sharedStrings.xml part. openpyxl opens that part unconditionally
+    and dies with KeyError before reading a single row. Rebuild the container
+    with an empty shared-string table and it reads normally."""
+    import zipfile
+    workdir.mkdir(parents=True, exist_ok=True)
+    out = workdir / f"repaired_{path.name}"
+    if out.exists():
+        return out
+    with zipfile.ZipFile(path) as zin, zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as zout:
+        for item in zin.infolist():
+            data = zin.read(item.filename)
+            if item.filename == "[Content_Types].xml" and b"sharedStrings" not in data:
+                data = data.replace(b"</Types>",
+                    b'<Override PartName="/xl/sharedStrings.xml" ContentType='
+                    b'"application/vnd.openxmlformats-officedocument.spreadsheetml.'
+                    b'sharedStrings+xml"/></Types>')
+            elif item.filename == "xl/_rels/workbook.xml.rels" and b"sharedStrings" not in data:
+                data = data.replace(b"</Relationships>",
+                    b'<Relationship Id="rIdSS" Type="http://schemas.openxmlformats.org/'
+                    b'officeDocument/2006/relationships/sharedStrings" '
+                    b'Target="sharedStrings.xml"/></Relationships>')
+            zout.writestr(item, data)
+        zout.writestr("xl/sharedStrings.xml", _SHARED_STRINGS_STUB)
+    return out
 
 
 def sha256(path, limit=None):
@@ -119,7 +193,8 @@ def sha256(path, limit=None):
 # Card Member, Amount" — so requiring a "strong" token would quarantine real
 # statements. This is the shape-based fallback for that case.
 _DATEISH = ("date", "posted", "posting", "trans date", "tx date")
-_AMOUNTISH = ("amount", "debit", "credit", "withdrawal", "deposit", "charge")
+_AMOUNTISH = ("amount", "debit", "credit", "withdrawal", "deposit", "charge",
+              "spent", "received", "paid in", "paid out")
 _LABELISH = ("description", "memo", "payee", "narrative", "details", "merchant",
              "reference", "card member", "transaction")
 
@@ -156,8 +231,13 @@ def _header_tokens_tabular(path, max_rows=25):
                     rows.append(r)
         elif suffix in (".xlsx", ".xlsm", ".xls"):
             import pandas as pd
-            df = pd.read_excel(path, header=None, nrows=max_rows,
-                               sheet_name=0, dtype=str)
+            try:
+                df = pd.read_excel(path, header=None, nrows=max_rows, sheet_name=0, dtype=str)
+            except KeyError as e:
+                if "sharedStrings" not in str(e):
+                    raise
+                df = pd.read_excel(repair_xlsx(path, path.parent / "_repaired"),
+                                   header=None, nrows=max_rows, sheet_name=0, dtype=str)
             rows = df.fillna("").astype(str).values.tolist()
     except Exception:
         return []
@@ -252,14 +332,15 @@ BANK_ALIASES = ["chase", "amex", "bofa", "bankofamerica", "wellsfargo", "wf", "p
                 "truist", "fifththird", "keybank", "comdata", "efs", "wex"]
 
 
-def infer_account(path: Path):
+def infer_account(path: Path, archive_hint: str = ""):
     # Underscore is a regex word character, so \bzone\b does NOT match
     # "zone_chase_op" — the boundary never occurs. Tokenize instead. The
     # parent folder is included because people file by company.
     stem = re.sub(r"[^a-z0-9]+", " ", path.stem.lower())
     folder = re.sub(r"[^a-z0-9]+", " ", path.parent.name.lower())
-    tokens = set(stem.split()) | set(folder.split())
-    joined = stem.replace(" ", "")
+    hint = re.sub(r"[^a-z0-9]+", " ", (archive_hint or "").lower())
+    tokens = set(stem.split()) | set(folder.split()) | set(hint.split())
+    joined = (stem + " " + folder + " " + hint).replace(" ", "")
 
     entity = next((v for k, v in ENTITY_ALIASES.items()
                    if k in tokens or k.replace("_", "") in joined), None)
@@ -277,7 +358,9 @@ def infer_account(path: Path):
 # Walk + plan
 # ---------------------------------------------------------------------------
 
-SKIP_NAMES = {".DS_Store", "Thumbs.db", "__MACOSX"}
+# "_repaired" holds rebuilt copies of xlsx files that lacked a shared-string
+# part; scanning them as well would double-count those files.
+SKIP_NAMES = {".DS_Store", "Thumbs.db", "__MACOSX", "_repaired"}
 
 # Archives people actually send. .zip is handled in-process; the rest go through
 # the 7z binary, which reads RAR5 (what modern WinRAR produces) as well as 7z.
@@ -317,7 +400,13 @@ def walk(root: Path, expand_zips=True, workdir=None):
             ok, err = _expand_archive(p, dest)
             if ok:
                 # Nested archives are expanded too: people zip a folder of rars.
-                files.extend(walk(dest, expand_zips=True, workdir=workdir))
+                inner = walk(dest, expand_zips=True, workdir=workdir)
+                # Carry the archive's own name down. Iron_lease_statements.rar
+                # expands to a folder called just "statements", which loses the
+                # entity entirely — the archive name is the only place it exists.
+                for f in inner:
+                    f.setdefault("archive_hint", p.stem)
+                files.extend(inner)
             else:
                 files.append({"path": p, "kind": QUARANTINE, "confidence": "none",
                               "evidence": err, "size": p.stat().st_size})
@@ -339,7 +428,7 @@ def build_plan(root: Path, workdir=None):
         h = sha256(p)
         dup_of = seen_hashes.get(h)
         seen_hashes.setdefault(h, str(p))
-        entity, bank, last4, account_id = infer_account(p)
+        entity, bank, last4, account_id = infer_account(p, e.get("archive_hint", ""))
         plan.append({
             "path": p, "size": e["size"], "kind": kind, "confidence": conf,
             "evidence": evidence, "sha256": h, "duplicate_of": dup_of,
