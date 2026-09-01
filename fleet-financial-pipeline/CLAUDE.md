@@ -108,6 +108,8 @@ This is *not* how the sources present it:
 
 | Source | Native convention | What ingest must do |
 |---|---|---|
+| BofA statement PDF | **mixed** — older statements print a withdrawal bare (`16,107.20`), newer ones print it signed (`-16,107.20`) | trust the printed sign when there is one; apply the section sign only when there is not. **Never multiply the two** |
+| BofA / QuickBooks bank-feed CSV | `Spent` / `Received` columns, unsigned | the column is the sign; `abs()` first |
 | Bank checking export | debit negative | pass through |
 | **Credit card export (AmEx etc.)** | **charge POSITIVE** | **negate** |
 | QuickBooks GL report | debit positive / credit negative | pass through bank + credit-card lines, **flip income/expense lines** (`normalize_amount()`) |
@@ -116,8 +118,33 @@ Card sign handling is per-account and belongs in `accounts.account_type`, not
 hardcoded per file. A card statement ingested without negation books spend as
 revenue.
 
+The BofA row is not a hypothetical. Applying the section sign to an
+already-signed amount gives `-1 x -804.38 = +804.38`: a withdrawal recorded as
+income, internally consistent, and invisible without the balance control. It
+failed 127 of 147 statements until `signed()` in `parse_boa_statement.py`
+replaced the multiplication. Any new statement parser must follow the same
+rule.
+
 For QuickBooks: run `--sync-accounts` before the first GL pull. Without account
 types the sign is a guess, and the ingest warns when it had to guess.
+
+---
+
+## Verified corpus — what the controls have actually proved
+
+| Source | Rows | Control | Status |
+|---|---|---|---|
+| BofA statement PDFs (147, 7 accounts) | 8,709 | statement total | **147/147 pass, $0.00 unexplained** |
+| AmEx card (`AMEX-2006`, 20 exports) | 10,271 unique | card payments vs. bank | **26 of 27 payments matched** |
+| QuickBooks bank-feed CSVs (19) | 2,292 | none available | 5 files truncated at the page cap |
+
+Known gaps, named rather than papered over:
+- A **second AmEx account** (statements addressed to Cheryl Carter) is drafted
+  from Xtrack 5745 and its card export is not in the corpus.
+- One `AUTOPAY PAYMENT` of $39,624.31 (2026-08-11) was funded from an account
+  whose statements are not in the corpus.
+- Repeated `RETRY PYMT` drafts of identical amounts (e.g. $409.98 three times
+  in June 2025) are returned-payment cycles, not three separate payments.
 
 ---
 
@@ -189,8 +216,26 @@ rule below it. The suite is 59 cases covering exactly the failures observed.
 **Statement-total reconciliation.** Every ingested statement must satisfy
 `sum(transactions) == ending_balance - beginning_balance`, within $0.01.
 A statement that fails this is a bad parse — fix the parser, do not ingest.
-Run `python analysis/check_statement_totals.py` after every ingest batch.
+Run `python analysis/check_statement_totals.py` after every ingest batch, or
+`check-csv --txns ... --meta ...` to gate a parse before it reaches a database.
 This is the control that catches double-inserted rows and dropped pages.
+**Status: 147/147 BofA statements reconcile to the penny across 7 accounts.**
+
+**Statement identity is the full path, never the basename.** BofA names every
+statement `eStmt_<period-end>.pdf`, so seven accounts share ~60 filenames. A
+basename join silently pools every account's transactions into one and assigns
+one account's period and last-4 to another's statement.
+
+**Sources with no balance pair are stamped `control: none`, never mixed in
+silently.** The QuickBooks bank-feed CSVs and the AmEx exports carry no
+beginning/ending balance and cannot be self-verified. Where a cross-source
+control exists, use it: card payments appear on both the card and the verified
+bank statements (`analysis/reconcile_card_payments.py`).
+
+**A QuickBooks CSV export of exactly 300 rows hit the UI page cap.** It is a
+truncated view of the account, not the account. Summing it produces a number
+that looks like a total and is not one. Five files in the corpus are truncated;
+they must be re-exported before any total that includes them is quoted.
 
 **Ingest idempotency.** Uniqueness is `(source_file_hash, file_line_no)`.
 Re-ingesting a file updates rows in place. Cross-file duplicates (the same
