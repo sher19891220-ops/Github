@@ -245,3 +245,53 @@ CREATE TABLE IF NOT EXISTS odometer_readings (
 
 CREATE INDEX IF NOT EXISTS idx_pnl_obs_key ON pnl_observations(entity_id, month, category);
 CREATE INDEX IF NOT EXISTS idx_odo_unit ON odometer_readings(unit_number, reading_date);
+
+-- ---------------------------------------------------------------------------
+-- Per-unit revenue and utilization from the dispatch board.
+-- Revenue is weekly and per truck; the finance side is monthly and per entity,
+-- so both grains are kept rather than collapsing early.
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS unit_revenue (
+    rev_id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    source           TEXT NOT NULL,          -- 'dispatch'
+    unit_number      TEXT NOT NULL,
+    entity_id        TEXT,
+    week_start       TEXT NOT NULL,          -- Monday of the dispatch week
+    month            TEXT,                   -- as the board itself assigns it
+    driver_id        TEXT,
+    driver_name      TEXT,
+    pay_type         TEXT,                   -- CPM | % | LO | OO | Flat
+    -- Gross on the load. For OO/LO this is NOT the company's revenue: most of
+    -- it belongs to the operator. Stored gross, split applied downstream.
+    gross            REAL NOT NULL DEFAULT 0,
+    miles            REAL NOT NULL DEFAULT 0,
+    load_days        INTEGER NOT NULL DEFAULT 0,
+    nonrevenue_days  INTEGER NOT NULL DEFAULT 0,
+    transit_days     INTEGER NOT NULL DEFAULT 0,
+    is_sub_truck     INTEGER NOT NULL DEFAULT 0,  -- revenue moved off the driver's usual unit
+    loaded_at        TEXT,
+    UNIQUE (source, unit_number, week_start, driver_id)
+);
+CREATE INDEX IF NOT EXISTS idx_unit_rev_unit ON unit_revenue(unit_number, week_start);
+CREATE INDEX IF NOT EXISTS idx_unit_rev_entity ON unit_revenue(entity_id, month);
+
+-- Utilization is per UNIT-DAY, not per driver. A truck can have two drivers in
+-- one week (handoff, team, mid-week swap); summing day counts across drivers
+-- reports more days than the calendar holds. Kept in its own table at the grain
+-- where a day is a day.
+CREATE TABLE IF NOT EXISTS unit_utilization (
+    util_id       INTEGER PRIMARY KEY AUTOINCREMENT,
+    source        TEXT NOT NULL,
+    unit_number   TEXT NOT NULL,
+    entity_id     TEXT,
+    week_start    TEXT NOT NULL,
+    month         TEXT,
+    load_days     INTEGER NOT NULL DEFAULT 0,
+    nonrevenue_days INTEGER NOT NULL DEFAULT 0,
+    transit_days  INTEGER NOT NULL DEFAULT 0,
+    covered_days  INTEGER NOT NULL DEFAULT 0,   -- distinct days with any entry
+    driver_count  INTEGER NOT NULL DEFAULT 0,
+    loaded_at     TEXT,
+    UNIQUE (source, unit_number, week_start)
+);
+CREATE INDEX IF NOT EXISTS idx_unit_util ON unit_utilization(unit_number, week_start);
