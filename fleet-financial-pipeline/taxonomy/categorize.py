@@ -39,10 +39,29 @@ Classification = namedtuple("Classification", "category confidence rule")
 # Each entity as it appears in a bank memo. Kept specific enough not to catch
 # an unrelated third party: "Zone LLC" requires the LLC so it will not match a
 # customer called "Zone Logistics Inc".
+# A related party that is NOT in the declared entity list and is paid by
+# INTERNATIONAL wire. It shares the ZONEOH name with Zone OH LLC and lines up
+# with the "Salaries uzbekistan" line in the weekly P&L panel, so it is almost
+# certainly the offshore back office -- but "almost certainly" is not a basis
+# for folding $965,204 into intercompany, where it would vanish into a
+# $32M pile that nets to zero. It gets its own category so it stays visible
+# until someone confirms what it is.
+RELATED_PARTY_REVIEW_PATTERNS = [
+    r"\bzoneoh\s+freight\s+insights\b",
+    r"\bzone\s*oh\s+freight\b",
+]
+
 INTERCOMPANY_PATTERNS = [
     r"\bzone\s+llc\b",
     r"\bxtrack\b",
     r"\bafg\s+transportco\b",
+    # Inbound wires name the sender as ORIG:, not BNF:. Anchored to those two
+    # fields ON PURPOSE: an ACH memo also carries INDN:, the name of the
+    # account being debited, so a bare entity-name rule turns AFG's OWN ADP
+    # payroll draft ("ADP DES:PAYROLL ... INDN:AFG TRANSPORT CO") into an
+    # intercompany transfer. That regression moved $289,000 out of
+    # driver_settlement before this anchor was added.
+    r"(?:BNF|ORIG):(?:\d/)?\s*afg\s+transport\s+co\b",
     r"\biron\s+lease\b",
     r"\btruck\s+max\s+usa\b",
     r"\bshaeffer\b",
@@ -56,6 +75,34 @@ INTERCOMPANY_PATTERNS = [
 TRANSFER_TOKENS = r"(transfer|xfer|wire|ach|funding|fund|intercompany|inter-?co\b|repay|reimb|advance|loan|capital|contribution|due\s+to|due\s+from)"
 
 # ---------------------------------------------------------------------------
+# Movement that is NOT spend — evaluated before the expense rules
+# ---------------------------------------------------------------------------
+
+# Money moving between accounts WE hold. Not a cost to anyone: it nets to zero
+# across the group and, left uncategorized, it is the single largest pile in
+# the corpus and outranks every real leak. BofA writes these as CHK-to-CHK or
+# CHK-to-SAV movements with no counterparty name at all, which is exactly why
+# they never matched an entity-name rule.
+INTERNAL_TRANSFER_PATTERNS = [
+    r"\bonline\s+(banking\s+)?transfer\s+(to|from)\s+(chk|sav|checking|savings)\b",
+    r"\btransfer\s+(to|from)\s+chk\s*\d{4}\b",
+    r"\bfunds\s+transfer\s+(debit|credit)\b",
+    r"\bbkofamerica\s+bc\b",
+]
+
+# Paying the credit card is not spending money — the CHARGES on that card are
+# the spend, and they are already ingested from the card export. Count both and
+# every dollar on the card is booked twice: once where it was spent, once again
+# as a lump payment to AmEx. This is the single most dangerous double-count in
+# a dual-source model, because both numbers are individually correct.
+CARD_PAYMENT_PATTERNS = [
+    r"\b(online|mobile)\s+banking\s+payment\s+to\s+crd\b",
+    r"\bamerican\s+express\s+des:\s*(ach\s+pmt|retry\s+pymt)\b",
+    r"\b(mobile|autopay)\s+payment\s*-?\s*thank\s+you\b",
+    r"\bpayment\s+thank\s+you\b",
+]
+
+# ---------------------------------------------------------------------------
 # Revenue — only considered on inflows
 # ---------------------------------------------------------------------------
 
@@ -67,6 +114,12 @@ REVENUE_PATTERNS = [
     r"\bload\s+payments?\b", r"\bfreight\s+payments?\b", r"\bbroker\s+payments?\b",
     r"\binvoice\s+payments?\b", r"\bcustomer\s+payments?\b", r"\bremittance\b",
     r"\bach\s+credit\b", r"\bincoming\s+wire\b", r"\bdeposit\b",
+    # The customers this fleet actually hauls for. FedEx arrives under four
+    # different ACH originator names for what is one shipper relationship;
+    # without all four, $4.2M of revenue reads as unexplained inflow.
+    r"\bfedex\b", r"\bfederal\s+express\b", r"\bfedex\s+supply\s+cha\b",
+    r"\bfedex\s+office\b", r"\bfedex\s+corporatio\b",
+    r"\bcounter\s+credit\b",
 ]
 
 # ---------------------------------------------------------------------------
@@ -94,10 +147,15 @@ CATEGORY_RULES = [
                               r"\bequipment\s+purchases?\b", r"\bvehicles?\s+purchases?\b",
                               r"\bdown\s*payments?\b", r"\bpurchase\s+of\s+(truck|trailer|tractor)\b",
                               r"\bwabash\b", r"\bgreat\s+dane\b", r"\butility\s+trailers?\b",
-                              r"\bhyundai\s+translead\b"]),
+                              r"\bhyundai\s+translead\b",
+                              r"\bright\s+truck\s+deal\b"]),
 
     # IFTA before fuel: "FUEL TAX PAYMENT" is a quarterly tax filing, not diesel.
-    ("ifta",                 [r"\bifta\b", r"\bfuel\s+tax(es)?\b", r"\bmileage\s+tax\b"]),
+    ("ifta",                 [r"\bifta\b", r"\bfuel\s+tax(es)?\b", r"\bmileage\s+tax\b",
+                              # State road-tax filings arrive as opaque ACH names.
+                              r"ifta\s*tax", r"ohio-?ifta", r"oh-?iftatx", r"ohiftatx", r"\bnys\s+dtf\s+hut\b",
+                              r"\bhighway\s+use\s+tax\b", r"\bstate\s+of\s+ct\s+drs\b",
+                              r"\bky\s+weight\s+distance\b", r"\bnm\s+trip\b"]),
 
     ("fuel",                 [r"\bfuels?\b", r"\bdiesel\b", r"\bgasoline\b", r"\bdef\b",
                               r"\bpilot\b", r"\bflying\s*j\b", r"\blove'?s\b",
@@ -106,7 +164,12 @@ CATEGORY_RULES = [
                               r"\bta\s+travel\b", r"\bta\s*#\s*\d", r"\btravelcenters\b",
                               r"\bpetro\s+(stopping|travel)\b",
                               r"\bcomdata\b", r"\befs\s+llc\b", r"\bwex\s+(fuel|inc)\b",
-                              r"\bspeedway\b", r"\bsapp\s+bros\b", r"\broadys\b"]),
+                              r"\bspeedway\b", r"\bsapp\s+bros\b", r"\broadys\b",
+                              # Payment RAILS, not merchants. The rail is never the
+                              # category by itself, but on this fleet Relay and EFS
+                              # carry fuel and are drafted as consolidated lumps.
+                              r"\brelay\s+payments?\b",
+                              r"\belectronic\s+funds\s+source\b"]),
 
     ("maintenance",          [r"\brepairs?\b", r"\bmaintenance\b", r"\bmainten\b",
                               r"\bpreventive\s+maint\w*\b", r"\bpm\s+service\b",
@@ -117,11 +180,16 @@ CATEGORY_RULES = [
                               # Dealer names are SERVICE far more often than a purchase.
                               # Capex requires explicit purchase language below.
                               r"\bfreightliner\b", r"\bpeterbilt\b", r"\bkenworth\b",
-                              r"\bvolvo\s+truck\b", r"\bmack\s+truck\b", r"\btruck\s+center\b"]),
+                              r"\bvolvo\s+truck\b", r"\bmack\s+truck\b", r"\btruck\s+center\b",
+                              r"\bcit\s+trucks\b", r"\btranschicago\b",
+                              r"\bfleetpride\b", r"\bbf\s+tire\b", r"\btcs\s+truck\b"]),
 
     ("insurance_premium",    [r"\binsurances?\b", r"\bpremiums?\b", r"\bprogressive\b",
                               r"\bprime\s+insurance\b", r"\bgreat\s+west\b", r"\bnorthland\b",
-                              r"\bcanal\s+insurance\b", r"\bbaldwin\s+&?\s*lyons\b"]),
+                              r"\bcanal\s+insurance\b", r"\bbaldwin\s+&?\s*lyons\b",
+                              r"\byourcomminspmt\b", r"\binsuremart\b",
+                              r"\bassuredpartners\b", r"\bsafe\s+route\s+risk\b",
+                              r"\boccupational\s+accident\b"]),
 
     ("registration",         [r"\bregistrations?\b", r"\bplates?\b", r"\btitle\s+fees?\b",
                               r"\bapportioned\b", r"\birp\b", r"\bbmv\b", r"\bdmv\b",
@@ -132,7 +200,10 @@ CATEGORY_RULES = [
 
     ("lease_rent",           [r"\bleases?\b", r"\bleasing\b", r"\brentals?\b", r"\brent\b",
                               r"\bpaccar\s+financial\b", r"\bdaimler\s+truck\s+financial\b",
-                              r"\bttl\s+financial\b", r"\bryder\b", r"\bpenske\b"]),
+                              r"\bttl\s+financial\b", r"\bryder\b", r"\bpenske\b",
+                              r"\bstl\s+truckers?\b", r"\btransport\s+enterp\w*\b",
+                              r"\bbowman\s+sales\b", r"\bfleet\s+advantage\b",
+                              r"\bequiplinc\b", r"\bten\s+leasing\b", r"\btel\s+leasing\b"]),
 
     ("loan_finance",         [r"\bloans?\b", r"\bfinanc(e|ing)\b", r"\bnote\s+payments?\b",
                               r"\binterest\s+(charge|payment|expense)\b", r"\bprincipal\s+payment\b"]),
@@ -149,7 +220,8 @@ CATEGORY_RULES = [
 
     ("tolls",                [r"\btolls?\b", r"\bprepass\b", r"\bbestpass\b",
                               r"\bez\s*-?\s*pass\b", r"\bi\s*-?\s*pass\b", r"\btoll\s*tags?\b",
-                              r"\bturnpike\b", r"\bpike\s+pass\b"]),
+                              r"\bturnpike\b", r"\bpike\s+pass\b",
+                              r"\bcat\s+scale\b", r"\bscale\s+fees?\b"]),
 
     ("factoring_fees",       [r"\bfactoring\s+fees?\b", r"\bfactoring\b", r"\badvance\s+fees?\b",
                               r"\btriumph\b", r"\brts\s+financial\b", r"\bapex\s+capital\b"]),
@@ -160,7 +232,19 @@ CATEGORY_RULES = [
 
     ("subscriptions_saas",   [r"\bsubscriptions?\b", r"\bsamsara\b", r"\bmotive\b",
                               r"\bkeeptruckin\b", r"\bquickmanage\b", r"\bquickbooks\b",
-                              r"\bintuit\b", r"\beld\b", r"\bgreen\s*light\b", r"\bsoftware\b"]),
+                              r"\bintuit\b", r"\beld\b", r"\bgreen\s*light\b", r"\bsoftware\b",
+                              r"\bpedigree\s+technolog\w*\b", r"\btrippak\b", r"\bvzwrlss\b",
+                              r"\bbestpass\b", r"\bverizon\b", r"\bmicrosoft\b"]),
+
+    # Bank's own charges and reversals. Small individually, and a returned item
+    # is not a payment: counting the original and the return as two outflows
+    # doubles a bounced charge.
+    ("bank_fees",            [r"\breturn\s+item\s+chargeback\b",
+                              r"\breturn\s+of\s+posted\s+check\b",
+                              r"\badjustment/correction\b",
+                              r"\bwire\s+transfer\s+fees?\b", r"\boverdraft\b",
+                              r"\bmonthly\s+fee\b", r"\bservice\s+charge\b",
+                              r"\bnsf\b", r"\breturned\s+item\b"]),
 ]
 
 UNIT_NUMBER_PATTERN = re.compile(r"\b(?:unit|truck|trailer|tractor|#)\s*[-#]?\s*(\d{2,5})\b",
@@ -170,6 +254,9 @@ _COMPILED = [(cat, [re.compile(p, re.IGNORECASE) for p in pats]) for cat, pats i
 _INTERCOMPANY = [re.compile(p, re.IGNORECASE) for p in INTERCOMPANY_PATTERNS]
 _TRANSFER = re.compile(TRANSFER_TOKENS, re.IGNORECASE)
 _REVENUE = [re.compile(p, re.IGNORECASE) for p in REVENUE_PATTERNS]
+_INTERNAL = [re.compile(p, re.IGNORECASE) for p in INTERNAL_TRANSFER_PATTERNS]
+_CARD_PAYMENT = [re.compile(p, re.IGNORECASE) for p in CARD_PAYMENT_PATTERNS]
+_RELATED_REVIEW = [re.compile(p, re.IGNORECASE) for p in RELATED_PARTY_REVIEW_PATTERNS]
 
 
 def classify(memo: str, amount: float | None = None) -> Classification:
@@ -184,12 +271,29 @@ def classify(memo: str, amount: float | None = None) -> Classification:
     """
     memo = memo or ""
 
+    # 0. A related party we cannot yet classify. Before intercompany so it
+    #    cannot be absorbed into a pile that nets to zero.
+    for pat in _RELATED_REVIEW:
+        if pat.search(memo):
+            return Classification("related_party_review", "medium", pat.pattern)
+
     # 1. Intercompany, before anything else.
     for pat in _INTERCOMPANY:
         if pat.search(memo):
             if _TRANSFER.search(memo):
                 return Classification("intercompany", "high", pat.pattern)
             return Classification("intercompany", "medium", pat.pattern)
+
+    # 1b. Movement that is not spend. After intercompany, because a wire whose
+    #     beneficiary is one of our own companies is intercompany and should be
+    #     named as such; these two catch the movements that carry NO
+    #     counterparty at all and so could never match an entity rule.
+    for pat in _CARD_PAYMENT:
+        if pat.search(memo):
+            return Classification("card_payment", "high", pat.pattern)
+    for pat in _INTERNAL:
+        if pat.search(memo):
+            return Classification("internal_transfer", "high", pat.pattern)
 
     # 2a. Wording that can only mean revenue classifies regardless of sign.
     #     P&L sheet rows and GL account names arrive with no amount at all, so

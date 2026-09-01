@@ -17,6 +17,74 @@ from taxonomy.categorize import categorize, classify, extract_unit_number
 CASES = [
     # (memo, amount, expected_category, why)
 
+    # --- ACH INDN: is the account being debited, not a counterparty -------
+    ("ADP           DES:PAYROLL   ID:12345 INDN:AFG TRANSPORT CO CO ID:9591",
+     -18865.00, "driver_settlement",
+     "AFG's own payroll draft; an unanchored entity rule stole $289K of this "
+     "into intercompany"),
+    ("WIRE TYPE:BOOK IN ORIG:1/AFG TRANSPORT CO. ID:291043084504", 40312.33,
+     "intercompany", "inbound wire really is from a sister company"),
+
+    # --- movement that is not spend --------------------------------------
+    # These carry no counterparty name at all, which is why they sat in
+    # uncategorized as the largest pile in the corpus.
+    ("Online Banking transfer to CHK 1558 Confirmation# 5118961291", -60000,
+     "internal_transfer", "our own account; not a cost to anyone"),
+    ("Online Banking transfer from CHK 0271 Confirmation# 5376792643", 5000,
+     "internal_transfer", "inbound leg of the same movement"),
+    ("Online transfer to CHK 4504 Confirmation# 12345", -25000,
+     "internal_transfer", "second BofA wording for the same thing"),
+    ("FUNDS TRANSFER DEBIT", -82576, "internal_transfer",
+     "third BofA wording; no counterparty at all"),
+    ("Online Banking payment to CRD 2006 Confirmation# 99", -30000,
+     "card_payment", "settling the card is not spending; the CHARGES are"),
+    ("AMERICAN EXPRESS DES:ACH PMT ID:M9082 INDN:CHERYL CARTER", -409.98,
+     "card_payment", "card settlement drafted from the bank"),
+    ("MOBILE PAYMENT - THANK YOU", 44398.37, "card_payment",
+     "same event seen from the card side"),
+    ("AUTOPAY PAYMENT - THANK YOU", 39624.31, "card_payment",
+     "autopay variant"),
+
+    # --- the customers this fleet actually hauls for ----------------------
+    ("FEDEX SUPPLY CHA DES:5802480 ID:8363462 INDN:ZONE-OH LLC", 13339.94,
+     "revenue", "FedEx is the shipper; $4.2M arrived under four ACH names"),
+    ("FEDERAL EXPRESS DES:5738489 ID:8322104 INDN:ZONE-OH LLC", 6669.97,
+     "revenue", "second FedEx originator name"),
+    ("Counter Credit", 7391.41, "revenue", "over-the-counter deposit"),
+
+    # --- counterparties found in the verified statements ------------------
+    ("WIRE TYPE:WIRE OUT BNF:STL TRUCKERS LLC ID", -68000, "lease_rent",
+     "largest single outflow in the corpus at $4.77M"),
+    ("TRANSPORT ENTERP DES:ePay ID:01010L INDN:ZONE-OH", -6195.00, "lease_rent",
+     "TEL truck leasing, $700K"),
+    ("BOWMAN SALES AND DES:Debits ID:C123", -17566.49, "lease_rent",
+     "trailer lessor, $439K"),
+    ("WIRE TYPE:WIRE OUT BNF:FLEET ADVANTAGE LLC ID", -202850, "lease_rent",
+     "truck lessor"),
+    ("WIRE TYPE:WIRE OUT BNF:RIGHT TRUCK DEAL ID", -150000,
+     "capex_truck_trailer", "buying trucks, not renting them"),
+    ("RELAY PAYMENTS DES:AJ4NTKSURZ ID:XYZ INDN:ZONE", -50000, "fuel",
+     "fuel payment rail drafted as a consolidated lump"),
+    ("ELECTRONIC FUNDS SOURCE LLC", -22000, "fuel", "EFS fuel rail"),
+    ("BT*CAT SCALE COMPANYWALCOTT IA", -14.75, "tolls",
+     "scale fees ride the same rail as tolls; 6,818 card charges"),
+    ("YOURCOMMINSPMT DES:PURCHASE ID:ZONEOHLLC", -69439.14, "insurance_premium",
+     "commercial insurance under an opaque ACH name"),
+    ("WIRE TYPE:WIRE OUT BNF:INSUREMART INC ID", -117782, "insurance_premium",
+     "insurance broker"),
+    ("WIRE TYPE:WIRE OUT BNF:ASSUREDPARTNERS OF NEW JER ID", -54220,
+     "insurance_premium", "insurance broker"),
+    ("4OHIO-IFTATX DES:ODTIFTATAX ID:123 INDN:SHERKHONKHUJA", -13585,
+     "ifta", "state road-tax filing, opaque ACH name"),
+    ("NYS DTF HUT DES:TAX PAYMNT", -1600.56, "ifta",
+     "New York highway use tax"),
+    ("PEDIGREE TECHNOLOGIEFARGO ND", -2861.71, "subscriptions_saas",
+     "ELD vendor"),
+    ("RETURN ITEM CHARGEBACK", -5246.78, "bank_fees",
+     "a returned item is not a second payment"),
+    ("Return of Posted Check / Item", -4114.15, "bank_fees",
+     "reversal, not spend"),
+
     # --- intercompany must beat generic keywords -------------------------
     ("TRANSFER TO IRON LEASE LLC", -25000, "intercompany",
      "entity name contains 'lease'; previously lost to lease_rent"),

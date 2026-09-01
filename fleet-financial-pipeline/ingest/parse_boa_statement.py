@@ -158,7 +158,7 @@ def parse(path: Path, meta: dict):
                 elif rows and i == cont_idx + 1 and not re.search(AMT, line) and len(line) < 90:
                     # continuation of the previous description -- only when it
                     # physically follows that line
-                    rows[-1]["description"] = (rows[-1]["description"] + " " + line)[:300]
+                    rows[-1]["description"] = (rows[-1]["description"] + " " + line)[:600]
                     cont_idx = i
     return rows, skipped_sections
 
