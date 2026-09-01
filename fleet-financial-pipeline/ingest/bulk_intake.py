@@ -151,30 +151,47 @@ _SHARED_STRINGS_STUB = (
 
 
 def repair_xlsx(path: Path, workdir: Path):
-    """Some exporters (Bestpass among them) write .xlsx with every string inline
-    and no xl/sharedStrings.xml part. openpyxl opens that part unconditionally
-    and dies with KeyError before reading a single row. Rebuild the container
-    with an empty shared-string table and it reads normally."""
+    """Repair two exporter defects that make a perfectly good workbook read as
+    empty or unreadable. Both are silent in different ways.
+
+    1. NO xl/sharedStrings.xml. Some exporters (Bestpass) write every string
+       inline and omit the part entirely. openpyxl opens it unconditionally and
+       dies with KeyError before reading a row -- loud, at least.
+
+    2. A LYING <dimension> RECORD. The EFS fuel exports declare
+       `<dimension ref="A1"/>` on sheets holding 24,634 rows. openpyxl trusts
+       it and returns exactly one row with no error at all, so the file looks
+       like an empty report instead of a year of fuel purchases. This one costs
+       you the data without telling you. Strip the dimension and openpyxl falls
+       back to scanning the rows that are actually there."""
+    import re
     import zipfile
     workdir.mkdir(parents=True, exist_ok=True)
     out = workdir / f"repaired_{path.name}"
     if out.exists():
         return out
     with zipfile.ZipFile(path) as zin, zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as zout:
+        # Only synthesise a shared-string table when the file genuinely has
+        # none. Writing the stub over a real one silently blanks every string
+        # in the workbook -- worse than the defect being repaired.
+        has_ss = "xl/sharedStrings.xml" in zin.namelist()
         for item in zin.infolist():
             data = zin.read(item.filename)
-            if item.filename == "[Content_Types].xml" and b"sharedStrings" not in data:
+            if item.filename == "[Content_Types].xml" and not has_ss:
                 data = data.replace(b"</Types>",
                     b'<Override PartName="/xl/sharedStrings.xml" ContentType='
                     b'"application/vnd.openxmlformats-officedocument.spreadsheetml.'
                     b'sharedStrings+xml"/></Types>')
-            elif item.filename == "xl/_rels/workbook.xml.rels" and b"sharedStrings" not in data:
+            elif item.filename.startswith("xl/worksheets/sheet"):
+                data = re.sub(rb'<dimension\s+ref="[^"]*"\s*/>', b"", data)
+            elif item.filename == "xl/_rels/workbook.xml.rels" and not has_ss:
                 data = data.replace(b"</Relationships>",
                     b'<Relationship Id="rIdSS" Type="http://schemas.openxmlformats.org/'
                     b'officeDocument/2006/relationships/sharedStrings" '
                     b'Target="sharedStrings.xml"/></Relationships>')
             zout.writestr(item, data)
-        zout.writestr("xl/sharedStrings.xml", _SHARED_STRINGS_STUB)
+        if not has_ss:
+            zout.writestr("xl/sharedStrings.xml", _SHARED_STRINGS_STUB)
     return out
 
 

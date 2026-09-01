@@ -5,14 +5,25 @@ One Google Sheet per operating company, ONE TAB PER WEEK, named for the week it
 covers ("08.17.26-08.23.26"). Each tab holds two independent things side by
 side, and both matter:
 
-  cols A-O   repeated per-unit blocks: a "Unit# | Driver | Gross | Mileage |
+  left       repeated per-unit blocks: a "Unit# | Driver | Gross | Mileage |
              Driver Salary | ... " header, one row per LOAD, then a "Total" row
              that is the unit's week. The unit number is in column A of the
              first row of the block; the rows under it are that unit's loads.
-  cols P-V   a weekly summary panel of label/value pairs -- "Total gross",
-             "Total driver pay", "Salaries of OO", "C drivers" / "OO drivers",
-             "OO trucks" / "CD trucks". This panel is where the owner-operator
-             split lives, and it exists nowhere else in the corpus.
+  right      a weekly summary panel of label/value pairs -- "Total gross",
+             "Total driver pay", "Salaries of OO", "C drivers" / "OO drivers".
+             This panel is where the owner-operator split lives, and it exists
+             nowhere else in the corpus.
+
+NEITHER IS AT A FIXED COLUMN. Across three years the sheet was rebuilt several
+times: 10 of ZONE's 139 tabs drop "Other Charges" and "Total" from the unit
+table, so "Per mile" moves from index 13 to 11; the summary panel sits at
+column P in recent tabs and column N in 2024 ones; and the same field is headed
+"Insur/Admin/Trl" in most tabs and "Pys/Cargo/Admin" in others. Reading by
+POSITION silently returns the wrong field -- truck rental read out of the toll
+column, and a summary panel that simply is not found, which is what "panel
+0.00" against real unit rows means. So every column here is resolved by
+matching the header TEXT in each block, and every panel metric is found by
+anchoring on its label and taking the first number to its right.
 
 Two things to know before trusting anything this produces:
 
@@ -48,6 +59,35 @@ UNIT_COLS = ["unit", "driver", "gross", "mileage", "driver_salary",
              "additional_charges", "subtotal", "other_charges", "total",
              "per_mile", "fuel_avr"]
 
+# Header text -> canonical field. Same column, different wording by vintage.
+HEADER_ALIASES = {
+    "unit#": "unit", "unit": "unit", "driver": "driver", "gross": "gross",
+    "mileage": "mileage", "driver salary": "driver_salary",
+    "insur/admin/trl": "insur_admin_trl", "pys/cargo/admin": "insur_admin_trl",
+    "insur/admin/trailer": "insur_admin_trl",
+    "def/fuel/fee": "def_fuel_fee", "truck rental": "truck_rental",
+    "toll / scale": "toll_scale", "toll/scale": "toll_scale",
+    "additional charges": "additional_charges", "subtotal": "subtotal",
+    "other charges": "other_charges", "total": "total",
+    "per mile": "per_mile", "fuel avr": "fuel_avr",
+}
+
+# Labels in the right-hand weekly panel worth keeping. Matched case-folded and
+# anchored, so a panel that moved columns is still found.
+PANEL_LABELS = {
+    "total gross", "total mileage", "total odometer mileage", "total driver pay",
+    "total fuel", "total truck rent", "total toll and scale", "total fuel oo",
+    "other expenses total", "salaries uzbekistan", "fuel discount for oo",
+    "salary of us office", "salaries of oo", "expenses of oo", "insurance",
+    "margin % (profit)", "average gross", "average rpm", "avr gross for running trucks",
+    "maintance exp per truck", "maintance exp per mile", "toll average per mile",
+    "fuel average per mile", "gallon", "worked units", "oo trucks", "cd trucks",
+    "fuel discount oo", "total fuel oo", "loss-making trucks",
+}
+
+# Bands whose values sit on the row BELOW the labels, spread across columns.
+BAND_HEADS = {"c drivers", "us salary", "salary"}
+
 # "08.17.26-08.23.26", " 04.27.26- 05.03.26", "07.20.26 - 07.26.26"
 WEEK = re.compile(r"(\d{1,2})[.\-/](\d{1,2})[.\-/](\d{2,4})\s*[-–]\s*"
                   r"(\d{1,2})[.\-/](\d{1,2})[.\-/](\d{2,4})")
@@ -56,7 +96,13 @@ ERR = ("#DIV/0!", "#REF!", "#VALUE!", "#N/A", "#NAME?", "#NUM!", "#NULL!")
 
 
 def parse_week(tab):
-    m = WEEK.search(tab.replace(" ", ""))
+    t = tab.replace(" ", "")
+    # Four Xtrack tabs are typed "03.24.25.25-03.30.25" -- the year keyed twice.
+    # Anchored to a FOUR-group date, because "01.26.26" is a legitimate
+    # Jan 26 2026 whose day and year happen to match, and a looser rule
+    # collapses it to "01.26" and loses three real weeks.
+    t = re.sub(r"\b(\d{1,2}\.\d{1,2}\.\d{2})\.\d{2}(?=-)", r"\1", t)
+    m = WEEK.search(t)
     if not m:
         return None, None
     a, b, c, d, e, f = (int(x) for x in m.groups())
@@ -89,6 +135,46 @@ def txt(v):
     return str(v).strip() if v is not None else ""
 
 
+def _colmap(r):
+    """Build {canonical field -> column index} from an actual header row."""
+    m = {}
+    for j, v in enumerate(r):
+        key = txt(v).lower()
+        if key in HEADER_ALIASES and HEADER_ALIASES[key] not in m:
+            m[HEADER_ALIASES[key]] = j
+    return m
+
+
+def _panel(rows, i, r, first_free):
+    """Label-anchored metric extraction from the right-hand panel.
+
+    Takes the first numeric cell within three columns to the right of a known
+    label. Three, not one: the panel is merged and padded differently in each
+    vintage, so the value is not always in the adjacent cell."""
+    out = []
+    for j in range(first_free, len(r)):
+        lab = txt(r[j])
+        if not lab or num(lab) is not None:
+            continue
+        low = lab.lower()
+        if low in PANEL_LABELS:
+            for k in range(j + 1, min(j + 4, len(r))):
+                v = num(r[k])
+                if v is not None:
+                    out.append((lab, v))
+                    break
+        elif low in BAND_HEADS and i + 1 < len(rows):
+            nxt = rows[i + 1]
+            for k in range(j, min(j + 6, len(r))):
+                sub = txt(r[k])
+                if not sub or num(sub) is not None:
+                    continue
+                v = num(nxt[k]) if k < len(nxt) else None
+                if v is not None:
+                    out.append((sub, v))
+    return out
+
+
 def parse_sheet(ws, entity, tab):
     """Returns (unit_week_rows, weekly_metric_rows)."""
     w0, w1 = parse_week(tab)
@@ -97,16 +183,25 @@ def parse_sheet(ws, entity, tab):
     units, metrics = [], []
     cur_unit = cur_driver = None
     in_block = False
+    cmap, first_free = {}, 15
 
-    for r in rows:
-        def c(i):
-            return r[i] if i < len(r) else None
+    for i, r in enumerate(rows):
+        def c(i_):
+            return r[i_] if i_ < len(r) else None
 
         head = txt(c(0))
         # --- per-unit blocks -------------------------------------------------
         if head == "Unit#":
             in_block, cur_unit, cur_driver = True, None, None
+            cmap = _colmap(r)
+            # everything right of the unit table is panel territory
+            first_free = max(cmap.values()) + 1 if cmap else 15
             continue
+        for lab, v in _panel(rows, i, r, first_free):
+            metrics.append({"entity": entity, "tab": tab,
+                            "week_start": w0.isoformat() if w0 else "",
+                            "week_end": w1.isoformat() if w1 else "",
+                            "metric": lab, "value": v})
         if in_block:
             if cur_unit is None and head and head != "Unit#":
                 cur_unit = txt(c(0)).rstrip(".0") if txt(c(0)).endswith(".0") else head
@@ -116,10 +211,9 @@ def parse_sheet(ws, entity, tab):
                        "week_start": w0.isoformat() if w0 else "",
                        "week_end": w1.isoformat() if w1 else "",
                        "unit": cur_unit or "", "driver": cur_driver or ""}
-                for j, name in enumerate(UNIT_COLS):
-                    if j < 2:
-                        continue
-                    rec[name] = num(c(j))
+                for name in UNIT_COLS[2:]:
+                    j = cmap.get(name)
+                    rec[name] = num(c(j)) if j is not None else None
                 # Each tab ships ~82 pre-built empty blocks as scaffolding for
                 # a fleet larger than the one that ran. Keep a block only if it
                 # names a unit or driver, or moved money. An idle truck with
@@ -132,27 +226,6 @@ def parse_sheet(ws, entity, tab):
                     units.append(rec)
                 in_block = False
 
-        # --- weekly summary panel (label in col P, value in col Q) -----------
-        label = txt(c(15))
-        # A label column that parses as a number is not a label: it is the
-        # VALUE row of a multi-across band (the C drivers / OO drivers split),
-        # which parse_split_rows handles by position. Without this guard every
-        # such value becomes its own bogus one-off metric name.
-        if label and not label.startswith("#") and num(label) is None:
-            v = num(c(16))
-            if v is not None:
-                metrics.append({"entity": entity, "tab": tab,
-                                "week_start": w0.isoformat() if w0 else "",
-                                "week_end": w1.isoformat() if w1 else "",
-                                "metric": label, "value": v})
-        # the C/OO split is a 4-across header with its values on the next row,
-        # so it is captured by label position rather than the P/Q pair.
-        if label in ("C drivers", "US salary"):
-            hdr = [txt(c(i)) for i in range(15, 20)]
-            metrics.append({"entity": entity, "tab": tab,
-                            "week_start": w0.isoformat() if w0 else "",
-                            "week_end": w1.isoformat() if w1 else "",
-                            "metric": "__ROW__" + "|".join(hdr), "value": 0.0})
     return units, metrics
 
 
@@ -194,8 +267,6 @@ def main():
     for tab in wb.sheetnames:
         ws = wb[tab]
         u, m = parse_sheet(ws, args.entity, tab)
-        m = [x for x in m if not x["metric"].startswith("__ROW__")]
-        m += parse_split_rows(ws, args.entity, tab)
         all_units += u
         all_metrics += m
         if parse_week(tab) == (None, None):
