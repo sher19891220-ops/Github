@@ -148,6 +148,44 @@ Known gaps, named rather than papered over:
 
 ---
 
+## Google Sheets P&L — how to read it, and how to get it out
+
+One workbook per operating company, ONE TAB PER WEEK. Each tab holds per-unit
+blocks in columns A-O and a weekly summary panel in P-V. The panel is the only
+place in the entire corpus where the owner-operator split exists.
+
+**The week is only in the tab name.** No cell carries a date. So the text
+rendering of these workbooks — which drops tab names — loses the time axis
+completely. Always export `.xlsx` (`ingest_gsheet_pnl.py`); fall back to
+`ingest_gsheet_pnl_text.py` only for totals, and never date its output.
+
+**Drive refuses to export a sheet above its size limit.** ZONE (3 years of
+weeks, 11.3 MB) and Xtrack (5.8 MB) both exceed it, so only their text
+rendering is reachable — and that rendering is INCOMPLETE: for ZONE the panel
+`Total gross` sums to $34.1M against $5.8M of unit rows, and the weekly anchor
+stops firing partway so the tail collapses into one bucket. **Do not quote
+ZONE or Xtrack P&L figures from the text path.** They need a per-year or
+per-quarter `.xlsx` export.
+
+**Internal control for this source:** the panel's `Total gross` must equal the
+sum of that week's unit rows. AFG passes 20/20 weeks to the penny. Run it on
+every new P&L export before using the numbers.
+
+**~82 empty template blocks per tab** are scaffolding for a larger fleet. Drop
+them — but an idle truck with zero gross and a negative total is NOT empty; it
+is rent and insurance accruing on a truck that did not run.
+
+**Revenue arrives through a factor, not from customers.** Triumph Finance
+advances against invoices and keeps a fee, so bank deposits are structurally
+below P&L gross. The gap is a real cost line that appears nowhere in the
+per-unit P&L — every unit is credited with gross it never fully received.
+
+**P&L driver pay is the GROSS settlement; the bank shows the NET.** The
+difference is the deduction pool, and it is the only place the Truck Max
+recovery chain becomes measurable.
+
+---
+
 ## Sources — four, all permanent
 
 | Source | Role | Nature |
