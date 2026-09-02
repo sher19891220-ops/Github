@@ -167,10 +167,11 @@
         {
           "name": "Jumash aka",
           "rate": 40,
-          "hours": 55,
+          "hours": 54,
           "basis": "hourly",
-          "amount": 2200,
-          "period": "week"
+          "amount": 2160,
+          "period": "week",
+          "_note": "operator 2026-09-02: shop works 54 hours; Vlad usually 50"
         },
         {
           "name": "Vlad",
@@ -179,23 +180,25 @@
           "basis": "hourly",
           "amount": 2250,
           "period": "week",
-          "_note": "operator correction 2026-09-02: 45/hr, was recorded at 35/hr"
+          "_note": "operator 2026-09-02: shop works 54 hours; Vlad usually 50, and 45/hr not 35"
         },
         {
           "name": "Ilfat",
           "rate": 32,
-          "hours": 55,
+          "hours": 54,
           "basis": "hourly",
-          "amount": 1760,
-          "period": "week"
+          "amount": 1728,
+          "period": "week",
+          "_note": "operator 2026-09-02: shop works 54 hours; Vlad usually 50"
         },
         {
           "name": "Alovuddin",
           "rate": 23,
-          "hours": 55,
+          "hours": 54,
           "basis": "hourly",
-          "amount": 1265,
-          "period": "week"
+          "amount": 1242,
+          "period": "week",
+          "_note": "operator 2026-09-02: shop works 54 hours; Vlad usually 50"
         }
       ],
       "parts": {
