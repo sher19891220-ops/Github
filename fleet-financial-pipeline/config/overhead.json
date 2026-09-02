@@ -72,14 +72,14 @@
       "name": "Sherkhonkhuja Imamkhodjaev",
       "entity": "ZONE",
       "amount": 500,
-      "_note": "same person at both entities, per the operator",
+      "_note": "CONFIRMED 2026-09-02: Sherkhonkhuja Imamkhodjaev draws 500 from EACH entity, so the group total is 1,000/wk, not 500. This closes the open question of whether one salary was shown against both books.",
       "period": "week"
     },
     {
       "name": "Sherkhonkhuja Imamkhodjaev",
       "entity": "XTRACK",
       "amount": 500,
-      "_note": "same person at both entities, per the operator",
+      "_note": "CONFIRMED 2026-09-02: Sherkhonkhuja Imamkhodjaev draws 500 from EACH entity, so the group total is 1,000/wk, not 500. This closes the open question of whether one salary was shown against both books.",
       "period": "week"
     }
   ],
@@ -87,12 +87,14 @@
     {
       "name": "Sher Trucking",
       "amount": 2500,
-      "period": "week"
+      "period": "week",
+      "_note": "2,500 each, confirmed by the operator 2026-09-02"
     },
     {
       "name": "Zuhritdinaka",
       "amount": 2500,
-      "period": "week"
+      "period": "week",
+      "_note": "2,500 each, confirmed by the operator 2026-09-02"
     }
   ],
   "owners_stated_total": 5000,
@@ -108,7 +110,7 @@
     "MAINTENANCE RATE: trucking's variable model uses 0.220/mile, an estimate. Recorded shop events for 2026 imply 0.102/mile. If the lower figure is right, contribution rises and break-even falls sharply. The shop ledger settles it.",
     "Does the 4,000/mo shop facility line cover rent alone, or utilities and consumables too? Operator marked it 'for now'.",
     "Office, yard and shop may share one payee (13,000/mo combined). Confirm against the bank before splitting per company.",
-    "The two 500/wk W2 lines are the same person at ZONE and XTRACK. Drawing 500 from each, or one salary against both books? Decides the per-company split."
+    "Which company pays which owner? Needed to allocate the 3,500/wk owner understatement between ZONE, XTRACK and AFG."
   ],
   "us_office_and_yard": {
     "_note": "operator confirmed 2026-09-02: MONTHLY. Office 4,000/mo, yard 5,000/mo.",
@@ -178,5 +180,23 @@
         "_note": "NOT SUPPLIED. The Cases log records events by payer -- ZONE 654,239, STL 69,685, driver 39,401 for Jan-Aug 2026 -- but it is a breakdown COST log, and whether those figures are what the shop BILLED or what the event COST is unresolved. Needs the shop ledger."
       }
     }
+  },
+  "sheet_vs_actual": {
+    "_note": "The weekly P&L books LESS owner pay than is actually paid. Recorded here so any figure taken from the sheet can be corrected rather than quietly trusted.",
+    "owners_booked_in_sheet_per_week": {
+      "ZONE": 2000,
+      "XTRACK": 500,
+      "AFG": 0,
+      "total": 2500
+    },
+    "owners_actually_paid_per_week": {
+      "two_owners": 5000,
+      "w2_same_person_both_entities": 1000,
+      "total": 6000
+    },
+    "understated_per_week": 3500,
+    "understated_over_26_weeks": 91000,
+    "checked": "Not hidden in 'Other charges' -- that block is itemised (max truck, trailer insurance and charge, credit card, ADP fee, factoring, Loves, STL, maintenance, returned-truck tolls, freight) and carries no owner line in any week, early layout or late.",
+    "per_company_split_unknown": "Which company pays which owner has not been stated, so the group understatement is certain and the per-company allocation is not."
   }
 }
