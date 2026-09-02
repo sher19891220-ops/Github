@@ -96,53 +96,6 @@
     }
   ],
   "owners_stated_total": 5000,
-  "shop": {
-    "_note": "excluded from trucking fixed cost. Shop facility is MONTHLY (operator, 'for now', so provisional); mechanics are weekly. Office, yard and shop may share one payee -- reconcile against a single payment before splitting per company.",
-    "shop_itself": 4000,
-    "shop_itself_period": "month",
-    "provisional": true,
-    "mechanics": [
-      {
-        "name": "Qoshmat Will",
-        "role": "shop manager",
-        "basis": "fixed",
-        "amount": 1800,
-        "period": "week"
-      },
-      {
-        "name": "Jumash aka",
-        "rate": 40,
-        "hours": 55,
-        "basis": "hourly",
-        "amount": 2200,
-        "period": "week"
-      },
-      {
-        "name": "Vlad",
-        "rate": 35,
-        "hours": 50,
-        "basis": "hourly",
-        "amount": 1750,
-        "period": "week"
-      },
-      {
-        "name": "Ilfat",
-        "rate": 32,
-        "hours": 55,
-        "basis": "hourly",
-        "amount": 1760,
-        "period": "week"
-      },
-      {
-        "name": "Alovuddin",
-        "rate": 23,
-        "hours": 55,
-        "basis": "hourly",
-        "amount": 1265,
-        "period": "week"
-      }
-    ]
-  },
   "offshore": {
     "_note": "operator states >30000/wk, to be confirmed. Bank shows wires to ZONEOH Freight Insights averaging 25105/wk across 2026 (20168/wk over full history). Unreconciled.",
     "tashkent_operator_stated": 30000,
@@ -150,10 +103,12 @@
     "confirmed": false
   },
   "open_questions": [
-    "What does 'shop itself 4,000/mo' cover? Operator marked it 'for now' -- provisional, possibly incomplete.",
-    "Office, yard and shop may share one payee (13,000/mo combined). Confirm against the bank: one payment or three? Affects the per-company split, not the group total.",
-    "The two 500/wk W2 lines are the same person at ZONE and XTRACK. Drawing 500 from each (group 1,000/wk), or one salary shown against both books (group 500/wk)? Worth ~7 miles of break-even to the group; decides the per-company split.",
-    "Does the 4,000/mo office line include utilities and software, or rent alone? Software and telematics ride the AmEx card (116 card transactions), not the bank."
+    "SHOP REVENUE: what does the shop actually bill ZONE, XTRACK and AFG, per week? Without it the shop P&L has a cost side only.",
+    "SHOP PARTS: parts purchases per week. Inferred at ~12,300/wk from the events log; not confirmed.",
+    "MAINTENANCE RATE: trucking's variable model uses 0.220/mile, an estimate. Recorded shop events for 2026 imply 0.102/mile. If the lower figure is right, contribution rises and break-even falls sharply. The shop ledger settles it.",
+    "Does the 4,000/mo shop facility line cover rent alone, or utilities and consumables too? Operator marked it 'for now'.",
+    "Office, yard and shop may share one payee (13,000/mo combined). Confirm against the bank before splitting per company.",
+    "The two 500/wk W2 lines are the same person at ZONE and XTRACK. Drawing 500 from each, or one salary against both books? Decides the per-company split."
   ],
   "us_office_and_yard": {
     "_note": "operator confirmed 2026-09-02: MONTHLY. Office 4,000/mo, yard 5,000/mo.",
@@ -162,5 +117,66 @@
     "stated_total": 9000,
     "period": "month"
   },
-  "weeks_per_month": 4.333333333333333
+  "weeks_per_month": 4.333333333333333,
+  "entities": {
+    "_note": "The shop is a SEPARATE ENTITY, not a line of trucking overhead (operator, 2026-09-02). It sells maintenance to ZONE, XTRACK and AFG and buys parts and labour; it has its own P&L and its own break-even. Trucking carries the shop's BILLINGS as a variable cost per mile -- never the shop's own cost lines, which would double-count. On consolidation the shop's revenue eliminates against trucking's maintenance expense.",
+    "shop": {
+      "kind": "cost_centre_billing_out",
+      "facility": {
+        "amount": 4000,
+        "period": "month",
+        "provisional": true,
+        "_note": "operator said 'for now' -- may be incomplete"
+      },
+      "labour": [
+        {
+          "name": "Qoshmat Will",
+          "role": "shop manager",
+          "basis": "fixed",
+          "amount": 1800,
+          "period": "week"
+        },
+        {
+          "name": "Jumash aka",
+          "rate": 40,
+          "hours": 55,
+          "basis": "hourly",
+          "amount": 2200,
+          "period": "week"
+        },
+        {
+          "name": "Vlad",
+          "rate": 35,
+          "hours": 50,
+          "basis": "hourly",
+          "amount": 1750,
+          "period": "week"
+        },
+        {
+          "name": "Ilfat",
+          "rate": 32,
+          "hours": 55,
+          "basis": "hourly",
+          "amount": 1760,
+          "period": "week"
+        },
+        {
+          "name": "Alovuddin",
+          "rate": 23,
+          "hours": 55,
+          "basis": "hourly",
+          "amount": 1265,
+          "period": "week"
+        }
+      ],
+      "parts": {
+        "amount": null,
+        "period": null,
+        "_note": "NOT SUPPLIED. Recorded breakdown events for Jan-Aug 2026 total 763,325 against 335,942 of labour and facility over the same weeks; the ~427,383 gap is the shape of parts, but that is inference from a cost log, not the shop's purchase ledger."
+      },
+      "revenue": {
+        "_note": "NOT SUPPLIED. The Cases log records events by payer -- ZONE 654,239, STL 69,685, driver 39,401 for Jan-Aug 2026 -- but it is a breakdown COST log, and whether those figures are what the shop BILLED or what the event COST is unresolved. Needs the shop ledger."
+      }
+    }
+  }
 }

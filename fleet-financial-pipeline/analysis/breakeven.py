@@ -88,7 +88,7 @@ def load_overhead(path):
     if round(owners) != cfg["owners_stated_total"]:
         raise ValueError(f"owner lines sum to {owners:,.0f}/wk, stated "
                          f"{cfg['owners_stated_total']:,}")
-    for m in cfg["shop"]["mechanics"]:
+    for m in cfg["entities"]["shop"]["labour"]:
         if m["basis"] == "hourly" and m["rate"] * m["hours"] != m["amount"]:
             raise ValueError(f"{m['name']}: {m['rate']} x {m['hours']} != {m['amount']}")
 
@@ -99,9 +99,14 @@ def load_overhead(path):
 
     w2 = total(cfg["w2"])
     yard = weekly(oy["stated_total"], oy["period"], "office_and_yard")
-    sh = cfg["shop"]
-    shop = (weekly(sh["shop_itself"], sh["shop_itself_period"], "shop_itself")
-            + total(sh["mechanics"]))
+
+    # The shop is a separate entity. Its cost is returned so it can be reported
+    # and, with --include-shop, folded back -- but folding it in DOUBLE-COUNTS
+    # unless trucking's maintenance-per-mile is zeroed at the same time, because
+    # trucking already carries the shop's work as a variable cost.
+    sh = cfg["entities"]["shop"]
+    f = sh["facility"]
+    shop = weekly(f["amount"], f["period"], "shop facility") + total(sh["labour"])
     return {"us_staff": staff, "w2": w2, "owners": owners, "office_and_yard": yard,
             "us_total": staff + w2 + owners + yard, "shop": shop,
             "tashkent": cfg["offshore"]["tashkent_operator_stated"],
