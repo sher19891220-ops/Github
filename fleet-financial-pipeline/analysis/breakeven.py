@@ -80,7 +80,11 @@ def load_overhead(path):
                              f"!= {m['amount']}")
 
     w2 = sum(x["amount"] for x in cfg["w2"])
-    yard = cfg["us_office_and_yard"]["amount"]
+    oy = cfg["us_office_and_yard"]
+    yard = oy["office"] + oy["yard"]
+    if yard != oy["stated_total"]:
+        raise ValueError(f"office {oy['office']} + yard {oy['yard']} = {yard}, "
+                         f"stated {oy['stated_total']}")
     shop = (cfg["shop"]["shop_itself"]
             + sum(m["amount"] for m in cfg["shop"]["mechanics"]))
     return {"us_staff": staff, "w2": w2, "owners": owners, "office_and_yard": yard,

@@ -58,12 +58,14 @@
     {
       "name": "Sherkhonkhuja Imamkhodjaev",
       "entity": "ZONE",
-      "amount": 500
+      "amount": 500,
+      "_note": "same person at both entities, per the operator"
     },
     {
       "name": "Sherkhonkhuja Imamkhodjaev",
       "entity": "XTRACK",
-      "amount": 500
+      "amount": 500,
+      "_note": "same person at both entities, per the operator"
     }
   ],
   "owners": [
@@ -78,7 +80,7 @@
   ],
   "owners_stated_total": 5000,
   "shop": {
-    "_note": "excluded from trucking fixed cost; see _README. 'shop itself' is the operator's wording -- facility and consumables for the shop only, marked 'for now', so treat as provisional.",
+    "_note": "excluded from trucking fixed cost; see _README. Separate from the office-and-yard line, though the operator indicates the same person is behind both -- so premises may reach the bank as ONE payment of about 13,000/wk, not three. Reconcile against a single payee before splitting.",
     "shop_itself": 4000,
     "provisional": true,
     "mechanics": [
@@ -125,13 +127,15 @@
     "confirmed": false
   },
   "open_questions": [
-    "What does 'shop itself 4,000' cover -- rent, consumables, utilities? Operator marked it 'for now', so it may be incomplete.",
-    "Are the two W2 lines for the same person at two entities a genuine split, or one salary recorded twice?",
-    "Does the 9,000 office-and-yard line include utilities and software, or only rent? Software and telematics ride the AmEx card (116 card transactions), not the bank.",
-    "Shop labour and facility is 12,775/wk against roughly 22,036/wk of recorded breakdown events. The gap is presumably parts, bought outside this roster -- needs the shop ledger to confirm."
+    "What does 'shop itself 4,000' cover? Operator marked it 'for now', so treat as provisional and possibly incomplete.",
+    "Office, yard and shop appear to share one payee (13,000/wk combined). Confirm against the bank: one payment or three? Affects how premises are split per company, not the group total.",
+    "The two 500 W2 lines are the same person at ZONE and XTRACK. Is he drawing 500 from each (group total 1,000), or is one 500 salary shown against both books (group total 500)? Immaterial to the group -- 500/wk is 6.6 miles of break-even -- but it decides the per-company split.",
+    "Does the 4,000 office line include utilities and software, or rent alone? Software and telematics ride the AmEx card (116 card transactions), not the bank."
   ],
   "us_office_and_yard": {
-    "_note": "operator correction 2026-09-02: this is OFFICE and yard, not shop. Previously mis-recorded under the shop block.",
-    "amount": 9000
+    "_note": "operator, 2026-09-02: office 4,000 and yard 5,000. Recorded under the shop block in the first pass; it is office and yard, and it belongs to US overhead.",
+    "office": 4000,
+    "yard": 5000,
+    "stated_total": 9000
   }
 }
