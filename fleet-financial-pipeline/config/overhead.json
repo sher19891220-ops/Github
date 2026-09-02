@@ -5,14 +5,20 @@
     "with office salaries, so no query separates an office salary from a driver's pay.",
     "Every figure sourced here must be labelled operator-supplied wherever it is quoted.",
     "",
-    "PERIOD IS WEEKLY throughout. The mechanic lines are hourly x hours and all five",
-    "reconcile exactly, which is what fixes the period: 55 hours is a week, not a month.",
+    "THE ROSTER MIXES PERIODS. People are paid weekly; premises are billed monthly.",
+    "So there is no file-level period -- EVERY line carries its own 'period', and the",
+    "loader refuses to read a line that does not declare one. A single global period",
+    "was the first reading of this data and it was wrong: it priced office, yard and",
+    "shop at 52x instead of 12x, overstating fixed cost by about 6,900 a week.",
+    "",
+    "Weekly is settled for the people by the mechanic lines: 50-55 hours is a week,",
+    "and monthly would put the COO at 19,200 a year. Monthly for premises is the",
+    "operator's explicit confirmation.",
     "",
     "The shop block is EXCLUDED from trucking break-even at the operator's instruction",
-    "('we will calculate shop independently'). It is recorded here so the exclusion is",
-    "explicit and reversible, not silently dropped."
+    "('we will calculate shop independently'). Recorded so the exclusion is explicit",
+    "and reversible (--include-shop), not silently dropped."
   ],
-  "period": "week",
   "currency": "USD",
   "as_of": "2026-09-02",
   "source": "operator, supplied in session",
@@ -20,37 +26,44 @@
     {
       "name": "Sirojjiddin",
       "role": "fleet and staff",
-      "amount": 1000
+      "amount": 1000,
+      "period": "week"
     },
     {
       "name": "Otkir aka",
       "role": "fleet",
-      "amount": 2000
+      "amount": 2000,
+      "period": "week"
     },
     {
       "name": "Morales Zarate Lisberth",
       "role": "cleaning",
-      "amount": 1000
+      "amount": 1000,
+      "period": "week"
     },
     {
       "name": "Samuel Gonzalez Frank",
       "role": "fleet and staff",
-      "amount": 1000
+      "amount": 1000,
+      "period": "week"
     },
     {
       "name": "Bereket Inc (Aika)",
       "role": "claims",
-      "amount": 1200
+      "amount": 1200,
+      "period": "week"
     },
     {
       "name": "Solid Progress (Marat)",
       "role": "unspecified",
-      "amount": 2000
+      "amount": 2000,
+      "period": "week"
     },
     {
       "name": "Evan",
       "role": "COO",
-      "amount": 1600
+      "amount": 1600,
+      "period": "week"
     }
   ],
   "us_staff_1099_stated_total": 9800,
@@ -59,64 +72,74 @@
       "name": "Sherkhonkhuja Imamkhodjaev",
       "entity": "ZONE",
       "amount": 500,
-      "_note": "same person at both entities, per the operator"
+      "_note": "same person at both entities, per the operator",
+      "period": "week"
     },
     {
       "name": "Sherkhonkhuja Imamkhodjaev",
       "entity": "XTRACK",
       "amount": 500,
-      "_note": "same person at both entities, per the operator"
+      "_note": "same person at both entities, per the operator",
+      "period": "week"
     }
   ],
   "owners": [
     {
       "name": "Sher Trucking",
-      "amount": 2500
+      "amount": 2500,
+      "period": "week"
     },
     {
       "name": "Zuhritdinaka",
-      "amount": 2500
+      "amount": 2500,
+      "period": "week"
     }
   ],
   "owners_stated_total": 5000,
   "shop": {
-    "_note": "excluded from trucking fixed cost; see _README. Separate from the office-and-yard line, though the operator indicates the same person is behind both -- so premises may reach the bank as ONE payment of about 13,000/wk, not three. Reconcile against a single payee before splitting.",
+    "_note": "excluded from trucking fixed cost. Shop facility is MONTHLY (operator, 'for now', so provisional); mechanics are weekly. Office, yard and shop may share one payee -- reconcile against a single payment before splitting per company.",
     "shop_itself": 4000,
+    "shop_itself_period": "month",
     "provisional": true,
     "mechanics": [
       {
         "name": "Qoshmat Will",
         "role": "shop manager",
         "basis": "fixed",
-        "amount": 1800
+        "amount": 1800,
+        "period": "week"
       },
       {
         "name": "Jumash aka",
         "rate": 40,
         "hours": 55,
         "basis": "hourly",
-        "amount": 2200
+        "amount": 2200,
+        "period": "week"
       },
       {
         "name": "Vlad",
         "rate": 35,
         "hours": 50,
         "basis": "hourly",
-        "amount": 1750
+        "amount": 1750,
+        "period": "week"
       },
       {
         "name": "Ilfat",
         "rate": 32,
         "hours": 55,
         "basis": "hourly",
-        "amount": 1760
+        "amount": 1760,
+        "period": "week"
       },
       {
         "name": "Alovuddin",
         "rate": 23,
         "hours": 55,
         "basis": "hourly",
-        "amount": 1265
+        "amount": 1265,
+        "period": "week"
       }
     ]
   },
@@ -127,15 +150,17 @@
     "confirmed": false
   },
   "open_questions": [
-    "What does 'shop itself 4,000' cover? Operator marked it 'for now', so treat as provisional and possibly incomplete.",
-    "Office, yard and shop appear to share one payee (13,000/wk combined). Confirm against the bank: one payment or three? Affects how premises are split per company, not the group total.",
-    "The two 500 W2 lines are the same person at ZONE and XTRACK. Is he drawing 500 from each (group total 1,000), or is one 500 salary shown against both books (group total 500)? Immaterial to the group -- 500/wk is 6.6 miles of break-even -- but it decides the per-company split.",
-    "Does the 4,000 office line include utilities and software, or rent alone? Software and telematics ride the AmEx card (116 card transactions), not the bank."
+    "What does 'shop itself 4,000/mo' cover? Operator marked it 'for now' -- provisional, possibly incomplete.",
+    "Office, yard and shop may share one payee (13,000/mo combined). Confirm against the bank: one payment or three? Affects the per-company split, not the group total.",
+    "The two 500/wk W2 lines are the same person at ZONE and XTRACK. Drawing 500 from each (group 1,000/wk), or one salary shown against both books (group 500/wk)? Worth ~7 miles of break-even to the group; decides the per-company split.",
+    "Does the 4,000/mo office line include utilities and software, or rent alone? Software and telematics ride the AmEx card (116 card transactions), not the bank."
   ],
   "us_office_and_yard": {
-    "_note": "operator, 2026-09-02: office 4,000 and yard 5,000. Recorded under the shop block in the first pass; it is office and yard, and it belongs to US overhead.",
+    "_note": "operator confirmed 2026-09-02: MONTHLY. Office 4,000/mo, yard 5,000/mo.",
     "office": 4000,
     "yard": 5000,
-    "stated_total": 9000
-  }
+    "stated_total": 9000,
+    "period": "month"
+  },
+  "weeks_per_month": 4.333333333333333
 }

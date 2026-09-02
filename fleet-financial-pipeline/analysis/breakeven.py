@@ -56,37 +56,52 @@ def f(r, k="amount"):
 
 
 def load_overhead(path):
-    """Read config/overhead.json and total the weekly lines.
+    """Read config/overhead.json and total every line as dollars per WEEK.
 
-    Controls, because a hand-kept roster drifts: every stated total must equal
-    the sum of its own lines, and every hourly line must equal rate x hours.
-    A mismatch raises rather than quietly shifting break-even.
+    The roster mixes periods -- people weekly, premises monthly -- so each line
+    declares its own and a line without one raises. That is deliberate: reading
+    the whole file as weekly priced premises at 52x instead of 12x and overstated
+    fixed cost by roughly 6,900 a week.
+
+    The other controls exist because a hand-kept roster drifts: every stated
+    total must equal the sum of its own lines, and every hourly line must equal
+    rate x hours. A mismatch raises rather than quietly moving break-even.
     """
     cfg = json.loads(Path(path).read_text())
-    if cfg.get("period") != "week":
-        raise ValueError(f"{path}: period is {cfg.get('period')!r}, expected 'week'")
+    wpm = cfg["weeks_per_month"]
 
-    staff = sum(x["amount"] for x in cfg["us_staff_1099"])
-    if staff != cfg["us_staff_1099_stated_total"]:
-        raise ValueError(f"1099 lines sum to {staff}, stated "
-                         f"{cfg['us_staff_1099_stated_total']}")
-    owners = sum(x["amount"] for x in cfg["owners"])
-    if owners != cfg["owners_stated_total"]:
-        raise ValueError(f"owner lines sum to {owners}, stated "
-                         f"{cfg['owners_stated_total']}")
+    def weekly(amount, period, what):
+        if period == "week":
+            return float(amount)
+        if period == "month":
+            return amount / wpm
+        raise ValueError(f"{what}: period {period!r} is neither 'week' nor 'month'")
+
+    def total(lines, key="amount"):
+        return sum(weekly(x[key], x.get("period"), x.get("name", key)) for x in lines)
+
+    staff = total(cfg["us_staff_1099"])
+    if round(staff) != cfg["us_staff_1099_stated_total"]:
+        raise ValueError(f"1099 lines sum to {staff:,.0f}/wk, stated "
+                         f"{cfg['us_staff_1099_stated_total']:,}")
+    owners = total(cfg["owners"])
+    if round(owners) != cfg["owners_stated_total"]:
+        raise ValueError(f"owner lines sum to {owners:,.0f}/wk, stated "
+                         f"{cfg['owners_stated_total']:,}")
     for m in cfg["shop"]["mechanics"]:
         if m["basis"] == "hourly" and m["rate"] * m["hours"] != m["amount"]:
-            raise ValueError(f"{m['name']}: {m['rate']} x {m['hours']} "
-                             f"!= {m['amount']}")
+            raise ValueError(f"{m['name']}: {m['rate']} x {m['hours']} != {m['amount']}")
 
-    w2 = sum(x["amount"] for x in cfg["w2"])
     oy = cfg["us_office_and_yard"]
-    yard = oy["office"] + oy["yard"]
-    if yard != oy["stated_total"]:
-        raise ValueError(f"office {oy['office']} + yard {oy['yard']} = {yard}, "
-                         f"stated {oy['stated_total']}")
-    shop = (cfg["shop"]["shop_itself"]
-            + sum(m["amount"] for m in cfg["shop"]["mechanics"]))
+    if oy["office"] + oy["yard"] != oy["stated_total"]:
+        raise ValueError(f"office {oy['office']} + yard {oy['yard']} "
+                         f"!= stated {oy['stated_total']}")
+
+    w2 = total(cfg["w2"])
+    yard = weekly(oy["stated_total"], oy["period"], "office_and_yard")
+    sh = cfg["shop"]
+    shop = (weekly(sh["shop_itself"], sh["shop_itself_period"], "shop_itself")
+            + total(sh["mechanics"]))
     return {"us_staff": staff, "w2": w2, "owners": owners, "office_and_yard": yard,
             "us_total": staff + w2 + owners + yard, "shop": shop,
             "tashkent": cfg["offshore"]["tashkent_operator_stated"],
