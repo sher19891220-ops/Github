@@ -16,53 +16,122 @@
   "currency": "USD",
   "as_of": "2026-09-02",
   "source": "operator, supplied in session",
-
   "us_staff_1099": [
-    {"name": "Sirojjiddin",             "role": "fleet and staff", "amount": 1000},
-    {"name": "Otkir aka",               "role": "fleet",           "amount": 2000},
-    {"name": "Morales Zarate Lisberth", "role": "cleaning",        "amount": 1000},
-    {"name": "Samuel Gonzalez Frank",   "role": "fleet and staff", "amount": 1000},
-    {"name": "Bereket Inc (Aika)",      "role": "claims",          "amount": 1200},
-    {"name": "Solid Progress (Marat)",  "role": "unspecified",     "amount": 2000},
-    {"name": "Evan",                    "role": "COO",             "amount": 1600}
+    {
+      "name": "Sirojjiddin",
+      "role": "fleet and staff",
+      "amount": 1000
+    },
+    {
+      "name": "Otkir aka",
+      "role": "fleet",
+      "amount": 2000
+    },
+    {
+      "name": "Morales Zarate Lisberth",
+      "role": "cleaning",
+      "amount": 1000
+    },
+    {
+      "name": "Samuel Gonzalez Frank",
+      "role": "fleet and staff",
+      "amount": 1000
+    },
+    {
+      "name": "Bereket Inc (Aika)",
+      "role": "claims",
+      "amount": 1200
+    },
+    {
+      "name": "Solid Progress (Marat)",
+      "role": "unspecified",
+      "amount": 2000
+    },
+    {
+      "name": "Evan",
+      "role": "COO",
+      "amount": 1600
+    }
   ],
   "us_staff_1099_stated_total": 9800,
-
   "w2": [
-    {"name": "Sherkhonkhuja Imamkhodjaev", "entity": "ZONE",   "amount": 500},
-    {"name": "Sherkhonkhuja Imamkhodjaev", "entity": "XTRACK", "amount": 500}
+    {
+      "name": "Sherkhonkhuja Imamkhodjaev",
+      "entity": "ZONE",
+      "amount": 500
+    },
+    {
+      "name": "Sherkhonkhuja Imamkhodjaev",
+      "entity": "XTRACK",
+      "amount": 500
+    }
   ],
-
   "owners": [
-    {"name": "Sher Trucking", "amount": 2500},
-    {"name": "Zuhritdinaka",  "amount": 2500}
+    {
+      "name": "Sher Trucking",
+      "amount": 2500
+    },
+    {
+      "name": "Zuhritdinaka",
+      "amount": 2500
+    }
   ],
   "owners_stated_total": 5000,
-
   "shop": {
-    "_note": "excluded from trucking fixed cost; see _README",
-    "yard_and_facility": 9000,
-    "unlabelled": 4000,
+    "_note": "excluded from trucking fixed cost; see _README. 'shop itself' is the operator's wording -- facility and consumables for the shop only, marked 'for now', so treat as provisional.",
+    "shop_itself": 4000,
+    "provisional": true,
     "mechanics": [
-      {"name": "Qoshmat Will", "role": "shop manager", "basis": "fixed",  "amount": 1800},
-      {"name": "Jumash aka",   "rate": 40, "hours": 55, "basis": "hourly", "amount": 2200},
-      {"name": "Vlad",         "rate": 35, "hours": 50, "basis": "hourly", "amount": 1750},
-      {"name": "Ilfat",        "rate": 32, "hours": 55, "basis": "hourly", "amount": 1760},
-      {"name": "Alovuddin",    "rate": 23, "hours": 55, "basis": "hourly", "amount": 1265}
+      {
+        "name": "Qoshmat Will",
+        "role": "shop manager",
+        "basis": "fixed",
+        "amount": 1800
+      },
+      {
+        "name": "Jumash aka",
+        "rate": 40,
+        "hours": 55,
+        "basis": "hourly",
+        "amount": 2200
+      },
+      {
+        "name": "Vlad",
+        "rate": 35,
+        "hours": 50,
+        "basis": "hourly",
+        "amount": 1750
+      },
+      {
+        "name": "Ilfat",
+        "rate": 32,
+        "hours": 55,
+        "basis": "hourly",
+        "amount": 1760
+      },
+      {
+        "name": "Alovuddin",
+        "rate": 23,
+        "hours": 55,
+        "basis": "hourly",
+        "amount": 1265
+      }
     ]
   },
-
   "offshore": {
     "_note": "operator states >30000/wk, to be confirmed. Bank shows wires to ZONEOH Freight Insights averaging 25105/wk across 2026 (20168/wk over full history). Unreconciled.",
     "tashkent_operator_stated": 30000,
     "tashkent_bank_observed_2026": 25105,
     "confirmed": false
   },
-
   "open_questions": [
-    "Are 'USA shop and yard 9000' and 'Shop 4000' distinct, or does one contain the other?",
-    "What is the unlabelled 'Shop 4000' -- rent, supplies, consumables, utilities?",
-    "US overhead ex-shop totals 15800/wk against the earlier 20000/wk estimate. The 4200 gap is not in the list; office rent, utilities and software are unaccounted for. Note software and telematics ride the AmEx card (116 card transactions), not the bank.",
-    "Are the two W2 lines for the same person at two entities a genuine split, or one salary recorded twice?"
-  ]
+    "What does 'shop itself 4,000' cover -- rent, consumables, utilities? Operator marked it 'for now', so it may be incomplete.",
+    "Are the two W2 lines for the same person at two entities a genuine split, or one salary recorded twice?",
+    "Does the 9,000 office-and-yard line include utilities and software, or only rent? Software and telematics ride the AmEx card (116 card transactions), not the bank.",
+    "Shop labour and facility is 12,775/wk against roughly 22,036/wk of recorded breakdown events. The gap is presumably parts, bought outside this roster -- needs the shop ledger to confirm."
+  ],
+  "us_office_and_yard": {
+    "_note": "operator correction 2026-09-02: this is OFFICE and yard, not shop. Previously mis-recorded under the shop block.",
+    "amount": 9000
+  }
 }
