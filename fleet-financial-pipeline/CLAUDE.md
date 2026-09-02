@@ -227,6 +227,42 @@ Operator-confirmed facts that the sheets alone would misread:
 
 ---
 
+## Lease-to-own: read the register's flags correctly
+
+In the Iron Lease "Overall" register the **Start date** and **PU mileage**
+columns sometimes hold `rented` or `sold` instead of a date. Those describe the
+DRIVER's standing on that truck, not Iron Lease's:
+
+    sold    = the driver finished paying and took title
+              (Alphonse Jefferson, unit 4851, $65,000 of $65,000)
+    rented  = the lease-to-own contract is still running
+
+They do NOT mean Iron Lease rents the truck in. Reading them that way produced
+the false claim that the group sells drivers trucks it does not own. **The bank
+refutes it outright**: account 5151 pays no rent at all -- $900,415 of truck
+purchases and $332,431 of TBK equipment finance, and zero `lease_rent`. Iron
+Lease owns its fleet. The group's $6.77M of external rent is paid from Zone's
+operating account for the OPERATING fleet, which is a different set of trucks.
+
+Iron Lease is funded by the group rather than by its own billing: of $1,264,229
+in, $698,660 is intercompany and $514,295 internal transfer. Third-party revenue
+is $8,100. Its lease-to-own collections never appear as deposits because they
+are settlement deductions -- invisible in its bank account by design.
+
+## ADP is ONE payroll rail for at least five companies
+
+580 drafts, $24,842,566, debited against Zone (447), Xtrack (87), Truck Max (29)
+and AFG (15). So "what left the bank for drivers" cannot be separated from
+office staff, mechanics or another entity's payroll, and any settlement-deduction
+test run against the ADP total is confounded. Both Zone and Xtrack show MORE
+leaving via ADP than their P&L books as gross settlement, which looks like
+negative deductions and is really just other people's wages.
+
+Only the ADP payroll register split by employee, or the settlement detail with
+its deduction lines, can close the recovery question.
+
+---
+
 ## Sources — four, all permanent
 
 | Source | Role | Nature |
