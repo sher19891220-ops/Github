@@ -38,6 +38,7 @@ Usage:
 import argparse
 import collections
 import csv
+import json
 from datetime import datetime
 from pathlib import Path
 
@@ -54,6 +55,40 @@ def f(r, k="amount"):
         return 0.0
 
 
+def load_overhead(path):
+    """Read config/overhead.json and total the weekly lines.
+
+    Controls, because a hand-kept roster drifts: every stated total must equal
+    the sum of its own lines, and every hourly line must equal rate x hours.
+    A mismatch raises rather than quietly shifting break-even.
+    """
+    cfg = json.loads(Path(path).read_text())
+    if cfg.get("period") != "week":
+        raise ValueError(f"{path}: period is {cfg.get('period')!r}, expected 'week'")
+
+    staff = sum(x["amount"] for x in cfg["us_staff_1099"])
+    if staff != cfg["us_staff_1099_stated_total"]:
+        raise ValueError(f"1099 lines sum to {staff}, stated "
+                         f"{cfg['us_staff_1099_stated_total']}")
+    owners = sum(x["amount"] for x in cfg["owners"])
+    if owners != cfg["owners_stated_total"]:
+        raise ValueError(f"owner lines sum to {owners}, stated "
+                         f"{cfg['owners_stated_total']}")
+    for m in cfg["shop"]["mechanics"]:
+        if m["basis"] == "hourly" and m["rate"] * m["hours"] != m["amount"]:
+            raise ValueError(f"{m['name']}: {m['rate']} x {m['hours']} "
+                             f"!= {m['amount']}")
+
+    w2 = sum(x["amount"] for x in cfg["w2"])
+    shop = (cfg["shop"]["yard_and_facility"] + cfg["shop"]["unlabelled"]
+            + sum(m["amount"] for m in cfg["shop"]["mechanics"]))
+    return {"us_staff": staff, "w2": w2, "owners": owners,
+            "us_total": staff + w2 + owners, "shop": shop,
+            "tashkent": cfg["offshore"]["tashkent_operator_stated"],
+            "tashkent_bank": cfg["offshore"]["tashkent_bank_observed_2026"],
+            "cfg": cfg}
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -61,9 +96,13 @@ def main():
     ap.add_argument("--pnl", required=True)
     ap.add_argument("--from", dest="since", default="2026-01-01")
     ap.add_argument("--trucks", type=float, default=85)
-    ap.add_argument("--tashkent", type=float, default=30000, help="per WEEK, operator")
-    ap.add_argument("--us-office", type=float, default=20000, help="per WEEK, operator")
-    ap.add_argument("--owners", type=float, default=5000, help="per WEEK, operator")
+    ap.add_argument("--overhead", default="config/overhead.json",
+                    help="operator-supplied weekly overhead roster")
+    ap.add_argument("--tashkent", type=float, help="override the roster, per WEEK")
+    ap.add_argument("--us-office", type=float, help="override the roster, per WEEK")
+    ap.add_argument("--owners", type=float, help="override the roster, per WEEK")
+    ap.add_argument("--include-shop", action="store_true",
+                    help="fold the shop block into fixed cost (default: excluded,\nper the operator, who costs the shop independently)")
     ap.add_argument("--maint-per-mile", type=float, default=0.220)
     a = ap.parse_args()
 
@@ -91,12 +130,25 @@ def main():
           f"{eq_total / a.trucks:>15,.2f}")
 
     # ---- overhead, operator-supplied --------------------------------------
-    oh = a.tashkent + a.us_office + a.owners
+    ov = load_overhead(a.overhead)
+    tashkent = a.tashkent if a.tashkent is not None else ov["tashkent"]
+    us = a.us_office if a.us_office is not None else ov["us_total"]
+    owners = a.owners if a.owners is not None else ov["owners"]
+    shop = ov["shop"] if a.include_shop else 0.0
+    oh = tashkent + us + owners + shop
     print(f"\nGROUP OVERHEAD — operator figures, not measurable from the bank\n")
-    print(f"  {'Tashkent office':<34}{a.tashkent:>12,.0f}{a.tashkent / a.trucks:>15,.2f}")
-    print(f"  {'US office and staff':<34}{a.us_office:>12,.0f}{a.us_office / a.trucks:>15,.2f}")
-    print(f"  {'Owners (2)':<34}{a.owners:>12,.0f}{a.owners / a.trucks:>15,.2f}")
-    print(f"  {'TOTAL OVERHEAD':<34}{oh:>12,.0f}{oh / a.trucks:>15,.2f}")
+    print(f"  {'Tashkent office':<34}{tashkent:>12,.0f}{tashkent / a.trucks:>15,.2f}")
+    print(f"  {'US staff and office':<34}{us:>12,.0f}{us / a.trucks:>15,.2f}")
+    print(f"  {'Owners (2)':<34}{owners:>12,.0f}{owners / a.trucks:>15,.2f}")
+    if a.include_shop:
+        print(f"  {'Shop (folded in)':<34}{shop:>12,.0f}{shop / a.trucks:>15,.2f}")
+    else:
+        print(f"  {'Shop':<34}{'excluded':>12}{'costed apart':>15}")
+    if tashkent != ov["tashkent_bank"]:
+        print(f"\n  ! Tashkent is operator-stated at {tashkent:,.0f}/wk; the bank shows "
+              f"{ov['tashkent_bank']:,.0f}/wk\n    in 2026. Unreconciled — the gap moves "
+              f"break-even by {abs(tashkent - ov['tashkent_bank']) / a.trucks:,.2f}/truck/wk.")
+    print(f"\n  {'TOTAL OVERHEAD':<34}{oh:>12,.0f}{oh / a.trucks:>15,.2f}")
 
     fixed_wk = eq_total + oh
     print(f"\n  {'ALL FIXED, PER WEEK':<34}{fixed_wk:>12,.0f}"

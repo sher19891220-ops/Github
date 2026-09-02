@@ -1,0 +1,68 @@
+{
+  "_README": [
+    "Operator-supplied overhead. NOT measured from the bank and NOT verifiable from it:",
+    "ADP is one payroll rail for at least five companies and mixes driver settlements",
+    "with office salaries, so no query separates an office salary from a driver's pay.",
+    "Every figure sourced here must be labelled operator-supplied wherever it is quoted.",
+    "",
+    "PERIOD IS WEEKLY throughout. The mechanic lines are hourly x hours and all five",
+    "reconcile exactly, which is what fixes the period: 55 hours is a week, not a month.",
+    "",
+    "The shop block is EXCLUDED from trucking break-even at the operator's instruction",
+    "('we will calculate shop independently'). It is recorded here so the exclusion is",
+    "explicit and reversible, not silently dropped."
+  ],
+  "period": "week",
+  "currency": "USD",
+  "as_of": "2026-09-02",
+  "source": "operator, supplied in session",
+
+  "us_staff_1099": [
+    {"name": "Sirojjiddin",             "role": "fleet and staff", "amount": 1000},
+    {"name": "Otkir aka",               "role": "fleet",           "amount": 2000},
+    {"name": "Morales Zarate Lisberth", "role": "cleaning",        "amount": 1000},
+    {"name": "Samuel Gonzalez Frank",   "role": "fleet and staff", "amount": 1000},
+    {"name": "Bereket Inc (Aika)",      "role": "claims",          "amount": 1200},
+    {"name": "Solid Progress (Marat)",  "role": "unspecified",     "amount": 2000},
+    {"name": "Evan",                    "role": "COO",             "amount": 1600}
+  ],
+  "us_staff_1099_stated_total": 9800,
+
+  "w2": [
+    {"name": "Sherkhonkhuja Imamkhodjaev", "entity": "ZONE",   "amount": 500},
+    {"name": "Sherkhonkhuja Imamkhodjaev", "entity": "XTRACK", "amount": 500}
+  ],
+
+  "owners": [
+    {"name": "Sher Trucking", "amount": 2500},
+    {"name": "Zuhritdinaka",  "amount": 2500}
+  ],
+  "owners_stated_total": 5000,
+
+  "shop": {
+    "_note": "excluded from trucking fixed cost; see _README",
+    "yard_and_facility": 9000,
+    "unlabelled": 4000,
+    "mechanics": [
+      {"name": "Qoshmat Will", "role": "shop manager", "basis": "fixed",  "amount": 1800},
+      {"name": "Jumash aka",   "rate": 40, "hours": 55, "basis": "hourly", "amount": 2200},
+      {"name": "Vlad",         "rate": 35, "hours": 50, "basis": "hourly", "amount": 1750},
+      {"name": "Ilfat",        "rate": 32, "hours": 55, "basis": "hourly", "amount": 1760},
+      {"name": "Alovuddin",    "rate": 23, "hours": 55, "basis": "hourly", "amount": 1265}
+    ]
+  },
+
+  "offshore": {
+    "_note": "operator states >30000/wk, to be confirmed. Bank shows wires to ZONEOH Freight Insights averaging 25105/wk across 2026 (20168/wk over full history). Unreconciled.",
+    "tashkent_operator_stated": 30000,
+    "tashkent_bank_observed_2026": 25105,
+    "confirmed": false
+  },
+
+  "open_questions": [
+    "Are 'USA shop and yard 9000' and 'Shop 4000' distinct, or does one contain the other?",
+    "What is the unlabelled 'Shop 4000' -- rent, supplies, consumables, utilities?",
+    "US overhead ex-shop totals 15800/wk against the earlier 20000/wk estimate. The 4200 gap is not in the list; office rent, utilities and software are unaccounted for. Note software and telematics ride the AmEx card (116 card transactions), not the bank.",
+    "Are the two W2 lines for the same person at two entities a genuine split, or one salary recorded twice?"
+  ]
+}
