@@ -185,6 +185,22 @@ export const BEHAVIORS: BehaviorSpec[] = [
     aliases: ['dvir', 'dvirsubmitted', 'dvirdefect', 'unsafedvir', 'inspectiondefect'],
   },
   {
+    key: 'cameraObstruction',
+    title: 'Camera covered / obstructed',
+    emoji: '📷',
+    severity: 'high',
+    aliases: [
+      'cameracovered',
+      'cameraclosed',
+      'cameracoveredclosed',
+      'cameraobstruction',
+      'obstructedcamera',
+      'cameratampering',
+      'camerablocked',
+      'inwardcameraobstructed',
+    ],
+  },
+  {
     key: 'smoking',
     title: 'Smoking in cab',
     emoji: '🚬',

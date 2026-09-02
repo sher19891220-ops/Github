@@ -186,3 +186,22 @@ describe('severityRank', () => {
     expect(severityRank('nonsense')).toBe(0);
   });
 });
+
+describe('camera obstruction', () => {
+  // Seen in a real fleet violation report, where it dominated the
+  // repeat-offender list (8 and 5 occurrences for two drivers).
+  it('matches the spellings that appear in Samsara reports', () => {
+    for (const label of [
+      'Camera Covered/Closed',
+      'Camera Covered',
+      'camera obstruction',
+      'Camera Tampering',
+    ]) {
+      expect(classifyBehavior(label).key).toBe('cameraObstruction');
+    }
+  });
+
+  it('is high severity — covering a camera is deliberate, not incidental', () => {
+    expect(classifyBehavior('Camera Covered/Closed').severity).toBe('high');
+  });
+});
