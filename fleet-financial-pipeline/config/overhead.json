@@ -99,10 +99,36 @@
   ],
   "owners_stated_total": 5000,
   "offshore": {
-    "_note": "operator states >30000/wk, to be confirmed. Bank shows wires to ZONEOH Freight Insights averaging 25105/wk across 2026 (20168/wk over full history). Unreconciled.",
-    "tashkent_operator_stated": 30000,
-    "tashkent_bank_observed_2026": 25105,
-    "confirmed": false
+    "_note": "MEASURED, not estimated. From the Tashkent payroll register (62 staff, July 2026 and Jan-Jul averages). This replaces the operator's verbal >30,000/wk and resolves the three-way disagreement: July actual is 33,630/wk, which confirms the operator; the Jan-Jul average of 24,048/wk is what the bank was seeing at 25,105/wk; and the weekly P&L's 25,462/wk covers ZONE+XTRACK only.",
+    "source": "payrolljuly2026.pdf / payrollactivestaffaverage.pdf, 62 staff, parsed and reconciled to the register's own 'All staff' totals to the dollar",
+    "headcount": 62,
+    "monthly": {
+      "2026-05": 99563,
+      "2026-06": 125596,
+      "2026-07": 145728,
+      "jan_jul_avg": 104210
+    },
+    "july_2026_split": {
+      "base_salary": 40020,
+      "bonus": 17171,
+      "commission_adjustments": 88537,
+      "total": 145728,
+      "_note": "73% of the Tashkent cost is bonus and commission, NOT base salary. DISPATCH alone is 101,824 a month at 91% variable. So Tashkent is mostly a VARIABLE cost that scales with freight, and treating all of it as fixed overhead -- which this model did until now -- overstates fixed cost and understates cost per mile."
+    },
+    "by_department_july": {
+      "DISPATCH": 101824,
+      "MANAGER": 11562,
+      "FLEET": 9065,
+      "HR": 7330,
+      "ELD": 5799,
+      "ACCOUNTING": 5500,
+      "UPDATE_TEAM": 4648
+    },
+    "fixed_per_week": 9235.384615384615,
+    "variable_per_week_july": 24394.153846153848,
+    "total_per_week_july": 33629.53846153846,
+    "growth": "May 99,563 -> June 125,596 -> July 145,728: +46% in two months, +10,653/wk",
+    "confirmed": true
   },
   "open_questions": [
     "SHOP REVENUE: what does the shop actually bill ZONE, XTRACK and AFG, per week? Without it the shop P&L has a cost side only.",
@@ -110,7 +136,8 @@
     "MAINTENANCE RATE: trucking's variable model uses 0.220/mile, an estimate. Recorded shop events for 2026 imply 0.102/mile. If the lower figure is right, contribution rises and break-even falls sharply. The shop ledger settles it.",
     "Does the 4,000/mo shop facility line cover rent alone, or utilities and consumables too? Operator marked it 'for now'.",
     "Office, yard and shop may share one payee (13,000/mo combined). Confirm against the bank before splitting per company.",
-    "Which company pays which owner? Needed to allocate the 3,500/wk owner understatement between ZONE, XTRACK and AFG."
+    "Which company pays which owner? Needed to allocate the 3,500/wk owner understatement between ZONE, XTRACK and AFG.",
+    "Tashkent commission is 73% of that cost and grew 46% in two months. What is the commission formula, and is it on gross revenue or on margin? A commission on GROSS pays out the same on a loss-making load as a profitable one."
   ],
   "us_office_and_yard": {
     "_note": "operator confirmed 2026-09-02: MONTHLY. Office 4,000/mo, yard 5,000/mo.",
@@ -148,11 +175,12 @@
         },
         {
           "name": "Vlad",
-          "rate": 35,
+          "rate": 45,
           "hours": 50,
           "basis": "hourly",
-          "amount": 1750,
-          "period": "week"
+          "amount": 2250,
+          "period": "week",
+          "_note": "operator correction 2026-09-02: 45/hr, was recorded at 35/hr"
         },
         {
           "name": "Ilfat",

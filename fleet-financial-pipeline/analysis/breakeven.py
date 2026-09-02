@@ -97,6 +97,11 @@ def load_overhead(path):
         raise ValueError(f"office {oy['office']} + yard {oy['yard']} "
                          f"!= stated {oy['stated_total']}")
 
+    off = cfg["offshore"]
+    if round(off["fixed_per_week"] + off["variable_per_week_july"]) != round(
+            off["total_per_week_july"]):
+        raise ValueError("Tashkent fixed + variable does not equal the total")
+
     w2 = total(cfg["w2"])
     yard = weekly(oy["stated_total"], oy["period"], "office_and_yard")
 
@@ -109,8 +114,10 @@ def load_overhead(path):
     shop = weekly(f["amount"], f["period"], "shop facility") + total(sh["labour"])
     return {"us_staff": staff, "w2": w2, "owners": owners, "office_and_yard": yard,
             "us_total": staff + w2 + owners + yard, "shop": shop,
-            "tashkent": cfg["offshore"]["tashkent_operator_stated"],
-            "tashkent_bank": cfg["offshore"]["tashkent_bank_observed_2026"],
+            "tashkent": off["total_per_week_july"],
+            "tashkent_fixed": off["fixed_per_week"],
+            "tashkent_variable": off["variable_per_week_july"],
+            "tashkent_bank": 25105.0,
             "cfg": cfg}
 
 
