@@ -64,7 +64,7 @@ def labeled(ws,wanted,maxr=40):
 
 WANT={'total gross':'gross','total odometer mileage':'odo_miles','total mileage':'all_miles',
       'total driver pay':'driver_pay','total fuel':'fuel','total truck rent':'truck_rent',
-      'total toll and scale':'tolls','other expenses total':'other_exp',
+      'total toll and scale':'tolls','total toll':'tolls','other expenses total':'other_exp',
       'salaries uzbekistan':'uz_salaries','salaries of oo':'oo_salaries',
       'expenses of oo':'oo_expenses','insurance':'insurance','oo trucks':'oo_trucks',
       'cd trucks':'cd_trucks','average rpm (company)':'rpm_company',
