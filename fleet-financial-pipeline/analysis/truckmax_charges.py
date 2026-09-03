@@ -19,8 +19,17 @@ FLEET CLASSES, per the operator:
   lease_to_own  drivers buying the truck from us, shown as 'rented' until paid
   sold          4851 -- paid off, out of our possession, must not count as fleet
   trailer       rows with a trailer number instead of a truck number
+  zone_stl      the 80xx/81xx block -- Zone bought these from STL on a
+                lease-to-purchase option. Zone's own, not Iron Lease's.
   other         a truck on none of the lists: an outside lease (Ryder, Penske)
                 or a unit not yet recorded
+
+THE PAYER COLUMNS ARE A BILLING ADDRESS, NOT THE COST BEARER. Truck Max invoices
+Zone for almost everything, and the fleet and accounting teams redistribute the
+charges to the right company afterwards. So a figure in the 'Zone' column means
+Zone was BILLED, not that Zone ultimately bore it -- and this file has no record
+of the redistribution. Any per-company conclusion drawn from these columns would
+be measuring the invoicing convention rather than the economics.
 
 Amounts come from 'Inv amount'. The payer columns are checked against it: where
 they disagree the row is reported rather than quietly taking one side.
@@ -36,6 +45,10 @@ IRON_LEASE = {"15862", "15909", "15739", "4772", "15852", "8482", "7605", "6799"
 INVESTOR = {"1365", "1596", "3898", "4546"}
 LEASE_TO_OWN = {"2703", "8671", "4864", "4857", "1564", "4718", "1682", "5413"}
 SOLD = {"4851"}
+# Bought by Zone from STL on a lease-to-purchase option. Zone's own trucks, not
+# Iron Lease's and not an outside lease.
+ZONE_STL = {"8033", "8083", "8091", "8092", "8093", "8094",
+            "8130", "8131", "8132", "8133", "8136"}
 
 
 def unit(v):
@@ -60,6 +73,8 @@ def classify(truck, trailer):
         return "lease_to_own"
     if truck in IRON_LEASE:
         return "iron_lease"
+    if truck in ZONE_STL:
+        return "zone_stl"
     return "other"
 
 

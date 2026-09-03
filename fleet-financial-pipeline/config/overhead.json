@@ -351,7 +351,47 @@
             ],
             "residual": "contractor payout to the investor"
           }
+        },
+        "zone_stl_lease_to_purchase": {
+          "_note": "Operator, 2026-09-03: the 80xx/81xx block belongs to ZONE, bought from STL on a lease-to-purchase option. Zone's own trucks -- not Iron Lease assets, not an outside lease. 101,284 of Truck Max spend over the year.",
+          "trucks": [
+            "8033",
+            "8083",
+            "8091",
+            "8092",
+            "8093",
+            "8094",
+            "8130",
+            "8131",
+            "8132",
+            "8133",
+            "8136"
+          ]
+        },
+        "outside_leases": {
+          "_note": "identified from the ZONE truck-and-trailer ledger's source column",
+          "Penske_units": 28,
+          "Ryder_units": 4,
+          "ledger_spend_2026": {
+            "Penske": 65156.93,
+            "Ryder": 17846.28
+          }
         }
+      }
+    },
+    "truck_max": {
+      "kind": "shop_vendor",
+      "billing_convention": "Operator, 2026-09-03: Truck Max invoices ZONE for almost everything regardless of which company the truck belongs to. The fleet and accounting teams then redistribute the charge to the proper company. So the payer columns in the Truck Max file are a BILLING ADDRESS, not the cost bearer, and this file carries no record of the redistribution.",
+      "consequence": "An earlier reading of this file -- that Zone paid 56,033 of shop work on Iron Lease's own trucks and should have billed it to Iron Lease -- does NOT follow. That figure shows Zone was invoiced, which is the normal convention here. Whether Iron Lease ultimately bore it can only be seen in the redistribution journal, which is not in this corpus.",
+      "spend_year_to_2026_08_20": {
+        "total": 536803.45,
+        "iron_lease_trucks": 187091.71,
+        "trailers": 135432.58,
+        "zone_stl": 101283.89,
+        "unclassified": 77273.68,
+        "lease_to_own": 18947.43,
+        "sold_4851": 5314.44,
+        "investor": 3783.32
       }
     }
   },
