@@ -53,6 +53,33 @@ ZONE_STL = {"8033", "8083", "8091", "8092", "8093", "8094",
 # Keying errors in the source, corrected here rather than by editing the file, so
 # the change stays visible and reversible. Each needs the operator's confirmation
 # before it goes in.
+# Units the operator named on 2026-09-03, closing most of the unidentified tail.
+OWNER_OPERATOR = {"7584", "# 001", "12878", "5091", "52613", "6169"}
+RYDER = {"484514", "484500", "484505", "484506", "484499"}
+PENSKE = {"560638", "463061"}
+STL_RETURNED = {"9011", "7126"}
+COMPANY_DRIVER = {"7004"}
+OWNER_RETURNED = {"2743"}
+UNIT_NOTES = {
+    "2743": "owner's truck, since returned",
+    "7584": "owner-operator, left the company",
+    "# 001": "owner-operator truck, driver left the company",
+    "12878": "owner-operator, Innocent Ndayambaje",
+    "5091": "owner-operator, Henry Evans",
+    "52613": "owner-operator, Patrick Karuhura",
+    "6169": "owner-operator, Estime Platini",
+    "484514": "Ryder",
+    "484500": "Ryder -- accident, totalled",
+    "484505": "Ryder -- in the shop, transmission",
+    "484506": "Ryder -- lease-to-walk-away, driver Lucas Ramone",
+    "484499": "Ryder -- in the shop",
+    "560638": "Penske",
+    "463061": "Penske, most likely returned",
+    "9011": "STL, no longer with us",
+    "7126": "STL, Derilus Evanuel (took this truck after 5413's accident)",
+    "7004": "company driver, Saint Felick Shameeks",
+}
+
 UNIT_CORRECTIONS = {
     # INV-484, 2026-07-30, 5,761.39 paid by Iron Lease. Keyed 1543; 1543 appears
     # nowhere else in the corpus and 1542 -- a leased truck -- appears not at all.
@@ -91,6 +118,16 @@ def classify(truck, trailer):
         return "iron_lease"
     if truck in ZONE_STL:
         return "zone_stl"
+    if truck in OWNER_OPERATOR:
+        return "owner_operator"
+    if truck in RYDER:
+        return "outside lease (Ryder)"
+    if truck in PENSKE:
+        return "outside lease (Penske)"
+    if truck in STL_RETURNED:
+        return "stl"
+    if truck in COMPANY_DRIVER or truck in OWNER_RETURNED:
+        return "zone_other"
     return "other"
 
 

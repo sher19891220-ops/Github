@@ -385,13 +385,18 @@
       "consequence": "An earlier reading of this file -- that Zone paid 56,033 of shop work on Iron Lease's own trucks and should have billed it to Iron Lease -- does NOT follow. That figure shows Zone was invoiced, which is the normal convention here. Whether Iron Lease ultimately bore it can only be seen in the redistribution journal, which is not in this corpus.",
       "spend_year_to_2026_08_20": {
         "total": 536803.45,
-        "iron_lease_trucks": 187091.71,
+        "iron_lease_trucks": 192853.1,
         "trailers": 135432.58,
         "zone_stl": 101283.89,
-        "unclassified": 77273.68,
+        "still_unidentified": 34783.03,
         "lease_to_own": 18947.43,
+        "owner_operator": 13851.36,
+        "ryder": 11299.25,
+        "unknown_unit": 7676.4,
+        "zone_other": 5701.78,
         "sold_4851": 5314.44,
-        "investor": 3783.32
+        "investor": 3783.32,
+        "penske": 3098.02
       }
     }
   },
