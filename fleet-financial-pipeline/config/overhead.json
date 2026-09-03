@@ -448,5 +448,53 @@
       }
     },
     "checked": "Not hidden in 'Other charges' -- that block is itemised (max truck, trailer insurance and charge, credit card, ADP fee, factoring, Loves, STL, maintenance, returned-truck tolls, freight) and carries no owner line in any week, early layout or late."
+  },
+  "allocation_policy": {
+    "_note": "Operator, 2026-09-03.",
+    "us_office_salaries_and_owners": {
+      "rule": "split EQUALLY three ways",
+      "amount_per_week": 17876.92,
+      "per_company": 5958.97,
+      "why": "These are fixed group costs. Nothing about the US office or the owners' draw scales with a particular company's freight, so no usage basis applies and an equal split is the honest one. The sheets had ZONE carrying 2,025 of owner pay against XTRACK's 375 and AFG's nothing, which reflected nothing."
+    },
+    "tashkent": {
+      "rule": "allocate on each company's share of gross",
+      "amount_per_week": 33629.54,
+      "per_company": {
+        "ZONE": 13438,
+        "XTRACK": 17567,
+        "AFG": 2625
+      },
+      "why": "This one SHOULD differ between companies and does so for a real reason. The payroll register shows 73% of the Tashkent cost is bonus and commission, and dispatch alone -- 70% of the department -- is 91% variable. Commission is paid on the freight each company moves, so a company booking more gross genuinely generates more Tashkent cost. The sheets' own split already tracks gross closely (40.0/52.2/7.8 against gross shares of 36.6/51.8/11.7), so the proportions are kept and only the total is corrected to the payroll actual.",
+      "sheets_understate_by_per_week": 10812
+    },
+    "effect": {
+      "_note": "overhead per truck-week and break-even after redistribution",
+      "per_truck_week": {
+        "ZONE": 606,
+        "XTRACK": 523,
+        "AFG": 505,
+        "GROUP": 548
+      },
+      "per_mile": {
+        "ZONE": 0.214,
+        "XTRACK": 0.199,
+        "AFG": 0.339,
+        "GROUP": 0.219
+      },
+      "breakeven_miles": {
+        "ZONE": 2681,
+        "XTRACK": 1972,
+        "AFG": 1086
+      },
+      "was": {
+        "ZONE": 2545,
+        "XTRACK": 1740,
+        "AFG": 623
+      },
+      "group_result_per_week": 30412,
+      "was_group_result": 47880,
+      "why_lower": "the sheets under-book total overhead by 17,560 a week"
+    }
   }
 }
