@@ -1,0 +1,120 @@
+{
+  "_README": [
+    "Manager bonus designs, from the operator's own briefs (Apr 2026) plus the",
+    "Sep 2026 note on flat rates. Recorded so DESIGNED pay can be tested against",
+    "the ACTUAL payroll register rather than assumed to match it.",
+    "",
+    "The designs share one idea: a low fixed floor plus a bonus tied to trucks on",
+    "the road, so HR, fleet and dispatch all lose money on the same idle truck.",
+    "That is sound design. Whether it is what runs in payroll is a separate",
+    "question, and the July register answers it -- see comparison_july_2026."
+  ],
+  "designs": {
+    "Dona": {
+      "role": "HR manager",
+      "fixed_per_month": 1000,
+      "bonus": "40/truck/month above a 50-truck floor, driver active 4+ weeks at 4+ days",
+      "designed_range": [
+        1000,
+        2600
+      ]
+    },
+    "Faridun": {
+      "role": "fleet manager",
+      "fixed_per_month": 1200,
+      "bonus": "30/truck/month above 50 that ran 5+ days, plus 3% of negotiated discounts",
+      "designed_range": [
+        1200,
+        2700
+      ]
+    },
+    "Rowdy": {
+      "role": "dispatch manager",
+      "fixed_per_month": 1000,
+      "bonus": "weekly tier on team average gross and rpm, plus 500 consistency bonus for 4/4 weeks",
+      "designed_range": [
+        1000,
+        4700
+      ],
+      "tiers": {
+        "target": {
+          "gross": [
+            8500,
+            8999
+          ],
+          "rpm": 2.4,
+          "per_week": 400
+        },
+        "profitable": {
+          "gross": [
+            9000,
+            9999
+          ],
+          "rpm": 2.4,
+          "per_week": 600
+        }
+      }
+    },
+    "Aika": {
+      "role": "claims (billed as Bereket Inc)",
+      "fixed_per_week": 1000,
+      "bonus": "2% of (claimed - settled) on defensive claims; 5% of (recovered - damage cost) on offensive",
+      "monthly_cap": 6000,
+      "designed_range": [
+        4000,
+        6000
+      ],
+      "documentation_rule": "no written baseline = no defensive bonus; no repair invoice = offensive bonus on full recovery"
+    },
+    "Rustam": {
+      "role": "dispatch",
+      "bonus": "2.4% of gross",
+      "_source": "Sep 2026 note"
+    },
+    "update_team": {
+      "bonus": "10% of layover and detention earned"
+    },
+    "fleet_other": {
+      "bonus": "100 per no-valuation, 10% of discount"
+    },
+    "fuel": {
+      "bonus": "0.5% of discount"
+    }
+  },
+  "comparison_july_2026": {
+    "_note": "Designed range against what the July 2026 register actually paid.",
+    "Dona": {
+      "designed_max": 2600,
+      "actual": 2750,
+      "verdict": "above design",
+      "detail": "bonus of exactly 1,200 = 30 trucks x 40, so the FORMULA is running correctly at ~80 active trucks. The deviation is the fixed floor: 1,550 paid against 1,000 designed."
+    },
+    "Faridun": {
+      "designed_max": 2700,
+      "actual": 2473,
+      "verdict": "within design",
+      "detail": "total lands in range but the composition is inverted -- 2,000 fixed against 1,200 designed, and only 473 of variable against the ~1,260 the design intends. He is being paid as a salary, not as an incentive."
+    },
+    "Rowdy": {
+      "designed_max": 4700,
+      "actual": 8857,
+      "verdict": "88% ABOVE design max",
+      "detail": "1,000 fixed as designed, but 7,857 of variable against a designed maximum of 3,700. The variable sits in the register's +/- column, not its bonus column."
+    },
+    "others_above_rowdy": {
+      "Makhmud JALILOV": 11627,
+      "Shokh ABDUNAZAROV": 10000,
+      "Rustam XODJAYEV": 9447,
+      "_note": "Rustam at 2.4% of gross implies a team gross of about 364,000 in July."
+    },
+    "dispatch_department": {
+      "headcount": 19,
+      "base_salary": 8700,
+      "variable": 93124,
+      "total": 101824,
+      "variable_share": "91%",
+      "implied_blended_rate": "3.12% of group gross (2,986,014/mo), against a published solo schedule topping out at 3.0% and a flat 2.4% for Rustam",
+      "_note": "The published tier schedule tops out at 3.0% and only at 12,000 gross on 3.0 rpm. A blended 3.12% across the whole department is at or above that ceiling, which the tier table alone does not explain. Either most trucks are hitting the top tier, or something outside the schedule is being paid on top. Worth checking before the next payroll run."
+    }
+  }
+}
