@@ -50,6 +50,17 @@ SOLD = {"4851"}
 ZONE_STL = {"8033", "8083", "8091", "8092", "8093", "8094",
             "8130", "8131", "8132", "8133", "8136"}
 
+# Keying errors in the source, corrected here rather than by editing the file, so
+# the change stays visible and reversible. Each needs the operator's confirmation
+# before it goes in.
+UNIT_CORRECTIONS = {
+    # INV-484, 2026-07-30, 5,761.39 paid by Iron Lease. Keyed 1543; 1543 appears
+    # nowhere else in the corpus and 1542 -- a leased truck -- appears not at all.
+    # The work is engine oil pan, valve adjustment, NOx sensors, DPF: mechanical,
+    # truck-only, exactly Iron Lease's contractual scope. Operator confirmed.
+    "1543": "1542",
+}
+
 
 def unit(v):
     if v is None:
@@ -58,6 +69,11 @@ def unit(v):
     if s.endswith(".0"):
         s = s[:-2]
     return s or None
+
+
+def correct(u):
+    """Apply a confirmed keying correction, if there is one for this unit."""
+    return UNIT_CORRECTIONS.get(u, u)
 
 
 def classify(truck, trailer):
@@ -94,7 +110,7 @@ def main():
 
     rows = []
     for r in range(2, ws.max_row + 1):
-        t, tr = unit(C(r, "Truck")), unit(C(r, "Trailer"))
+        t, tr = correct(unit(C(r, "Truck"))), unit(C(r, "Trailer"))
         amt = money(C(r, "Inv amount"))
         if not (t or tr) and not amt:
             continue
