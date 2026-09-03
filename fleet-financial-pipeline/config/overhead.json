@@ -292,13 +292,13 @@
           "_note": "drivers buying the truck from us; shown as 'rented' in the register until paid off. 4851 is SOLD -- paid in full and no longer in our possession -- and must not be counted as fleet.",
           "2703": "Nelson Reginald / rented",
           "8671": "Jean Beaufils / rented",
-          "4851": "Alphonse Jefferson / SOLD",
+          "4851": "SOLD and out of possession -- operator confirms: remove from fleet",
           "4864": "Accident / rented",
           "4857": "Aw Abou / rented",
           "1564": "Felix Yvener / rented",
           "4718": "Junior Virgile / rented",
           "1682": "Colas Jasmin / rented",
-          "5413": "Derilus Evanuel / rented (Triumph)"
+          "5413": "Derilus Evanuel / accident 2026-08-22, in repair. Driver moved to truck 7126 meanwhile -- which is why 5413 has no register rows."
         },
         "register_coverage": {
           "distinct_trucks_in_register": 35,
@@ -325,7 +325,32 @@
             "8671"
           ],
           "in_register_on_neither_list": 0,
-          "_note": "Nine of the 36 leased trucks carry no register rows in this period -- they are on the list but were never billed. 5413 is absent too. And 4851, which the operator says is SOLD, still appears in the register."
+          "_note": "Nine of the 36 leased trucks carry no register rows in this period -- they are on the list but were never billed. 5413 is absent too. And 4851, which the operator says is SOLD, still appears in the register.",
+          "absent_explained": {
+            "1365, 1596, 3898, 4546": "investor-owned, not Iron Lease assets",
+            "5413": "accident 2026-08-22, in repair, driver on 7126",
+            "4549, 4553, 4713, 4928, 5026": "operator believes still in the yard -- safety checks after purchase, and waiting on titles to register. Not yet on the road, so no rows."
+          }
+        },
+        "investor_owned": {
+          "_note": "Operator, 2026-09-03: 1365, 1596, 3898 and 4546 belong to an outside investor, not to us and not to Iron Lease. We find the driver, run the truck, and take a 10% company charge on gross; we pay driver, fuel, tolls, truck payment and insurance out of the gross, and whatever remains goes to the investor. So these units carry a contractor payout line and must not be counted as our fleet, nor their costs as ours.",
+          "trucks": [
+            "1365",
+            "1596",
+            "3898",
+            "4546"
+          ],
+          "model": {
+            "company_charge_pct": 10,
+            "we_pay": [
+              "driver salary",
+              "fuel",
+              "tolls",
+              "truck payment",
+              "insurance"
+            ],
+            "residual": "contractor payout to the investor"
+          }
         }
       }
     }
