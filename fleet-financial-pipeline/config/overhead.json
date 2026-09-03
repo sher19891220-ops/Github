@@ -209,6 +209,44 @@
       "revenue": {
         "_note": "NOT SUPPLIED. The Cases log records events by payer -- ZONE 654,239, STL 69,685, driver 39,401 for Jan-Aug 2026 -- but it is a breakdown COST log, and whether those figures are what the shop BILLED or what the event COST is unresolved. Needs the shop ledger."
       }
+    },
+    "iron_lease": {
+      "kind": "asset_holding_company",
+      "_note": "Operator, 2026-09-03: Iron Lease owns the trucks and leases them to all three operating companies. It charges each company TWO things per truck: a weekly rent, and a per-mile fee for mechanical maintenance. It is responsible for mechanical repairs ONLY -- not body damage, not windshields, not tyres, and not trailers, which fall to the shop. Trucks only.",
+      "measured_from": "Iron lease register, 57 weekly tabs, 862 truck-weeks, 1,808,081 miles",
+      "weekly_rent": {
+        "per_charged_truck_week": 932.82,
+        "common_rates": [
+          735,
+          900,
+          1000,
+          2000,
+          630
+        ],
+        "by_entity_per_truck_week": {
+          "ZONE": 761,
+          "XTRACK": 900,
+          "AFG": 995
+        }
+      },
+      "mileage_charge": {
+        "rate_per_mile": 0.106,
+        "most_common": 0.1,
+        "total": 191716.58,
+        "_note": "this is the truck MECHANICAL maintenance rate, and it replaces the 0.102-0.220 band the model was carrying"
+      },
+      "efs_maintenance": {
+        "total": 297304.06,
+        "per_mile": 0.1644,
+        "_open_question": "exceeds the mileage charge by 105,587 (0.058/mi). If this is Iron Lease's cost it loses 55 cents on every dollar it charges for mechanical work; if the operating companies bear it directly then truck maintenance costs them 0.270/mi and group break-even is 2,136 miles a truck-week rather than 1,700. The register does not say which."
+      },
+      "idle": {
+        "truck_weeks_total": 862,
+        "truck_weeks_zero_miles": 328,
+        "rent_charged_on_idle": 308005.4,
+        "_note": "44% of all rent billed was on trucks that moved no miles"
+      },
+      "why_the_bank_cannot_see_this": "Iron Lease is a related party, so these payments leave the operating accounts as intercompany and never reach the lease_rent category. That is the whole of the 46,634/wk gap between the P&Ls' truck rent and the bank's."
     }
   },
   "sheet_vs_actual": {
