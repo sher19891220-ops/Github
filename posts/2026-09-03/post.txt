@@ -1,0 +1,19 @@
+📈 Shippers Are Paying 28% More to Move LESS Freight — August's LMI Explains Why
+
+The August Logistics Managers' Index just landed, and it captures the strangest freight market dynamic of 2026: volumes are falling, but costs keep climbing anyway.
+
+📊 The stats/facts:
+• Transportation Prices index hit 90.0 (up 3.1 pts) — the 4th time in 5 months it's crossed the rare 90+ threshold
+• Transportation Capacity stayed deeply contracted at 40.0, even after its biggest one-month improvement (+11.6 pts) in 6 months
+• Shipment volumes fell 2.8% year-over-year — while shipper spending jumped 28.1% YoY over the same stretch
+• Transportation Utilization spiked to 70.6 (+5.6 pts) — only the 2nd time in 5 years it's cleared 70
+• Warehousing Capacity loosened to 53.5 (+7.2 pts) even as Transportation Capacity stayed pinned near record tightness — a split market by mode
+
+💡 Why marketers should care:
+• "Paying more to move less" is a messaging goldmine for freight-tech, TMS, and cost-visibility vendors — the pain point right now isn't demand, it's cost control on flat-to-declining volume, and campaigns should say that explicitly
+• The transportation-vs-warehousing capacity split means broker/3PL marketers should segment outreach by mode — a shipper squeezed on trucking capacity may have newly loosened warehousing options worth cross-selling
+• The LMI itself is a PR playbook: a monthly proprietary survey with consistent methodology gets picked up across FreightWaves, Logistics Management, and other trade press every single month — a repeatable model for any B2B logistics brand sitting on its own data
+
+🔗 Source: FreightWaves (Todd Maiden), published September 1, 2026 — https://www.freightwaves.com/news/transportation-capacity-contraction-slows-in-august
+
+#FounderHub #Logistics #SupplyChain #FreightMarket #LMI
