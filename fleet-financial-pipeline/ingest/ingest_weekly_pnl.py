@@ -17,6 +17,29 @@ TWO TRAPS THIS MODULE EXISTS TO AVOID
    at row 2 in ZONE and row 20 in XTRACK. Nothing may be read by fixed
    coordinates; every field is found by its label.
 
+THE TWO MILEAGE FIGURES, settled by the operator 2026-09-03. They are NOT two
+measures of the same thing -- they differ in population AND in what counts as a
+mile, which is why they sit about 2x apart at XTRACK:
+
+  'Total Odometer mileage'  COMPANY DRIVERS ONLY, and ALL miles those trucks
+                            ran -- loaded and empty. Owner-operator and
+                            lease-to-own trucks are absent.
+  'Total mileage'           ALL trucks, company plus OO plus LO, but LOADED
+                            miles only.
+
+So neither is "the" mileage, and subtracting one from the other means nothing.
+Each metric has to take the denominator that matches what it measures:
+
+  revenue per mile, cost per mile   -> 'Total mileage' (loaded, all trucks),
+                                       because revenue is earned on loaded miles
+                                       and every truck earns it
+  fuel economy and fuel cost/mile   -> odometer miles, because fuel is burned on
+                                       every mile including empty ones, and the
+                                       company only buys fuel for its own drivers
+  deadhead                          -> a company truck's odometer against its own
+                                       loaded miles. Measured over the last four
+                                       weeks: ZONE 6.6%, XTRACK 7.6%, AFG 10.4%.
+
 CONTROL: the panel's 'Total gross' must equal the sum of the week's unit blocks
 (each unit is a block of load rows closed by a row reading 'Total' in column B).
 Run check_weekly_pnl() on every new export before quoting anything from it.

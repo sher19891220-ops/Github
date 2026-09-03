@@ -496,5 +496,22 @@
       "was_group_result": 47880,
       "why_lower": "the sheets under-book total overhead by 17,560 a week"
     }
+  },
+  "mileage_definitions": {
+    "_note": "Operator, 2026-09-03. The two panel mileage figures measure different populations and different mile types; they are not reconcilable to each other.",
+    "total_odometer_mileage": "company drivers only; ALL miles run, loaded and empty",
+    "total_mileage": "all trucks including owner-operator and lease-to-own; LOADED miles only",
+    "which_denominator": {
+      "revenue_per_mile": "total mileage (loaded, all trucks)",
+      "cost_per_mile": "total mileage (loaded, all trucks)",
+      "fuel_economy_and_fuel_cost_per_mile": "odometer miles (company drivers, all miles)",
+      "break_even_miles": "loaded miles per truck-week, since loaded miles earn the revenue"
+    },
+    "deadhead_last_4_weeks": {
+      "ZONE": 0.066,
+      "XTRACK": 0.076,
+      "AFG": 0.104,
+      "_note": "company-driver trucks only: odometer against their own loaded miles"
+    }
   }
 }
