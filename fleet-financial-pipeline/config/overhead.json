@@ -238,7 +238,8 @@
       "efs_maintenance": {
         "total": 297304.06,
         "per_mile": 0.1644,
-        "_open_question": "exceeds the mileage charge by 105,587 (0.058/mi). If this is Iron Lease's cost it loses 55 cents on every dollar it charges for mechanical work; if the operating companies bear it directly then truck maintenance costs them 0.270/mi and group break-even is 2,136 miles a truck-week rather than 1,700. The register does not say which."
+        "_open_question": "exceeds the mileage charge by 105,587 (0.058/mi). If this is Iron Lease's cost it loses 55 cents on every dollar it charges for mechanical work; if the operating companies bear it directly then truck maintenance costs them 0.270/mi and group break-even is 2,136 miles a truck-week rather than 1,700. The register does not say which.",
+        "scope_answer": "296,778.59 of the 297,304.06 -- 99.8% -- lands on the 36 leased trucks, and only 525.47 anywhere else. Iron Lease covers trucks only, so this line is TRUCK mechanical work. It is not trailer spend. What the register cannot say is whether it is over-the-road breakdowns only or includes scheduled service, since it carries no job codes."
       },
       "idle": {
         "truck_weeks_total": 862,
@@ -246,7 +247,87 @@
         "rent_charged_on_idle": 308005.4,
         "_note": "44% of all rent billed was on trucks that moved no miles"
       },
-      "why_the_bank_cannot_see_this": "Iron Lease is a related party, so these payments leave the operating accounts as intercompany and never reach the lease_rent category. That is the whole of the 46,634/wk gap between the P&Ls' truck rent and the bank's."
+      "why_the_bank_cannot_see_this": "Iron Lease is a related party, so these payments leave the operating accounts as intercompany and never reach the lease_rent category. That is the whole of the 46,634/wk gap between the P&Ls' truck rent and the bank's.",
+      "fleet": {
+        "_note": "Operator, 2026-09-03. Iron Lease does not own the whole fleet -- these are the trucks it leases out.",
+        "leased_trucks": [
+          "15862",
+          "15909",
+          "15739",
+          "4772",
+          "15852",
+          "8482",
+          "7605",
+          "6799",
+          "9859",
+          "6867",
+          "2639",
+          "4716",
+          "1489",
+          "1431",
+          "1500",
+          "1722",
+          "1662",
+          "1568",
+          "1645",
+          "4727",
+          "3773",
+          "5269",
+          "4928",
+          "5007",
+          "5026",
+          "4937",
+          "1542",
+          "4713",
+          "1471",
+          "4709",
+          "4549",
+          "4553",
+          "1365",
+          "1596",
+          "3898",
+          "4546"
+        ],
+        "lease_to_own": {
+          "_note": "drivers buying the truck from us; shown as 'rented' in the register until paid off. 4851 is SOLD -- paid in full and no longer in our possession -- and must not be counted as fleet.",
+          "2703": "Nelson Reginald / rented",
+          "8671": "Jean Beaufils / rented",
+          "4851": "Alphonse Jefferson / SOLD",
+          "4864": "Accident / rented",
+          "4857": "Aw Abou / rented",
+          "1564": "Felix Yvener / rented",
+          "4718": "Junior Virgile / rented",
+          "1682": "Colas Jasmin / rented",
+          "5413": "Derilus Evanuel / rented (Triumph)"
+        },
+        "register_coverage": {
+          "distinct_trucks_in_register": 35,
+          "on_leased_list_and_in_register": 27,
+          "on_leased_list_absent_from_register": [
+            "1365",
+            "1596",
+            "3898",
+            "4546",
+            "4549",
+            "4553",
+            "4713",
+            "4928",
+            "5026"
+          ],
+          "lease_to_own_found_in_register": [
+            "1564",
+            "1682",
+            "2703",
+            "4718",
+            "4851",
+            "4857",
+            "4864",
+            "8671"
+          ],
+          "in_register_on_neither_list": 0,
+          "_note": "Nine of the 36 leased trucks carry no register rows in this period -- they are on the list but were never billed. 5413 is absent too. And 4851, which the operator says is SOLD, still appears in the register."
+        }
+      }
     }
   },
   "sheet_vs_actual": {
