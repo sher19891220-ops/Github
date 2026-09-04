@@ -24,7 +24,11 @@ NOTES = [
      "blocks use different cost columns and are kept apart."),
     ("Why gross fell short", "Against the fleet's own median running truck. The three "
      "causes are applied in order and add up exactly."),
-    ("Sitting trucks", "Truck-weeks with zero gross, and the cost charged to them anyway."),
+    ("Sitting trucks", "Truck-weeks with zero gross, and the cost charged to them anyway. "
+     "'Active', 'Shop' and 'Dealer' are STATUSES the P&L writes into the driver cell "
+     "when no driver is assigned; they are not names."),
+    ("Sitting runs", "The same weeks grouped into consecutive outages. A blank "
+     "dispatch_day_rows means the truck had no driver at all that week."),
     ("Home time policy", "4 days home per 32-day cycle. Entitlement is scaled to the days "
      "each driver actually appears, so a mid-period joiner is not scored as compliant."),
     ("Iron Lease rent", "Contract rate card against what the P&L charged the truck."),
@@ -63,9 +67,21 @@ def build(company, out):
     summ = summ.join(d[["days", "active", "idle", "home", "mechanical"]], how="left")
 
     short = T.gross_shortfall(tw)
-    sitting = tw[(tw.kind == "company_driver") & (tw.gross <= 0)][
-        ["week", "unit", "driver", *CD_COST_FIELDS]].sort_values(["unit", "week"])
+    sit = tw[(tw.kind == "company_driver") & (tw.gross <= 0)].copy()
+    sit["cost"] = sit[list(CD_COST_FIELDS)].sum(axis=1)
+    sitting = (sit.merge(T.truck_days(days, company).drop(columns=["driver"]),
+                         on=["unit", "week"], how="left")
+               .rename(columns={"driver": "driver_or_status"})
+               [["week", "unit", "driver_or_status", "cost", *CD_COST_FIELDS,
+                 "days", "active", "idle", "home", "shop", "oos", "stuck",
+                 "office", "newdriver", "leftcompany"]]
+               .sort_values(["unit", "week"]))
+    short_ben = T.gross_shortfall(tw)
+    ben = short_ben.attrs["benchmark_miles"] * short_ben.attrs["benchmark_rpm"]
+    runs = T.sitting_runs(tw, days, company, benchmark=ben)
     policy = T.home_time_policy(days, company)
+    policy.insert(0, "band", policy.variance.map(T.policy_band))
+    policy = policy.sort_values(["band", "variance"])
     rent = T.iron_rent_check(tw).groupby("unit").agg(
         weeks=("week", "size"), miles=("miles", "sum"),
         contract_due=("iron_rent_due", "sum"), charged=("rent", "sum"))
@@ -82,7 +98,7 @@ def build(company, out):
                .sort_values("total", ascending=False).reset_index())
 
     sheets = {"Weekly by truck": weekly, "Truck summary": summ.reset_index(),
-              "Why gross fell short": short.reset_index(), "Sitting trucks": sitting,
+              "Why gross fell short": short.reset_index(), "Sitting trucks": sitting, "Sitting runs": runs,
               "Home time policy": policy.reset_index(drop=True),
               "Iron Lease rent": rent.reset_index(),
               "Maintenance charges": maint[mcols].sort_values(["unit", "date"]),

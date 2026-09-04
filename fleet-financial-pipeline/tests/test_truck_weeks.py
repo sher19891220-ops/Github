@@ -100,3 +100,28 @@ def test_maintenance_ledger_drops_the_rows_that_are_not_charges():
     # Everything kept carries an amount, and nothing priced inside the window is lost.
     assert c.amount.notna().all()
     assert len(c) <= int(priced.sum())
+
+
+def test_truck_status_is_not_a_driver_name(tw):
+    """'Active', 'Shop' and 'Dealer' sit in the Driver cell when no driver is
+    assigned. Counted as drivers they invent three people; counted as working
+    trucks they hide 77 idle truck-weeks."""
+    sit = tw[(tw.kind == "company_driver") & (tw.gross <= 0)]
+    assert set(T.TRUCK_STATUS) <= set(sit.driver)
+    # A status never appears on a truck-week that actually earned.
+    earning = tw[(tw.kind == "company_driver") & (tw.gross > 0)]
+    assert not set(T.TRUCK_STATUS) & set(earning.driver)
+
+
+def test_sitting_runs_cover_every_sitting_week_exactly_once(tw, days):
+    r = T.sitting_runs(tw, days, "XTRACK")
+    sit = tw[(tw.kind == "company_driver") & (tw.gross <= 0)]
+    assert r.weeks.sum() == len(sit)
+    assert abs(r.cost_charged.sum()
+               - sit[list(T.CD_COST_FIELDS)].sum().sum()) < 0.01
+
+
+def test_policy_bands_are_symmetric_around_zero():
+    assert T.policy_band(-3) == "well under" and T.policy_band(3) == "well over"
+    assert T.policy_band(-1) == T.policy_band(1) == "on policy"
+    assert T.policy_band(-2) == "under" and T.policy_band(2) == "over"

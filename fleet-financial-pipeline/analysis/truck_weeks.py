@@ -174,6 +174,67 @@ def gross_shortfall(tw, kind="company_driver"):
     return g
 
 
+# The P&L writes a STATUS into the Driver cell when no driver is assigned to the
+# truck that week. It is not a name and must not be read as one.
+TRUCK_STATUS = ("Active", "Shop", "Dealer")
+
+
+def sitting_runs(tw, days=None, company=None, benchmark=None):
+    """Consecutive weeks a truck earned nothing, with the status and the day detail.
+
+    A run, not a week, is the unit that matters: twelve separate idle weeks and
+    one twelve-week outage cost the same money and mean completely different
+    things operationally.
+    """
+    sit = tw[(tw.kind == "company_driver") & (tw.gross <= 0)].copy()
+    sit["cost"] = sit[list(CD_COST_FIELDS)].sum(axis=1)
+    if days is not None:
+        sit = sit.merge(truck_days(days, company), on=["unit", "week"],
+                        how="left", suffixes=("", "_ops"))
+    order = {w: i for i, w in enumerate(sorted(tw.week.unique()))}
+    out = []
+    for (unit, status), x in sit.groupby(["unit", "driver"]):
+        wks = sorted(x.week)
+        run = [wks[0]]
+        for w in wks[1:]:
+            if order[w] == order[run[-1]] + 1:
+                run.append(w)
+            else:
+                out.append((unit, status, run))
+                run = [w]
+        out.append((unit, status, run))
+    rows = []
+    for unit, status, run in out:
+        x = sit[(sit.unit == unit) & sit.week.isin(run)]
+        r = {"unit": unit, "status": status, "first_week": run[0], "last_week": run[-1],
+             "weeks": len(run), "cost_charged": x.cost.sum(),
+             "rent": x.rent.sum(), "admin_insurance": x.admin.sum(),
+             "driver_pay": x.driver_pay.sum(), "fuel": x.fuel.sum()}
+        if benchmark:
+            r["gross_forgone_at_benchmark"] = len(run) * benchmark
+        if days is not None:
+            r["dispatch_day_rows"] = x.days.sum()
+            r["no_driver_on_the_truck"] = bool(x.days.isna().all())
+            for c in ("active", "idle", "home", "shop", "oos", "stuck", "office",
+                      "newdriver", "leftcompany"):
+                r[c] = x[c].sum()
+        rows.append(r)
+    return pd.DataFrame(rows).sort_values(["weeks", "cost_charged"], ascending=False)
+
+
+def policy_band(variance):
+    """Two failures hide in one average, so the bands are symmetric."""
+    if variance <= -3:
+        return "well under"
+    if variance < -1:
+        return "under"
+    if variance <= 1:
+        return "on policy"
+    if variance < 3:
+        return "over"
+    return "well over"
+
+
 def iron_rent_check(tw):
     """Contract rent vs what the P&L actually charged the truck."""
     d = tw[tw.iron_leased & (tw.kind == "company_driver")].copy()
