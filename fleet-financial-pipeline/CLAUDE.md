@@ -224,6 +224,43 @@ recovery chain becomes measurable.
 
 ---
 
+## Cost of a truck-day, and break-even for one truck
+
+`analysis/truck_breakeven.py`. Three measured pieces, no chart of accounts:
+
+1. **What a parked truck is charged** — the mean of 65 company-driver truck-weeks
+   that earned nothing. XTRACK, last 13 weeks: $1,183/week (rent 673, admin and
+   insurance 373, standing DEF and fees 97, tolls 21, downtime pay 21).
+2. **The fixed/variable split of a running truck** — least squares of block cost
+   on loaded miles: $1,690/truck-week fixed + **$1.6947/loaded mile** (R² 0.87).
+   The two fixed figures differ ON PURPOSE: an idle truck is charged less rent
+   than a running one, so the parked figure prices a lost day and the fitted
+   figure prices break-even. Using one for both is wrong in both directions.
+3. **Company overhead as a residual**, from an identity that cannot drift:
+   `overhead = gross − net − CD block cost − OO cost`. **Never add up the panel's
+   overhead lines** — they sum to 126% of the residual because some of what the
+   panel calls overhead is already inside the unit blocks. Use the components
+   only for the fixed/variable RATIO, which keeps their information without
+   importing their overlap.
+
+XTRACK, 2026-06-01 .. 2026-08-24: overhead $42,049/wk over 47 trucks = **$887 per
+truck-week**, of which **$505 fixed** ($72/truck-day) and the rest 4.69% of gross
+(Tashkent commission, factoring, maintenance).
+
+    cost of a truck that does not move   $1,688/week = $241/day
+    must be covered by a running truck   $2,578/week
+    break-even                           2,646 miles at $2.80, 2,213 at $3.00,
+                                         3,290 at $2.60, 4,348 at $2.40
+
+**Charging an idle truck only what the P&L billed it understates it by 41%.**
+The 105 idle XTRACK truck-weeks were billed $125,197; they also absorbed $51,401
+of fixed overhead that did not pause. True cost **$176,599**, $6,541 a week.
+
+This prices a COMPANY-DRIVER truck. Owner-operators carry their own equipment and
+fuel and break even on different numbers. And a parked Iron Lease truck is
+charged below its rate card, so the group's true cost of an idle truck is higher
+than the operating company's books show.
+
 ## Per-truck economics: the rate card, the policy, and the maintenance ledger
 
 `analysis/truck_weeks.py` joins three things on the truck number, which is the

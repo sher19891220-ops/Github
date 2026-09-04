@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "analysis"))
 import truck_weeks as T
 import maintenance_ledger as ML
+import truck_breakeven as B
 from xtrack_diagnosis import CD_COST_FIELDS
 
 NOTES = [
@@ -36,6 +37,12 @@ NOTES = [
      "as a matched pair -- the charge and its credit back -- and net to zero."),
     ("Maintenance by unit", "Same ledger totalled per unit. Trailers and trucks are "
      "separate fleets; a trailer repair is not a cost of the tractor pulling it."),
+    ("Break-even scenarios", "Weekly profit for ONE company-driver truck at each "
+     "combination of loaded miles and rate, after its own costs and its share of "
+     "company overhead. Negative means that truck loses money that week."),
+    ("Cost model", "The inputs behind the scenarios, all measured: fixed cost from "
+     "parked truck-weeks, cost per mile by least squares, overhead from the "
+     "identity gross - net - block costs."),
 ]
 
 
@@ -97,12 +104,34 @@ def build(company, out):
                     first=("date", "min"), last=("date", "max"))
                .sort_values("total", ascending=False).reset_index())
 
+    bm = B.model(company, 13)
+    rates = [2.20, 2.40, 2.60, 2.80, 3.00, 3.20, 3.40]
+    grid = pd.DataFrame(
+        [{"loaded_miles_per_week": mi,
+          **{f"${r:.2f}/mi": round(B.weekly_result(bm, mi, r)) for r in rates}}
+         for mi in range(1000, 5001, 250)])
+    be = pd.DataFrame([{"rpm": r,
+                        "kept_per_mile": round(B.contribution_per_mile(bm, r), 4),
+                        "breakeven_miles_per_week": round(B.breakeven_miles(bm, r)),
+                        "breakeven_miles_per_driving_day": round(B.breakeven_miles(bm, r) / 5),
+                        "breakeven_gross_per_week": round(B.breakeven_miles(bm, r) * r)}
+                       for r in rates])
+    grid = pd.concat([be, pd.DataFrame([{}]), grid], ignore_index=True)
+    inputs = pd.DataFrame(
+        [{"input": k, "value": v} for k, v in bm.items()
+         if isinstance(v, (int, float))]
+        + [{"input": f"parked cost: {k}", "value": round(v, 2)}
+           for k, v in bm["parked_lines"].items()]
+        + [{"input": f"cost per mile: {k}", "value": round(v[1], 4)}
+           for k, v in bm["line_fit"].items()])
+
     sheets = {"Weekly by truck": weekly, "Truck summary": summ.reset_index(),
               "Why gross fell short": short.reset_index(), "Sitting trucks": sitting, "Sitting runs": runs,
               "Home time policy": policy.reset_index(drop=True),
               "Iron Lease rent": rent.reset_index(),
               "Maintenance charges": maint[mcols].sort_values(["unit", "date"]),
-              "Maintenance by unit": by_unit}
+              "Maintenance by unit": by_unit,
+              "Break-even scenarios": grid, "Cost model": inputs}
     with pd.ExcelWriter(out, engine="xlsxwriter") as xl:
         book = xl.book
         head = book.add_format({"bold": True, "bg_color": "#1F3864", "font_color": "white",
