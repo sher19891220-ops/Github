@@ -1,0 +1,4 @@
+
+# Third-party clone made at the operator request, not part of this project.
+# 161MB of tutorial apps plus per-app virtualenvs; belongs on disk, not in git.
+awesome-llm-apps/
