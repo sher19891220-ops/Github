@@ -224,6 +224,43 @@ recovery chain becomes measurable.
 
 ---
 
+## The dispatch export is the only DAY in the corpus
+
+`data/raw/ops/` is the dispatch system's own database: one row per driver per
+day, 7,360 of them across the 13 complete weeks 2026-06-01 .. 2026-08-24, plus
+`drivers.csv` (130 drivers with company, truck, pay type and inactive reason),
+`weeks.csv`, `hidden_week_periods.csv` and `sub_truck_periods.csv`. Everything
+else in the corpus is weekly or monthly, so this is the ONLY source that can say
+why miles per truck moved. Read it with `analysis/load_days.py`.
+
+**`entry_type` does not answer "did this truck earn?".** 740 of 4,684 rows typed
+`loadday` carry ZERO gross -- 316 of them also carry an idle reason (`home`,
+`shop`, `stuck`), the other 424 carry nothing. Trusting the label counts idle
+days as revenue days and understates the idle rate by a fifth. Classify on the
+money: revenue = `loadday` AND gross > 0; idle = `nonrevenue` OR a zero-gross
+`loadday` with a reason; the rest is unexplained and is reported, never assigned.
+
+**Vacation is deleted, not marked.** A driver inside a `hidden_week_periods` span
+has no rows at all, so the denominator is days a driver was expected to work and
+the idle rate is not inflated by holidays. It also means a truck standing idle
+through a 7-week vacation is invisible here while still accruing rent and
+insurance -- about 217 driver-days over the period.
+
+**A breakdown often costs no days.** `sub_truck_periods` moves the driver to
+another truck and they keep working: driver 107 ran 49 days on a substitute after
+a 26 June breakdown and booked two `oos` days. `shop` + `oos` is a FLOOR on
+mechanical disruption, not a measure of it.
+
+**Coverage grew while the fleet did not.** In June the export held 37 XTRACK
+drivers against 45-51 trucks on the P&L and ran 7.5% below it on gross; by late
+August, 45 against 48 and within 0.1%. So the two sources only agree in dollars
+from about 2026-07-13, and any trend in a raw weekly count is partly the export
+filling up. Use `stable_cohort()` -- drivers present in every week -- for trend.
+
+**Company attribution is a snapshot.** `drivers.csv` has one `mc` per driver and
+no history, so a driver who changed authority is attributed to the current one
+for every past week.
+
 ## Intercompany says the money moved, NOT why it moved
 
 Classifying a transfer `intercompany` is a statement about the counterparty and
