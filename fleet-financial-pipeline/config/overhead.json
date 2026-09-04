@@ -537,5 +537,45 @@
       "Runstar has not appeared anywhere else in this corpus -- not in the bank accounts, the P&Ls, the payroll or the fleet lists. Is it a fourth entity, and does it carry trucks or costs this model should be picking up?",
       "XTRACK has no line here. Deliberate, or an omission?"
     ]
+  },
+  "factoring_status_caveat": {
+    "_note": "Operator's team, 2026-09-04. RETRACTS an earlier reading. The Triumph invoice list has NO amount-received column, so a 'Short Paid' flag carries the FULL invoice value regardless of whether the shortfall was 1.75 or the whole load. Treating status-flagged invoice value as money at risk overstates it by orders of magnitude.",
+    "landstar": {
+      "invoices": 41,
+      "invoice_value": 110475,
+      "actual_exposure": 71.75,
+      "explanation": "Landstar deducts a 1.75 fee per load. Standard across carriers, not specific to this group, and payment itself has never been a problem. 41 invoices x 1.75 = 71.75, against the 110,475 of invoice value the Short Paid flag carries."
+    },
+    "stl": {
+      "note": "STL was credit-DENIED by the factor, so Triumph rejects every STL load. That is a credit decision on STL, not a collection failure.",
+      "denied_all_three_companies": 332153,
+      "collected_directly": 80346,
+      "still_open": 251807,
+      "by_company": {
+        "ZONE": {
+          "invoices": 120,
+          "value": 236357,
+          "paid": 41081
+        },
+        "XTRACK": {
+          "invoices": 45,
+          "value": 88366,
+          "paid": 39265
+        },
+        "AFG": {
+          "invoices": 4,
+          "value": 7430,
+          "paid": 0
+        }
+      },
+      "related_party_flag": "STL TRUCKERS LLC and STL GLOBAL LOGISTICS LLC appear here as CUSTOMERS while STL also appears as a supplier -- trucks bought from STL and 'STL charges' in the weekly P&Ls. Related party on both sides of the ledger; the 251,807 open is owed by a party this group also buys from."
+    },
+    "restated": {
+      "reported_at_risk": 416179,
+      "landstar_portion_real": 71.75,
+      "stl_portion": "credit decision, 24% already collected directly",
+      "genuinely_unquantified": 235495,
+      "conclusion": "Only the 235,495 from other customers remains unquantified, and even that is invoice value rather than measured shortfall. The 416,179 figure should not be used."
+    }
   }
 }
