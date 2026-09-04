@@ -513,5 +513,29 @@
       "AFG": 0.104,
       "_note": "company-driver trucks only: odometer against their own loaded miles"
     }
+  },
+  "entity_office_costs": {
+    "_note": "Operator, 2026-09-04. Office cost billed to a NAMED entity, so these are NOT split equally the way the shared office and yard are -- each lands on the entity that incurs it.",
+    "period": "month",
+    "lines": [
+      {
+        "entity": "AFG LLC",
+        "amount": 450
+      },
+      {
+        "entity": "Runstar",
+        "amount": 250
+      },
+      {
+        "entity": "Zone LLC",
+        "amount": 250
+      }
+    ],
+    "stated_total_per_month": 950,
+    "per_week": 219.23076923076925,
+    "open_questions": [
+      "Runstar has not appeared anywhere else in this corpus -- not in the bank accounts, the P&Ls, the payroll or the fleet lists. Is it a fourth entity, and does it carry trucks or costs this model should be picking up?",
+      "XTRACK has no line here. Deliberate, or an omission?"
+    ]
   }
 }
