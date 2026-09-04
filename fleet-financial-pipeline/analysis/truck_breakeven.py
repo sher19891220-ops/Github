@@ -114,7 +114,10 @@ def model(company="XTRACK", weeks=13):
     m["overhead_pct_of_gross"] = m["overhead_variable"] / m["gross"]
 
     m["idle_day_cost"] = (m["parked_cost"] + m["fixed_overhead_per_truck_week"]) / DAYS_PER_WEEK
-    m["breakeven_fixed"] = m["running_fixed"] + m["overhead_per_truck_week"]
+    # FIXED overhead only. The variable part is already taken off the top in
+    # contribution_per_mile() as a percentage of gross; adding the whole $887
+    # here subtracts it twice and roughly halves every truck's modelled profit.
+    m["breakeven_fixed"] = m["running_fixed"] + m["fixed_overhead_per_truck_week"]
     m["rpm"] = m["cd_gross"] / m["cd_miles"]
     m["miles_per_truck"] = m["cd_miles"] / m["cd_trucks"]
     return m
@@ -155,6 +158,14 @@ def controls(m):
     actual = m["cd_block_cost"] / m["cd_trucks"]
     if abs(predicted - actual) > 0.05 * actual:
         fails.append(("fitted vs actual block cost per truck-week", round(predicted - actual)))
+    # The one control that catches a double-counted overhead: run the model at
+    # the fleet's OWN miles and rate and it must land on the fleet's own result.
+    modelled = weekly_result(m, m["miles_per_truck"], m["rpm"]) * m["cd_trucks"]
+    actual = m["cd_gross"] - m["cd_block_cost"] - m["overhead"] * (
+        m["cd_trucks"] / m["trucks"])
+    if abs(modelled - actual) > 0.10 * abs(actual):
+        fails.append(("model run at the fleet's own miles and rate vs its actual "
+                      "company-driver result", round(modelled - actual)))
     if not 0 < m["overhead_variable_share"] < 1:
         fails.append(("overhead variable share out of range", m["overhead_variable_share"]))
     if m["parked_cost"] >= m["running_fixed"]:
@@ -232,8 +243,11 @@ def main():
 
     print("\n== BREAK-EVEN BASE ==")
     print(f"  {'fixed cost of a RUNNING truck':<34}{m['running_fixed']:>12,.0f}")
-    print(f"  {'company overhead per truck':<34}{m['overhead_per_truck_week']:>12,.0f}")
+    print(f"  {'fixed company overhead per truck':<34}"
+          f"{m['fixed_overhead_per_truck_week']:>12,.0f}")
     print(f"  {'= must be covered every week':<34}{m['breakeven_fixed']:>12,.0f}")
+    print(f"  (the variable overhead, {100 * m['overhead_pct_of_gross']:.2f}% of gross, "
+          f"is taken off the rate instead -- counting it here too halves the answer)")
     print(f"  today the fleet runs {m['miles_per_truck']:,.0f} loaded miles a week "
           f"at ${m['rpm']:.3f}")
 

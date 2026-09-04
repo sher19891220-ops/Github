@@ -81,3 +81,19 @@ def test_idle_cost_exceeds_what_the_pnl_billed(m):
     assert ic["fixed_overhead_they_absorbed"] > 0
     assert (abs(ic["true_cost"] - ic["billed_to_the_truck"]
                 - ic["fixed_overhead_they_absorbed"]) < 0.01)
+
+
+def test_variable_overhead_is_not_charged_twice(m):
+    """It comes off the rate as a % of gross. Adding the WHOLE overhead per truck
+    to the fixed base as well subtracts it a second time and roughly halves every
+    truck's modelled profit - which is what this model did at first."""
+    assert m["breakeven_fixed"] == pytest.approx(
+        m["running_fixed"] + m["fixed_overhead_per_truck_week"])
+    assert m["fixed_overhead_per_truck_week"] < m["overhead_per_truck_week"]
+
+
+def test_the_model_run_at_the_fleets_own_numbers_lands_on_the_fleets_own_result(m):
+    modelled = B.weekly_result(m, m["miles_per_truck"], m["rpm"]) * m["cd_trucks"]
+    actual = (m["cd_gross"] - m["cd_block_cost"]
+              - m["overhead"] * m["cd_trucks"] / m["trucks"])
+    assert modelled == pytest.approx(actual, rel=0.10)
