@@ -8,6 +8,37 @@ This file is the set of conventions that must not be re-derived or guessed.
 
 ---
 
+## Start here: find the file before opening any file
+
+**`docs/CATALOG.md` is the index of every source file** -- 400 of them -- with
+its entity, the period it covers, how many weeks of it this pipeline can
+actually read, and which module reads it. Consult it instead of listing
+directories or reopening workbooks to find out what they are. It is generated:
+
+    python3 ingest/catalog.py            # rebuild after any upload
+    python3 ingest/catalog.py --check    # what is missing / new vs the committed catalog
+
+Three things it is there to prevent, each of which has already happened:
+
+- **A tab count is not a week count.** The XTRACK workbook with 145 tabs and the
+  ZONE one with 139 reach back to 2023, but the weekly panel was laid out
+  differently in the earlier years and those tabs parse to nothing. The catalog
+  records `weeks readable` per workbook; pick on that, never on tab count.
+- **AFG was being read from a ONE-WEEK export** while a twenty-week export sat
+  in the same directory. `WORKBOOKS` in `ingest/ingest_weekly_pnl.py` now points
+  at the long one, and `tests/test_catalog.py` fails if it drifts back.
+- **The same document is filed under two paths.** The catalog keys on content
+  hash, so it is counted once and both paths are shown.
+
+**The container is ephemeral and has been reclaimed mid-analysis before**, taking
+`data/raw` with it. `data/raw` is gitignored (statements, payroll), so the
+catalog is committed and the files are not. After a reclaim, `docs/CATALOG.md`
+is the list of what has to be re-uploaded, and `--check` proves when the corpus
+is whole again. `.claude/hooks/session-start.sh` runs that check at session
+start, so a missing corpus shows up in the first seconds rather than an hour in.
+
+---
+
 ## Entities
 
 | entity_id | Legal name | DOT | Notes |
@@ -158,6 +189,13 @@ place in the entire corpus where the owner-operator split exists.
 rendering of these workbooks — which drops tab names — loses the time axis
 completely. Always export `.xlsx` (`ingest_gsheet_pnl.py`); fall back to
 `ingest_gsheet_pnl_text.py` only for totals, and never date its output.
+
+**Superseded 2026-09-04: the full `.xlsx` exports DO exist.**
+`5f79f0b0-ZONE_Profit__Loss_2024_and_2025_and_2026.xlsx` (139 tabs, 15.6 MB) and
+`1efc7de0-Xtrack_LLC_Profit_and_Loss_Weekly.xlsx` (145 tabs) are in the corpus.
+The remaining limit is this reader, not Drive: the pre-2026 tabs use a different
+panel layout, so of those 139 and 145 tabs only 72 and 26 currently parse. The
+text path is still not a substitute. Historical note follows.
 
 **Drive refuses to export a sheet above its size limit.** ZONE (3 years of
 weeks, 11.3 MB) and Xtrack (5.8 MB) both exceed it, so only their text

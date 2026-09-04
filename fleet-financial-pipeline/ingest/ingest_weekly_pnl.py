@@ -113,7 +113,10 @@ def truck_counts(ws):
 
 WORKBOOKS={"ZONE":"data/raw/pnl/4954206d-Zone_LLC_download.xlsx",
            "XTRACK":"data/raw/pnl/88206141-Xtrack_LLC_download.xlsx",
-           "AFG":"data/raw/pnl/423b1a54-AFG__download.xlsx"}
+           # 423b1a54-AFG__download.xlsx is an earlier export of the SAME sheet
+           # holding ONE week. b479b596 holds twenty. Reading the one-week file
+           # made every AFG figure a single-week snapshot presented as a period.
+           "AFG":"data/raw/pnl/b479b596-AFG__download.xlsx"}
 
 def read_workbook(path):
     """Every week in one workbook, keyed by week. Import-safe: nothing at module

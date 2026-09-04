@@ -1,0 +1,5782 @@
+{
+ "generated": "2026-09-04",
+ "distinct_files": 400,
+ "total_paths": 453,
+ "files": [
+  {
+   "path": "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/3ee6cf23-Afg_stmt_AprilAugust.zip",
+   "bytes": 145539,
+   "modified": "2026-09-04",
+   "kind": "archive",
+   "entity": "AFG",
+   "period": null,
+   "note": "Upload archive. The extracted files are catalogued separately; the archive is kept only as the re-upload unit after a container reclaim.",
+   "used_by": [],
+   "sha256": "56a13f409c56cb8d",
+   "copies": []
+  },
+  {
+   "path": "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/b856077b-AFG_statements.rar",
+   "bytes": 626408,
+   "modified": "2026-08-31",
+   "kind": "archive",
+   "entity": "AFG",
+   "period": null,
+   "note": "Upload archive. The extracted files are catalogued separately; the archive is kept only as the re-upload unit after a container reclaim.",
+   "used_by": [],
+   "sha256": "04967ba4a70fd248",
+   "copies": []
+  },
+  {
+   "path": "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/4cb9f428-Iron_lease__Zone.zip",
+   "bytes": 1573048,
+   "modified": "2026-08-31",
+   "kind": "archive",
+   "entity": "IRON_LEASE",
+   "period": null,
+   "note": "Upload archive. The extracted files are catalogued separately; the archive is kept only as the re-upload unit after a container reclaim.",
+   "used_by": [],
+   "sha256": "06e69a04c163098a",
+   "copies": []
+  },
+  {
+   "path": "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/a2247fb8-Iron_lease_statements.rar",
+   "bytes": 1961171,
+   "modified": "2026-08-31",
+   "kind": "archive",
+   "entity": "IRON_LEASE",
+   "period": null,
+   "note": "Upload archive. The extracted files are catalogued separately; the archive is kept only as the re-upload unit after a container reclaim.",
+   "used_by": [],
+   "sha256": "e47f070e44988a70",
+   "copies": []
+  },
+  {
+   "path": "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/c8d65190-Iron_lease__Xtrack.zip",
+   "bytes": 444347,
+   "modified": "2026-08-31",
+   "kind": "archive",
+   "entity": "IRON_LEASE",
+   "period": null,
+   "note": "Upload archive. The extracted files are catalogued separately; the archive is kept only as the re-upload unit after a container reclaim.",
+   "used_by": [],
+   "sha256": "f19a5ac9c5da47ce",
+   "copies": []
+  },
+  {
+   "path": "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/f4ccfff6-Iron_lease__AFG.zip",
+   "bytes": 372849,
+   "modified": "2026-08-31",
+   "kind": "archive",
+   "entity": "IRON_LEASE",
+   "period": null,
+   "note": "Upload archive. The extracted files are catalogued separately; the archive is kept only as the re-upload unit after a container reclaim.",
+   "used_by": [],
+   "sha256": "8f7460b3a6a5dab7",
+   "copies": []
+  },
+  {
+   "path": "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/b8483172-Shop_statements.rar",
+   "bytes": 2040018,
+   "modified": "2026-08-31",
+   "kind": "archive",
+   "entity": "TRUCKMAX",
+   "period": null,
+   "note": "Upload archive. The extracted files are catalogued separately; the archive is kept only as the re-upload unit after a container reclaim.",
+   "used_by": [],
+   "sha256": "29047cf8955b677a",
+   "copies": []
+  },
+  {
+   "path": "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/c103db97-Xtrack_statements.rar",
+   "bytes": 1711697,
+   "modified": "2026-08-31",
+   "kind": "archive",
+   "entity": "XTRACK",
+   "period": null,
+   "note": "Upload archive. The extracted files are catalogued separately; the archive is kept only as the re-upload unit after a container reclaim.",
+   "used_by": [],
+   "sha256": "6d6332cca247aaa9",
+   "copies": []
+  },
+  {
+   "path": "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/e528935b-Xtrack_stmt_MarchAugust.zip",
+   "bytes": 269052,
+   "modified": "2026-09-03",
+   "kind": "archive",
+   "entity": "XTRACK",
+   "period": null,
+   "note": "Upload archive. The extracted files are catalogued separately; the archive is kept only as the re-upload unit after a container reclaim.",
+   "used_by": [],
+   "sha256": "b644dc0b0f0efff0",
+   "copies": []
+  },
+  {
+   "path": "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/ec2889dd-Xtrack_5745.rar",
+   "bytes": 6455504,
+   "modified": "2026-08-31",
+   "kind": "archive",
+   "entity": "XTRACK",
+   "period": null,
+   "note": "Upload archive. The extracted files are catalogued separately; the archive is kept only as the re-upload unit after a container reclaim.",
+   "used_by": [],
+   "sha256": "5a9eff2d8325d13e",
+   "copies": []
+  },
+  {
+   "path": "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/22fcdb4b-ZONE_OH_statements.rar",
+   "bytes": 4966338,
+   "modified": "2026-08-31",
+   "kind": "archive",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Upload archive. The extracted files are catalogued separately; the archive is kept only as the re-upload unit after a container reclaim.",
+   "used_by": [],
+   "sha256": "a387543bbe457b03",
+   "copies": []
+  },
+  {
+   "path": "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/3376c8f2-Zone_stmt_MarchAugust.zip",
+   "bytes": 254173,
+   "modified": "2026-09-04",
+   "kind": "archive",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Upload archive. The extracted files are catalogued separately; the archive is kept only as the re-upload unit after a container reclaim.",
+   "used_by": [],
+   "sha256": "c71f560565eeaf2f",
+   "copies": []
+  },
+  {
+   "path": "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/78627974-Zone_statements.rar",
+   "bytes": 5928757,
+   "modified": "2026-08-31",
+   "kind": "archive",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Upload archive. The extracted files are catalogued separately; the archive is kept only as the re-upload unit after a container reclaim.",
+   "used_by": [],
+   "sha256": "f18bd8ceafe53ee5",
+   "copies": []
+  },
+  {
+   "path": "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/5bbff9ec-fleetfinancialpipeline.zip",
+   "bytes": 17126,
+   "modified": "2026-08-30",
+   "kind": "archive",
+   "entity": null,
+   "period": null,
+   "note": "Upload archive. The extracted files are catalogued separately; the archive is kept only as the re-upload unit after a container reclaim.",
+   "used_by": [],
+   "sha256": "0269ec25d57bfbd6",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/c0bf95ef-fleetfinancialpipeline.zip"
+   ]
+  },
+  {
+   "path": "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/adf853e0-files.zip",
+   "bytes": 236184,
+   "modified": "2026-09-01",
+   "kind": "archive",
+   "entity": null,
+   "period": null,
+   "note": "Upload archive. The extracted files are catalogued separately; the archive is kept only as the re-upload unit after a container reclaim.",
+   "used_by": [],
+   "sha256": "58b1d096c52ff801",
+   "copies": []
+  },
+  {
+   "path": "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/c6354ab2-fleetfinancialpipeline.zip",
+   "bytes": 16984,
+   "modified": "2026-08-30",
+   "kind": "archive",
+   "entity": null,
+   "period": null,
+   "note": "Upload archive. The extracted files are catalogued separately; the archive is kept only as the re-upload unit after a container reclaim.",
+   "used_by": [],
+   "sha256": "17213adf940974fb",
+   "copies": []
+  },
+  {
+   "path": "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/d9f21eac-amex.zip",
+   "bytes": 1124960,
+   "modified": "2026-08-31",
+   "kind": "archive",
+   "entity": null,
+   "period": null,
+   "note": "Upload archive. The extracted files are catalogued separately; the archive is kept only as the re-upload unit after a container reclaim.",
+   "used_by": [],
+   "sha256": "f063f8e059904d0b",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bankfeed/0ef7a174-Bank_of_America2.csv",
+   "bytes": 2992,
+   "modified": "2026-09-04",
+   "kind": "bank_feed_csv",
+   "entity": null,
+   "period": null,
+   "note": "QuickBooks/BofA bank-feed CSV. NO beginning/ending balance, so it cannot be self-verified -- control: none. An export of exactly 300 rows hit the UI page cap and is a truncated view of the account, not the account.",
+   "used_by": [],
+   "columns": [
+    "\ufeffdate",
+    "Bank description",
+    "Spent",
+    "Received",
+    "From/To",
+    "Transaction Posted"
+   ],
+   "rows": 21,
+   "sha256": "7a8d3f93a225c1a0",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/0ef7a174-Bank_of_America2.csv"
+   ]
+  },
+  {
+   "path": "data/raw/bankfeed/14791f8f-Bank_of_America2a.csv",
+   "bytes": 16666,
+   "modified": "2026-09-04",
+   "kind": "bank_feed_csv",
+   "entity": null,
+   "period": null,
+   "note": "QuickBooks/BofA bank-feed CSV. NO beginning/ending balance, so it cannot be self-verified -- control: none. An export of exactly 300 rows hit the UI page cap and is a truncated view of the account, not the account.",
+   "used_by": [],
+   "columns": [
+    "\ufeffDate",
+    "Bank description",
+    "Spent",
+    "Received",
+    "From/To",
+    "Match/Categorize"
+   ],
+   "rows": 185,
+   "sha256": "39b401cfa0682965",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/14791f8f-Bank_of_America2a.csv"
+   ]
+  },
+  {
+   "path": "data/raw/bankfeed/1699567f-Bank_of_America2_6.csv",
+   "bytes": 4171,
+   "modified": "2026-09-04",
+   "kind": "bank_feed_csv",
+   "entity": null,
+   "period": null,
+   "note": "QuickBooks/BofA bank-feed CSV. NO beginning/ending balance, so it cannot be self-verified -- control: none. An export of exactly 300 rows hit the UI page cap and is a truncated view of the account, not the account.",
+   "used_by": [],
+   "columns": [
+    "\ufeffdate",
+    "Bank description",
+    "Spent",
+    "Received",
+    "From/To",
+    "Transaction Posted"
+   ],
+   "rows": 29,
+   "sha256": "ca29702045e68bb8",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/1699567f-Bank_of_America2_6.csv"
+   ]
+  },
+  {
+   "path": "data/raw/bankfeed/21aa98b6-Bank_of_America_1_3.csv",
+   "bytes": 2383,
+   "modified": "2026-09-04",
+   "kind": "bank_feed_csv",
+   "entity": null,
+   "period": null,
+   "note": "QuickBooks/BofA bank-feed CSV. NO beginning/ending balance, so it cannot be self-verified -- control: none. An export of exactly 300 rows hit the UI page cap and is a truncated view of the account, not the account.",
+   "used_by": [],
+   "columns": [
+    "\ufeffdate",
+    "Bank description",
+    "Amount",
+    "From/To",
+    "Transaction Posted"
+   ],
+   "rows": 22,
+   "sha256": "5c916cb9f5ba1bd7",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/21aa98b6-Bank_of_America_1_3.csv"
+   ]
+  },
+  {
+   "path": "data/raw/bankfeed/233ea035-Bank_of_America_2.csv",
+   "bytes": 5967,
+   "modified": "2026-09-04",
+   "kind": "bank_feed_csv",
+   "entity": null,
+   "period": null,
+   "note": "QuickBooks/BofA bank-feed CSV. NO beginning/ending balance, so it cannot be self-verified -- control: none. An export of exactly 300 rows hit the UI page cap and is a truncated view of the account, not the account.",
+   "used_by": [],
+   "columns": [
+    "\ufeffdate",
+    "Bank description",
+    "Spent",
+    "Received",
+    "From/To",
+    "Transaction Posted"
+   ],
+   "rows": 50,
+   "sha256": "756e0548ca14aee8",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/233ea035-Bank_of_America_2.csv"
+   ]
+  },
+  {
+   "path": "data/raw/bankfeed/3233ec6f-Bank_of_America2_4.csv",
+   "bytes": 7267,
+   "modified": "2026-09-04",
+   "kind": "bank_feed_csv",
+   "entity": null,
+   "period": null,
+   "note": "QuickBooks/BofA bank-feed CSV. NO beginning/ending balance, so it cannot be self-verified -- control: none. An export of exactly 300 rows hit the UI page cap and is a truncated view of the account, not the account.",
+   "used_by": [],
+   "columns": [
+    "\ufeffdate",
+    "Bank description",
+    "Spent",
+    "Received",
+    "From/To",
+    "Transaction Posted"
+   ],
+   "rows": 56,
+   "sha256": "0a573b9bab700ad4",
+   "copies": [
+    "data/raw/bankfeed/f81cb3ff-Bank_of_America_6.csv",
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/3233ec6f-Bank_of_America2_4.csv",
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/f81cb3ff-Bank_of_America_6.csv"
+   ]
+  },
+  {
+   "path": "data/raw/bankfeed/35203430-Bank_of_America.csv",
+   "bytes": 30854,
+   "modified": "2026-09-04",
+   "kind": "bank_feed_csv",
+   "entity": null,
+   "period": null,
+   "note": "QuickBooks/BofA bank-feed CSV. NO beginning/ending balance, so it cannot be self-verified -- control: none. An export of exactly 300 rows hit the UI page cap and is a truncated view of the account, not the account.",
+   "used_by": [],
+   "columns": [
+    "\ufeffdate",
+    "Bank description",
+    "Spent",
+    "Received",
+    "From/To",
+    "Transaction Posted"
+   ],
+   "rows": 300,
+   "sha256": "4ba96e19ae4f2d8c",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/35203430-Bank_of_America.csv"
+   ]
+  },
+  {
+   "path": "data/raw/bankfeed/3830c18a-Bank_of_America_1_2.csv",
+   "bytes": 19583,
+   "modified": "2026-09-04",
+   "kind": "bank_feed_csv",
+   "entity": null,
+   "period": null,
+   "note": "QuickBooks/BofA bank-feed CSV. NO beginning/ending balance, so it cannot be self-verified -- control: none. An export of exactly 300 rows hit the UI page cap and is a truncated view of the account, not the account.",
+   "used_by": [],
+   "columns": [
+    "\ufeffDate",
+    "Bank description",
+    "Spent",
+    "Received",
+    "From/To",
+    "Match/Categorize"
+   ],
+   "rows": 300,
+   "sha256": "2678b53f5d19405f",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/3830c18a-Bank_of_America_1_2.csv"
+   ]
+  },
+  {
+   "path": "data/raw/bankfeed/425f8b6a-Bank_of_America2_2.csv",
+   "bytes": 4790,
+   "modified": "2026-09-04",
+   "kind": "bank_feed_csv",
+   "entity": null,
+   "period": null,
+   "note": "QuickBooks/BofA bank-feed CSV. NO beginning/ending balance, so it cannot be self-verified -- control: none. An export of exactly 300 rows hit the UI page cap and is a truncated view of the account, not the account.",
+   "used_by": [],
+   "columns": [
+    "\ufeffdate",
+    "Bank description",
+    "Spent",
+    "Received",
+    "From/To",
+    "Transaction Posted"
+   ],
+   "rows": 37,
+   "sha256": "1f0392449348d180",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/425f8b6a-Bank_of_America2_2.csv"
+   ]
+  },
+  {
+   "path": "data/raw/bankfeed/53af03e0-Bank_of_America_2_2.csv",
+   "bytes": 5732,
+   "modified": "2026-09-04",
+   "kind": "bank_feed_csv",
+   "entity": null,
+   "period": null,
+   "note": "QuickBooks/BofA bank-feed CSV. NO beginning/ending balance, so it cannot be self-verified -- control: none. An export of exactly 300 rows hit the UI page cap and is a truncated view of the account, not the account.",
+   "used_by": [],
+   "columns": [
+    "\ufeffdate",
+    "Bank description",
+    "Amount",
+    "From/To",
+    "Transaction Posted"
+   ],
+   "rows": 50,
+   "sha256": "2a5b89cc73bb7dd7",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/53af03e0-Bank_of_America_2_2.csv"
+   ]
+  },
+  {
+   "path": "data/raw/bankfeed/657fdcab-Bank_of_America_1.csv",
+   "bytes": 31699,
+   "modified": "2026-09-04",
+   "kind": "bank_feed_csv",
+   "entity": null,
+   "period": null,
+   "note": "QuickBooks/BofA bank-feed CSV. NO beginning/ending balance, so it cannot be self-verified -- control: none. An export of exactly 300 rows hit the UI page cap and is a truncated view of the account, not the account.",
+   "used_by": [],
+   "columns": [
+    "\ufeffdate",
+    "Bank description",
+    "Spent",
+    "Received",
+    "From/To",
+    "Transaction Posted"
+   ],
+   "rows": 300,
+   "sha256": "75d00c6253f5c8d1",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/657fdcab-Bank_of_America_1.csv"
+   ]
+  },
+  {
+   "path": "data/raw/bankfeed/7a4fae71-Bank_of_America2_3.csv",
+   "bytes": 3398,
+   "modified": "2026-09-04",
+   "kind": "bank_feed_csv",
+   "entity": null,
+   "period": null,
+   "note": "QuickBooks/BofA bank-feed CSV. NO beginning/ending balance, so it cannot be self-verified -- control: none. An export of exactly 300 rows hit the UI page cap and is a truncated view of the account, not the account.",
+   "used_by": [],
+   "columns": [
+    "\ufeffdate",
+    "Bank description",
+    "Spent",
+    "Received",
+    "From/To",
+    "Transaction Posted"
+   ],
+   "rows": 24,
+   "sha256": "5b7ed7c7b3c22069",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/7a4fae71-Bank_of_America2_3.csv"
+   ]
+  },
+  {
+   "path": "data/raw/bankfeed/92466ca8-Bank_of_America_5.csv",
+   "bytes": 6038,
+   "modified": "2026-09-04",
+   "kind": "bank_feed_csv",
+   "entity": null,
+   "period": null,
+   "note": "QuickBooks/BofA bank-feed CSV. NO beginning/ending balance, so it cannot be self-verified -- control: none. An export of exactly 300 rows hit the UI page cap and is a truncated view of the account, not the account.",
+   "used_by": [],
+   "columns": [
+    "\ufeffdate",
+    "Bank description",
+    "Amount",
+    "From/To",
+    "Transaction Posted"
+   ],
+   "rows": 50,
+   "sha256": "fd53778ff8bf46b4",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/92466ca8-Bank_of_America_5.csv"
+   ]
+  },
+  {
+   "path": "data/raw/bankfeed/ab3f4fab-Bank_of_America_3.csv",
+   "bytes": 5552,
+   "modified": "2026-09-04",
+   "kind": "bank_feed_csv",
+   "entity": null,
+   "period": null,
+   "note": "QuickBooks/BofA bank-feed CSV. NO beginning/ending balance, so it cannot be self-verified -- control: none. An export of exactly 300 rows hit the UI page cap and is a truncated view of the account, not the account.",
+   "used_by": [],
+   "columns": [
+    "\ufeffdate",
+    "Bank description",
+    "Amount",
+    "From/To",
+    "Transaction Posted"
+   ],
+   "rows": 50,
+   "sha256": "4ffe04bba6e904ca",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/ab3f4fab-Bank_of_America_3.csv"
+   ]
+  },
+  {
+   "path": "data/raw/bankfeed/b1cb56a5-Bank_of_America1.csv",
+   "bytes": 13818,
+   "modified": "2026-09-04",
+   "kind": "bank_feed_csv",
+   "entity": null,
+   "period": null,
+   "note": "QuickBooks/BofA bank-feed CSV. NO beginning/ending balance, so it cannot be self-verified -- control: none. An export of exactly 300 rows hit the UI page cap and is a truncated view of the account, not the account.",
+   "used_by": [],
+   "columns": [
+    "\ufeffdate",
+    "Bank description",
+    "Spent",
+    "Received",
+    "From/To",
+    "Transaction Posted"
+   ],
+   "rows": 112,
+   "sha256": "ea1410c07f450057",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/b1cb56a5-Bank_of_America1.csv"
+   ]
+  },
+  {
+   "path": "data/raw/bankfeed/bdbae51a-Bank_of_America2_5.csv",
+   "bytes": 36409,
+   "modified": "2026-09-04",
+   "kind": "bank_feed_csv",
+   "entity": null,
+   "period": null,
+   "note": "QuickBooks/BofA bank-feed CSV. NO beginning/ending balance, so it cannot be self-verified -- control: none. An export of exactly 300 rows hit the UI page cap and is a truncated view of the account, not the account.",
+   "used_by": [],
+   "columns": [
+    "\ufeffdate",
+    "Bank description",
+    "Spent",
+    "Received",
+    "From/To",
+    "Transaction Posted"
+   ],
+   "rows": 300,
+   "sha256": "8eb1d227957f8c66",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/bdbae51a-Bank_of_America2_5.csv"
+   ]
+  },
+  {
+   "path": "data/raw/bankfeed/eca0d66a-Bank_of_America_4.csv",
+   "bytes": 6034,
+   "modified": "2026-09-04",
+   "kind": "bank_feed_csv",
+   "entity": null,
+   "period": null,
+   "note": "QuickBooks/BofA bank-feed CSV. NO beginning/ending balance, so it cannot be self-verified -- control: none. An export of exactly 300 rows hit the UI page cap and is a truncated view of the account, not the account.",
+   "used_by": [],
+   "columns": [
+    "\ufeffdate",
+    "Bank description",
+    "Amount",
+    "From/To",
+    "Transaction Posted"
+   ],
+   "rows": 50,
+   "sha256": "bedd91791b9f6270",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/eca0d66a-Bank_of_America_4.csv"
+   ]
+  },
+  {
+   "path": "data/raw/bankfeed/fafc5e78-Bank_of_America2_1.csv",
+   "bytes": 37664,
+   "modified": "2026-09-04",
+   "kind": "bank_feed_csv",
+   "entity": null,
+   "period": null,
+   "note": "QuickBooks/BofA bank-feed CSV. NO beginning/ending balance, so it cannot be self-verified -- control: none. An export of exactly 300 rows hit the UI page cap and is a truncated view of the account, not the account.",
+   "used_by": [],
+   "columns": [
+    "\ufeffdate",
+    "Bank description",
+    "Spent",
+    "Received",
+    "From/To",
+    "Transaction Posted"
+   ],
+   "rows": 300,
+   "sha256": "d55144ded791b2ea",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/fafc5e78-Bank_of_America2_1.csv"
+   ]
+  },
+  {
+   "path": "data/raw/bank/AFG/AFG statements/eStmt_2026-02-27.pdf",
+   "bytes": 168901,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "AFG",
+   "period": "2026-02-27",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "5e90637c56b47c9c",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/AFG/AFG statements/eStmt_2026-03-31.pdf",
+   "bytes": 166148,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "AFG",
+   "period": "2026-03-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "e36fda60c8d1b127",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/AFG/AFG statements/eStmt_2026-04-30.pdf",
+   "bytes": 244735,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "AFG",
+   "period": "2026-04-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "f6a566e7701996d3",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/AFG/AFG statements/eStmt_2026-05-29.pdf",
+   "bytes": 267157,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "AFG",
+   "period": "2026-05-29",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "d7e6ad179ed32c2d",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/AFG/AFG statements/eStmt_2026-06-30.pdf",
+   "bytes": 261732,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "AFG",
+   "period": "2026-06-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "22711ae6f74a3152",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/AFG/AFG statements/eStmt_2026-07-31.pdf",
+   "bytes": 274395,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "AFG",
+   "period": "2026-07-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "ba6eee5e70c9c136",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/IronLease/Iron lease statements/eStmt_2025-03-31.pdf",
+   "bytes": 257053,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "IRON_LEASE",
+   "period": "2025-03-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "fa7ed4dacd7efad3",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/IronLease/Iron lease statements/eStmt_2025-04-30.pdf",
+   "bytes": 249870,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "IRON_LEASE",
+   "period": "2025-04-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "34b335f3a7c7e438",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/IronLease/Iron lease statements/eStmt_2025-05-30.pdf",
+   "bytes": 257773,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "IRON_LEASE",
+   "period": "2025-05-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "b48660dc95e0c5ff",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/IronLease/Iron lease statements/eStmt_2025-06-30.pdf",
+   "bytes": 245216,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "IRON_LEASE",
+   "period": "2025-06-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "c9261eacef36918b",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/IronLease/Iron lease statements/eStmt_2025-07-31.pdf",
+   "bytes": 247269,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "IRON_LEASE",
+   "period": "2025-07-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "1baf0103e524ec4a",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/IronLease/Iron lease statements/eStmt_2025-08-29.pdf",
+   "bytes": 253814,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "IRON_LEASE",
+   "period": "2025-08-29",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "21b1a3f68c709594",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/IronLease/Iron lease statements/eStmt_2025-09-30.pdf",
+   "bytes": 243910,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "IRON_LEASE",
+   "period": "2025-09-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "425bef7e763c354b",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/IronLease/Iron lease statements/eStmt_2025-10-31.pdf",
+   "bytes": 255272,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "IRON_LEASE",
+   "period": "2025-10-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "7fd870b106c05b36",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/IronLease/Iron lease statements/eStmt_2025-11-28.pdf",
+   "bytes": 267805,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "IRON_LEASE",
+   "period": "2025-11-28",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "517d911453076420",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/IronLease/Iron lease statements/eStmt_2025-12-31.pdf",
+   "bytes": 322025,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "IRON_LEASE",
+   "period": "2025-12-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "81333fd05f70a371",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/IronLease/Iron lease statements/eStmt_2026-01-30.pdf",
+   "bytes": 276926,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "IRON_LEASE",
+   "period": "2026-01-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "ad03988ae217d155",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/IronLease/Iron lease statements/eStmt_2026-02-27.pdf",
+   "bytes": 272366,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "IRON_LEASE",
+   "period": "2026-02-27",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "886dc801805eaca9",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/IronLease/Iron lease statements/eStmt_2026-03-31.pdf",
+   "bytes": 297878,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "IRON_LEASE",
+   "period": "2026-03-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "34e6ed1d82a836a7",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/IronLease/Iron lease statements/eStmt_2026-04-30.pdf",
+   "bytes": 254691,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "IRON_LEASE",
+   "period": "2026-04-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "c007cfb81cda6638",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/IronLease/Iron lease statements/eStmt_2026-05-29.pdf",
+   "bytes": 266678,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "IRON_LEASE",
+   "period": "2026-05-29",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "82494b0238d9b315",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/IronLease/Iron lease statements/eStmt_2026-06-30.pdf",
+   "bytes": 257256,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "IRON_LEASE",
+   "period": "2026-06-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "fb33e5cdb3e9f816",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/IronLease/Iron lease statements/eStmt_2026-07-31.pdf",
+   "bytes": 270064,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "IRON_LEASE",
+   "period": "2026-07-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "a8b3c95327de2707",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Shop/Shop statements/eStmt_2025-07-31.pdf",
+   "bytes": 261911,
+   "modified": "2026-08-10",
+   "kind": "bank_statement",
+   "entity": "TRUCKMAX",
+   "period": "2025-07-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "b80a1942557c566d",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Shop/Shop statements/eStmt_2025-08-29.pdf",
+   "bytes": 265391,
+   "modified": "2026-08-10",
+   "kind": "bank_statement",
+   "entity": "TRUCKMAX",
+   "period": "2025-08-29",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "2cb2cf6cb7f6aa55",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Shop/Shop statements/eStmt_2025-09-30.pdf",
+   "bytes": 252735,
+   "modified": "2026-08-10",
+   "kind": "bank_statement",
+   "entity": "TRUCKMAX",
+   "period": "2025-09-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "abea2fa683ed00c2",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Shop/Shop statements/eStmt_2025-10-31.pdf",
+   "bytes": 263103,
+   "modified": "2026-08-10",
+   "kind": "bank_statement",
+   "entity": "TRUCKMAX",
+   "period": "2025-10-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "be363aeb9978ff45",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Shop/Shop statements/eStmt_2025-11-28.pdf",
+   "bytes": 284514,
+   "modified": "2026-08-10",
+   "kind": "bank_statement",
+   "entity": "TRUCKMAX",
+   "period": "2025-11-28",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "8f2a731cccb27002",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Shop/Shop statements/eStmt_2025-12-31.pdf",
+   "bytes": 339903,
+   "modified": "2026-08-10",
+   "kind": "bank_statement",
+   "entity": "TRUCKMAX",
+   "period": "2025-12-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "09d9e4eb11890b18",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Shop/Shop statements/eStmt_2026-01-30.pdf",
+   "bytes": 287252,
+   "modified": "2026-08-10",
+   "kind": "bank_statement",
+   "entity": "TRUCKMAX",
+   "period": "2026-01-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "43b5cd58c1e6a234",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Shop/Shop statements/eStmt_2026-02-27.pdf",
+   "bytes": 276355,
+   "modified": "2026-08-10",
+   "kind": "bank_statement",
+   "entity": "TRUCKMAX",
+   "period": "2026-02-27",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "8f54bfaed4171bb7",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Shop/Shop statements/eStmt_2026-03-31.pdf",
+   "bytes": 306978,
+   "modified": "2026-08-10",
+   "kind": "bank_statement",
+   "entity": "TRUCKMAX",
+   "period": "2026-03-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "f9fc57a0f81686a5",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Shop/Shop statements/eStmt_2026-04-30.pdf",
+   "bytes": 268476,
+   "modified": "2026-08-10",
+   "kind": "bank_statement",
+   "entity": "TRUCKMAX",
+   "period": "2026-04-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "50b7c5f8a653fe26",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Shop/Shop statements/eStmt_2026-05-29.pdf",
+   "bytes": 280468,
+   "modified": "2026-08-10",
+   "kind": "bank_statement",
+   "entity": "TRUCKMAX",
+   "period": "2026-05-29",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "c550b35465eeeedc",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Shop/Shop statements/eStmt_2026-06-30.pdf",
+   "bytes": 268635,
+   "modified": "2026-08-10",
+   "kind": "bank_statement",
+   "entity": "TRUCKMAX",
+   "period": "2026-06-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "b5a04c967ccaf2f5",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Shop/Shop statements/eStmt_2026-07-31.pdf",
+   "bytes": 283475,
+   "modified": "2026-08-10",
+   "kind": "bank_statement",
+   "entity": "TRUCKMAX",
+   "period": "2026-07-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "f3e84d1756666c3d",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack/Xtrack statements/eStmt_2025-05-30.pdf",
+   "bytes": 245344,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2025-05-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "be494ad1e73fad50",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack/Xtrack statements/eStmt_2025-06-30.pdf",
+   "bytes": 243773,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2025-06-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "439445ead691220a",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack/Xtrack statements/eStmt_2025-07-31.pdf",
+   "bytes": 250280,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2025-07-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "51ede039b476b175",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack/Xtrack statements/eStmt_2025-08-29.pdf",
+   "bytes": 261874,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2025-08-29",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "94c65d4ebd2021bf",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack/Xtrack statements/eStmt_2025-09-30.pdf",
+   "bytes": 241091,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2025-09-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "132bf12c625f0e1b",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack/Xtrack statements/eStmt_2025-10-31.pdf",
+   "bytes": 277607,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2025-10-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "a893be6d3682355f",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack/Xtrack statements/eStmt_2025-11-28.pdf",
+   "bytes": 274222,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2025-11-28",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "1c20f6c8cb73c045",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack/Xtrack statements/eStmt_2025-12-31.pdf",
+   "bytes": 289355,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2025-12-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "18917a9735ad4eee",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack/Xtrack statements/eStmt_2026-01-30.pdf",
+   "bytes": 269699,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2026-01-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "4bf830672e770efb",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack/Xtrack statements/eStmt_2026-02-27.pdf",
+   "bytes": 245121,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2026-02-27",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "7cbdb159b5c86ecb",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack/Xtrack statements/eStmt_2026-03-31.pdf",
+   "bytes": 287431,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2026-03-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "0c61f097ef61aa75",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack/Xtrack statements/eStmt_2026-04-30.pdf",
+   "bytes": 241833,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2026-04-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "0407ab38a8960203",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack/Xtrack statements/eStmt_2026-05-29.pdf",
+   "bytes": 304084,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2026-05-29",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "4c7e95845d4c95fb",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack/Xtrack statements/eStmt_2026-06-30.pdf",
+   "bytes": 252083,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2026-06-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "e818ae7162168180",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack/Xtrack statements/eStmt_2026-07-31.pdf",
+   "bytes": 267517,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2026-07-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "9aad4184007abb47",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack_5745/Xtrack 5745/eStmt_2023-08-31.pdf",
+   "bytes": 409475,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2023-08-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "4d3d80c5058d805f",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack_5745/Xtrack 5745/eStmt_2023-09-29.pdf",
+   "bytes": 390423,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2023-09-29",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "a0415320f70d9261",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack_5745/Xtrack 5745/eStmt_2023-10-31.pdf",
+   "bytes": 396772,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2023-10-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "ccfc4e81e8ba3f52",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack_5745/Xtrack 5745/eStmt_2023-11-30.pdf",
+   "bytes": 398031,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2023-11-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "29b2ca023a2cec58",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack_5745/Xtrack 5745/eStmt_2023-12-29.pdf",
+   "bytes": 423886,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2023-12-29",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "d6f7aea3341503c8",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack_5745/Xtrack 5745/eStmt_2024-01-31.pdf",
+   "bytes": 370144,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2024-01-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "c77799476ea36ebe",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack_5745/Xtrack 5745/eStmt_2024-02-29.pdf",
+   "bytes": 396396,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2024-02-29",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "99ec2a7518690e1a",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack_5745/Xtrack 5745/eStmt_2024-03-29.pdf",
+   "bytes": 397005,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2024-03-29",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "0ce6172c4dcc7921",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack_5745/Xtrack 5745/eStmt_2024-04-30.pdf",
+   "bytes": 388580,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2024-04-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "b9bfd0e6e2f10a1d",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack_5745/Xtrack 5745/eStmt_2024-05-31.pdf",
+   "bytes": 366220,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2024-05-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "3bb5369a8a992be8",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack_5745/Xtrack 5745/eStmt_2024-06-28.pdf",
+   "bytes": 388624,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2024-06-28",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "622b3954d04b547b",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack_5745/Xtrack 5745/eStmt_2024-07-31.pdf",
+   "bytes": 371616,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2024-07-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "eb26ecc1a21b0ca8",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack_5745/Xtrack 5745/eStmt_2024-08-30.pdf",
+   "bytes": 394753,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2024-08-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "6f83c80e7f276773",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack_5745/Xtrack 5745/eStmt_2024-09-30.pdf",
+   "bytes": 361596,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2024-09-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "dd31eebc374a9ada",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack_5745/Xtrack 5745/eStmt_2024-10-31.pdf",
+   "bytes": 391605,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2024-10-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "a0bc08aa8310a7de",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack_5745/Xtrack 5745/eStmt_2024-11-29.pdf",
+   "bytes": 376793,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2024-11-29",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "022cf14a73466316",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack_5745/Xtrack 5745/eStmt_2024-12-31.pdf",
+   "bytes": 393809,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2024-12-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "dec68f568ebed713",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack_5745/Xtrack 5745/eStmt_2025-01-31.pdf",
+   "bytes": 326798,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2025-01-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "92ec7d6d795677bb",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack_5745/Xtrack 5745/eStmt_2025-02-28.pdf",
+   "bytes": 351430,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2025-02-28",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "07a0a70c729c42ec",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack_5745/Xtrack 5745/eStmt_2025-03-31.pdf",
+   "bytes": 353698,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2025-03-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "662a6d8947aaf7bc",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack_5745/Xtrack 5745/eStmt_2025-04-30.pdf",
+   "bytes": 252521,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2025-04-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "aaf925833f4f6654",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack_5745/Xtrack 5745/eStmt_2025-05-30.pdf",
+   "bytes": 254613,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2025-05-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "f816167f2a7326d3",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack_5745/Xtrack 5745/eStmt_2025-06-30.pdf",
+   "bytes": 241548,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2025-06-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "e7218a459e1107fd",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack_5745/Xtrack 5745/eStmt_2025-07-31.pdf",
+   "bytes": 243255,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2025-07-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "c56137c361080fa8",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack_5745/Xtrack 5745/eStmt_2025-08-29.pdf",
+   "bytes": 256098,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2025-08-29",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "9ec9a6f51e142f9f",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack_5745/Xtrack 5745/eStmt_2025-09-30.pdf",
+   "bytes": 234092,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2025-09-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "7811ed6cb82ba312",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack_5745/Xtrack 5745/eStmt_2025-10-31.pdf",
+   "bytes": 268973,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2025-10-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "8c15e025e7f1b45b",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack_5745/Xtrack 5745/eStmt_2025-11-28.pdf",
+   "bytes": 267742,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2025-11-28",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "8e910622fee6a0a8",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack_5745/Xtrack 5745/eStmt_2025-12-31.pdf",
+   "bytes": 281453,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2025-12-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "171c3033f49fc5f3",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack_5745/Xtrack 5745/eStmt_2026-01-30.pdf",
+   "bytes": 265184,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2026-01-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "76db99cd7f1efca8",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack_5745/Xtrack 5745/eStmt_2026-02-27.pdf",
+   "bytes": 237355,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2026-02-27",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "102fdd49ba50d09a",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack_5745/Xtrack 5745/eStmt_2026-03-31.pdf",
+   "bytes": 286573,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2026-03-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "ca536d956f0ddb81",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack_5745/Xtrack 5745/eStmt_2026-04-30.pdf",
+   "bytes": 234317,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2026-04-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "d0a87183bb8e9f7e",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack_5745/Xtrack 5745/eStmt_2026-05-29.pdf",
+   "bytes": 296360,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2026-05-29",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "417d20cd109599e0",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack_5745/Xtrack 5745/eStmt_2026-06-30.pdf",
+   "bytes": 243203,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2026-06-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "a5c7531833239c01",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Xtrack_5745/Xtrack 5745/eStmt_2026-07-31.pdf",
+   "bytes": 255637,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "XTRACK",
+   "period": "2026-07-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "8b5bde6388df730c",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/ZONE_OH/ZONE OH/eStmt_2024-03-29.pdf",
+   "bytes": 414606,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2024-03-29",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "53ed9a1d9444b6c4",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/ZONE_OH/ZONE OH/eStmt_2024-04-30.pdf",
+   "bytes": 427736,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2024-04-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "329c20fe2b0bd26e",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/ZONE_OH/ZONE OH/eStmt_2024-05-31.pdf",
+   "bytes": 394386,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2024-05-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "ce01614af878d0c7",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/ZONE_OH/ZONE OH/eStmt_2024-06-28.pdf",
+   "bytes": 423283,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2024-06-28",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "3e14a2cc15291502",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/ZONE_OH/ZONE OH/eStmt_2024-07-31.pdf",
+   "bytes": 399960,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2024-07-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "80b1307a4a2fc7e2",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/ZONE_OH/ZONE OH/eStmt_2024-08-30.pdf",
+   "bytes": 428352,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2024-08-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "f46cfbf8810f87cd",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/ZONE_OH/ZONE OH/eStmt_2024-09-30.pdf",
+   "bytes": 261020,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2024-09-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "b4e005a999eae41a",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/ZONE_OH/ZONE OH/eStmt_2024-10-31.pdf",
+   "bytes": 428810,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2024-10-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "1b5160e7e634000f",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/ZONE_OH/ZONE OH/eStmt_2024-11-29.pdf",
+   "bytes": 402456,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2024-11-29",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "aec4328a07fe99ca",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/ZONE_OH/ZONE OH/eStmt_2024-12-31.pdf",
+   "bytes": 342210,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2024-12-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "4f0369e9d7cbf8e3",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/ZONE_OH/ZONE OH/eStmt_2025-01-31.pdf",
+   "bytes": 331862,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2025-01-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "5ed9ba6a2f9d73b0",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/ZONE_OH/ZONE OH/eStmt_2025-02-28.pdf",
+   "bytes": 342666,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2025-02-28",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "c2e04c96f5924bf1",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/ZONE_OH/ZONE OH/eStmt_2025-03-31.pdf",
+   "bytes": 345818,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2025-03-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "b1907303ee9df46a",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/ZONE_OH/ZONE OH/eStmt_2025-04-30.pdf",
+   "bytes": 255451,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2025-04-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "2b887fe3a4e7cd4a",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/ZONE_OH/ZONE OH/eStmt_2025-05-30.pdf",
+   "bytes": 260130,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2025-05-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "384d64577d881767",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/ZONE_OH/ZONE OH/eStmt_2025-06-30.pdf",
+   "bytes": 251128,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2025-06-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "acd6f016bf50f0a9",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/ZONE_OH/ZONE OH/eStmt_2025-07-31.pdf",
+   "bytes": 252993,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2025-07-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "7d566bedc86afa73",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/ZONE_OH/ZONE OH/eStmt_2025-08-29.pdf",
+   "bytes": 265786,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2025-08-29",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "534ad52b449ca312",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/ZONE_OH/ZONE OH/eStmt_2025-09-30.pdf",
+   "bytes": 246679,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2025-09-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "59bf5d355a7ce702",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/ZONE_OH/ZONE OH/eStmt_2025-10-31.pdf",
+   "bytes": 246439,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2025-10-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "6e6fe0f7e116c392",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/ZONE_OH/ZONE OH/eStmt_2025-11-28.pdf",
+   "bytes": 267294,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2025-11-28",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "6d9f74b42f4b2412",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/ZONE_OH/ZONE OH/eStmt_2025-12-31.pdf",
+   "bytes": 324973,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2025-12-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "30fc5d807c60bce1",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/ZONE_OH/ZONE OH/eStmt_2026-01-30.pdf",
+   "bytes": 273649,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2026-01-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "7c47f8be9ca36d47",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/ZONE_OH/ZONE OH/eStmt_2026-02-27.pdf",
+   "bytes": 264308,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2026-02-27",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "3e746e0b9ecc22de",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/ZONE_OH/ZONE OH/eStmt_2026-03-31.pdf",
+   "bytes": 288326,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2026-03-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "7f80f91e305bc68a",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/ZONE_OH/ZONE OH/eStmt_2026-04-30.pdf",
+   "bytes": 249678,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2026-04-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "733b9f3a5a8cfb7f",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/ZONE_OH/ZONE OH/eStmt_2026-05-29.pdf",
+   "bytes": 257900,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2026-05-29",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "e51e275362e6a48b",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/ZONE_OH/ZONE OH/eStmt_2026-06-30.pdf",
+   "bytes": 244266,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2026-06-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "a6cb1811acf643bd",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/ZONE_OH/ZONE OH/eStmt_2026-07-31.pdf",
+   "bytes": 243139,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2026-07-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "3dce1d4608df8cfb",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Zone/Zone statements/eStmt_2024-01-31.pdf",
+   "bytes": 391729,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2024-01-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "e2747c76c129ddcb",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Zone/Zone statements/eStmt_2024-02-29.pdf",
+   "bytes": 406541,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2024-02-29",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "eb3342e2b6568d97",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Zone/Zone statements/eStmt_2024-03-29.pdf",
+   "bytes": 433706,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2024-03-29",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "7234fdc46740caa4",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Zone/Zone statements/eStmt_2024-04-30.pdf",
+   "bytes": 410746,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2024-04-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "b82650604d3d064a",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Zone/Zone statements/eStmt_2024-05-31.pdf",
+   "bytes": 381797,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2024-05-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "12add954dcdfd7a7",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Zone/Zone statements/eStmt_2024-06-28.pdf",
+   "bytes": 411169,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2024-06-28",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "f5f2dff163de30fc",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Zone/Zone statements/eStmt_2024-07-31.pdf",
+   "bytes": 398855,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2024-07-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "de7e836aa4579154",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Zone/Zone statements/eStmt_2024-08-30.pdf",
+   "bytes": 427729,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2024-08-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "46f09298bc79c9f3",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Zone/Zone statements/eStmt_2024-09-30.pdf",
+   "bytes": 417125,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2024-09-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "29fcab0fc22d6e0a",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Zone/Zone statements/eStmt_2024-10-31.pdf",
+   "bytes": 425462,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2024-10-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "70d5f542a0da1450",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Zone/Zone statements/eStmt_2024-11-29.pdf",
+   "bytes": 394022,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2024-11-29",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "fed67a40705ea709",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Zone/Zone statements/eStmt_2024-12-31.pdf",
+   "bytes": 436431,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2024-12-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "5641c0c8c6c008d3",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Zone/Zone statements/eStmt_2025-01-31.pdf",
+   "bytes": 343338,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2025-01-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "0cf667cf99cb1e12",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Zone/Zone statements/eStmt_2025-02-28.pdf",
+   "bytes": 371175,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2025-02-28",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "82a3544a0672d023",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Zone/Zone statements/eStmt_2025-03-31.pdf",
+   "bytes": 368287,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2025-03-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "cb276d88c30e75df",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Zone/Zone statements/eStmt_2025-04-30.pdf",
+   "bytes": 276191,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2025-04-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "75122b2e9f0562c9",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Zone/Zone statements/eStmt_2025-05-30.pdf",
+   "bytes": 266306,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2025-05-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "b039111fdff793a3",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Zone/Zone statements/eStmt_2025-06-30.pdf",
+   "bytes": 272569,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2025-06-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "80d2b1cb90f5b7d8",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Zone/Zone statements/eStmt_2025-07-31.pdf",
+   "bytes": 270943,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2025-07-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "e11517a94ed2cb80",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Zone/Zone statements/eStmt_2025-08-29.pdf",
+   "bytes": 292114,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2025-08-29",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "01e28d15ebc02e67",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Zone/Zone statements/eStmt_2025-09-30.pdf",
+   "bytes": 277756,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2025-09-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "76253e8509f1a1d3",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Zone/Zone statements/eStmt_2025-10-31.pdf",
+   "bytes": 268329,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2025-10-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "21a799e80ef86602",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Zone/Zone statements/eStmt_2025-11-28.pdf",
+   "bytes": 294654,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2025-11-28",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "00e21d2b41485089",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Zone/Zone statements/eStmt_2025-12-31.pdf",
+   "bytes": 352448,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2025-12-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "b5b50f57dd4747fd",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Zone/Zone statements/eStmt_2026-01-30.pdf",
+   "bytes": 298484,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2026-01-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "7a7f03091563c543",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Zone/Zone statements/eStmt_2026-02-27.pdf",
+   "bytes": 286287,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2026-02-27",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "23222e504d4ab5b7",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Zone/Zone statements/eStmt_2026-03-31.pdf",
+   "bytes": 312343,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2026-03-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "b5e6cdf45c8e64f2",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Zone/Zone statements/eStmt_2026-04-30.pdf",
+   "bytes": 285213,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2026-04-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "faf3cf5244d0b277",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Zone/Zone statements/eStmt_2026-05-29.pdf",
+   "bytes": 284100,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2026-05-29",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "714516088ac9fbb2",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Zone/Zone statements/eStmt_2026-06-30.pdf",
+   "bytes": 277287,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2026-06-30",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "82f4d7434b1e5ec3",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Zone/Zone statements/eStmt_2026-07-31.pdf",
+   "bytes": 294689,
+   "modified": "2026-08-28",
+   "kind": "bank_statement",
+   "entity": "ZONE",
+   "period": "2026-07-31",
+   "note": "BofA statement PDF. Identity is the FULL PATH -- seven accounts share these names.",
+   "used_by": [],
+   "sha256": "67b03b6cb2f6a5ee",
+   "copies": []
+  },
+  {
+   "path": "data/raw/amex/amex/activity (1).xlsx",
+   "bytes": 12048,
+   "modified": "2026-08-31",
+   "kind": "card_export",
+   "entity": null,
+   "period": null,
+   "note": "AmEx card export. No beginning/ending balance -- control: none. Cross-check card payments against the verified bank statements instead.",
+   "used_by": [],
+   "sheets": 2,
+   "sheet_names": [
+    "Transaction Details",
+    "Transaction Summary"
+   ],
+   "sha256": "a335af190b01a492",
+   "copies": []
+  },
+  {
+   "path": "data/raw/amex/amex/activity (10).xlsx",
+   "bytes": 51131,
+   "modified": "2026-08-31",
+   "kind": "card_export",
+   "entity": null,
+   "period": null,
+   "note": "AmEx card export. No beginning/ending balance -- control: none. Cross-check card payments against the verified bank statements instead.",
+   "used_by": [],
+   "sheets": 2,
+   "sheet_names": [
+    "Transaction Details",
+    "Transaction Summary"
+   ],
+   "sha256": "a2544f90ee5caeeb",
+   "copies": []
+  },
+  {
+   "path": "data/raw/amex/amex/activity (11).xlsx",
+   "bytes": 36326,
+   "modified": "2026-08-31",
+   "kind": "card_export",
+   "entity": null,
+   "period": null,
+   "note": "AmEx card export. No beginning/ending balance -- control: none. Cross-check card payments against the verified bank statements instead.",
+   "used_by": [],
+   "sheets": 2,
+   "sheet_names": [
+    "Transaction Details",
+    "Transaction Summary"
+   ],
+   "sha256": "6beaaada27e1a462",
+   "copies": []
+  },
+  {
+   "path": "data/raw/amex/amex/activity (12).xlsx",
+   "bytes": 39586,
+   "modified": "2026-08-31",
+   "kind": "card_export",
+   "entity": null,
+   "period": null,
+   "note": "AmEx card export. No beginning/ending balance -- control: none. Cross-check card payments against the verified bank statements instead.",
+   "used_by": [],
+   "sheets": 2,
+   "sheet_names": [
+    "Transaction Details",
+    "Transaction Summary"
+   ],
+   "sha256": "9a9acb9b11fdd913",
+   "copies": []
+  },
+  {
+   "path": "data/raw/amex/amex/activity (13).xlsx",
+   "bytes": 40533,
+   "modified": "2026-08-31",
+   "kind": "card_export",
+   "entity": null,
+   "period": null,
+   "note": "AmEx card export. No beginning/ending balance -- control: none. Cross-check card payments against the verified bank statements instead.",
+   "used_by": [],
+   "sheets": 2,
+   "sheet_names": [
+    "Transaction Details",
+    "Transaction Summary"
+   ],
+   "sha256": "b96d2b7e57739900",
+   "copies": []
+  },
+  {
+   "path": "data/raw/amex/amex/activity (14).xlsx",
+   "bytes": 52264,
+   "modified": "2026-08-31",
+   "kind": "card_export",
+   "entity": null,
+   "period": null,
+   "note": "AmEx card export. No beginning/ending balance -- control: none. Cross-check card payments against the verified bank statements instead.",
+   "used_by": [],
+   "sheets": 2,
+   "sheet_names": [
+    "Transaction Details",
+    "Transaction Summary"
+   ],
+   "sha256": "5b2f380105b63c22",
+   "copies": []
+  },
+  {
+   "path": "data/raw/amex/amex/activity (15).xlsx",
+   "bytes": 50679,
+   "modified": "2026-08-31",
+   "kind": "card_export",
+   "entity": null,
+   "period": null,
+   "note": "AmEx card export. No beginning/ending balance -- control: none. Cross-check card payments against the verified bank statements instead.",
+   "used_by": [],
+   "sheets": 2,
+   "sheet_names": [
+    "Transaction Details",
+    "Transaction Summary"
+   ],
+   "sha256": "1d41102d031b5d9a",
+   "copies": []
+  },
+  {
+   "path": "data/raw/amex/amex/activity (16).xlsx",
+   "bytes": 58605,
+   "modified": "2026-08-31",
+   "kind": "card_export",
+   "entity": null,
+   "period": null,
+   "note": "AmEx card export. No beginning/ending balance -- control: none. Cross-check card payments against the verified bank statements instead.",
+   "used_by": [],
+   "sheets": 2,
+   "sheet_names": [
+    "Transaction Details",
+    "Transaction Summary"
+   ],
+   "sha256": "e4add4ea0daaea99",
+   "copies": []
+  },
+  {
+   "path": "data/raw/amex/amex/activity (17).xlsx",
+   "bytes": 52852,
+   "modified": "2026-08-31",
+   "kind": "card_export",
+   "entity": null,
+   "period": null,
+   "note": "AmEx card export. No beginning/ending balance -- control: none. Cross-check card payments against the verified bank statements instead.",
+   "used_by": [],
+   "sheets": 2,
+   "sheet_names": [
+    "Transaction Details",
+    "Transaction Summary"
+   ],
+   "sha256": "0e1dadf3259b9cce",
+   "copies": []
+  },
+  {
+   "path": "data/raw/amex/amex/activity (18).xlsx",
+   "bytes": 68176,
+   "modified": "2026-08-31",
+   "kind": "card_export",
+   "entity": null,
+   "period": null,
+   "note": "AmEx card export. No beginning/ending balance -- control: none. Cross-check card payments against the verified bank statements instead.",
+   "used_by": [],
+   "sheets": 2,
+   "sheet_names": [
+    "Transaction Details",
+    "Transaction Summary"
+   ],
+   "sha256": "ec26aafb0e61cd0b",
+   "copies": []
+  },
+  {
+   "path": "data/raw/amex/amex/activity (19).xlsx",
+   "bytes": 64258,
+   "modified": "2026-08-31",
+   "kind": "card_export",
+   "entity": null,
+   "period": null,
+   "note": "AmEx card export. No beginning/ending balance -- control: none. Cross-check card payments against the verified bank statements instead.",
+   "used_by": [],
+   "sheets": 2,
+   "sheet_names": [
+    "Transaction Details",
+    "Transaction Summary"
+   ],
+   "sha256": "2bcc1caec27b1fd9",
+   "copies": []
+  },
+  {
+   "path": "data/raw/amex/amex/activity (2).xlsx",
+   "bytes": 19996,
+   "modified": "2026-08-31",
+   "kind": "card_export",
+   "entity": null,
+   "period": null,
+   "note": "AmEx card export. No beginning/ending balance -- control: none. Cross-check card payments against the verified bank statements instead.",
+   "used_by": [],
+   "sheets": 2,
+   "sheet_names": [
+    "Transaction Details",
+    "Transaction Summary"
+   ],
+   "sha256": "2323b800c90b9d10",
+   "copies": []
+  },
+  {
+   "path": "data/raw/amex/amex/activity (3).xlsx",
+   "bytes": 33713,
+   "modified": "2026-08-31",
+   "kind": "card_export",
+   "entity": null,
+   "period": null,
+   "note": "AmEx card export. No beginning/ending balance -- control: none. Cross-check card payments against the verified bank statements instead.",
+   "used_by": [],
+   "sheets": 2,
+   "sheet_names": [
+    "Transaction Details",
+    "Transaction Summary"
+   ],
+   "sha256": "ab3623139ec4030a",
+   "copies": []
+  },
+  {
+   "path": "data/raw/amex/amex/activity (4).xlsx",
+   "bytes": 54932,
+   "modified": "2026-08-31",
+   "kind": "card_export",
+   "entity": null,
+   "period": null,
+   "note": "AmEx card export. No beginning/ending balance -- control: none. Cross-check card payments against the verified bank statements instead.",
+   "used_by": [],
+   "sheets": 2,
+   "sheet_names": [
+    "Transaction Details",
+    "Transaction Summary"
+   ],
+   "sha256": "b5568f32972077b3",
+   "copies": []
+  },
+  {
+   "path": "data/raw/amex/amex/activity (5).xlsx",
+   "bytes": 39798,
+   "modified": "2026-08-31",
+   "kind": "card_export",
+   "entity": null,
+   "period": null,
+   "note": "AmEx card export. No beginning/ending balance -- control: none. Cross-check card payments against the verified bank statements instead.",
+   "used_by": [],
+   "sheets": 2,
+   "sheet_names": [
+    "Transaction Details",
+    "Transaction Summary"
+   ],
+   "sha256": "085e6b0ffb5f6574",
+   "copies": []
+  },
+  {
+   "path": "data/raw/amex/amex/activity (6).xlsx",
+   "bytes": 45276,
+   "modified": "2026-08-31",
+   "kind": "card_export",
+   "entity": null,
+   "period": null,
+   "note": "AmEx card export. No beginning/ending balance -- control: none. Cross-check card payments against the verified bank statements instead.",
+   "used_by": [],
+   "sheets": 2,
+   "sheet_names": [
+    "Transaction Details",
+    "Transaction Summary"
+   ],
+   "sha256": "862c938683a2c443",
+   "copies": []
+  },
+  {
+   "path": "data/raw/amex/amex/activity (7).xlsx",
+   "bytes": 48743,
+   "modified": "2026-08-31",
+   "kind": "card_export",
+   "entity": null,
+   "period": null,
+   "note": "AmEx card export. No beginning/ending balance -- control: none. Cross-check card payments against the verified bank statements instead.",
+   "used_by": [],
+   "sheets": 2,
+   "sheet_names": [
+    "Transaction Details",
+    "Transaction Summary"
+   ],
+   "sha256": "a2394236d84a07ec",
+   "copies": []
+  },
+  {
+   "path": "data/raw/amex/amex/activity (8).xlsx",
+   "bytes": 44157,
+   "modified": "2026-08-31",
+   "kind": "card_export",
+   "entity": null,
+   "period": null,
+   "note": "AmEx card export. No beginning/ending balance -- control: none. Cross-check card payments against the verified bank statements instead.",
+   "used_by": [],
+   "sheets": 2,
+   "sheet_names": [
+    "Transaction Details",
+    "Transaction Summary"
+   ],
+   "sha256": "154e72baa27ce0f5",
+   "copies": []
+  },
+  {
+   "path": "data/raw/amex/amex/activity (9).xlsx",
+   "bytes": 56978,
+   "modified": "2026-08-31",
+   "kind": "card_export",
+   "entity": null,
+   "period": null,
+   "note": "AmEx card export. No beginning/ending balance -- control: none. Cross-check card payments against the verified bank statements instead.",
+   "used_by": [],
+   "sheets": 2,
+   "sheet_names": [
+    "Transaction Details",
+    "Transaction Summary"
+   ],
+   "sha256": "2c6899bb3283e799",
+   "copies": []
+  },
+  {
+   "path": "data/raw/amex/amex/activity.xlsx",
+   "bytes": 371715,
+   "modified": "2026-08-31",
+   "kind": "card_export",
+   "entity": null,
+   "period": null,
+   "note": "AmEx card export. No beginning/ending balance -- control: none. Cross-check card payments against the verified bank statements instead.",
+   "used_by": [],
+   "sheets": 2,
+   "sheet_names": [
+    "Transaction Details",
+    "Transaction Summary"
+   ],
+   "sha256": "d9979e3f4bcd82d9",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/6baf5c6a-OO_and_LO_drivers_report.xlsx",
+   "bytes": 11862,
+   "modified": "2026-09-04",
+   "kind": "driver_roster",
+   "entity": "XTRACK",
+   "period": null,
+   "note": "Owner-operator and lease-operator roster.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet1"
+   ],
+   "sha256": "ecda3269793451d9",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/6baf5c6a-OO_and_LO_drivers_report.xlsx"
+   ]
+  },
+  {
+   "path": "data/raw/xtrack/Afg_stmt_AprilAugust/Afg stmt April-August/AFG TRANSPORT CO-Statements-202616-50K 13-19 April.xlsx",
+   "bytes": 6802,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "AFG",
+   "period": "wk16 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "47c6093a3fa17e76",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Afg_stmt_AprilAugust/Afg stmt April-August/AFG TRANSPORT CO-Statements-202617-13U 20-26 April.xlsx",
+   "bytes": 7016,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "AFG",
+   "period": "wk17 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "c0449d73b829fd5a",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Afg_stmt_AprilAugust/Afg stmt April-August/AFG TRANSPORT CO-Statements-202618-QD5 27-03 May.xlsx",
+   "bytes": 7031,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "AFG",
+   "period": "wk18 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "578efc80236ec10d",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Afg_stmt_AprilAugust/Afg stmt April-August/AFG TRANSPORT CO-Statements-202619-XWH 04-10 May.xlsx",
+   "bytes": 7021,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "AFG",
+   "period": "wk19 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "fe72eb43c34917da",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Afg_stmt_AprilAugust/Afg stmt April-August/AFG TRANSPORT CO-Statements-202620-XSJ 11-17 May.xlsx",
+   "bytes": 7435,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "AFG",
+   "period": "wk20 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "7b773eea566c9ab7",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Afg_stmt_AprilAugust/Afg stmt April-August/AFG TRANSPORT CO-Statements-202621-CF6 18-24 May.xlsx",
+   "bytes": 7552,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "AFG",
+   "period": "wk21 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "ffe6a5dfff9f989e",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Afg_stmt_AprilAugust/Afg stmt April-August/AFG TRANSPORT CO-Statements-202622-890 25-31 May.xlsx",
+   "bytes": 7698,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "AFG",
+   "period": "wk22 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "ea199e4a5d432f9d",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Afg_stmt_AprilAugust/Afg stmt April-August/AFG TRANSPORT CO-Statements-202623-AI5 01-07 June.xlsx",
+   "bytes": 7704,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "AFG",
+   "period": "wk23 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "b21448e52b74bfc6",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Afg_stmt_AprilAugust/Afg stmt April-August/AFG TRANSPORT CO-Statements-202624-LR2 08-14 June.xlsx",
+   "bytes": 7809,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "AFG",
+   "period": "wk24 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "2b5c26f8df61d6ea",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Afg_stmt_AprilAugust/Afg stmt April-August/AFG TRANSPORT CO-Statements-202625-IGC 15-21 June.xlsx",
+   "bytes": 7690,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "AFG",
+   "period": "wk25 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "f07a75c0ff5d0c82",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Afg_stmt_AprilAugust/Afg stmt April-August/AFG TRANSPORT CO-Statements-202626-LT3 22-28 June.xlsx",
+   "bytes": 7840,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "AFG",
+   "period": "wk26 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "1a9cbe93a2a14b6a",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Afg_stmt_AprilAugust/Afg stmt April-August/AFG TRANSPORT CO-Statements-202627-5XE 29-05 July.xlsx",
+   "bytes": 7915,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "AFG",
+   "period": "wk27 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "7c666f5585bcea20",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Afg_stmt_AprilAugust/Afg stmt April-August/AFG TRANSPORT CO-Statements-202628-Y86 06-12 July.xlsx",
+   "bytes": 7617,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "AFG",
+   "period": "wk28 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "9a851f81a805c99a",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Afg_stmt_AprilAugust/Afg stmt April-August/AFG TRANSPORT CO-Statements-202629-DEG 13-19 July.xlsx",
+   "bytes": 7945,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "AFG",
+   "period": "wk29 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "203398656d25c174",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Afg_stmt_AprilAugust/Afg stmt April-August/AFG TRANSPORT CO-Statements-202630-4CW 20-26 July.xlsx",
+   "bytes": 8375,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "AFG",
+   "period": "wk30 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "8fc6ee16e77f8950",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Afg_stmt_AprilAugust/Afg stmt April-August/AFG TRANSPORT CO-Statements-202631-WTV 27-02 August.xlsx",
+   "bytes": 8324,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "AFG",
+   "period": "wk31 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "67b9a39ebf6f680e",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Afg_stmt_AprilAugust/Afg stmt April-August/AFG TRANSPORT CO-Statements-202632-NQQ 03-09 August.xlsx",
+   "bytes": 8309,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "AFG",
+   "period": "wk32 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "ad916e161fa12994",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Afg_stmt_AprilAugust/Afg stmt April-August/AFG TRANSPORT CO-Statements-202633-TO8 10-16 August.xlsx",
+   "bytes": 8305,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "AFG",
+   "period": "wk33 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "18421c9248486887",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Afg_stmt_AprilAugust/Afg stmt April-August/AFG TRANSPORT CO-Statements-202634-0DP 17-23 August.xlsx",
+   "bytes": 8431,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "AFG",
+   "period": "wk34 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "bf05adad121d309d",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Afg_stmt_AprilAugust/Afg stmt April-August/AFG TRANSPORT CO-Statements-202635-0UY 24-30 August.xlsx",
+   "bytes": 8649,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "AFG",
+   "period": "wk35 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "41b06c78fa91e60c",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Xtrack_stmt_MarchAugust/Xtrack stmt March-August/Xtrack LLC-Statements-202610-PNN 02-08 March.xlsx",
+   "bytes": 9548,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "XTRACK",
+   "period": "wk10 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "080d6cf2b5fb9f09",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Xtrack_stmt_MarchAugust/Xtrack stmt March-August/Xtrack LLC-Statements-202611-ONQ 09-15 March.xlsx",
+   "bytes": 10345,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "XTRACK",
+   "period": "wk11 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "4d483bf14dfb3117",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Xtrack_stmt_MarchAugust/Xtrack stmt March-August/Xtrack LLC-Statements-202612-2QL 16-22 March.xlsx",
+   "bytes": 10291,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "XTRACK",
+   "period": "wk12 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "30970eb8b5bcf40d",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Xtrack_stmt_MarchAugust/Xtrack stmt March-August/Xtrack LLC-Statements-202613-CUP 23-29 March.xlsx",
+   "bytes": 10305,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "XTRACK",
+   "period": "wk13 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "a51936a20e07f493",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Xtrack_stmt_MarchAugust/Xtrack stmt March-August/Xtrack LLC-Statements-202614-S9K 30-05 April.xlsx",
+   "bytes": 10172,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "XTRACK",
+   "period": "wk14 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "9c7616d9992ada8c",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Xtrack_stmt_MarchAugust/Xtrack stmt March-August/Xtrack LLC-Statements-202615-7CO 06-12 April.xlsx",
+   "bytes": 10673,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "XTRACK",
+   "period": "wk15 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "28aa31d011b3fc58",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Xtrack_stmt_MarchAugust/Xtrack stmt March-August/Xtrack LLC-Statements-202616-ZQ1 13-19 April.xlsx",
+   "bytes": 10765,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "XTRACK",
+   "period": "wk16 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "d5da0a702fd8d10e",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Xtrack_stmt_MarchAugust/Xtrack stmt March-August/Xtrack LLC-Statements-202617-M9S 20-26 April.xlsx",
+   "bytes": 11092,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "XTRACK",
+   "period": "wk17 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "70b43f4ac9617d44",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Xtrack_stmt_MarchAugust/Xtrack stmt March-August/Xtrack LLC-Statements-202618-B1E 27-03 May.xlsx",
+   "bytes": 11250,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "XTRACK",
+   "period": "wk18 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "30f08348d18e430c",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Xtrack_stmt_MarchAugust/Xtrack stmt March-August/Xtrack LLC-Statements-202619-S8V 04-10 May.xlsx",
+   "bytes": 11175,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "XTRACK",
+   "period": "wk19 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "33ba7f36f4665304",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Xtrack_stmt_MarchAugust/Xtrack stmt March-August/Xtrack LLC-Statements-202620-Y6Q 11-17 May.xlsx",
+   "bytes": 10709,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "XTRACK",
+   "period": "wk20 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "a56d89b872c6c808",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Xtrack_stmt_MarchAugust/Xtrack stmt March-August/Xtrack LLC-Statements-202621-L22 18-24 May.xlsx",
+   "bytes": 10907,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "XTRACK",
+   "period": "wk21 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "05b8cf9119a50765",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Xtrack_stmt_MarchAugust/Xtrack stmt March-August/Xtrack LLC-Statements-202622-HQZ 25-31 May.xlsx",
+   "bytes": 10708,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "XTRACK",
+   "period": "wk22 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "44dd8a2ed822cbec",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Xtrack_stmt_MarchAugust/Xtrack stmt March-August/Xtrack LLC-Statements-202623-7QX 01-07 June.xlsx",
+   "bytes": 11429,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "XTRACK",
+   "period": "wk23 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "5b0b54e974886958",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Xtrack_stmt_MarchAugust/Xtrack stmt March-August/Xtrack LLC-Statements-202624-67K 08-14 june.xlsx",
+   "bytes": 11117,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "XTRACK",
+   "period": "wk24 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "5ae7b8d0cafe0e73",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Xtrack_stmt_MarchAugust/Xtrack stmt March-August/Xtrack LLC-Statements-202625-HSS 15-21 June.xlsx",
+   "bytes": 11263,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "XTRACK",
+   "period": "wk25 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "c575385fdd353061",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Xtrack_stmt_MarchAugust/Xtrack stmt March-August/Xtrack LLC-Statements-202626-30I 22-28 June.xlsx",
+   "bytes": 11475,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "XTRACK",
+   "period": "wk26 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "da55e43bd176c889",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Xtrack_stmt_MarchAugust/Xtrack stmt March-August/Xtrack LLC-Statements-202627-TGG 29-05 July.xlsx",
+   "bytes": 11193,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "XTRACK",
+   "period": "wk27 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "3c2a6c6ef9b37a5a",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Xtrack_stmt_MarchAugust/Xtrack stmt March-August/Xtrack LLC-Statements-202628-6V4 06-12 July.xlsx",
+   "bytes": 11250,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "XTRACK",
+   "period": "wk28 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "8032df9679837cd1",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Xtrack_stmt_MarchAugust/Xtrack stmt March-August/Xtrack LLC-Statements-202629-ZF5 13-19 July.xlsx",
+   "bytes": 11186,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "XTRACK",
+   "period": "wk29 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "8cd963909ccf3a52",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Xtrack_stmt_MarchAugust/Xtrack stmt March-August/Xtrack LLC-Statements-202630-JL1 20-26 July.xlsx",
+   "bytes": 11369,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "XTRACK",
+   "period": "wk30 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "9e1c9dc367d2a13e",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Xtrack_stmt_MarchAugust/Xtrack stmt March-August/Xtrack LLC-Statements-202631-SQP 27-02 August.xlsx",
+   "bytes": 10935,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "XTRACK",
+   "period": "wk31 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "bb677f20b09f4497",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Xtrack_stmt_MarchAugust/Xtrack stmt March-August/Xtrack LLC-Statements-202632-YWL 03-09 August.xlsx",
+   "bytes": 10934,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "XTRACK",
+   "period": "wk32 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "38698b031e8cc7de",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Xtrack_stmt_MarchAugust/Xtrack stmt March-August/Xtrack LLC-Statements-202633-5E2 10-16 August.xlsx",
+   "bytes": 11501,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "XTRACK",
+   "period": "wk33 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "19594e276665a4a4",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Xtrack_stmt_MarchAugust/Xtrack stmt March-August/Xtrack LLC-Statements-202634-X28 17-23 August.xlsx",
+   "bytes": 11921,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "XTRACK",
+   "period": "wk34 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "cd6848529255e890",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Xtrack_stmt_MarchAugust/Xtrack stmt March-August/Xtrack LLC-Statements-202635-XQC 24-30 August.xlsx",
+   "bytes": 11092,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "XTRACK",
+   "period": "wk35 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "4abae172e9dbf873",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Zone_stmt_MarchAugust/Zone stmt March-August/Zone-OH LLC-Statements-202610-S5Z 02-08 March.xlsx",
+   "bytes": 10487,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "ZONE",
+   "period": "wk10 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "8cbd88fea57814fc",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Zone_stmt_MarchAugust/Zone stmt March-August/Zone-OH LLC-Statements-202611-584 09-15 March.xlsx",
+   "bytes": 10834,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "ZONE",
+   "period": "wk11 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "0f571dc464f22bcb",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Zone_stmt_MarchAugust/Zone stmt March-August/Zone-OH LLC-Statements-202612-FHC 16-22 March.xlsx",
+   "bytes": 12317,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "ZONE",
+   "period": "wk12 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "f772913d97ecbc50",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Zone_stmt_MarchAugust/Zone stmt March-August/Zone-OH LLC-Statements-202613-4HH 23-29 March.xlsx",
+   "bytes": 10767,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "ZONE",
+   "period": "wk13 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "b4266747321ea9e5",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Zone_stmt_MarchAugust/Zone stmt March-August/Zone-OH LLC-Statements-202614-QBV 30-05 April.xlsx",
+   "bytes": 10637,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "ZONE",
+   "period": "wk14 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "bb95c94a6bd4cda4",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Zone_stmt_MarchAugust/Zone stmt March-August/Zone-OH LLC-Statements-202615-MBK 06-12 April.xlsx",
+   "bytes": 10298,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "ZONE",
+   "period": "wk15 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "d1359027ecf6f66e",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Zone_stmt_MarchAugust/Zone stmt March-August/Zone-OH LLC-Statements-202616-W8J 13-19 April.xlsx",
+   "bytes": 10164,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "ZONE",
+   "period": "wk16 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "15b81cdde93355e1",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Zone_stmt_MarchAugust/Zone stmt March-August/Zone-OH LLC-Statements-202617-JHH 20-26 April.xlsx",
+   "bytes": 10190,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "ZONE",
+   "period": "wk17 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "f3fe01793d6e376e",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Zone_stmt_MarchAugust/Zone stmt March-August/Zone-OH LLC-Statements-202618-4ZX 27-03 May.xlsx",
+   "bytes": 10040,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "ZONE",
+   "period": "wk18 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "dd1ec0232d49302a",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Zone_stmt_MarchAugust/Zone stmt March-August/Zone-OH LLC-Statements-202619-IX8 04-10 May.xlsx",
+   "bytes": 9660,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "ZONE",
+   "period": "wk19 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "bd2e90eecb0b58d8",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Zone_stmt_MarchAugust/Zone stmt March-August/Zone-OH LLC-Statements-202620-MGU 11-17 May.xlsx",
+   "bytes": 9565,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "ZONE",
+   "period": "wk20 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "912637e58ca4a412",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Zone_stmt_MarchAugust/Zone stmt March-August/Zone-OH LLC-Statements-202621-ZDE 18-24 May.xlsx",
+   "bytes": 9858,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "ZONE",
+   "period": "wk21 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "e29166991b09adcb",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Zone_stmt_MarchAugust/Zone stmt March-August/Zone-OH LLC-Statements-202622-AKS 25-31 May.xlsx",
+   "bytes": 9418,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "ZONE",
+   "period": "wk22 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "4a778aa3956236e1",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Zone_stmt_MarchAugust/Zone stmt March-August/Zone-OH LLC-Statements-202623-54Y 01-07 June.xlsx",
+   "bytes": 9637,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "ZONE",
+   "period": "wk23 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "e71f33d8cdda2fa5",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Zone_stmt_MarchAugust/Zone stmt March-August/Zone-OH LLC-Statements-202624-E2T 08-14 June.xlsx",
+   "bytes": 9519,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "ZONE",
+   "period": "wk24 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "afb09813f1e960e0",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Zone_stmt_MarchAugust/Zone stmt March-August/Zone-OH LLC-Statements-202625-HTB 15-21 June.xlsx",
+   "bytes": 9746,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "ZONE",
+   "period": "wk25 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "2ae2cf7109052f58",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Zone_stmt_MarchAugust/Zone stmt March-August/Zone-OH LLC-Statements-202626-36R 22-28 June.xlsx",
+   "bytes": 9646,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "ZONE",
+   "period": "wk26 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "a5b462bc46dba3cf",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Zone_stmt_MarchAugust/Zone stmt March-August/Zone-OH LLC-Statements-202627-2OK 29-05 July.xlsx",
+   "bytes": 9960,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "ZONE",
+   "period": "wk27 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "e54374d2fdef6267",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Zone_stmt_MarchAugust/Zone stmt March-August/Zone-OH LLC-Statements-202628-74E 06-12 July.xlsx",
+   "bytes": 10745,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "ZONE",
+   "period": "wk28 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "e3253184cbad9a71",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Zone_stmt_MarchAugust/Zone stmt March-August/Zone-OH LLC-Statements-202629-QNT 13-19 July.xlsx",
+   "bytes": 10890,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "ZONE",
+   "period": "wk29 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "ca5f370db6d10f73",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Zone_stmt_MarchAugust/Zone stmt March-August/Zone-OH LLC-Statements-202630-800 20-26 July.xlsx",
+   "bytes": 10851,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "ZONE",
+   "period": "wk30 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "dd5a636846f0a810",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Zone_stmt_MarchAugust/Zone stmt March-August/Zone-OH LLC-Statements-202631-BYB 27-02 August.xlsx",
+   "bytes": 11108,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "ZONE",
+   "period": "wk31 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "60025fc9213469a0",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Zone_stmt_MarchAugust/Zone stmt March-August/Zone-OH LLC-Statements-202632-YSO 03-09 August.xlsx",
+   "bytes": 10959,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "ZONE",
+   "period": "wk32 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "71599e16e1636916",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Zone_stmt_MarchAugust/Zone stmt March-August/Zone-OH LLC-Statements-202633-2K5 10-16 August.xlsx",
+   "bytes": 10637,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "ZONE",
+   "period": "wk33 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "b55de52b7add70c3",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Zone_stmt_MarchAugust/Zone stmt March-August/Zone-OH LLC-Statements-202634-V81 7-23 August.xlsx",
+   "bytes": 10499,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "ZONE",
+   "period": "wk34 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "a4b3abe6a4b4fec4",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/Zone_stmt_MarchAugust/Zone stmt March-August/Zone-OH LLC-Statements-202635-84R 24-30 August.xlsx",
+   "bytes": 10853,
+   "modified": "2026-09-02",
+   "kind": "driver_settlement",
+   "entity": "ZONE",
+   "period": "wk35 of 2026",
+   "note": "Weekly driver settlement statements (one workbook per week).",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "statements"
+   ],
+   "sha256": "dfb6b6b6cbffe2db",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/2f5eae22-Invoice_list_STL.xlsx",
+   "bytes": 36010,
+   "modified": "2026-09-04",
+   "kind": "factoring_invoices",
+   "entity": "STL",
+   "period": null,
+   "note": "Triumph factoring invoice list. NO amount-received column -- a 'Short Paid' status carries the FULL invoice value, so it cannot measure what was collected.",
+   "used_by": [],
+   "sheets": 3,
+   "sheet_names": [
+    "Zone",
+    "Xtrack",
+    "AFG"
+   ],
+   "sha256": "1a589e2b4a8527e1",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/2f5eae22-Invoice_list_STL.xlsx"
+   ]
+  },
+  {
+   "path": "data/raw/xtrack/2b75e3c2-Invoice_List_19.xlsx",
+   "bytes": 12197,
+   "modified": "2026-09-04",
+   "kind": "factoring_invoices",
+   "entity": "XTRACK",
+   "period": null,
+   "note": "Triumph factoring invoice list. NO amount-received column -- a 'Short Paid' status carries the FULL invoice value, so it cannot measure what was collected.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Invoice List"
+   ],
+   "sha256": "85808f8f4589a457",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/2b75e3c2-Invoice_List_19.xlsx"
+   ]
+  },
+  {
+   "path": "data/raw/xtrack/b5815381-Invoice_List_XTRACK.xlsx",
+   "bytes": 180362,
+   "modified": "2026-09-04",
+   "kind": "factoring_invoices",
+   "entity": "XTRACK",
+   "period": null,
+   "note": "Triumph factoring invoice list. NO amount-received column -- a 'Short Paid' status carries the FULL invoice value, so it cannot measure what was collected.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Invoice List"
+   ],
+   "sha256": "f352b95494860cba",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/b5815381-Invoice_List_XTRACK.xlsx"
+   ]
+  },
+  {
+   "path": "data/raw/pnl/9f8d6e38-EFS_FUEL_REPORT_XTRACK__2025.xlsx",
+   "bytes": 3924,
+   "modified": "2026-09-02",
+   "kind": "fuel_efs",
+   "entity": "XTRACK",
+   "period": null,
+   "note": "EFS/WEX fuel rail. Carried all diesel through March 2026.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet0"
+   ],
+   "sha256": "678993351af87fb5",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/9f8d6e38-EFS_FUEL_REPORT_XTRACK__2025.xlsx"
+   ]
+  },
+  {
+   "path": "data/raw/pnl/be69f7e1-EFS_FUEL_REPORT_XTRACK___2026.xlsx",
+   "bytes": 56655,
+   "modified": "2026-09-02",
+   "kind": "fuel_efs",
+   "entity": "XTRACK",
+   "period": null,
+   "note": "EFS/WEX fuel rail. Carried all diesel through March 2026.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet0"
+   ],
+   "sha256": "25829ae7b8bbb48e",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/be69f7e1-EFS_FUEL_REPORT_XTRACK___2026.xlsx"
+   ]
+  },
+  {
+   "path": "data/raw/pnl/6ebc2aac-EFS_FUEL_REPORT_ZONE_2025.xlsx",
+   "bytes": 1792036,
+   "modified": "2026-09-02",
+   "kind": "fuel_efs",
+   "entity": "ZONE",
+   "period": null,
+   "note": "EFS/WEX fuel rail. Carried all diesel through March 2026.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet0"
+   ],
+   "sha256": "db55c7d437efd823",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/6ebc2aac-EFS_FUEL_REPORT_ZONE_2025.xlsx"
+   ]
+  },
+  {
+   "path": "data/raw/pnl/f326d606-EFS_FUEL_REPORT_ZONE__2026.xlsx",
+   "bytes": 428697,
+   "modified": "2026-09-02",
+   "kind": "fuel_efs",
+   "entity": "ZONE",
+   "period": null,
+   "note": "EFS/WEX fuel rail. Carried all diesel through March 2026.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet0"
+   ],
+   "sha256": "3ee8c880dc8c3deb",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/f326d606-EFS_FUEL_REPORT_ZONE__2026.xlsx"
+   ]
+  },
+  {
+   "path": "data/raw/pnl/38fff6d2-MarchApril_RELAY.xlsx",
+   "bytes": 527210,
+   "modified": "2026-09-02",
+   "kind": "fuel_relay",
+   "entity": null,
+   "period": null,
+   "note": "Relay Payments fuel rail. Took over in April 2026. A rail itemises what later hits the bank as one draft -- reconcile, never sum.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "March-April"
+   ],
+   "sha256": "8ca28ae405d22f79",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/38fff6d2-MarchApril_RELAY.xlsx"
+   ]
+  },
+  {
+   "path": "data/raw/pnl/b4f9c822-JulyAugust_RELAY.xlsx",
+   "bytes": 1487621,
+   "modified": "2026-09-02",
+   "kind": "fuel_relay",
+   "entity": null,
+   "period": null,
+   "note": "Relay Payments fuel rail. Took over in April 2026. A rail itemises what later hits the bank as one draft -- reconcile, never sum.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "July-August"
+   ],
+   "sha256": "54f34acb0210d7cd",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/b4f9c822-JulyAugust_RELAY.xlsx"
+   ]
+  },
+  {
+   "path": "data/raw/pnl/c4014f81-MayJune_RELAY.xlsx",
+   "bytes": 1313262,
+   "modified": "2026-09-02",
+   "kind": "fuel_relay",
+   "entity": null,
+   "period": null,
+   "note": "Relay Payments fuel rail. Took over in April 2026. A rail itemises what later hits the bank as one draft -- reconcile, never sum.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "May-June"
+   ],
+   "sha256": "7ebd56b1c24a7e0d",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/c4014f81-MayJune_RELAY.xlsx"
+   ]
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - AFG/AFG 05.22.26.pdf",
+   "bytes": 31888,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "AFG",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "6cb8645978e26d74",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - AFG/AFG 05.29.26.pdf",
+   "bytes": 31200,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "AFG",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "07ac400c200fb783",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - AFG/AFG 06.05.26.pdf",
+   "bytes": 30985,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "AFG",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "ec80a7d4e847c929",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - AFG/AFG 06.12.26.pdf",
+   "bytes": 31027,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "AFG",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "854b14173c795306",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - AFG/AFG 06.19.26.pdf",
+   "bytes": 31695,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "AFG",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "ec4dcbd7b1eb6c24",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - AFG/AFG 06.26.26.pdf",
+   "bytes": 32599,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "AFG",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "c2435c177d1778dd",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - AFG/AFG 07.03.26.pdf",
+   "bytes": 31217,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "AFG",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "722f99c96f511408",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - AFG/AFG 07.10.26.pdf",
+   "bytes": 30987,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "AFG",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "d5e5c67184f70392",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - AFG/AFG 07.17.26.pdf",
+   "bytes": 30195,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "AFG",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "609bdb85f1acc5c3",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - AFG/AFG 07.31.26.pdf",
+   "bytes": 31576,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "AFG",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "e6be945f9e57d02b",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - AFG/AFG 08.07.26.pdf",
+   "bytes": 31969,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "AFG",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "f8743a0a14d13ac4",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - AFG/AFG 08.14.26.pdf",
+   "bytes": 31572,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "AFG",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "2d5e42e35c327c98",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - AFG/AFG 08.21.26.pdf",
+   "bytes": 31598,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "AFG",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "dab0c56e135c48cf",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Xtrack/Xtrack 05.15.26.pdf",
+   "bytes": 33129,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "XTRACK",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "23ba59da9dc6f13b",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Xtrack/Xtrack 05.22.26.pdf",
+   "bytes": 31792,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "XTRACK",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "e56ec4dab0eccbe0",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Xtrack/Xtrack 05.29.26.pdf",
+   "bytes": 31668,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "XTRACK",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "40204f08c53128a8",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Xtrack/Xtrack 06.05.26.pdf",
+   "bytes": 32180,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "XTRACK",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "7867ac358a49b49c",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Xtrack/Xtrack 06.12.26.pdf",
+   "bytes": 33188,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "XTRACK",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "71841f37acb916ec",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Xtrack/Xtrack 06.19.26.pdf",
+   "bytes": 32095,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "XTRACK",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "b8112549c2a154b5",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Xtrack/Xtrack 06.26.26.pdf",
+   "bytes": 32971,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "XTRACK",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "8c86783358d5ac5a",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Xtrack/Xtrack 07.03.26.pdf",
+   "bytes": 33331,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "XTRACK",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "e104c5e4b207d328",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Xtrack/Xtrack 07.10.26.pdf",
+   "bytes": 30945,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "XTRACK",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "08bf6acfeebf4b3b",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Xtrack/Xtrack 07.17.26.pdf",
+   "bytes": 33105,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "XTRACK",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "0f5ab6f175334d9c",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Xtrack/Xtrack 07.24.26.pdf",
+   "bytes": 31599,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "XTRACK",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "1e75258d071dd0ff",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Xtrack/Xtrack 07.31.26.pdf",
+   "bytes": 30934,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "XTRACK",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "6e266e91e2e58f25",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Xtrack/Xtrack 08.07.26.pdf",
+   "bytes": 34021,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "XTRACK",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "9349470812fac04b",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Xtrack/Xtrack 08.14.26.pdf",
+   "bytes": 32809,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "XTRACK",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "03b9d6a52059bcc9",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Xtrack/Xtrack 08.21.26.pdf",
+   "bytes": 34104,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "XTRACK",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "dc4764b776135bb5",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 01.02.26 1.pdf",
+   "bytes": 31920,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "7026c4ccf4f3360c",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 01.02.26 2.pdf",
+   "bytes": 30714,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "a32c06a0ca25c9ec",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 01.02.26 3.pdf",
+   "bytes": 32076,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "5cfaaa83fcf8c0cc",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 01.09.26.pdf",
+   "bytes": 31391,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "1f8110cd303910f5",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 01.16.26.pdf",
+   "bytes": 30755,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "0c13c35dfceab77c",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 01.23.26.pdf",
+   "bytes": 33779,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "d10c79a037f1ebeb",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 01.30.26.pdf",
+   "bytes": 31829,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "9a9f1ccc989eabc8",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 02.06.26.pdf",
+   "bytes": 32740,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "e1ac5298b364d9b1",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 02.13.26.pdf",
+   "bytes": 32985,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "95585f36fedf2bed",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 02.20.26.pdf",
+   "bytes": 32078,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "d027c719982369f4",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 02.27.26.pdf",
+   "bytes": 33390,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "95ae5dc3e20b461e",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 03.06.26.pdf",
+   "bytes": 31922,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "91c7f8bffa29b673",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 03.13.26.pdf",
+   "bytes": 33970,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "514d1fceec19a832",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 03.20.26.pdf",
+   "bytes": 31954,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "955df832924a3ab8",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 03.27.26.pdf",
+   "bytes": 31877,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "ce48937ae7d61f07",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 04.03.26.pdf",
+   "bytes": 31344,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "ae98bec315b72188",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 04.10.26.pdf",
+   "bytes": 31901,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "be865a11299c5931",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 04.17.26.pdf",
+   "bytes": 32470,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "9f2da081318521ca",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 04.24.26.pdf",
+   "bytes": 33245,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "231d754ef10aed47",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 05.01.26.pdf",
+   "bytes": 32504,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "86282804e63207a7",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 05.08.26.pdf",
+   "bytes": 33250,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "458c2100f178bc93",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 05.15.26.pdf",
+   "bytes": 31936,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "c2e6fb7ae5a4e362",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 05.22.26.pdf",
+   "bytes": 32058,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "b8ab65a319905c4f",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 05.29.26.pdf",
+   "bytes": 30989,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "bf77d7313fc83ca5",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 06.05.26.pdf",
+   "bytes": 30762,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "ab4e1da54be8b141",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 06.12.26.pdf",
+   "bytes": 31026,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "6a7abd106fb860a0",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 06.19.26.pdf",
+   "bytes": 30746,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "865f403dee333c5a",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 06.26.26.pdf",
+   "bytes": 31662,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "bbe74623751e8115",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 07.03.26.pdf",
+   "bytes": 32109,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "1940342453ca0b30",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 07.10.26.pdf",
+   "bytes": 31019,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "2e3bfaa4254a3ecc",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 07.17.26.pdf",
+   "bytes": 31913,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "aa531ed6af3eaa2c",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 07.24.26.pdf",
+   "bytes": 31371,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "159385f702d6093e",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 07.31.26.pdf",
+   "bytes": 31498,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "fb5f15ef72015c84",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 08.07.26.pdf",
+   "bytes": 30902,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "a20099acb72347c0",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 08.14.26.pdf",
+   "bytes": 33126,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "0a9fc04e1ee0bbd7",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 08.21.26.pdf",
+   "bytes": 34000,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "99351219eb308156",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 08.22.25 1.pdf",
+   "bytes": 31007,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "5643ccf5a06e4f48",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 08.22.25 2.pdf",
+   "bytes": 31562,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "7aac4b6dd57f9cb2",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 08.29.25.pdf",
+   "bytes": 32430,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "1d1c49071421590c",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 09.05.25.pdf",
+   "bytes": 30976,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "a86b983c5cb389f2",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 09.12.25.pdf",
+   "bytes": 31150,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "8b53231a4854c27b",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 09.26.25.pdf",
+   "bytes": 30956,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "e2702f020d8be943",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 10.03.25.pdf",
+   "bytes": 31782,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "a3085e421c972e34",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 10.10.25.pdf",
+   "bytes": 31976,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "62a5c677b8a8ad87",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 10.17.25 1.pdf",
+   "bytes": 31794,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "5bedc4fd98696f81",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 10.17.25 2.pdf",
+   "bytes": 34319,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "bfecebf4b71bdd04",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 10.24.25.pdf",
+   "bytes": 31848,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "462c2e30c3e6be83",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 10.31.25.pdf",
+   "bytes": 31037,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "f7c5322010570083",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 11.07.25.pdf",
+   "bytes": 33126,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "d9ccb7d2cdc534c9",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 11.14.25.pdf",
+   "bytes": 31662,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "95a320edb37f091b",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 11.21.25.pdf",
+   "bytes": 31376,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "22ff204104c12aa4",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 11.28.25.pdf",
+   "bytes": 31270,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "7a79410a42eeff70",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 12.05.25.pdf",
+   "bytes": 31605,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "ccbcd86e430781de",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/invoices/Iron lease - Zone/Zone 12.12.25.pdf",
+   "bytes": 32602,
+   "modified": "2026-08-28",
+   "kind": "lease_invoice",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Iron Lease's weekly invoices TO an operating company -- the billing side of the intercompany lease, which the bank alone cannot distinguish from funding.",
+   "used_by": [],
+   "sha256": "e2a9b3873732e573",
+   "copies": []
+  },
+  {
+   "path": "data/processed/iron_lease.csv/iron_lease_ledger.csv",
+   "bytes": 8919,
+   "modified": "2026-09-03",
+   "kind": "lease_register",
+   "entity": "IRON_LEASE",
+   "period": null,
+   "note": "Iron Lease register. 'rented'/'sold' in Start date describe the DRIVER's standing, not Iron Lease's.",
+   "used_by": [],
+   "columns": [
+    "entity",
+    "period",
+    "week_start",
+    "week_end",
+    "invoiced",
+    "paid",
+    "date_paid"
+   ],
+   "rows": 130,
+   "sha256": "fd9d4ff05580ae0f",
+   "copies": []
+  },
+  {
+   "path": "data/processed/iron_lease.csv/iron_lease_trucks.csv",
+   "bytes": 2213,
+   "modified": "2026-09-03",
+   "kind": "lease_register",
+   "entity": "IRON_LEASE",
+   "period": null,
+   "note": "Iron Lease register. 'rented'/'sold' in Start date describe the DRIVER's standing, not Iron Lease's.",
+   "used_by": [],
+   "columns": [
+    "entity",
+    "truck",
+    "driver",
+    "start_date",
+    "pu_mileage",
+    "rented_in"
+   ],
+   "rows": 69,
+   "sha256": "6e7bd3ea4117e48a",
+   "copies": []
+  },
+  {
+   "path": "data/processed/iron_lease.csv/iron_lease_weekly.csv",
+   "bytes": 88032,
+   "modified": "2026-09-03",
+   "kind": "lease_register",
+   "entity": "IRON_LEASE",
+   "period": null,
+   "note": "Iron Lease register. 'rented'/'sold' in Start date describe the DRIVER's standing, not Iron Lease's.",
+   "used_by": [],
+   "columns": [
+    "entity",
+    "entity_source",
+    "tab",
+    "week_start",
+    "week_end",
+    "truck",
+    "odo_open",
+    "odo_close",
+    "miles",
+    "mileage_charge",
+    "worked_weeks",
+    "truck_rent",
+    "efs_maintenance"
+   ],
+   "rows": 862,
+   "sha256": "4cc6d971cb5ec4ce",
+   "copies": []
+  },
+  {
+   "path": "data/raw/iron/4d409f87-Iron_lease.xlsx",
+   "bytes": 5476915,
+   "modified": "2026-09-03",
+   "kind": "lease_register",
+   "entity": "IRON_LEASE",
+   "period": "2025-07-21 .. 2026-08-17",
+   "note": "Iron Lease register. 'rented'/'sold' in Start date describe the DRIVER's standing, not Iron Lease's.",
+   "used_by": [
+    "tests/test_catalog.py"
+   ],
+   "sheets": 61,
+   "sheet_names": [
+    "Overall",
+    "Overall Zone",
+    "Overall Xtrack",
+    "Overall AFG",
+    "08.17.26-08.23.26",
+    "08.10.26-08.16.26"
+   ],
+   "sha256": "19ce806dc3209ec6",
+   "copies": [
+    "data/raw/pnl/4d409f87-Iron_lease.xlsx",
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/4d409f87-Iron_lease.xlsx"
+   ]
+  },
+  {
+   "path": "data/raw/ops/dispatcher_history.csv",
+   "bytes": 9481,
+   "modified": "2026-08-31",
+   "kind": "ops_export",
+   "entity": null,
+   "period": null,
+   "note": "Load-level export from the dispatch system: one row per load entry, with pickup/delivery city, gross, miles, dispatcher and pay type. The only source in the corpus below the weekly level.",
+   "used_by": [],
+   "columns": [
+    "id",
+    "driver_id",
+    "dispatcher",
+    "effective_date",
+    "created_at"
+   ],
+   "rows": 163,
+   "sha256": "7135c4577352d591",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ops/drivers.csv",
+   "bytes": 14431,
+   "modified": "2026-08-31",
+   "kind": "ops_export",
+   "entity": null,
+   "period": null,
+   "note": "Load-level export from the dispatch system: one row per load entry, with pickup/delivery city, gross, miles, dispatcher and pay type. The only source in the corpus below the weekly level.",
+   "used_by": [],
+   "columns": [
+    "id",
+    "name",
+    "dispatcher",
+    "truck",
+    "mc",
+    "pay_type",
+    "config",
+    "driver_status",
+    "note",
+    "created_at",
+    "inactive_reason",
+    "inactive_date",
+    "inactive_note",
+    "comeback_date"
+   ],
+   "rows": 130,
+   "sha256": "dc8b3e3449dc6102",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ops/hidden_week_periods.csv",
+   "bytes": 770,
+   "modified": "2026-08-31",
+   "kind": "ops_export",
+   "entity": null,
+   "period": null,
+   "note": "Load-level export from the dispatch system: one row per load entry, with pickup/delivery city, gross, miles, dispatcher and pay type. The only source in the corpus below the weekly level.",
+   "used_by": [],
+   "columns": [
+    "id",
+    "driver_id",
+    "start_date",
+    "end_date",
+    "reason",
+    "created_at"
+   ],
+   "rows": 11,
+   "sha256": "55a1a8d468bcbe85",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ops/load_entries.csv",
+   "bytes": 955720,
+   "modified": "2026-08-31",
+   "kind": "ops_export",
+   "entity": null,
+   "period": null,
+   "note": "Load-level export from the dispatch system: one row per load entry, with pickup/delivery city, gross, miles, dispatcher and pay type. The only source in the corpus below the weekly level.",
+   "used_by": [],
+   "columns": [
+    "id",
+    "week_id",
+    "driver_id",
+    "day_index",
+    "entry_type",
+    "pickup_city",
+    "pickup_gross",
+    "pickup_miles",
+    "delivery_city",
+    "nr_reason",
+    "updated_at",
+    "note",
+    "nr_location",
+    "dispatcher",
+    "pay_type",
+    "created_at"
+   ],
+   "rows": 7906,
+   "sha256": "888458ec64f4ce42",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ops/sub_truck_periods.csv",
+   "bytes": 767,
+   "modified": "2026-08-31",
+   "kind": "ops_export",
+   "entity": null,
+   "period": null,
+   "note": "Load-level export from the dispatch system: one row per load entry, with pickup/delivery city, gross, miles, dispatcher and pay type. The only source in the corpus below the weekly level.",
+   "used_by": [],
+   "columns": [
+    "id",
+    "driver_id",
+    "original_truck",
+    "sub_truck",
+    "reason",
+    "note",
+    "start_date",
+    "end_date",
+    "created_at"
+   ],
+   "rows": 9,
+   "sha256": "c3b069e9727dd942",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ops/weeks.csv",
+   "bytes": 1188,
+   "modified": "2026-08-31",
+   "kind": "ops_export",
+   "entity": null,
+   "period": null,
+   "note": "Load-level export from the dispatch system: one row per load entry, with pickup/delivery city, gross, miles, dispatcher and pay type. The only source in the corpus below the weekly level.",
+   "used_by": [],
+   "columns": [
+    "id",
+    "monday",
+    "month",
+    "quarter",
+    "year",
+    "range_label",
+    "created_at"
+   ],
+   "rows": 14,
+   "sha256": "06ec93111abbbcbe",
+   "copies": []
+  },
+  {
+   "path": "data/raw/xtrack/d0942a1b-payroll_history_report_Xtrack.xlsx",
+   "bytes": 65845,
+   "modified": "2026-09-04",
+   "kind": "payroll",
+   "entity": "XTRACK",
+   "period": null,
+   "note": "Payroll register. ADP is ONE rail for at least five companies, so an ADP total cannot be split by entity without this register.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "report"
+   ],
+   "sha256": "6925aa33a188717f",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/d0942a1b-payroll_history_report_Xtrack.xlsx"
+   ]
+  },
+  {
+   "path": "data/raw/payroll/41f4143c-payrollactivestaffaverage.pdf",
+   "bytes": 195452,
+   "modified": "2026-09-04",
+   "kind": "payroll",
+   "entity": null,
+   "period": null,
+   "note": "Payroll register. ADP is ONE rail for at least five companies, so an ADP total cannot be split by entity without this register.",
+   "used_by": [],
+   "sha256": "7714d87a492c1165",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/41f4143c-payrollactivestaffaverage.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/payroll/79ca31f7-payrolljuly2026.pdf",
+   "bytes": 172911,
+   "modified": "2026-09-04",
+   "kind": "payroll",
+   "entity": null,
+   "period": null,
+   "note": "Payroll register. ADP is ONE rail for at least five companies, so an ADP total cannot be split by entity without this register.",
+   "used_by": [],
+   "sha256": "9aa6fce6fe2b7a4d",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/79ca31f7-payrolljuly2026.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/pnl/423b1a54-AFG__download.xlsx",
+   "bytes": 98792,
+   "modified": "2026-09-02",
+   "kind": "pnl_weekly",
+   "entity": "AFG",
+   "period": "2026-04-13 .. 2026-04-13",
+   "note": "Weekly P&L workbook, ONE TAB PER WEEK; the week exists only in the tab name.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    " 04.13.26- 04.19.26"
+   ],
+   "weeks_passing_control": 1,
+   "passing_range": "2026-04-13 .. 2026-04-13",
+   "sha256": "55d4535adff6bcd1",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/423b1a54-AFG__download.xlsx"
+   ]
+  },
+  {
+   "path": "data/raw/pnl/b479b596-AFG__download.xlsx",
+   "bytes": 1942794,
+   "modified": "2026-09-02",
+   "kind": "pnl_weekly",
+   "entity": "AFG",
+   "period": "2026-04-13 .. 2026-08-24",
+   "note": "Weekly P&L workbook, ONE TAB PER WEEK; the week exists only in the tab name.",
+   "used_by": [
+    "ingest/ingest_weekly_pnl.py",
+    "tests/test_catalog.py"
+   ],
+   "sheets": 20,
+   "sheet_names": [
+    "08.24.26-08.30.26",
+    "08.17.26-08.23.26",
+    "08.10.26-08.16.26",
+    "08.03.26-08.09.26",
+    " 07.27.26-08.02.26",
+    "07.20.26-07.26.26"
+   ],
+   "weeks_passing_control": 20,
+   "passing_range": "2026-04-13 .. 2026-08-24",
+   "sha256": "ef3d33cccba7c0b9",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/b479b596-AFG__download.xlsx"
+   ]
+  },
+  {
+   "path": "data/raw/pnl/1efc7de0-Xtrack_LLC_Profit_and_Loss_Weekly.xlsx",
+   "bytes": 13088215,
+   "modified": "2026-09-02",
+   "kind": "pnl_weekly",
+   "entity": "XTRACK",
+   "period": "2023-11-20 .. 2026-08-24",
+   "note": "Weekly P&L workbook, ONE TAB PER WEEK; the week exists only in the tab name.",
+   "used_by": [],
+   "sheets": 145,
+   "sheet_names": [
+    "08.24.26-08.30.26",
+    "08.17.26-08.23.26",
+    "08.10.26-08.16.26",
+    "08.03.26-08.09.26",
+    "07.27.26-08.02.26",
+    " 07.20.26-07.26.26"
+   ],
+   "weeks_passing_control": 26,
+   "weeks_failing_control": 119,
+   "passing_range": "2025-11-24 .. 2026-08-24",
+   "unmapped_headers": {
+    "Actual price": 784,
+    "Actual Price": 112,
+    "Additional": 17
+   },
+   "sha256": "3a1c1cbbfe7c03e3",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/1efc7de0-Xtrack_LLC_Profit_and_Loss_Weekly.xlsx"
+   ]
+  },
+  {
+   "path": "data/raw/pnl/88206141-Xtrack_LLC_download.xlsx",
+   "bytes": 2781045,
+   "modified": "2026-09-02",
+   "kind": "pnl_weekly",
+   "entity": "XTRACK",
+   "period": "2026-02-23 .. 2026-08-24",
+   "note": "Weekly P&L workbook, ONE TAB PER WEEK; the week exists only in the tab name.",
+   "used_by": [
+    "ingest/ingest_weekly_pnl.py",
+    "tests/test_catalog.py",
+    "tests/test_xtrack_trend.py"
+   ],
+   "sheets": 27,
+   "sheet_names": [
+    "08.24.26-08.30.26",
+    "08.17.26-08.23.26",
+    "08.10.26-08.16.26",
+    "08.03.26-08.09.26",
+    "07.27.26-08.02.26",
+    " 07.20.26-07.26.26"
+   ],
+   "weeks_passing_control": 17,
+   "weeks_failing_control": 10,
+   "passing_range": "2026-02-23 .. 2026-08-24",
+   "sha256": "5a708fce4a5972fd",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/88206141-Xtrack_LLC_download.xlsx"
+   ]
+  },
+  {
+   "path": "data/raw/pnl/4954206d-Zone_LLC_download.xlsx",
+   "bytes": 2768249,
+   "modified": "2026-09-02",
+   "kind": "pnl_weekly",
+   "entity": "ZONE",
+   "period": "2026-02-23 .. 2026-08-17",
+   "note": "Weekly P&L workbook, ONE TAB PER WEEK; the week exists only in the tab name.",
+   "used_by": [
+    "ingest/ingest_weekly_pnl.py",
+    "tests/test_catalog.py"
+   ],
+   "sheets": 26,
+   "sheet_names": [
+    "08.17.26-08.23.26",
+    "08.10.26-08.16.26",
+    "08.03.26-08.09.26",
+    "07.27.26-08.02.26",
+    "07.20.26-07.26.26",
+    "07.13.26-07.19.26"
+   ],
+   "weeks_passing_control": 26,
+   "passing_range": "2026-02-23 .. 2026-08-17",
+   "sha256": "3398c32810af699b",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/4954206d-Zone_LLC_download.xlsx"
+   ]
+  },
+  {
+   "path": "data/raw/pnl/5f79f0b0-ZONE_Profit__Loss_2024_and_2025_and_2026.xlsx",
+   "bytes": 15645979,
+   "modified": "2026-09-02",
+   "kind": "pnl_weekly",
+   "entity": "ZONE",
+   "period": "2024-01-01 .. 2026-08-24",
+   "note": "Weekly P&L workbook, ONE TAB PER WEEK; the week exists only in the tab name.",
+   "used_by": [],
+   "sheets": 139,
+   "sheet_names": [
+    "08.24.26-08.30.26",
+    "08.17.26-08.23.26",
+    "08.10.26-08.16.26",
+    "08.03.26-08.09.26",
+    "07.27.26-08.02.26",
+    "07.20.26-07.26.26"
+   ],
+   "weeks_passing_control": 72,
+   "weeks_failing_control": 67,
+   "passing_range": "2024-06-03 .. 2026-08-17",
+   "unmapped_headers": {
+    "Actual price": 76,
+    "Actual Price": 13,
+    "cargo liabilty 13205.52 weekly": 10,
+    "Additional": 10,
+    "S": 2
+   },
+   "sha256": "f885c97a9680a878",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/5f79f0b0-ZONE_Profit__Loss_2024_and_2025_and_2026.xlsx"
+   ]
+  },
+  {
+   "path": "data/processed/boa_transactions.csv",
+   "bytes": 1778490,
+   "modified": "2026-09-02",
+   "kind": "processed_csv",
+   "entity": null,
+   "period": null,
+   "note": "Derived output of this pipeline, not a source.",
+   "used_by": [],
+   "columns": [
+    "source_path",
+    "source_file",
+    "account_last4",
+    "txn_date",
+    "amount",
+    "section",
+    "description"
+   ],
+   "rows": 8598,
+   "sha256": "78c42416c1c69510",
+   "copies": []
+  },
+  {
+   "path": "data/processed/cash_categorized.csv",
+   "bytes": 1262397,
+   "modified": "2026-09-02",
+   "kind": "processed_csv",
+   "entity": null,
+   "period": null,
+   "note": "Derived output of this pipeline, not a source.",
+   "used_by": [],
+   "columns": [
+    "src",
+    "account",
+    "entity",
+    "date",
+    "amount",
+    "category",
+    "confidence",
+    "rule",
+    "memo"
+   ],
+   "rows": 8598,
+   "sha256": "931fffe38bda3673",
+   "copies": []
+  },
+  {
+   "path": "data/processed/statement_meta.csv",
+   "bytes": 17268,
+   "modified": "2026-09-02",
+   "kind": "processed_csv",
+   "entity": null,
+   "period": null,
+   "note": "Derived output of this pipeline, not a source.",
+   "used_by": [],
+   "columns": [
+    "file",
+    "path",
+    "account_last4",
+    "period_start",
+    "period_end",
+    "beginning_balance",
+    "ending_balance",
+    "balance_delta",
+    "error"
+   ],
+   "rows": 130,
+   "sha256": "e13ebfa7a6281a64",
+   "copies": []
+  },
+  {
+   "path": "data/raw/pnl/7a11ac48-REPORT__FB_UPDATED_2.xlsx",
+   "bytes": 53816,
+   "modified": "2026-09-02",
+   "kind": "recruiting_cost",
+   "entity": null,
+   "period": null,
+   "note": "Driver recruiting cost per candidate -- MVR, PSP, clearinghouse, drug test, travel -- with recruiter and hired/not-hired status. The acquisition side of the driver-turnover cost that never appears in the weekly P&L.",
+   "used_by": [],
+   "sheets": 3,
+   "sheet_names": [
+    "Sheet1",
+    "Clean Report",
+    "Other Entries"
+   ],
+   "sha256": "07dc51a83de861df",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/7a11ac48-REPORT__FB_UPDATED_2.xlsx"
+   ]
+  },
+  {
+   "path": "data/raw/pnl/07ed590e-AFG_Truck_and_trailer_expenses_2026.xlsx",
+   "bytes": 110633,
+   "modified": "2026-09-02",
+   "kind": "shop_charges",
+   "entity": "AFG",
+   "period": null,
+   "note": "Shop / truck-and-trailer charge register.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "AFG Truck and trailer exp"
+   ],
+   "sha256": "a5fa27b9a4827568",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/07ed590e-AFG_Truck_and_trailer_expenses_2026.xlsx"
+   ]
+  },
+  {
+   "path": "data/raw/bank/Shop/Shop statements/Shop investments.xlsx",
+   "bytes": 16779,
+   "modified": "2026-07-31",
+   "kind": "shop_charges",
+   "entity": "TRUCKMAX",
+   "period": null,
+   "note": "Shop / truck-and-trailer charge register.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet1"
+   ],
+   "sha256": "3906a9f30a601673",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Shop/Shop statements/stmt Max truck.xlsx",
+   "bytes": 2801349,
+   "modified": "2026-07-31",
+   "kind": "shop_charges",
+   "entity": "TRUCKMAX",
+   "period": null,
+   "note": "Shop / truck-and-trailer charge register.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet1"
+   ],
+   "sha256": "800599bf114075aa",
+   "copies": []
+  },
+  {
+   "path": "data/raw/bank/Shop/Shop statements/stmt Shop.xlsx",
+   "bytes": 2801286,
+   "modified": "2026-08-10",
+   "kind": "shop_charges",
+   "entity": "TRUCKMAX",
+   "period": null,
+   "note": "Shop / truck-and-trailer charge register.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet1"
+   ],
+   "sha256": "6b319f59666817b6",
+   "copies": []
+  },
+  {
+   "path": "data/raw/truckmax/25d084a2-Truck_Max_charges.xlsx",
+   "bytes": 49072,
+   "modified": "2026-09-03",
+   "kind": "shop_charges",
+   "entity": "TRUCKMAX",
+   "period": null,
+   "note": "Shop / truck-and-trailer charge register.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet1"
+   ],
+   "sha256": "e230f31c229f387a",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/25d084a2-Truck_Max_charges.xlsx"
+   ]
+  },
+  {
+   "path": "data/raw/pnl/168e4bc8-XTRACK_Truck_and_Trailer_Expenses_2026.xlsx",
+   "bytes": 135896,
+   "modified": "2026-09-02",
+   "kind": "shop_charges",
+   "entity": "XTRACK",
+   "period": null,
+   "note": "Shop / truck-and-trailer charge register.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "XTRACK Truck and Trailer Expens"
+   ],
+   "sha256": "9614d1d648f86319",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/168e4bc8-XTRACK_Truck_and_Trailer_Expenses_2026.xlsx"
+   ]
+  },
+  {
+   "path": "data/raw/pnl/b5ae7b00-Zone_and_Xtrack_Truck_and_Trailer_Expenses_2025.xlsx",
+   "bytes": 165581,
+   "modified": "2026-09-02",
+   "kind": "shop_charges",
+   "entity": "XTRACK",
+   "period": null,
+   "note": "Shop / truck-and-trailer charge register.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Truck and Trailer Expenses 2025"
+   ],
+   "sha256": "63a190a079d259e0",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/b5ae7b00-Zone_and_Xtrack_Truck_and_Trailer_Expenses_2025.xlsx"
+   ]
+  },
+  {
+   "path": "data/raw/pnl/5c1ac5ff-ZONE_Truck_and_Trailer_Expenses_2026.xlsx",
+   "bytes": 125757,
+   "modified": "2026-09-02",
+   "kind": "shop_charges",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Shop / truck-and-trailer charge register.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "ZONE Truck and Trailer Expenses"
+   ],
+   "sha256": "eb8244c1c419126a",
+   "copies": [
+    "data/raw/truckmax/2d89d0e5-ZONE_Truck_and_Trailer_Expenses_2026.xlsx",
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/2d89d0e5-ZONE_Truck_and_Trailer_Expenses_2026.xlsx",
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/5c1ac5ff-ZONE_Truck_and_Trailer_Expenses_2026.xlsx"
+   ]
+  },
+  {
+   "path": "data/raw/pnl/11d720be-Bestpass_Toll__2025_08272026.xlsx",
+   "bytes": 4335716,
+   "modified": "2026-09-02",
+   "kind": "toll_bestpass",
+   "entity": null,
+   "period": null,
+   "note": "Bestpass toll rail.",
+   "used_by": [],
+   "sha256": "ff71482f39b56292",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/11d720be-Bestpass_Toll__2025_08272026.xlsx"
+   ]
+  },
+  {
+   "path": "data/raw/pnl/a5e76db3-Bestpass_Toll__2026_08272026.xlsx",
+   "bytes": 2637581,
+   "modified": "2026-09-02",
+   "kind": "toll_bestpass",
+   "entity": null,
+   "period": null,
+   "note": "Bestpass toll rail.",
+   "used_by": [],
+   "sha256": "9797c3fc0ac403c3",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/a5e76db3-Bestpass_Toll__2026_08272026.xlsx"
+   ]
+  }
+ ]
+}

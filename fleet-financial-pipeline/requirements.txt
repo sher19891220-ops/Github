@@ -1,3 +1,16 @@
-pdfplumber>=0.10
+# Parsing the sources
+pdfplumber>=0.10        # BofA statement PDFs
+openpyxl>=3.1           # every .xlsx: P&L, settlements, fuel and toll rails
 pandas>=2.0
-openpyxl>=3.1
+
+# Querying and reporting
+duckdb>=1.0             # SQL over the corpus without standing up a database
+XlsxWriter>=3.2         # formatted workbooks back to the operator
+matplotlib>=3.8         # charts for reports
+rarfile>=4.0            # upload archives (needs the 7z binary, already present)
+
+# Database target
+psycopg2-binary>=2.9
+
+# Tests
+pytest>=8.0
