@@ -244,7 +244,7 @@ def consumers():
 
 
 def scan(include_uploads=True):
-    files, roots = {}, [(ROOT / r, r) for r in SEARCH_ROOTS]
+    files, roots = {}, [(ROOT / r, r) for r in SEARCH_ROOTS]  # sha256 -> [record, ...]
     if include_uploads and UPLOAD_ROOT.exists():
         for d in sorted(UPLOAD_ROOT.iterdir()):
             if d.is_dir():
@@ -260,6 +260,13 @@ def scan(include_uploads=True):
                 continue
             rel = p.relative_to(base)
             shown = f"{label}/{rel}"
+            digest = sha256(p)
+            if digest in files:
+                # Same bytes under another path -- the upload copy of a file
+                # already in data/raw. Re-parsing it would double the cost of a
+                # build for nothing; only the path is new.
+                files[digest].append({"path": shown, "bytes": p.stat().st_size})
+                continue
             kind, entity, note = classify(shown)
             rec = {"path": shown, "bytes": p.stat().st_size,
                    "modified": datetime.fromtimestamp(p.stat().st_mtime, timezone.utc)
@@ -286,7 +293,7 @@ def scan(include_uploads=True):
                         print(f"  parsing {rec['path']} ({n} tabs)...",
                               file=sys.stderr, flush=True)
                         rec.update(pnl_parse_status(p, n))
-            files.setdefault(sha256(p), []).append(rec)
+            files[digest] = [rec]
     return files
 
 
