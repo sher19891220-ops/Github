@@ -224,6 +224,46 @@ recovery chain becomes measurable.
 
 ---
 
+## Per-truck economics: the rate card, the policy, and the maintenance ledger
+
+`analysis/truck_weeks.py` joins three things on the truck number, which is the
+same identifier in all of them (51 of XTRACK's 52 rostered trucks match its P&L
+units): 27 weeks of P&L money, 13 weeks of dispatch days, and the Iron Lease
+rate card. `analysis/truck_report.py` writes the operator workbook;
+`analysis/maintenance_ledger.py` reads the per-unit repair ledger.
+
+**The Iron Lease rate card** (operator-supplied 2026-09-04) is two tiers:
+$735/week + $0.10/mile on 15739, 4772, 6867, 15909, 15852, 15862, 9859, 6799;
+$900/week + $0.12/mile on 4716, 1489, 7605, 1431, 1645, 1568, 1542, 5007, 5269,
+6379, 1500, 3773, 4549, 1722. **A truck moves between operating companies** —
+1500 and 1722 appear in XTRACK and AFG, 15909 and 7605 in XTRACK and ZONE — so
+"XTRACK's trucks" is a per-week fact, not a list. 5007 and 6379 appear in no P&L.
+
+**The $735 tier is the expensive tier.** Over the invoice year its 8 trucks drew
+$21,125 each in Iron Lease maintenance credits against $5,735 each on the $900
+tier — 3.7x. The cheaper tier saves $165/week of rent and costs roughly twice
+that in repairs.
+
+**Rent charged falls below the rate card when a truck sits.** Across XTRACK's
+five Iron-leased company-driver units the P&L charged $85,704 against $99,205 of
+contract, and the whole $13,501 gap sits on 7605 and 6799 — the two that sat
+most. So the P&L understates the carrying cost of an idle Iron truck; the
+difference is absorbed inside Iron Lease.
+
+**The home-time policy is 4 days home per 32-day cycle**, and the fleet average
+meets it exactly while almost nobody does: 464 home days taken against 462 due,
+but only 4 of 59 XTRACK drivers within a day of policy. OO drivers take 1.7x
+their entitlement, `%` drivers 0.5x. Scale entitlement to the days a driver
+actually appears — a flat denominator scores mid-period joiners as compliant.
+
+**The maintenance ledger's `Iron lease exp` rows net to exactly zero, in pairs.**
+68 positive and 68 negative, $53,367 each way: the repair booked when the
+operating company pays it and reversed when Iron Lease credits it back. Summing
+them double-counts; reading one reversal alone books a refund as a cost. Also:
+only 712 of its 1,639 rows carry an amount, and **trailers are the bigger half**
+of the spend (108 units, $162,533 vs 65 trucks, $130,352 in 2026) — folding them
+into trucks overstates cost per tractor by about half.
+
 ## The dispatch export is the only DAY in the corpus
 
 `data/raw/ops/` is the dispatch system's own database: one row per driver per
