@@ -111,11 +111,14 @@ def truck_counts(ws):
                     ws.cell(row=c.row,column=c.column+1).value)
     return out
 
-out={}
-for f,lab in [("data/raw/pnl/4954206d-Zone_LLC_download.xlsx","ZONE"),
-              ("data/raw/pnl/88206141-Xtrack_LLC_download.xlsx","XTRACK"),
-              ("data/raw/pnl/423b1a54-AFG__download.xlsx","AFG")]:
-    wb=openpyxl.load_workbook(f,data_only=True); out[lab]={}
+WORKBOOKS={"ZONE":"data/raw/pnl/4954206d-Zone_LLC_download.xlsx",
+           "XTRACK":"data/raw/pnl/88206141-Xtrack_LLC_download.xlsx",
+           "AFG":"data/raw/pnl/423b1a54-AFG__download.xlsx"}
+
+def read_workbook(path):
+    """Every week in one workbook, keyed by week. Import-safe: nothing at module
+    level opens a file, so importing this module costs nothing."""
+    wb=openpyxl.load_workbook(path,data_only=True); out={}
     for t in wb.sheetnames:
         k=week_key(t)
         if not k: continue
@@ -123,9 +126,8 @@ for f,lab in [("data/raw/pnl/4954206d-Zone_LLC_download.xlsx","ZONE"),
         d.update(overhead_row(ws)); d.update(labeled(ws,WANT)); d.update(truck_counts(ws))
         b=blocks(ws); d['unit_blocks']=len(b)
         d['unit_gross']=sum(x[0] for x in b); d['unit_miles']=sum(x[1] for x in b)
-        out[lab][k]=d
-    print(f"{lab}: {len(out[lab])} weeks",file=sys.stderr)
-json.dump(out,open('/tmp/claude-0/-home-user-Github/27d87790-026b-5160-8c3b-bb714cc8e5e8/scratchpad/pnl2.json','w'),indent=1)
+        out[k]=d
+    return out
 
 
 def check_weekly_pnl(weeks, tol=1.0):
@@ -139,3 +141,9 @@ def check_weekly_pnl(weeks, tol=1.0):
         diff = units - panel
         (ok if abs(diff) <= tol else bad).append((wk, panel, units, diff))
     return ok, bad
+
+
+if __name__=="__main__":
+    out={lab:read_workbook(f) for lab,f in WORKBOOKS.items()}
+    for lab,w in out.items(): print(f"{lab}: {len(w)} weeks",file=sys.stderr)
+    json.dump(out,open(sys.argv[1],'w'),indent=1)

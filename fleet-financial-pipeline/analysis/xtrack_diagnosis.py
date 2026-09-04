@@ -36,14 +36,48 @@ from ingest_weekly_pnl import week_key
 ALIAS = {
     "unit#": "unit", "driver": "driver_name", "gross": "gross",
     "mileage": "miles", "driver salary": "driver_pay",
-    "pys/cargo/admin": "admin", "def/fuel/fee": "fuel", "fuel": "fuel",
+    # The admin/insurance column on a company block was headed 'Insur/Admin/Trl'
+    # up to 2026-06-29 and 'Pys/Cargo/Admin' after. Both are the SAME column.
+    # Mapping only the later spelling drops it to zero in 3,594 of the block
+    # headers across the three workbooks and overstates the company-driver
+    # margin by roughly $0.19/mile.
+    "pys/cargo/admin": "admin", "insur/admin/trl": "admin",
+    "def/fuel/fee": "fuel", "fuel": "fuel", "fuel/toll/sc": "fuel",
     "truck rental": "rent", "toll / scale": "toll", "toll/scale": "toll",
+    "toll": "toll", "toll/ scale": "toll",
     "additional charges": "additional", "subtotal": "subtotal",
     "other charges": "other", "total": "result", "profit": "result",
     "per mile": "per_mile", "rpm": "per_mile", "fuel avr": "fuel_avr",
     "company charge": "company_charge", "deductions": "deductions",
-    "fuel discount": "fuel_discount", "driver pay": "driver_payout",
+    "fuel discount": "fuel_discount", "fuel di": "fuel_discount",
+    "fuel dis": "fuel_discount", "driver pay": "driver_payout",
+    "contractor": "contractor", "contractor pay": "contractor",
+    "contractor charge": "contractor", "contractor profit": "contractor_profit",
+    "owner earning": "owner_earning", "company profit": "company_profit",
+    "profit for zone": "company_profit",
 }
+
+# A company-driver block's cost columns. 'subtotal' and 'result' are totals,
+# not components, and must never be added alongside these.
+CD_COST_FIELDS = ("driver_pay", "admin", "fuel", "rent", "toll",
+                  "additional", "other")
+
+
+def unmapped_headers(ws):
+    """Header labels on this sheet that ALIAS does not know.
+
+    A label that is not in ALIAS is read as zero, silently. Run this over any
+    new export before quoting a margin from it.
+    """
+    out = collections.Counter()
+    for r in range(1, ws.max_row + 1):
+        if str(ws.cell(row=r, column=1).value).strip() != "Unit#":
+            continue
+        for c in range(1, 16):
+            v = ws.cell(row=r, column=c).value
+            if isinstance(v, str) and v.strip() and v.strip().lower() not in ALIAS:
+                out[v.strip()] += 1
+    return out
 
 
 def n(v):
