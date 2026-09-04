@@ -282,6 +282,49 @@ Unverified accounts, no statements behind them: 0007, 0023, 1308, 2835, 3877,
 
 ---
 
+## Iron Lease bills on paper and is funded in cash — they are different events
+
+82 weekly invoices (`data/raw/iron/invoices/`, 2025-08-22 .. 2026-08-21) are the
+billing side the bank cannot show. Read with `analysis/iron_lease.py`; parsed by
+`ingest/parse_iron_lease_invoices.py`, all 82 reconciling to their printed total
+and to Total + Payment = Balance due.
+
+    charged  $808,824  = Truck rental $626,446 + Truck Mileage $182,377
+    credited -$271,594 = EFS money codes $97,457 + repairs $174,138
+    net      $537,230
+
+**A third of what Iron Lease bills goes straight back as maintenance credits.**
+So an invoice Total understates BOTH the lease charge and the repair flow
+running the other way, and neither can be read off the bank.
+
+**"Paid in Full" does not mean paid.** Every invoice carries that stamp. Of the
+70 dated inside the account-5151 statement window, only 4 have a deposit
+matching their total within a dollar and a month — about what coincidence yields
+against 58 deposits — while 42 of those 58 deposits are exact multiples of
+$1,000 and no invoice total is round. These are settled by NETTING. Iron Lease
+rent in an operating company's P&L is a BOOK charge; treating it as cash out
+overstates that company's cash cost and hides how much the group funds Iron
+Lease by transfer.
+
+**Iron Lease's only real outgoings are trucks.** Of $1,245,155 leaving account
+5151: $906,539 of purchases (Fleet Advantage, EquipLinc) and $332,431 of TBK
+equipment finance. No payroll (Zone runs it), no insurance, no maintenance.
+
+**Two mileage rates run at once**, $0.10 and $0.12, sometimes as two lines on
+one invoice — they are different truck groups, not a rate change. A single
+blended rate is wrong for every company.
+
+**Parse traps** (each already produced a wrong number, each tested):
+the minus sign is U+2212 not a hyphen; ten invoices sign the CREDIT on the rate
+(`1 −$77.73 −$77.73`) rather than the qty, and a rate pattern with no sign drops
+the whole line silently; one invoice prints its item number alone on a line;
+`AFG 07.31.26` has qty and rate swapped at source (the Amount is right, so the
+total still ties and only a per-mile figure goes wrong).
+
+**Credits lag the work.** EFS credits come back in a median 9 days, repair
+credits 11 with a 75th percentile of 31 and a maximum of 177. 22 credits worth
+$20,449 were taken more than 60 days after the repair.
+
 ## Fuel runs on TWO rails, and they changed hands mid-2026
 
 EFS/WEX carried all diesel through March 2026. Relay Payments took over in
