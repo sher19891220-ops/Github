@@ -1,0 +1,89 @@
+{
+  "_README": [
+    "MEASURED from the signed policies and proposals in data/raw/insurance, 2026-09-05.",
+    "This replaces every insurance figure that was previously an allocation or a guess.",
+    "The P&L's per-truck 'Insur/Admin/Trl' column is NOT this: it is an internal charge",
+    "that also carries admin and trailer. Compare, do not substitute."
+  ],
+  "as_of": "2026-09-05",
+  "policies": [
+    {
+      "entity": "ZONE_OH", "coverage": "auto_liability", "role": "group master policy",
+      "carrier": "Universal Casualty", "purchasing_group": "Drayage National 4 PG of CA, LLC",
+      "master_policy": "RKT0718-257-06", "certificate": "URG-02817",
+      "period": "2025-10-28 to 2026-10-28",
+      "limit": 1000000, "units_scheduled": 68, "unit_type": "tractors",
+      "premium": 912968.00, "rpg_premium_tax": 36518.72, "fees": 137945.20,
+      "annual_total": 1087431.92,
+      "per_unit_year": 15991.65, "per_unit_week": 307.53,
+      "basis": "per scheduled unit",
+      "_note": "68 tractors on the 2025-10-27 schedule: 52 Freightliner, 15 Volvo, 1 International. This is why 98% of the group's insurance spend leaves ZONE's account."
+    },
+    {
+      "entity": "ZONE_OH", "coverage": "motor_truck_cargo",
+      "period": "2025-10-28 to 2026-10-28",
+      "limit": 250000, "annual_total": 120750.00,
+      "basis": "0.70% of gross revenue",
+      "rate_per_100_of_gross": 0.70,
+      "_note": "VARIABLE, not fixed: rated at $0.70 per $100 of total gross. It scales with freight, so it belongs in cost per dollar of revenue, not in cost per truck."
+    },
+    {
+      "entity": "ZONE_OH", "coverage": "excess_motor_truck_cargo",
+      "period": "from 2026-02-28",
+      "limit": "50,000 excess of 250,000",
+      "units_scheduled": 44, "premium": 13200.00, "annual_total": 14295.00,
+      "per_unit_year": 300.00, "basis": "per scheduled unit",
+      "_open_question": "44 units here against 68 on the auto liability schedule. Which 24 have no excess cargo cover, and is that deliberate?"
+    },
+    {
+      "entity": "ZONE_OH", "coverage": "occupational_accident",
+      "period": "from 2026-03-07",
+      "rate_per_owner_operator_month": 107.00, "per_owner_operator_week": 24.69,
+      "combined_single_limit": 1000000, "aggregate_limit": 2000000,
+      "basis": "per owner-operator"
+    },
+    {
+      "entity": "XTRACK", "coverage": "auto_liability_cargo_pd_gl",
+      "carrier": "Benchmark Insurance Company (AL, PD, GL), Great American (cargo)",
+      "broker": "Trigon Insurance Agency",
+      "period": "2025-08-07 to 2026-08-07",
+      "units_scheduled": 3, "unit_type": "power units",
+      "lines": {"auto_liability": 36054.00, "motor_truck_cargo": 7513.00,
+                "physical_damage": 19430.00, "general_liability": 500.00},
+      "pure_premium": 63497.00, "taxes_and_fees": 225.00, "annual_total": 63722.00,
+      "financed": {"lender": "First Insurance Funding", "down_payment": 9685.80,
+                   "installments": 9, "installment": 6381.61,
+                   "finance_charge": 3398.29, "total_of_payments": 57434.49,
+                   "apr_pct": 14.850,
+                   "_note": "cash cost is 67,120.29, not 63,722 -- the 3,398 finance charge is a real cost and appears in the bank as a loan payment, not as insurance"},
+      "physical_damage_total_insured_value": 159000,
+      "scheduled_equipment_stated_values": [196213, 90000, 137808],
+      "_open_question": "TIV 159,000 against three units the same page values at 424,021. Either the TIV is per unit, or the fleet is insured for 37% of stated value.",
+      "excluded_drivers": ["Gautien Akami", "Niginabonu Imamkhodjaeva"],
+      "_note": "THREE power units. XTRACK runs 45+ in its own P&L; the rest are covered under ZONE-OH's master policy."
+    },
+    {
+      "entity": "AFG", "coverage": "commercial_auto",
+      "carrier": "Artisan and Truckers Casualty Co (Progressive)",
+      "policy": "08273758", "period": "2025-11-12 to 2026-11-12",
+      "units_scheduled": 1, "trailers": 1, "annual_total": 9383.00,
+      "cargo_limit": 100000, "cargo_deductible": 2500,
+      "trailer_interchange": 30000
+    }
+  ],
+  "ucr": [
+    {"entity": "XTRACK", "usdot": 4086204, "year": 2026, "bracket": "6 to 20 vehicles",
+     "vehicles_declared": 10, "fee": 276.00, "conv_fee": 8.20, "total": 284.20,
+     "_open_question": "10 vehicles declared. The P&L runs 45+ under XTRACK and the ZONE master schedules 68 group-wide. UCR brackets are by total fleet size."},
+    {"entity": "ZONE", "usdot": 3456354, "year": 2026},
+    {"entity": "AFG", "usdot": 2992973, "year": 2026}
+  ],
+  "group_annual_known": 1295581.92,
+  "group_weekly_known": 24915.04,
+  "open_questions": [
+    "UNIT-TO-VIN TABLE. The policies schedule units by VIN; every other source uses fleet numbers. Only 5 of the 68 insured VINs contain a fleet number (4851, 8671, 2703, 9859, 2743), so which trucks are insured -- and whether idle ones still are -- cannot be answered.",
+    "Are the 45+ XTRACK trucks not on XTRACK's own 3-unit policy all on ZONE-OH's 68-unit master, and is the group fleet larger than 68?",
+    "Physical damage: is the 159,000 TIV per unit or for the schedule?",
+    "Trailers. The ZONE master schedules 68 TRACTORS and no trailers; the maintenance ledger shows 108 trailers. Where are they insured?"
+  ]
+}

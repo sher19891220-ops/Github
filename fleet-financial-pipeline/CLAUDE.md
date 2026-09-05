@@ -224,6 +224,57 @@ recovery chain becomes measurable.
 
 ---
 
+## Insurance and IFTA — the first documents filed with someone outside
+
+Both arrived 2026-09-05 (`data/raw/insurance`, `data/raw/ifta`). Everything
+before them was the group's own sheets; these were signed with a carrier or
+filed with a state, so they are the first outside check on figures the sheets
+were asserting alone. Register: `config/insurance.json`. Reader:
+`ingest/parse_tax_and_insurance.py`.
+
+**XTRACK's own policy covers THREE power units.** $63,722 for 2025-08-07 to
+2026-08-07 (auto liability $36,054, cargo $7,513, physical damage $19,430,
+GL $500) against 45+ trucks in its own P&L. Everything else runs under
+**ZONE-OH's master policy**: $1,087,431.92 a year, 68 scheduled tractors,
+$15,992 per unit-year = **$307.53 per unit-week**. That is why 98% of the
+group's insurance spend leaves ZONE's account — it is not an allocation
+artefact, it is the actual policy.
+
+**Cargo insurance is VARIABLE.** ZONE-OH's motor truck cargo is rated at
+**$0.70 per $100 of gross revenue** — $120,750 a year. Spreading it per truck
+makes a revenue-linked cost look fixed and moves break-even the wrong way.
+
+**A financed premium is not its face value.** XTRACK's $63,722 is financed at
+**14.85% APR** through First Insurance Funding: $9,685.80 down plus 9 x
+$6,381.61 = **$67,120.29** of cash, and the $3,398.29 finance charge reaches the
+bank as a loan payment, not as insurance — which is part of why the bank's
+insurance total runs below the policies.
+
+**THE UNIT-TO-VIN GAP.** Policies schedule units by VIN; the P&Ls, the driver
+roster and the Iron Lease register use fleet numbers. Only 5 of the 68 insured
+VINs contain a fleet number anywhere (4851, 8671, 2703, 9859, 2743), so **which
+trucks are insured, and whether idle ones still are, cannot be answered.** A
+unit-to-VIN table closes it.
+
+**IFTA IS AN INDEPENDENT MILEAGE AND FUEL RECORD**, and one return does not
+survive contact with the equipment. XTRACK's Q2 2026 return divides 1,727,001
+miles by 197,081 gallons and states **8.76 mpg**, against 6.89 on its own Q1
+return and 6.68 in its own P&L for the same quarter. At 6.68 those miles need
+258,574 gallons — **61,493 more than the return shows**. IFTA tax is
+`(taxable miles / fleet mpg) - tax-paid gallons`, so an overstated mpg shrinks
+the taxable gallons and therefore the tax: that return computed 255 net taxable
+gallons. `check_ifta_plausibility()` flags any return outside 5.0-7.6 mpg.
+
+**Fuel and road taxes are about $0.011 a loaded mile** and appear nowhere in the
+weekly P&L. XTRACK H1 2026: IFTA $19,163.85, NY HUT $7,632.93, KY $1,923.09,
+NM $1,418.14 = $30,138.01 over 2,748,057 miles.
+
+**Do not identify these forms by keyword.** They extract with characters dropped
+into the headings ("Accounti ID", "gallotn"), so a literal "IFTA" is present in
+some returns and absent in others that are plainly the same form. Match on the
+Step 2 division line instead; keyword matching silently threw away four of
+seven valid returns.
+
 ## Cost of a truck-day, and break-even for one truck
 
 `analysis/truck_breakeven.py`. Three measured pieces, no chart of accounts:
