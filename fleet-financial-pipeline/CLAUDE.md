@@ -271,15 +271,47 @@ $7,381/wk, XTRACK 19 $5,843/wk, AFG 7 $2,153/wk, and **18 on no P&L at all**
 $5,536/wk. **21 of the 68 have not run since 2026-07-06 -- $335,825 a year of
 premium on trucks that are not moving.**
 
+**OHIO IS WHERE ZONE FILES IFTA**, and its returns are the richest tax source in
+the corpus -- full state-by-state miles, gallons and rate. Q1 2026: 1,509,945
+miles, 207,885 gallons, **7.26 mpg**, 63 vehicles, $12,145.28. Q2 2026:
+1,118,149 miles, 180,944 gallons, **6.18 mpg**, 46 vehicles, $9,576.44 plus
+$151.17 interest and **$957.64 penalty** -- filed 5 August against a 31 July due
+date. Set beside XTRACK's own returns the two move in OPPOSITE directions in the
+same quarter (ZONE 7.26 -> 6.18 while XTRACK 6.89 -> 8.76), which is what a
+mileage or gallon split between the two authorities would look like, not what a
+fleet does. Ohio itself is a large credit (fuel bought there exceeds fuel burnt
+there); Pennsylvania is the largest cost.
+
+**OREGON IS UNFILED, OR ITS RETURNS ARE MISSING.** ZONE's Ohio return reports
+2,968 Oregon miles in Q1 2026 and 436 in Q2 at a 0.00 IFTA rate -- Oregon taxes
+by weight-mile on a separate return, and no Oregon return is in the corpus.
+
 **PHYSICAL DAMAGE: the exposure is known, the premium is NOT.** The only
 physical-damage document is an Intact questionnaire (eff. 2026-03-06) stating
 56 power units at $7,889,308 and 104 trailers at $4,371,304, $5,000 deductible,
 with the **rate column blank**. The $1,500 + $75 in that file is the
 occupational-accident line, not VPD. Until the binder arrives, record
-`annual_total: null` and never coerce it to zero. The allocation basis is ready:
-active company-owned tractors, owner-operators excluded --
-**XTRACK 55.0% / ZONE 45.0%** ($5,061,616 and $4,144,669 of $9,206,285 across
-77 units), AFG a further 16 units at $1,790,922 and outside this policy.
+`annual_total: null` and never coerce it to zero.
+
+The schedule actually submitted at renewal is now known (`data/raw/insurance/
+pd_renewal/`) and supersedes the questionnaire: **62 power units at $8,578,444
+and 104 trailers at $4,349,304**, $12,927,748 total, 94 of the trailers leased.
+Split on the submitted units: **ZONE 47.7%, XTRACK 37.9%, AFG 12.9%**, with two
+units (1.5%) not resolving to a company.
+
+**AFG IS ON THIS POLICY.** Operator, 2026-09-05: AFG's tractors and dry vans
+carry physical damage TWICE -- this group Intact policy and Progressive, AFG's
+own insurer. An earlier note here said the group policy covered every unit
+except AFG; that was wrong, and 8 AFG units appear on the submitted schedule.
+
+**XTRACK carries TWO cargo coverages**: the cargo inside the Incline package
+bound 2026-08-07, and a separate extra cargo coverage taken out in February
+2026. The February one is not the August one renewed.
+
+**The 21 insured units that have not run since 2026-07-06 are a cleanup, not a
+misstatement.** Operator: they should not be on the policy, but may have been on
+it legitimately for part of the term and simply never removed -- so the question
+is a return premium, not an error.
 
 **IFTA IS AN INDEPENDENT MILEAGE AND FUEL RECORD**, and one return does not
 survive contact with the equipment. XTRACK's Q2 2026 return divides 1,727,001

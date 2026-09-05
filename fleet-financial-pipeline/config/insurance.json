@@ -115,15 +115,15 @@
       "trailer_interchange": 30000
     },
     {
-      "entity": "GROUP (ZONE + XTRACK, NOT AFG)",
+      "entity": "GROUP (ZONE + XTRACK + AFG)",
       "coverage": "vehicle_physical_damage_and_non_trucking_liability",
       "carrier": "Intact Insurance Group USA (proposal via RT Specialty / Insuremart)",
       "period": "requested effective 2026-03-06, policy period 2026-03-01 to 2027-03-01",
-      "power_units": 56,
-      "power_unit_tiv": 7889308.0,
+      "power_units": 62,
+      "power_unit_tiv": 8578444.0,
       "trailers": 104,
       "trailer_tiv": 4371304.05,
-      "total_insured_value": 12260612.05,
+      "total_insured_value": 12927748.05,
       "deductible": 5000,
       "prior_term": {
         "units": 62,
@@ -131,7 +131,31 @@
       },
       "annual_total": null,
       "_MISSING": "NO PREMIUM AND NO RATE. The questionnaire states the exposure and leaves the VPD Rate column blank; the only premium in the file is $1,500 + $75 tax for the Accident & Health line, which is the occupational-accident cover, not physical damage. The bound premium or rate is needed before any physical-damage cost can be stated.",
-      "_note": "Operator, 2026-09-05: physical damage is bound this year as a group policy covering every unit except AFG."
+      "_note": "Operator, 2026-09-05, CORRECTED: AFG's dry vans and tractors carry DOUBLE physical damage -- this group Intact policy AND Progressive, AFG's own main insurer. An earlier note here read 'every unit except AFG'; that was wrong about physical damage.",
+      "schedule_submitted_at_renewal": {
+        "source": "data/raw/insurance/pd_renewal/ (Unit_List, Trailer_List_active, Driver_List_Zone)",
+        "power_units": 62,
+        "power_unit_tiv": 8578444.0,
+        "trailers": 104,
+        "trailer_tiv": 4349304.05,
+        "total_insured_value": 12927748.05,
+        "trailer_ownership": {
+          "lease": 94,
+          "rent": 5,
+          "own": 3,
+          "ten lease": 1,
+          "bowman": 1
+        },
+        "_note": "This is the schedule actually submitted, and it supersedes the questionnaire's 56 units / $7,889,308. The questionnaire was the earlier snapshot; the fleet grew to 62 units and $8,578,444 by submission. Trailer TIV is unchanged at ~$4.35M."
+      }
+    },
+    {
+      "entity": "XTRACK",
+      "coverage": "excess_cargo_second_layer",
+      "period": "from 2026-02",
+      "annual_total": null,
+      "_MISSING": "Premium not yet supplied.",
+      "_note": "Operator, 2026-09-05: XTRACK carries TWO cargo coverages -- the cargo inside the new Incline auto-liability/GL/cargo package bound 2026-08-07, and a separate extra cargo coverage taken out in February 2026. Both are live; the February one is not the same policy renewed."
     }
   ],
   "ucr": [
@@ -160,10 +184,11 @@
   "group_annual_known": 1295581.92,
   "group_weekly_known": 24915.04,
   "open_questions": [
-    "THE PHYSICAL-DAMAGE PREMIUM. The only physical-damage document in the corpus is an exposure questionnaire with the rate column blank. The binder or declarations page is needed.",
+    "THE PHYSICAL-DAMAGE PREMIUM, and the XTRACK February 2026 extra cargo premium. The full schedule is now known -- 62 power units at $8,578,444 and 104 trailers at $4,349,304 -- so only the rate is missing.",
+    "A trailer-to-company mapping. 104 trailers at $4.35M, 94 of them leased, with no company column.",
+    "AFG pays twice for physical damage on the same units -- group Intact plus Progressive. Deliberate (lender requirement, differing limits) or duplication?",
+    "OREGON. ZONE's Ohio IFTA returns report 2,968 Oregon miles in Q1 2026 and 436 in Q2 at a 0.00 IFTA rate, which means Oregon's weight-mile tax is filed separately. No Oregon return is in the corpus.",
     "Are trailers on the same physical-damage policy? The questionnaire schedules 104 trailers at $4,371,304, but the group unit workbook lists tractors only, so trailers cannot be split by company.",
-    "AFG units sit on ZONE's master AUTO LIABILITY schedule (7 of the 68) even though AFG is excluded from the group physical-damage policy. Deliberate?",
-    "21 of the 68 insured units have not run since 2026-07-06. Are they still on the policy on purpose?",
     "Are the 45+ XTRACK trucks not on XTRACK's own 3-unit policy all on ZONE-OH's 68-unit master, and is the group fleet larger than 68?",
     "Physical damage: is the 159,000 TIV per unit or for the schedule?",
     "Trailers. The ZONE master schedules 68 TRACTORS and no trailers; the maintenance ledger shows 108 trailers. Where are they insured?"
@@ -194,7 +219,7 @@
         "annual": 287850,
         "weekly": 5536
       },
-      "_finding": "21 of the 68 insured units have not appeared in any P&L since 2026-07-06. That is $335,825 a year, $6,458 a week, of auto-liability premium on trucks that are not running."
+      "_finding": "21 of the 68 insured units have not appeared in any P&L since 2026-07-06 -- $335,825 a year, $6,458 a week. Operator, 2026-09-05: they should not be on the policy, but may have been on it legitimately during part of the term and simply never removed. So this is a cleanup and a possible return premium, not a misstatement."
     },
     "physical_damage": {
       "basis": "stated value of the company-owned units each company was running in the last 8 weeks; owner-operator units carry their own physical damage and are excluded",
@@ -210,19 +235,52 @@
       "ZONE": {
         "units": 39,
         "tiv": 4144669,
-        "share_excl_afg": 0.45
+        "share_excl_afg": 0.45,
+        "share_incl_afg": 0.3769
       },
       "XTRACK": {
         "units": 38,
         "tiv": 5061616,
-        "share_excl_afg": 0.55
+        "share_excl_afg": 0.55,
+        "share_incl_afg": 0.4603
       },
       "AFG": {
         "units": 16,
-        "tiv": 1790922
+        "tiv": 1790922,
+        "share_incl_afg": 0.1629
       },
-      "_how_to_use": "Multiply the bound physical-damage premium by share_excl_afg. The split is 55.0% XTRACK / 45.0% ZONE.",
-      "_cross_check": "The Intact questionnaire states 56 power units at $7,889,308 as of 2026-03-06 against $9,206,285 across 77 units here in Jul-Aug 2026. Same order; the difference is six months of fleet change and possibly a narrower schedule."
+      "_how_to_use": "Use from_the_submitted_schedule: ZONE 47.7%, XTRACK 37.9%, AFG 12.9% of the power-unit premium. The earlier shares were built from the whole active fleet rather than the schedule actually submitted, and the schedule is the better basis.",
+      "_cross_check": "The Intact questionnaire states 56 power units at $7,889,308 as of 2026-03-06 against $9,206,285 across 77 units here in Jul-Aug 2026. Same order; the difference is six months of fleet change and possibly a narrower schedule.",
+      "_CORRECTION": "2026-09-05: AFG IS on this policy. The 'excluding AFG' split below was built on an earlier reading and is superseded by share_incl_afg. AFG additionally carries Progressive on the same units, so the two policies overlap.",
+      "from_the_submitted_schedule": {
+        "basis": "the 62 power units actually submitted, joined on VIN to the fleet registry and attributed to the company whose P&L last carried them",
+        "ZONE": {
+          "units": 28,
+          "tiv": 4087783,
+          "share": 0.477
+        },
+        "XTRACK": {
+          "units": 24,
+          "tiv": 3249460,
+          "share": 0.379
+        },
+        "AFG": {
+          "units": 8,
+          "tiv": 1109314,
+          "share": 0.129
+        },
+        "not_matched": {
+          "units": 2,
+          "tiv": 131887,
+          "share": 0.015
+        },
+        "total": {
+          "units": 62,
+          "tiv": 8578444
+        },
+        "_trailers": "104 trailers at $4,349,304 cannot be split -- the trailer list carries no company column. Allocate them on the power-unit share, or send a trailer-to-company mapping.",
+        "_note": "AFG is on the schedule with 8 units, which confirms the double physical damage: these same units are also on AFG's Progressive policy."
+      }
     }
   }
 }
