@@ -59,7 +59,9 @@
       "per_owner_operator_week": 24.69,
       "combined_single_limit": 1000000,
       "aggregate_limit": 2000000,
-      "basis": "per owner-operator"
+      "basis": "per owner-operator",
+      "_MISSING": "No annual premium: the policy is rated per owner-operator per month ($107) and the count of enrolled owner-operators is not in the file. At the 20 owner-operator trucks XTRACK alone was running in August this is ~$25,700 a year for that company; the group figure needs the enrolment list. Binding the physical damage is contingent on this cover being written, so it is not optional.",
+      "rate_basis": "per enrolled owner-operator per month"
     },
     {
       "entity": "XTRACK",
