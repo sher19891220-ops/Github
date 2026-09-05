@@ -70,6 +70,9 @@ DAYS_PER_WEEK = 7
 TASHKENT_VARIABLE = 0.725
 
 
+WEEKS_PER_YEAR = 52.0
+
+
 def fit_line(y, x):
     A = np.vstack([np.ones(len(x)), x]).T
     coef, *_ = np.linalg.lstsq(A, y, rcond=None)
@@ -185,6 +188,23 @@ def breakeven_rpm(m, miles):
 
 def weekly_result(m, miles, rpm):
     return miles * contribution_per_mile(m, rpm) - m["breakeven_fixed"]
+
+
+def registration_per_truck_week():
+    """IRP plates and HVUT, per truck per week, from data/raw/permits/.
+
+    Returns None rather than 0.0 when the file is not in the corpus: a zero here
+    would silently claim registration is free, which is the failure this whole
+    module exists to avoid. The container is ephemeral and data/raw is
+    gitignored, so absence is the normal case after a reclaim.
+    """
+    try:
+        import parse_irp as R
+        payments, red, _ = R.read()
+    except Exception:
+        return None
+    per = R.per_unit(payments)
+    return (R.grand_total(payments, red) / len(per) / WEEKS_PER_YEAR) if per else None
 
 
 def controls(m):
@@ -309,6 +329,17 @@ def main():
           f"is taken off the rate instead -- counting it here too halves the answer)")
     print(f"  today the fleet runs {m['miles_per_truck']:,.0f} loaded miles a week "
           f"at ${m['rpm']:.3f}")
+    reg = registration_per_truck_week()
+    if reg:
+        print(f"\n  NOT IN THAT FIGURE: registration ${reg:.0f}/truck-week "
+              f"(IRP plates + HVUT).")
+        print("  It is fixed, annual and prepaid -- the same shape as insurance -- and")
+        print("  it is deliberately NOT added, because `overhead` here is a RESIDUAL")
+        print("  (gross - net - block cost) and would already contain any registration")
+        print("  that reached this P&L. Adding it blind double-counts. Settle it by")
+        print("  finding a registration line in the panel; until then it is a floor")
+        print(f"  of ${reg:.0f} on every per-truck cost in this module, and the true")
+        print("  break-even is at most that much higher.")
 
     print("\n== BREAK-EVEN MILES AT EACH RATE ==")
     print(f"  {'RPM':>6}{'$ kept per mile':>18}{'break-even miles/wk':>22}"

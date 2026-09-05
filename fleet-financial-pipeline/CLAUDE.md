@@ -400,6 +400,64 @@ some returns and absent in others that are plainly the same form. Match on the
 Step 2 division line instead; keyword matching silently threw away four of
 seven valid returns.
 
+## Registration: IRP plates and HVUT — the cost line nothing else carries
+
+`ingest/parse_irp.py` reads the payments, `analysis/registration.py` puts them on
+the fleet and tests them against the bank. Source: `data/raw/permits/` (uploaded
+2026-09-05), 24 payments over 48 trucks, $82,876.79.
+
+**It appears in no other source.** The weekly P&L has no registration column and
+`analysis/truck_breakeven.py` has no registration line, so every per-truck cost
+figure in this pipeline was missing **$1,727 a truck a year = $33 a truck-week =
+$4.73 a truck-day**. Small next to insurance and the SAME SHAPE: fixed, annual,
+prepaid, charged in full on a truck that never turns a wheel.
+
+    ZONE     $23,995/yr   $461/wk   15 trucks   $1,600 per truck-year
+    XTRACK   $25,494/yr   $490/wk   16 trucks   $1,593
+    AFG      $12,820/yr   $247/wk    9 trucks   $1,424
+    on no P&L $6,854 + not in the unit workbook $6,563
+
+**HVUT is flat, IRP is not.** The federal heavy vehicle use tax is $550 a truck
+and every one of the six group payments divides by it exactly — which is what
+makes the unit lists checkable against the money. IRP is apportioned on miles per
+jurisdiction and on weight and runs **$438 to $1,430 a truck (3.3x)**. Never
+average an IRP rate across trucks; the spread is real.
+
+**HVUT prorates from the month of first use.** Unit 7584's $458.33 is exactly
+10/12 of $550, so that truck went into service in September. A control that tests
+only for whole trucks calls a correct proration a bad parse.
+
+**REGISTRATION HAS A NAMED COUNTERPARTY ON BOTH LEGS**, so unlike most of this
+corpus the sheet can be tested against cash: `8308OHIODPSIRP DES:IRP FEE` for the
+plates, `IRS DES:USATAXPYMT` for the HVUT. It fails the test in BOTH directions:
+
+- **The duplicate the sheet flags is NOT one.** Two $2,493.34 IRP rows for units
+  1365/1564/1596; **one** debit in the bank. The row is duplicated, no money was
+  lost, and the sheet's $82,968.46 bottom line is overstated. A correction to the
+  sheet, not a refund claim.
+- **A duplicate the sheet does NOT flag IS one.** Unit 7584's $458.33 prorated
+  HVUT was debited by the IRS on **2025-09-05 and again 2025-09-18**. That is
+  cash out and a Form 2290 credit can recover it.
+- **$9,648 of registration debits are on no line of the sheet** (12 of them,
+  including $6,285.45 on 2025-05-02), and **$27,451 of sheet lines have no
+  matching debit**. Neither side is the complete record.
+
+**MATCH INSIDE THE VENDOR, NEVER ON AMOUNT ALONE.** $1,100 matches eleven bank
+rows and $5,500 five — Zelle payments, wires, mobile deposits. The sheet's $51.31
+plate transfer matches a Speedway fuel-card charge to the cent. Amount-only
+matching "confirms" payments that never happened, so the reconciler only looks
+inside rows already identified as that vendor's.
+
+**A repeated amount is not a duplicate.** Three $550 IRS debits are three trucks
+at the flat rate, and a $30.25 IRP fee eight months apart is two transactions.
+Only a repeat of an amount that could belong to one truck alone — a *prorated*
+HVUT — inside a 45-day window is a suspected double payment.
+
+**Registration does not come back.** Unlike the insurance, there is no return
+premium on a plate: the $2,607 on unit 2703, last seen in a P&L 2026-02-23, is
+spent. Three registered trucks (4851, 5417, 5852, $6,563) are on no unit list at
+all.
+
 ## Cost of a truck-day, and break-even for one truck
 
 `analysis/truck_breakeven.py`. Three measured pieces, no chart of accounts:

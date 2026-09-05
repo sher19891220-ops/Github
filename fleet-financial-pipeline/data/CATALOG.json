@@ -1,7 +1,7 @@
 {
  "generated": "2026-09-05",
- "distinct_files": 569,
- "total_paths": 658,
+ "distinct_files": 632,
+ "total_paths": 772,
  "files": [
   {
    "path": "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/3ee6cf23-Afg_stmt_AprilAugust.zip",
@@ -13,6 +13,18 @@
    "note": "Upload archive. The extracted files are catalogued separately; the archive is kept only as the re-upload unit after a container reclaim.",
    "used_by": [],
    "sha256": "56a13f409c56cb8d",
+   "copies": []
+  },
+  {
+   "path": "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/7d9f806c-AFG_Bills.rar",
+   "bytes": 135050,
+   "modified": "2026-09-05",
+   "kind": "archive",
+   "entity": "AFG",
+   "period": null,
+   "note": "Upload archive. The extracted files are catalogued separately; the archive is kept only as the re-upload unit after a container reclaim.",
+   "used_by": [],
+   "sha256": "df983cf4ef4e0862",
    "copies": []
   },
   {
@@ -136,6 +148,18 @@
    "copies": []
   },
   {
+   "path": "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/23c7a1f9-Zone.zip",
+   "bytes": 5966864,
+   "modified": "2026-09-05",
+   "kind": "archive",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Upload archive. The extracted files are catalogued separately; the archive is kept only as the re-upload unit after a container reclaim.",
+   "used_by": [],
+   "sha256": "5c97445d6b30433e",
+   "copies": []
+  },
+  {
    "path": "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/3376c8f2-Zone_stmt_MarchAugust.zip",
    "bytes": 254173,
    "modified": "2026-09-04",
@@ -160,6 +184,18 @@
    "copies": []
   },
   {
+   "path": "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/15aaafda-ZONEOH_Insurance_Reports_Archive_FINAL.zip",
+   "bytes": 1758193,
+   "modified": "2026-09-05",
+   "kind": "archive",
+   "entity": null,
+   "period": null,
+   "note": "Upload archive. The extracted files are catalogued separately; the archive is kept only as the re-upload unit after a container reclaim.",
+   "used_by": [],
+   "sha256": "81fbf70e4c0eb0f4",
+   "copies": []
+  },
+  {
    "path": "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/16096857-Ifta.zip",
    "bytes": 22196960,
    "modified": "2026-09-05",
@@ -181,6 +217,18 @@
    "note": "Upload archive. The extracted files are catalogued separately; the archive is kept only as the re-upload unit after a container reclaim.",
    "used_by": [],
    "sha256": "6b3ebcc00c69c524",
+   "copies": []
+  },
+  {
+   "path": "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/4c08294f-ZONEOH_NTLPD_OCCACC_NTL_and_PD.zip",
+   "bytes": 805627,
+   "modified": "2026-09-05",
+   "kind": "archive",
+   "entity": null,
+   "period": null,
+   "note": "Upload archive. The extracted files are catalogued separately; the archive is kept only as the re-upload unit after a container reclaim.",
+   "used_by": [],
+   "sha256": "67d7bfd6e26bd010",
    "copies": []
   },
   {
@@ -3975,6 +4023,31 @@
    ]
   },
   {
+   "path": "data/raw/be9f8984-group_units_list_and_driver_list.xlsx",
+   "bytes": 821448,
+   "modified": "2026-09-05",
+   "kind": "fleet_roster",
+   "entity": null,
+   "period": null,
+   "note": "The unit-to-VIN join. An ASSIGNMENT HISTORY, not a fleet list -- 1,413 rows, 358 distinct trucks, 244 of them in no P&L at all. Counting rows multiplies the fleet fourfold; treating it as current triples it.",
+   "used_by": [
+    "ingest/fleet_registry.py"
+   ],
+   "sheets": 6,
+   "sheet_names": [
+    "Zone driver list",
+    "Xtrack_Driver List",
+    "AFG Driver List ",
+    " Zone Unit List",
+    "Xtrack_Unit ",
+    "AFG Unit list "
+   ],
+   "sha256": "d895703b8b01b9f7",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/be9f8984-group_units_list_and_driver_list.xlsx"
+   ]
+  },
+  {
    "path": "data/raw/pnl/9f8d6e38-EFS_FUEL_REPORT_XTRACK__2025.xlsx",
    "bytes": 3924,
    "modified": "2026-09-02",
@@ -4379,7 +4452,8 @@
    "used_by": [],
    "sha256": "daf478d9128f8570",
    "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/2025 4th qt ifta.pdf"
+    "data/raw/ifta/Ifta/Zone/Zone/2025 4th qt ifta.pdf",
+    "data/raw/permits/Zone/2025 4th qt ifta.pdf"
    ]
   },
   {
@@ -4393,7 +4467,8 @@
    "used_by": [],
    "sha256": "3d8425a6a153b844",
    "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/HUWF2508305081317.pdf"
+    "data/raw/ifta/Ifta/Zone/Zone/HUWF2508305081317.pdf",
+    "data/raw/permits/Zone/HUWF2508305081317.pdf"
    ]
   },
   {
@@ -4407,7 +4482,8 @@
    "used_by": [],
    "sha256": "755763aafa1bdd84",
    "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/HUWF2509306141268.pdf"
+    "data/raw/ifta/Ifta/Zone/Zone/HUWF2509306141268.pdf",
+    "data/raw/permits/Zone/HUWF2509306141268.pdf"
    ]
   },
   {
@@ -4421,7 +4497,8 @@
    "used_by": [],
    "sha256": "0b5f96a221c61a46",
    "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/HUWF2510206767918.pdf"
+    "data/raw/ifta/Ifta/Zone/Zone/HUWF2510206767918.pdf",
+    "data/raw/permits/Zone/HUWF2510206767918.pdf"
    ]
   },
   {
@@ -4435,7 +4512,8 @@
    "used_by": [],
    "sha256": "73d060e0b19fe019",
    "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/HUWF2511187907176.pdf"
+    "data/raw/ifta/Ifta/Zone/Zone/HUWF2511187907176.pdf",
+    "data/raw/permits/Zone/HUWF2511187907176.pdf"
    ]
   },
   {
@@ -4449,7 +4527,8 @@
    "used_by": [],
    "sha256": "6498be7cd73f447f",
    "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/HUWF2512269036098.pdf"
+    "data/raw/ifta/Ifta/Zone/Zone/HUWF2512269036098.pdf",
+    "data/raw/permits/Zone/HUWF2512269036098.pdf"
    ]
   },
   {
@@ -4463,7 +4542,8 @@
    "used_by": [],
    "sha256": "7fe7c7952f979456",
    "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/HUWF2601300661908.pdf"
+    "data/raw/ifta/Ifta/Zone/Zone/HUWF2601300661908.pdf",
+    "data/raw/permits/Zone/HUWF2601300661908.pdf"
    ]
   },
   {
@@ -4477,7 +4557,8 @@
    "used_by": [],
    "sha256": "38cf430c551487f1",
    "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/HUWF2602271302781.pdf"
+    "data/raw/ifta/Ifta/Zone/Zone/HUWF2602271302781.pdf",
+    "data/raw/permits/Zone/HUWF2602271302781.pdf"
    ]
   },
   {
@@ -4491,7 +4572,8 @@
    "used_by": [],
    "sha256": "481594b923e3ee5e",
    "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/HUWF2604042392032.pdf"
+    "data/raw/ifta/Ifta/Zone/Zone/HUWF2604042392032.pdf",
+    "data/raw/permits/Zone/HUWF2604042392032.pdf"
    ]
   },
   {
@@ -4505,7 +4587,8 @@
    "used_by": [],
    "sha256": "a36c4bc2521a417c",
    "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/HUWF2604213289859.pdf"
+    "data/raw/ifta/Ifta/Zone/Zone/HUWF2604213289859.pdf",
+    "data/raw/permits/Zone/HUWF2604213289859.pdf"
    ]
   },
   {
@@ -4519,7 +4602,8 @@
    "used_by": [],
    "sha256": "88546ec0efd08ecd",
    "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/HUWF2605314490680.pdf"
+    "data/raw/ifta/Ifta/Zone/Zone/HUWF2605314490680.pdf",
+    "data/raw/permits/Zone/HUWF2605314490680.pdf"
    ]
   },
   {
@@ -4533,7 +4617,8 @@
    "used_by": [],
    "sha256": "9d4673c02664040a",
    "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/HUWF2607035402080.pdf"
+    "data/raw/ifta/Ifta/Zone/Zone/HUWF2607035402080.pdf",
+    "data/raw/permits/Zone/HUWF2607035402080.pdf"
    ]
   },
   {
@@ -4547,7 +4632,8 @@
    "used_by": [],
    "sha256": "7bbe2bab60d04e90",
    "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/HUWF2608077152193.pdf"
+    "data/raw/ifta/Ifta/Zone/Zone/HUWF2608077152193.pdf",
+    "data/raw/permits/Zone/HUWF2608077152193.pdf"
    ]
   },
   {
@@ -4561,7 +4647,8 @@
    "used_by": [],
    "sha256": "cb6958d23e1f8161",
    "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/HUWF2608267493868.pdf"
+    "data/raw/ifta/Ifta/Zone/Zone/HUWF2608267493868.pdf",
+    "data/raw/permits/Zone/HUWF2608267493868.pdf"
    ]
   },
   {
@@ -4575,7 +4662,8 @@
    "used_by": [],
    "sha256": "15ce06ff26a1cdc1",
    "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/Payment Receipt Form (1).pdf"
+    "data/raw/ifta/Ifta/Zone/Zone/Payment Receipt Form (1).pdf",
+    "data/raw/permits/Zone/Payment Receipt Form (1).pdf"
    ]
   },
   {
@@ -4589,7 +4677,8 @@
    "used_by": [],
    "sha256": "a674aed9fcbf7bec",
    "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/Payment Receipt Form.pdf"
+    "data/raw/ifta/Ifta/Zone/Zone/Payment Receipt Form.pdf",
+    "data/raw/permits/Zone/Payment Receipt Form.pdf"
    ]
   },
   {
@@ -4603,7 +4692,10 @@
    "used_by": [],
    "sha256": "1a3ad9a29c26c7aa",
    "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/ViewFile (2).pdf"
+    "data/raw/ifta/Ifta/Zone/Zone/ViewFile (2).pdf",
+    "data/raw/ifta/ohio/fe32857b-ViewFile_2.pdf",
+    "data/raw/permits/Zone/ViewFile (2).pdf",
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/fe32857b-ViewFile_2.pdf"
    ]
   },
   {
@@ -4617,7 +4709,10 @@
    "used_by": [],
    "sha256": "e419e6cd3fad99e5",
    "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/ViewFile (3).pdf"
+    "data/raw/ifta/Ifta/Zone/Zone/ViewFile (3).pdf",
+    "data/raw/ifta/ohio/8a1e93c9-ViewFile_3.pdf",
+    "data/raw/permits/Zone/ViewFile (3).pdf",
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/8a1e93c9-ViewFile_3.pdf"
    ]
   },
   {
@@ -4631,7 +4726,10 @@
    "used_by": [],
    "sha256": "c95f51e2e6532183",
    "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/ViewFile (5).pdf"
+    "data/raw/ifta/Ifta/Zone/Zone/ViewFile (5).pdf",
+    "data/raw/ifta/ohio/948230a8-ViewFile_5.pdf",
+    "data/raw/permits/Zone/ViewFile (5).pdf",
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/948230a8-ViewFile_5.pdf"
    ]
   },
   {
@@ -4645,7 +4743,10 @@
    "used_by": [],
    "sha256": "c156c0656ecc1fee",
    "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/ViewFile (7).pdf"
+    "data/raw/ifta/Ifta/Zone/Zone/ViewFile (7).pdf",
+    "data/raw/ifta/ohio/06f6909f-ViewFile_7.pdf",
+    "data/raw/permits/Zone/ViewFile (7).pdf",
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/06f6909f-ViewFile_7.pdf"
    ]
   },
   {
@@ -4659,7 +4760,8 @@
    "used_by": [],
    "sha256": "b1cf5f3126bf4cf2",
    "copies": [
-    "data/raw/ifta/Ifta/Zone/ky 2025 qt3.pdf"
+    "data/raw/ifta/Ifta/Zone/ky 2025 qt3.pdf",
+    "data/raw/permits/Zone/ky 2025 qt3.pdf"
    ]
   },
   {
@@ -4673,7 +4775,8 @@
    "used_by": [],
    "sha256": "c53432062152726f",
    "copies": [
-    "data/raw/ifta/Ifta/Zone/ky 2025 qt4.pdf"
+    "data/raw/ifta/Ifta/Zone/ky 2025 qt4.pdf",
+    "data/raw/permits/Zone/ky 2025 qt4.pdf"
    ]
   },
   {
@@ -4687,7 +4790,8 @@
    "used_by": [],
    "sha256": "0b8e8b615916538c",
    "copies": [
-    "data/raw/ifta/Ifta/Zone/nm 2025 3qt.pdf"
+    "data/raw/ifta/Ifta/Zone/nm 2025 3qt.pdf",
+    "data/raw/permits/Zone/nm 2025 3qt.pdf"
    ]
   },
   {
@@ -4701,7 +4805,8 @@
    "used_by": [],
    "sha256": "f6890e56e6977ea8",
    "copies": [
-    "data/raw/ifta/Ifta/Zone/nm 2025 qt4.pdf"
+    "data/raw/ifta/Ifta/Zone/nm 2025 qt4.pdf",
+    "data/raw/permits/Zone/nm 2025 qt4.pdf"
    ]
   },
   {
@@ -6191,6 +6296,66 @@
    "copies": []
   },
   {
+   "path": "data/raw/insurance/bills/APril bill AFG.pdf",
+   "bytes": 63623,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "AFG",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "6c19c8852c5df2f1",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/July payment AFG.pdf",
+   "bytes": 63921,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "AFG",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "a688bedeeb020d96",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/June Bill AFG.pdf",
+   "bytes": 63745,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "AFG",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "b1b71df825b97422",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/March bill AFG.pdf",
+   "bytes": 63113,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "AFG",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "6659821e054ff201",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/May Bill AFG.pdf",
+   "bytes": 63671,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "AFG",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "28714848dac7529d",
+   "copies": []
+  },
+  {
    "path": "data/raw/insurance/Insurance/Xtrack LLC Insurance/2026_UCR_Registration_4086204_202608222030.pdf",
    "bytes": 86651,
    "modified": "2026-08-26",
@@ -6260,7 +6425,10 @@
    "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
    "used_by": [],
    "sha256": "bbe10404902a13fc",
-   "copies": []
+   "copies": [
+    "data/raw/insurance/Insurance/Xtrack LLC Insurance/cfd1d3c6-XTRACK_MTC_FINANCE_encrypted_.pdf",
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/cfd1d3c6-XTRACK_MTC_FINANCE_encrypted_.pdf"
+   ]
   },
   {
    "path": "data/raw/insurance/Insurance/Xtrack LLC Insurance/Xtrack LLC 25-26 Insurance Proposal - signed.pdf",
@@ -6284,7 +6452,28 @@
    "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
    "used_by": [],
    "sha256": "9dac726c2b6c6c4c",
-   "copies": []
+   "copies": [
+    "data/raw/insurance/Insurance/Xtrack LLC Insurance/dd1fb191-Xtrack_LLC_encrypted_.pdf",
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/dd1fb191-Xtrack_LLC_encrypted_.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/insurance/bills/0f23632e-Xtrack.xlsx",
+   "bytes": 9657,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "XTRACK",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet1"
+   ],
+   "sha256": "bf785bf67c47ec5c",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/0f23632e-Xtrack.xlsx"
+   ]
   },
   {
    "path": "data/raw/insurance/Insurance/Zone Insurance/2026_UCR_Registration_3456354_202512081518.pdf",
@@ -6311,6 +6500,21 @@
    "copies": []
   },
   {
+   "path": "data/raw/insurance/Insurance/Zone Insurance/56dc5c3b-ZONE_OH_DBA_ZONE_INTACT_BENEFITS_PACKAGE_PROPOSAL__Signed.pdf",
+   "bytes": 2022454,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "a48350b13de3a37a",
+   "copies": [
+    "data/raw/insurance/Insurance/Zone Insurance/ZONE OH DBA ZONE INTACT BENEFITS PACKAGE PROPOSAL - Signed.pdf",
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/56dc5c3b-ZONE_OH_DBA_ZONE_INTACT_BENEFITS_PACKAGE_PROPOSAL__Signed.pdf"
+   ]
+  },
+  {
    "path": "data/raw/insurance/Insurance/Zone Insurance/Bank of America _ Online Banking _ Transfer Submitted (2).pdf",
    "bytes": 74697,
    "modified": "2026-09-04",
@@ -6335,18 +6539,6 @@
    "copies": []
   },
   {
-   "path": "data/raw/insurance/Insurance/Zone Insurance/ZONE OH DBA ZONE INTACT BENEFITS PACKAGE PROPOSAL - Signed.pdf",
-   "bytes": 2022454,
-   "modified": "2026-09-04",
-   "kind": "insurance_policy",
-   "entity": "ZONE",
-   "period": null,
-   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
-   "used_by": [],
-   "sha256": "a48350b13de3a37a",
-   "copies": []
-  },
-  {
    "path": "data/raw/insurance/Insurance/Zone Insurance/ZONE- OH COV CONF PAGE TO SIGN - Signed.pdf",
    "bytes": 757495,
    "modified": "2026-09-04",
@@ -6368,7 +6560,10 @@
    "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
    "used_by": [],
    "sha256": "a934645f7a9341c6",
-   "copies": []
+   "copies": [
+    "data/raw/insurance/Insurance/Zone Insurance/e09e8979-ZONE_OH_OCC_ACC_POLICY_DOCS_TO_SIGN__Signed.pdf",
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/e09e8979-ZONE_OH_OCC_ACC_POLICY_DOCS_TO_SIGN__Signed.pdf"
+   ]
   },
   {
    "path": "data/raw/insurance/Insurance/Zone Insurance/ZONE-OH CARGO DOCS TO SIGN  - Signed.pdf",
@@ -6417,6 +6612,786 @@
    "used_by": [],
    "sha256": "b51a53cc49321f11",
    "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/2025-11_November/Zone-Oh LLC DBA Zone (URG-02817) Endorsement #6.pdf",
+   "bytes": 330292,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": "2025",
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "bad638d4b72b867f",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/2025-12_December/Zone-Oh LLC DBA Zone (URG-02817) Endorsement #8.pdf",
+   "bytes": 330954,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": "2025",
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "7fbd93dd3a3cfd95",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/2026-01_January/Zone-Oh LLC DBA Zone (URG-02817) Endorsement #10.pdf",
+   "bytes": 330306,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": "2026",
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "4b4e2f2f375cdc0a",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/2026-02_February/Zone-Oh LLC DBA Zone (URG-02817) Endorsement #11.pdf",
+   "bytes": 329983,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": "2026",
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "7e8d586aff20b548",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/2026-03_March/ZONE-OH LLC - MARCH UNITS.xlsx",
+   "bytes": 28148,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": "2026",
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 2,
+   "sheet_names": [
+    "Unit List",
+    "Trailer list"
+   ],
+   "sha256": "33253199405694e6",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/2026-03_March/ZONE-OH LLC REPORT - MARCH DRIVERS.xlsx",
+   "bytes": 17706,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": "2026",
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet1"
+   ],
+   "sha256": "6dcf87229d91b1c0",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/2026-04_April/ZONE-OH LLC REPORT - APRIL DRIVERS.xlsx",
+   "bytes": 18093,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": "2026",
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet1"
+   ],
+   "sha256": "0be4d9a8ccd13d49",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/2026-04_April/ZONE-OH LLC REPORT - APRIL UNITS.xlsx",
+   "bytes": 28369,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": "2026",
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 2,
+   "sheet_names": [
+    "Unit List",
+    "Trailer list"
+   ],
+   "sha256": "f4389a4178822fbb",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/2026-05_May/ZONE-OH LLC REPORT - MAY DRIVERS  AL (2) (1).xlsx",
+   "bytes": 18926,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": "2026",
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet1"
+   ],
+   "sha256": "1ba024f258657c4d",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/2026-05_May/ZONE-OH LLC REPORT - MAY UNITS & TRAILERS AL  (2) (1).xlsx",
+   "bytes": 28888,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": "2026",
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 2,
+   "sheet_names": [
+    "Unit List",
+    "Trailer list"
+   ],
+   "sha256": "614cbb091b46aa9a",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/2026-06_June/Account Transaction History #208 - Zone-OH LLC - 2026-06-29.jpg",
+   "bytes": 110997,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": "2026",
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "bfa7bc1055d11738",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/2026-06_June/ZONE-OH LLC REPORT - JUNE UNITS & TRAILERS AL  (2) (2).xlsx",
+   "bytes": 29621,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": "2026",
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 2,
+   "sheet_names": [
+    "Unit List",
+    "Trailer list"
+   ],
+   "sha256": "60d340738aac69b7",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/2026-06_June/ZONE-OH LLC REPORT - June DRIVERS  AL (2) (1).xlsx",
+   "bytes": 20065,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": "2026",
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet1"
+   ],
+   "sha256": "bf74a1ba0410e28c",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/2026-07_July/ZONE-OH LLC REPORT - JULY UNITS & TRAILERS AL  (2) (1)READY.xlsx",
+   "bytes": 30529,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": "2026",
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 2,
+   "sheet_names": [
+    "Unit List",
+    "Trailer list"
+   ],
+   "sha256": "706573e1ddcf35d8",
+   "copies": [
+    "data/raw/insurance/bills/2026-08_August/ZONE-OH LLC REPORT - AUguts UNITS & TRAILERS AL  (2) (1)READY (1).xlsx"
+   ]
+  },
+  {
+   "path": "data/raw/insurance/bills/2026-07_July/ZONE-OH_LLC_REPORT_-_July_DRIVERS_ALReady.xlsx",
+   "bytes": 19189,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": "2026",
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet1"
+   ],
+   "sha256": "875360f9be108f3e",
+   "copies": [
+    "data/raw/insurance/bills/2026-08_August/ZONE-OH_LLC_REPORT_-AUgust DRIVERS_ALReady (1).xlsx"
+   ]
+  },
+  {
+   "path": "data/raw/insurance/bills/ZONE-OH_NTLPD_OCCACC_Archive/April_2026/APRIL OCC ACC REPORT (1).xlsx",
+   "bytes": 16561,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet1"
+   ],
+   "sha256": "f56dabc3b9e8b11d",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/ZONE-OH_NTLPD_OCCACC_Archive/April_2026/APRIL TRAILERS NTLPD REPORT (1).xlsx",
+   "bytes": 17737,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet1"
+   ],
+   "sha256": "a625e5325068a3d7",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/ZONE-OH_NTLPD_OCCACC_Archive/April_2026/APRIL UNITS NTLPD REPORT REVISED (1).xlsx",
+   "bytes": 15926,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet1"
+   ],
+   "sha256": "b39d50827843073a",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/ZONE-OH_NTLPD_OCCACC_Archive/April_2026/INVOICE 13260 NTLPD APRIL REVISED.pdf",
+   "bytes": 10738,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "ab8fddc73777e5b2",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/ZONE-OH_NTLPD_OCCACC_Archive/August_2026/AUGUST Monthly_report_OAC_ready.xlsx",
+   "bytes": 26259,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet1"
+   ],
+   "sha256": "921317283ccd1a6b",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/ZONE-OH_NTLPD_OCCACC_Archive/August_2026/August . Trailer_list _report_PD_updated (2).xlsx",
+   "bytes": 17323,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet1"
+   ],
+   "sha256": "991bb19e16275aa0",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/ZONE-OH_NTLPD_OCCACC_Archive/August_2026/Units August Report PD (1)Ready.xlsx",
+   "bytes": 20292,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet1"
+   ],
+   "sha256": "8d3401628d948c81",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/ZONE-OH_NTLPD_OCCACC_Archive/July_2026/JULY TRAILERS NTLPD (2) (2).xlsx",
+   "bytes": 18275,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet1"
+   ],
+   "sha256": "c723d5a3dbb44cc9",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/ZONE-OH_NTLPD_OCCACC_Archive/July_2026/JULY UNITS NTLPD (1) (2).xlsx",
+   "bytes": 20862,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet1"
+   ],
+   "sha256": "471821d812113503",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/ZONE-OH_NTLPD_OCCACC_Archive/July_2026/JULY_Monthly_report_OAC_UPDATED (1).xlsx",
+   "bytes": 23717,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet1"
+   ],
+   "sha256": "fbb72c7e80e1beb7",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/ZONE-OH_NTLPD_OCCACC_Archive/July_2026/ZONE-OH - OCC ACC JULY INVOICE (1).pdf",
+   "bytes": 228075,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "1a3504cbc9398f2d",
+   "copies": [
+    "data/raw/insurance/bills/ZONE-OH_NTLPD_OCCACC_Archive/July_2026/ZONE-OH - OCC ACC JULY INVOICE (2).pdf"
+   ]
+  },
+  {
+   "path": "data/raw/insurance/bills/ZONE-OH_NTLPD_OCCACC_Archive/June_2026/JUNE TRAILERS NTLPD REPORT (2) (2).xlsx",
+   "bytes": 16863,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet1"
+   ],
+   "sha256": "5cf9e2626f68cacc",
+   "copies": [
+    "data/raw/insurance/bills/ZONE-OH_NTLPD_OCCACC_Archive/June_2026/JUNE TRAILERS NTLPD REPORT (3) (2).xlsx"
+   ]
+  },
+  {
+   "path": "data/raw/insurance/bills/ZONE-OH_NTLPD_OCCACC_Archive/June_2026/ZONE -OH OCC ACC JUNE REPORT (2) (1).xlsx",
+   "bytes": 22477,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet1"
+   ],
+   "sha256": "834d1cb070828296",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/ZONE-OH_NTLPD_OCCACC_Archive/June_2026/ZONE-OH - NTL PD JUNE INVOICE (1) (1).pdf",
+   "bytes": 10895,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "6db06973ed1504f8",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/ZONE-OH_NTLPD_OCCACC_Archive/March_2026/MARCH OCC ACC REPORT (3).xlsx",
+   "bytes": 15320,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet1"
+   ],
+   "sha256": "899b55aabdb9acf1",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/ZONE-OH_NTLPD_OCCACC_Archive/March_2026/MARCH TRAILERS NTLPD REPORT (3).xlsx",
+   "bytes": 17290,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet1"
+   ],
+   "sha256": "761283bfd49a3f09",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/ZONE-OH_NTLPD_OCCACC_Archive/March_2026/MARCH UNITS NTLPD REPORT (2).xlsx",
+   "bytes": 15979,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet1"
+   ],
+   "sha256": "7e7605f9e01c5561",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/ZONE-OH_NTLPD_OCCACC_Archive/May_2026/INVOICE 13352 OCC ACC MAY REVISED.pdf",
+   "bytes": 10718,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "ef7003b846de5765",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/ZONE-OH_NTLPD_OCCACC_Archive/May_2026/MAY OCC ACC REPORT (1).xlsx",
+   "bytes": 18291,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet1"
+   ],
+   "sha256": "d2d05dfd594a1adf",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/ZONE-OH_NTLPD_OCCACC_Archive/May_2026/MAY TRAILERS NTLPD REPORT (2).xlsx",
+   "bytes": 18518,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet1"
+   ],
+   "sha256": "d841dd425bdb731a",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/ZONE-OH_NTLPD_OCCACC_Archive/May_2026/MAY UNITS NTLPD REPORT (2).xlsx",
+   "bytes": 16556,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet1"
+   ],
+   "sha256": "5773f0cdb802a73d",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/ZONE-OH_NTLPD_OCCACC_Archive/Payment_Summary/Ryan_Specialty_Payment_Receipt_2026-08-25.jpg",
+   "bytes": 54546,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "68704925446aa368",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/ZONE-OH_NTLPD_OCCACC_Archive/Payment_Summary/ZONE-OH_Balance_Summary.png",
+   "bytes": 13901,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "2aa2d8d70f56ff83",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/pd_renewal/9c76a77c-Driver_List_Zone.xlsx",
+   "bytes": 12395,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet1"
+   ],
+   "sha256": "17b15e203efabbce",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/9c76a77c-Driver_List_Zone.xlsx"
+   ]
+  },
+  {
+   "path": "data/raw/insurance/bills/2025-10_October/Driver Report for Oct ! (6).xlsx",
+   "bytes": 14901,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": null,
+   "period": "2025",
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet1"
+   ],
+   "sha256": "7e11dccc55df0876",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/2025-10_October/report ( 65)Units (3).xlsx",
+   "bytes": 13584,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": null,
+   "period": "2025",
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet1"
+   ],
+   "sha256": "a4de9f742dac5abf",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/2025-11_November/Driver Report for NOV ! (4).xlsx",
+   "bytes": 16229,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": null,
+   "period": "2025",
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet1"
+   ],
+   "sha256": "12c16526f0072d0e",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/2025-11_November/Unit& trailer Report NOV !!!! (3).xlsx",
+   "bytes": 22776,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": null,
+   "period": "2025",
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 2,
+   "sheet_names": [
+    "Unit List",
+    "Trailer list"
+   ],
+   "sha256": "89b77e18647f8865",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/2025-12_December/December AL report (2).xlsx",
+   "bytes": 24358,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": null,
+   "period": "2025",
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 2,
+   "sheet_names": [
+    "Unit List",
+    "Trailer list"
+   ],
+   "sha256": "91a5fba32fbc5807",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/2025-12_December/Driver Report for December! AL insurance (1).xlsx",
+   "bytes": 16949,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": null,
+   "period": "2025",
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet1"
+   ],
+   "sha256": "1a59d714e03e31ac",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/2026-01_January/Driver Report for January AL insurance (1).xlsx",
+   "bytes": 17387,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": null,
+   "period": "2026",
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet1"
+   ],
+   "sha256": "54e228be0d6e6ece",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/2026-01_January/January  AL report.xlsx",
+   "bytes": 24677,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": null,
+   "period": "2026",
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 2,
+   "sheet_names": [
+    "Unit List",
+    "Trailer list"
+   ],
+   "sha256": "a65e7e78b4f332fc",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/bills/9d2a08d9-Report_Insruance.xlsx",
+   "bytes": 10213,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": null,
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet1"
+   ],
+   "sha256": "e9478c0739238d2d",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/9d2a08d9-Report_Insruance.xlsx"
+   ]
+  },
+  {
+   "path": "data/raw/insurance/pd_renewal/ca3b2d6c-Trailer_List_active.xlsx",
+   "bytes": 16577,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": null,
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet1"
+   ],
+   "sha256": "f4d96873983cf607",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/ca3b2d6c-Trailer_List_active.xlsx"
+   ]
+  },
+  {
+   "path": "data/raw/insurance/pd_renewal/d6778ef3-Unit_List.xlsx",
+   "bytes": 12932,
+   "modified": "2026-09-05",
+   "kind": "insurance_policy",
+   "entity": null,
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sheet1"
+   ],
+   "sha256": "d397fb7dc6e6ba7a",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/d6778ef3-Unit_List.xlsx"
+   ]
   },
   {
    "path": "data/raw/iron/invoices/Iron lease - AFG/AFG 05.22.26.pdf",
@@ -7961,6 +8936,18 @@
    "copies": []
   },
   {
+   "path": "data/processed/fleet_registry.json",
+   "bytes": 102500,
+   "modified": "2026-09-05",
+   "kind": "processed_output",
+   "entity": null,
+   "period": null,
+   "note": "Derived output of this pipeline, not a source. Regenerate it rather than reading it as evidence.",
+   "used_by": [],
+   "sha256": "b663cb6dd955a31a",
+   "copies": []
+  },
+  {
    "path": "data/processed/statement_meta.csv",
    "bytes": 17268,
    "modified": "2026-09-02",
@@ -8002,6 +8989,26 @@
    "sha256": "07dc51a83de861df",
    "copies": [
     "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/7a11ac48-REPORT__FB_UPDATED_2.xlsx"
+   ]
+  },
+  {
+   "path": "data/raw/permits/55e7b638-IRP_expenses_report__List_Exact.xlsx",
+   "bytes": 6846,
+   "modified": "2026-09-05",
+   "kind": "registration",
+   "entity": null,
+   "period": null,
+   "note": "IRP apportioned plates, federal HVUT and plate transfers. Billed in GROUPS covering several trucks at once, so the unit of the document is the payment and the unit of the analysis is the truck. The only source in the corpus for a cost line the weekly P&L has no column for.",
+   "used_by": [
+    "ingest/parse_irp.py"
+   ],
+   "sheets": 1,
+   "sheet_names": [
+    "Easy Grouped List"
+   ],
+   "sha256": "c0a67cacdb0aab9e",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/55e7b638-IRP_expenses_report__List_Exact.xlsx"
    ]
   },
   {

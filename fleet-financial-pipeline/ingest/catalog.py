@@ -78,6 +78,15 @@ KIND_PATTERNS = [
     (r"data/raw/insurance/", "insurance_policy",
      "Signed policies, proposals and UCR registrations. Units are scheduled by "
      "VIN and cannot yet be joined to fleet numbers."),
+    (r"data/raw/permits/", "registration",
+     "IRP apportioned plates, federal HVUT and plate transfers. Billed in GROUPS "
+     "covering several trucks at once, so the unit of the document is the payment "
+     "and the unit of the analysis is the truck. The only source in the corpus "
+     "for a cost line the weekly P&L has no column for."),
+    (r"group_units_list_and_driver_list", "fleet_roster",
+     "The unit-to-VIN join. An ASSIGNMENT HISTORY, not a fleet list -- 1,413 rows, "
+     "358 distinct trucks, 244 of them in no P&L at all. Counting rows multiplies "
+     "the fleet fourfold; treating it as current triples it."),
     (r"data/raw/ops/", "ops_export",
      "Load-level export from the dispatch system: one row per load entry, with "
      "pickup/delivery city, gross, miles, dispatcher and pay type. The only source "
@@ -336,6 +345,8 @@ HEADINGS = {
     "fuel_tax_return": "IFTA and state fuel-tax returns",
     "insurance_policy": "Insurance policies and registrations",
     "ops_export": "Dispatch system export (load level)",
+    "registration": "IRP plates, HVUT and permits",
+    "fleet_roster": "Unit-to-VIN assignment history",
     "lease_invoice": "Iron Lease invoices to the operating companies",
     "card_export": "AmEx card exports",
     "recruiting_cost": "Driver recruiting costs",
