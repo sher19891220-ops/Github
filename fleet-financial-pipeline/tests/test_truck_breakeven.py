@@ -58,6 +58,24 @@ def test_break_even_miles_and_rpm_agree_with_each_other(m):
         assert abs(B.weekly_result(m, miles, rpm)) < 0.01
 
 
+def test_rent_is_not_modelled_as_a_per_mile_cost(m):
+    """Least squares returned $0.1428/mile for rent, which is not a rate anyone
+    charges: it was the fit confusing WHICH TRUCK with HOW MANY MILES. Rent is a
+    base plus, on an Iron Lease truck only, the rate card's $0.10 or $0.12."""
+    assert m["rent_iron_per_mile"] in (0.0,) or 0.09 <= m["rent_iron_per_mile"] <= 0.13
+    assert m["rent_per_mile"] == pytest.approx(m["iron_share"] * m["rent_iron_per_mile"])
+    assert m["rent_per_mile"] < 0.05, "the whole fleet is not on the Iron mileage rate"
+
+
+def test_fuel_per_mile_is_measured_not_fitted(m):
+    """The fit put $301/week of fuel in the intercept and returned $0.72/mile
+    when the fleet actually paid $0.87. Measured is dollars over loaded miles."""
+    assert m["per_mile_fuel"] > 0.80
+    assert m["cost_per_mile"] > m["fitted_per_mile"]
+    assert 4.5 < m["fuel_per_gallon"] < 7.5
+    assert 5.5 < m["mpg"] < 8.0
+
+
 def test_a_dollar_of_gross_does_not_all_reach_the_truck(m):
     """Commission, factoring and maintenance-linked overhead come off the top.
     Ignoring that understates break-even miles by about 5%."""
