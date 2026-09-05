@@ -129,8 +129,7 @@
         "units": 62,
         "tiv": 14000000.0
       },
-      "annual_total": null,
-      "_MISSING": "NO PREMIUM AND NO RATE. The questionnaire states the exposure and leaves the VPD Rate column blank; the only premium in the file is $1,500 + $75 tax for the Accident & Health line, which is the occupational-accident cover, not physical damage. The bound premium or rate is needed before any physical-damage cost can be stated.",
+      "annual_total": 550737.54,
       "_note": "Operator, 2026-09-05, CORRECTED: AFG's dry vans and tractors carry DOUBLE physical damage -- this group Intact policy AND Progressive, AFG's own main insurer. An earlier note here read 'every unit except AFG'; that was wrong about physical damage.",
       "schedule_submitted_at_renewal": {
         "source": "data/raw/insurance/pd_renewal/ (Unit_List, Trailer_List_active, Driver_List_Zone)",
@@ -147,15 +146,45 @@
           "bowman": 1
         },
         "_note": "This is the schedule actually submitted, and it supersedes the questionnaire's 56 units / $7,889,308. The questionnaire was the earlier snapshot; the fleet grew to 62 units and $8,578,444 by submission. Trailer TIV is unchanged at ~$4.35M."
-      }
+      },
+      "rate": {
+        "_source": "Intact NTL/VPD proposal rate page, supplied by the operator 2026-09-05",
+        "non_trucking_liability_per_unit_month": 35.0,
+        "vehicle_physical_damage_annual_pct_of_tiv": 0.045,
+        "vehicle_physical_damage_monthly": "4.50% x Total Insured Value / 12",
+        "conditions": [
+          "No limit on towing/storage",
+          "Statutory minimum UM/UIM/PIP included where applicable",
+          "Binding the NTL/VPD is contingent on successfully writing the supporting Occ Acc"
+        ],
+        "_note": "The monthly total moves with the vehicles actually covered, so this is a REPORTING policy: adding or removing a unit changes the bill. That is why the 21 units that stopped running still cost money until they come off the schedule."
+      },
+      "tiv_at_submission": 12238612.0,
+      "_tiv_note": "Operator, 2026-09-05: $12,238,612 at the time of submission. The schedule files total $12,927,748 (62 units $8,578,444 + 104 trailers $4,349,304) and the March questionnaire said $12,260,612.05. Premium is computed on the operator's figure; the schedule is used only for the per-company split.",
+      "vpd_annual": 550737.54,
+      "ntl_annual": 26040.0
     },
     {
       "entity": "XTRACK",
-      "coverage": "excess_cargo_second_layer",
-      "period": "from 2026-02",
-      "annual_total": null,
-      "_MISSING": "Premium not yet supplied.",
-      "_note": "Operator, 2026-09-05: XTRACK carries TWO cargo coverages -- the cargo inside the new Incline auto-liability/GL/cargo package bound 2026-08-07, and a separate extra cargo coverage taken out in February 2026. Both are live; the February one is not the same policy renewed."
+      "coverage": "motor_truck_cargo_second_layer",
+      "period": "25-26 renewal, signed 2026-02-24",
+      "annual_total": 40540.0,
+      "_note": "XTRACK's SECOND cargo layer, live alongside the cargo inside the Incline package. Priced PER MILE, so unlike every other insurance line it belongs in cost per mile, not cost per truck: $0.0143 a mile, and it is adjusted annually against actual miles.",
+      "carrier": "SiriusPoint America Insurance Company",
+      "broker": "Trigon Insurance Agency",
+      "signed": "2026-02-24",
+      "basis": "MILEAGE REPORTER: $1.43 per 100 miles, estimated on 2,800,000 miles a year",
+      "rate_per_mile": 0.0143,
+      "estimated_miles": 2800000,
+      "limits": {
+        "motor_truck_cargo": 300000,
+        "deductible": 2500,
+        "debris_removal": 25000,
+        "trailer_interchange": 50000,
+        "reefer_breakdown": 300000
+      },
+      "pure_premium": 40040.0,
+      "taxes_and_fees": 500.0
     }
   ],
   "ucr": [
@@ -181,10 +210,10 @@
       "year": 2026
     }
   ],
-  "group_annual_known": 1295581.92,
-  "group_weekly_known": 24915.04,
+  "group_annual_known": 1886859.46,
+  "group_weekly_known": 36285.76,
   "open_questions": [
-    "THE PHYSICAL-DAMAGE PREMIUM, and the XTRACK February 2026 extra cargo premium. The full schedule is now known -- 62 power units at $8,578,444 and 104 trailers at $4,349,304 -- so only the rate is missing.",
+    "The Intact TIV: operator says $12,238,612 at submission, the schedule files total $12,927,748 and the March questionnaire $12,260,612.05. A 5.3% spread on a 4.50% rate is $31,000 a year -- which figure is the policy written on?",
     "A trailer-to-company mapping. 104 trailers at $4.35M, 94 of them leased, with no company column.",
     "AFG pays twice for physical damage on the same units -- group Intact plus Progressive. Deliberate (lender requirement, differing limits) or duplication?",
     "OREGON. ZONE's Ohio IFTA returns report 2,968 Oregon miles in Q1 2026 and 436 in Q2 at a 0.00 IFTA rate, which means Oregon's weight-mile tax is filed separately. No Oregon return is in the corpus.",

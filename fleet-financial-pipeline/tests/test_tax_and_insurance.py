@@ -83,14 +83,25 @@ def test_a_stated_mpg_that_disagrees_with_the_division_is_flagged():
 
 
 def test_a_policy_without_a_bound_premium_says_so(ins):
-    """The physical-damage file states the exposure and leaves the rate blank.
-    Recording it as zero would silently drop a real cost out of every total."""
-    pd = [p for p in ins["policies"] if "physical_damage" in p["coverage"]]
-    assert pd, "the physical-damage policy is not in the register"
-    for p in pd:
-        assert p["annual_total"] is None
-        assert p.get("_MISSING"), "a policy with no premium must say what is missing"
-        assert p["total_insured_value"] > 0, "the exposure IS known"
+    """Held open for months on the physical damage, whose questionnaire stated
+    the exposure and left the rate blank. The rate arrived 2026-09-05 and that
+    policy is now priced, so the rule is enforced on whatever is still unpriced:
+    a premium of None must be accompanied by a note saying what is missing, and
+    must never be coerced to zero."""
+    for p in ins["policies"]:
+        if p.get("annual_total") is None:
+            assert p.get("_MISSING"), f"{p['coverage']}: no premium and no note"
+
+
+def test_the_physical_damage_premium_is_the_rate_times_the_value(ins):
+    """4.50% of Total Insured Value a year, per the Intact rate page."""
+    p = next(x for x in ins["policies"] if "physical_damage" in x["coverage"])
+    r = p["rate"]
+    assert r["vehicle_physical_damage_annual_pct_of_tiv"] == 0.045
+    assert p["vpd_annual"] == pytest.approx(
+        p["tiv_at_submission"] * r["vehicle_physical_damage_annual_pct_of_tiv"])
+    assert r["non_trucking_liability_per_unit_month"] == 35.0
+    assert p["annual_total"] is not None
 
 
 def test_the_physical_damage_split_is_a_share_of_a_premium_not_a_premium(ins):
@@ -111,8 +122,11 @@ def test_auto_liability_allocation_adds_back_to_the_policy(ins):
 
 
 def test_the_open_questions_are_recorded_not_answered(ins):
-    """The unit-to-VIN gap is closed; what replaced it is the missing premium."""
-    assert any("PHYSICAL-DAMAGE PREMIUM" in q for q in ins["open_questions"])
+    """Each answered question is replaced, not deleted. The unit-to-VIN gap gave
+    way to the missing premium, which gave way to which TIV the policy is
+    written on -- three figures are in play and a 5.3% spread at 4.50% is about
+    $31,000 a year."""
+    assert any("TIV" in q for q in ins["open_questions"])
     assert len(ins["open_questions"]) >= 3
 
 

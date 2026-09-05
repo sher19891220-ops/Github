@@ -271,6 +271,46 @@ $7,381/wk, XTRACK 19 $5,843/wk, AFG 7 $2,153/wk, and **18 on no P&L at all**
 $5,536/wk. **21 of the 68 have not run since 2026-07-06 -- $335,825 a year of
 premium on trucks that are not moving.**
 
+## Insurance costs what, per company — priced, not allocated
+
+`analysis/insurance_cost.py`. Every line is priced on a DIFFERENT basis, and
+using one basis for all of them is the mistake this module exists to prevent:
+
+    per scheduled unit   auto liability $15,992/unit-yr, excess cargo $300/unit-yr,
+                         non-trucking liability $35/unit-month
+    per dollar of value  physical damage -- 4.50% of Total Insured Value a year
+    per dollar of gross  ZONE motor truck cargo -- $0.70 per $100 of revenue
+    PER MILE             XTRACK second cargo layer -- $1.43 per 100 miles
+    per owner-operator   occupational accident -- $107 a month
+
+So **a truck that stops running still costs its auto liability, its excess cargo
+and its physical damage in full**, and stops costing the mileage-rated and
+revenue-rated cargo entirely. A single "insurance per truck" number gets the
+idle-truck question exactly backwards.
+
+    ZONE     $788,427/yr   $15,162/wk   $542 per truck-week   28 units
+    XTRACK   $564,615/yr   $10,858/wk   $452 per truck-week   24 units
+    AFG      $195,851/yr    $3,766/wk   $471 per truck-week    8 units
+    carried by nobody      $293,469/yr   $5,644/wk
+
+That last line is the 18 insured units on no company's P&L plus the two the
+registry cannot resolve. It is reported, never spread over the companies that do
+run, because spreading it hides the cleanup.
+
+XTRACK's $452 per truck-week lands within $20 of the $472 its P&L charges in
+`Insur/Admin/Trl`, so that column is very nearly insurance at cost -- closer
+than the earlier estimate of $366, which was missing physical damage.
+
+**Physical damage is a REPORTING policy** (4.50% of TIV, monthly, "subject to
+change based upon vehicles covered"), so adding or removing a unit changes the
+bill. That is exactly why the 21 units that stopped running keep costing money
+until they come off the schedule.
+
+**Three TIV figures are in play** and the policy can only be written on one:
+the operator's $12,238,612 at submission, the schedule files' $12,927,748, and
+the March questionnaire's $12,260,612.05. A 5.3% spread at a 4.50% rate is about
+$31,000 a year.
+
 **OHIO IS WHERE ZONE FILES IFTA**, and its returns are the richest tax source in
 the corpus -- full state-by-state miles, gallons and rate. Q1 2026: 1,509,945
 miles, 207,885 gallons, **7.26 mpg**, 63 vehicles, $12,145.28. Q2 2026:
@@ -305,8 +345,11 @@ own insurer. An earlier note here said the group policy covered every unit
 except AFG; that was wrong, and 8 AFG units appear on the submitted schedule.
 
 **XTRACK carries TWO cargo coverages**: the cargo inside the Incline package
-bound 2026-08-07, and a separate extra cargo coverage taken out in February
-2026. The February one is not the August one renewed.
+bound 2026-08-07, and a separate SiriusPoint layer signed 2026-02-24. The second
+is a **mileage reporter -- $1.43 per 100 miles, $40,540 estimated on 2,800,000
+miles, adjusted annually against actual miles**. It is the only insurance line
+in the group priced per mile, so it belongs in cost per mile ($0.0143) and not
+in cost per truck.
 
 **The 21 insured units that have not run since 2026-07-06 are a cleanup, not a
 misstatement.** Operator: they should not be on the policy, but may have been on
