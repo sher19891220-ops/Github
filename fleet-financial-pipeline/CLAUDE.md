@@ -250,11 +250,36 @@ $6,381.61 = **$67,120.29** of cash, and the $3,398.29 finance charge reaches the
 bank as a loan payment, not as insurance — which is part of why the bank's
 insurance total runs below the policies.
 
-**THE UNIT-TO-VIN GAP.** Policies schedule units by VIN; the P&Ls, the driver
-roster and the Iron Lease register use fleet numbers. Only 5 of the 68 insured
-VINs contain a fleet number anywhere (4851, 8671, 2703, 9859, 2743), so **which
-trucks are insured, and whether idle ones still are, cannot be answered.** A
-unit-to-VIN table closes it.
+**THE UNIT-TO-VIN GAP IS CLOSED** (2026-09-05, group unit workbook). Read it
+with `ingest/fleet_registry.py`; 67 of the 68 VINs on the master schedule now
+resolve to a fleet number and to the company last running that truck. Three
+things about that workbook:
+
+  - It is an ASSIGNMENT HISTORY, not a fleet list -- 1,413 rows carrying a VIN,
+    358 distinct trucks, one appearing 15 times. Counting rows multiplies the
+    fleet fourfold.
+  - **244 of the 358 appear in no P&L at all.** They are history. Treating the
+    workbook as current triples the fleet.
+  - 71 VINs sit on more than one company's sheet, because a truck that moved
+    authority stays in both histories. The sheet cannot say who runs it now;
+    the P&L can, and dates the answer.
+  - The Value column is free text -- numbers, `110K$`, `$60,000/OO`, bare `OO`.
+    `OO` marks an owner-operator truck, which carries its own physical damage.
+
+**AUTO LIABILITY, ALLOCATED** (68 units at $307.53/unit-week): ZONE 24 units
+$7,381/wk, XTRACK 19 $5,843/wk, AFG 7 $2,153/wk, and **18 on no P&L at all**
+$5,536/wk. **21 of the 68 have not run since 2026-07-06 -- $335,825 a year of
+premium on trucks that are not moving.**
+
+**PHYSICAL DAMAGE: the exposure is known, the premium is NOT.** The only
+physical-damage document is an Intact questionnaire (eff. 2026-03-06) stating
+56 power units at $7,889,308 and 104 trailers at $4,371,304, $5,000 deductible,
+with the **rate column blank**. The $1,500 + $75 in that file is the
+occupational-accident line, not VPD. Until the binder arrives, record
+`annual_total: null` and never coerce it to zero. The allocation basis is ready:
+active company-owned tractors, owner-operators excluded --
+**XTRACK 55.0% / ZONE 45.0%** ($5,061,616 and $4,144,669 of $9,206,285 across
+77 units), AFG a further 16 units at $1,790,922 and outside this policy.
 
 **IFTA IS AN INDEPENDENT MILEAGE AND FUEL RECORD**, and one return does not
 survive contact with the equipment. XTRACK's Q2 2026 return divides 1,727,001

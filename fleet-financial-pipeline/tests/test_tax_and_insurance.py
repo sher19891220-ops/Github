@@ -23,7 +23,10 @@ def ins():
 
 
 def test_insurance_register_totals_its_own_lines(ins):
-    named = sum(p.get("annual_total", 0) for p in ins["policies"])
+    # A policy with no bound premium yet carries annual_total None. It must be
+    # skipped, never coerced to zero -- a missing premium is not a free policy.
+    named = sum(p["annual_total"] for p in ins["policies"]
+                if p.get("annual_total") is not None)
     assert named == pytest.approx(ins["group_annual_known"], abs=0.01)
     assert ins["group_weekly_known"] == pytest.approx(named / 52, abs=0.5)
 
@@ -79,10 +82,37 @@ def test_a_stated_mpg_that_disagrees_with_the_division_is_flagged():
     assert P.check_ifta_plausibility(r)
 
 
+def test_a_policy_without_a_bound_premium_says_so(ins):
+    """The physical-damage file states the exposure and leaves the rate blank.
+    Recording it as zero would silently drop a real cost out of every total."""
+    pd = [p for p in ins["policies"] if "physical_damage" in p["coverage"]]
+    assert pd, "the physical-damage policy is not in the register"
+    for p in pd:
+        assert p["annual_total"] is None
+        assert p.get("_MISSING"), "a policy with no premium must say what is missing"
+        assert p["total_insured_value"] > 0, "the exposure IS known"
+
+
+def test_the_physical_damage_split_is_a_share_of_a_premium_not_a_premium(ins):
+    """Until the binder arrives the deliverable is the basis, not the cost."""
+    a = ins["allocation"]["physical_damage"]
+    assert abs(a["ZONE"]["share_excl_afg"] + a["XTRACK"]["share_excl_afg"] - 1) < 0.001
+    assert (a["ZONE"]["tiv"] + a["XTRACK"]["tiv"]
+            == pytest.approx(a["group_excluding_afg"]["tiv"], rel=0.001))
+    assert "AFG" in a and "share_excl_afg" not in a["AFG"]
+
+
+def test_auto_liability_allocation_adds_back_to_the_policy(ins):
+    al = ins["allocation"]["auto_liability"]
+    parts = [al[k] for k in ("ZONE", "XTRACK", "AFG", "not_in_any_pnl")]
+    master = next(p for p in ins["policies"] if p.get("role") == "group master policy")
+    assert sum(p["units"] for p in parts) == master["units_scheduled"]
+    assert sum(p["annual"] for p in parts) == pytest.approx(master["annual_total"], rel=0.001)
+
+
 def test_the_open_questions_are_recorded_not_answered(ins):
-    """Only 5 of 68 insured VINs carry a fleet number, so which trucks are
-    insured cannot be answered yet. That gap stays visible until it is closed."""
-    assert any("VIN" in q for q in ins["open_questions"])
+    """The unit-to-VIN gap is closed; what replaced it is the missing premium."""
+    assert any("PHYSICAL-DAMAGE PREMIUM" in q for q in ins["open_questions"])
     assert len(ins["open_questions"]) >= 3
 
 
