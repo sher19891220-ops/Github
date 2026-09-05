@@ -288,18 +288,43 @@ and its physical damage in full**, and stops costing the mileage-rated and
 revenue-rated cargo entirely. A single "insurance per truck" number gets the
 idle-truck question exactly backwards.
 
-    ZONE     $788,427/yr   $15,162/wk   $542 per truck-week   28 units
-    XTRACK   $564,615/yr   $10,858/wk   $452 per truck-week   24 units
-    AFG      $195,851/yr    $3,766/wk   $471 per truck-week    8 units
-    carried by nobody      $293,469/yr   $5,644/wk
+**A BILL BEATS A RATE, AND BOTH REPORTING POLICIES MOVED.** The register now
+carries the ACTUAL billing where it exists, and it disagrees with the rate in
+BOTH directions, so a rate-only model is wrong either way:
+
+| line | rated | billed | why |
+|---|---|---|---|
+| auto liability URG-02817 | $1,087,432 | **$644,761** | $442,670.66 came back as six RETURN PREMIUMS as units left the schedule. The ledger closes: $873,587.70 activated − $422,026.34 paid − $442,670.66 returned = $8,890.70. |
+| physical damage + NTL | $576,778 | **$598,056** | five invoices Mar-Jul, the schedule GREW |
+| occupational accident | — | **$94,840** | five invoices; $7,903/mo at $107 each = **74 enrolled owner-operators**, the count that was missing |
+
+**The face premium is not the cost, and allocating it overstates auto liability
+by 69%.** Every figure below is the effective premium.
+
+    ZONE     $685,412/yr   $13,181/wk   $471 per truck-week   28 units
+    XTRACK   $549,338/yr   $10,564/wk   $440 per truck-week   24 units
+    AFG      $155,891/yr    $2,998/wk   $375 per truck-week    8 units
+    carried by nobody      $176,773/yr   $3,399/wk
 
 That last line is the 18 insured units on no company's P&L plus the two the
 registry cannot resolve. It is reported, never spread over the companies that do
 run, because spreading it hides the cleanup.
 
-XTRACK's $452 per truck-week lands within $20 of the $472 its P&L charges in
+**The return premium settles the idle-truck question.** Taking a unit off a
+reporting policy DOES return money -- six credits prove it -- so the 21 units
+that stopped running are worth removing, not merely worth noting.
+
+XTRACK's $440 per truck-week lands within $32 of the $472 its P&L charges in
 `Insur/Admin/Trl`, so that column is very nearly insurance at cost -- closer
-than the earlier estimate of $366, which was missing physical damage.
+than the earlier estimate of $366, which was missing physical damage. That $440
+includes XTRACK's OWN $63,722 Benchmark package, which was priced in the register
+and missing from the table until 2026-09-05; leaving it out understated XTRACK by
+$51 per truck-week.
+
+**AFG's figure is a FLOOR.** Its Progressive premium is not in the table because
+it cannot be totalled: the bills show the remaining balance rising $5,113 ->
+$42,630 while payments left fall 5 -> 1, which is units being added all term at
+a premium far above the $9,383 quote. Recorded as `null`, never as zero.
 
 **Physical damage is a REPORTING policy** (4.50% of TIV, monthly, "subject to
 change based upon vehicles covered"), so adding or removing a unit changes the
