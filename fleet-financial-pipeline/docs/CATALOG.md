@@ -131,6 +131,57 @@ at the foot of this file.
 |---|---|---|--:|---|
 | `data/raw/xtrack/6baf5c6a-OO_and_LO_drivers_report.xlsx`<br>also at `~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/6baf5c6a-OO_and_LO_drivers_report.xlsx` | XTRACK | — | 1 | — |
 
+## IFTA and state fuel-tax returns
+
+> IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.
+
+| directory | files | entity | period range |
+|---|--:|---|---|
+| `data/raw/ifta/Ifta/CT 2026-20260904T210055Z-1-001/CT 2026/1st quarter` | 3 | — | 2026 .. 2026 |
+| `data/raw/ifta/Ifta/CT 2026-20260904T210055Z-1-001/CT 2026/2nd quarter` | 3 | — | 2026 .. 2026 |
+| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/April 2023` | 2 | — | 2023 .. 2023 |
+| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/August, 2023` | 4 | — | 2023 .. 2023 |
+| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/February 2023` | 3 | — | 2023 .. 2023 |
+| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/January 2023` | 3 | — | 2023 .. 2023 |
+| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/July 2023` | 2 | — | 2023 .. 2023 |
+| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/March 2023` | 4 | — | 2023 .. 2023 |
+| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/Oct-Nov-Dec, 2023` | 5 | ZONE | 2023 .. 2023 |
+| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/September 2023` | 4 | — | 2023 .. 2023 |
+| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2024/Apr-May-Jun,2024` | 3 | — | 2024 .. 2024 |
+| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2024/Jan-Feb-Mar, 2024` | 3 | — | 2024 .. 2024 |
+| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2024/Oct-Nov-Dec, 2024` | 3 | — | 2024 .. 2024 |
+| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/1st Quarter, 2025` | 7 | — | 2025 .. 2025 |
+| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/2nd Quarter, 2025` | 3 | — | 2025 .. 2025 |
+| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/3rd Quarter, 2025-20260904T205947Z-1-001 (1)/3rd Quarter, 2025` | 3 | — | 2025 .. 2025 |
+| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/4th Quarter, 2025-20260904T210006Z-1-001/4th Quarter, 2025` | 2 | — | 2025 .. 2025 |
+| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/4th Quarter, 2025-20260904T210006Z-1-001/4th Quarter, 2025/Xtrack` | 3 | XTRACK | 2025 .. 2025 |
+| `data/raw/ifta/Ifta/CT Reports-20260904T211352Z-1-001/CT Reports/2nd quarter, 2026` | 4 | — | 2026 .. 2026 |
+| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/1stQuarter2024` | 4 | — | 2024 .. 2024 |
+| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/2ndQuarter2024` | 3 | — | 2024 .. 2024 |
+| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/3rdQuarter2024` | 3 | — | 2024 .. 2024 |
+| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/4thQuarter2024` | 3 | — | 2024 .. 2024 |
+| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/1st quarter, 2025` | 4 | — | 2025 .. 2025 |
+| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/2nd quarter, 2025` | 2 | — | 2025 .. 2025 |
+| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/3rd quarter, 2025` | 3 | — | 2025 .. 2025 |
+| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2026/1st quarter,2026` | 3 | — | 2026 .. 2026 |
+| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2026/2nd quarter, 2026` | 3 | — | 2026 .. 2026 |
+| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/CT miles reports/LastQuarter,2023` | 2 | — | 2023 .. 2023 |
+| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/CT miles reports/September 2023` | 2 | — | 2023 .. 2023 |
+| `data/raw/ifta/Ifta/Xtrack LLC` | 14 | XTRACK | 2025 .. 2026 |
+| `data/raw/ifta/Ifta/Zone` | 20 | ZONE | 2025 .. 2025 |
+| `data/raw/ifta/Ifta/Zone/Zone` | 4 | ZONE | 2025 .. 2025 |
+| `data/raw/ifta/Ifta/afg` | 3 | AFG | 2026 .. 2026 |
+
+## Insurance policies and registrations
+
+> Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.
+
+| directory | files | entity | period range |
+|---|--:|---|---|
+| `data/raw/insurance/Insurance/Xtrack LLC Insurance` | 8 | XTRACK | — |
+| `data/raw/insurance/Insurance/Zone Insurance` | 11 | ZONE | — |
+| `data/raw/insurance/Insurance/afg` | 9 | AFG | — |
+
 ## Dispatch system export (load level)
 
 > Load-level export from the dispatch system: one row per load entry, with pickup/delivery city, gross, miles, dispatcher and pay type. The only source in the corpus below the weekly level.
@@ -180,41 +231,14 @@ at the foot of this file.
 
 ## Derived (pipeline output, not a source)
 
-> Derived output of this pipeline, not a source.
+> Derived output of this pipeline, not a source. Regenerate it rather than reading it as evidence.
 
 | file | entity | period | tabs | read by |
 |---|---|---|--:|---|
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/4th Quarter, 2025-20260904T210006Z-1-001/4th Quarter, 2025/Xtrack/XtrackOct-Nov-Dec.csv`<br>also at `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/4th quarter, 2025/XtrackOct-Nov-Dec.csv` | XTRACK | 2025 |  | — |
+| `data/processed/xtrack_truck_report.xlsx` | XTRACK | — | 11 | — |
 | `data/processed/boa_transactions.csv` | — | — |  | — |
 | `data/processed/cash_categorized.csv` | — | — |  | — |
 | `data/processed/statement_meta.csv` | — | — |  | — |
-| `data/raw/ifta/Ifta/CT 2026-20260904T210055Z-1-001/CT 2026/1st quarter/ZoneJan-Feb-March2026.csv`<br>also at `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2026/1st quarter/ZoneJan-Feb-March2026.csv` | — | 2026 |  | — |
-| `data/raw/ifta/Ifta/CT 2026-20260904T210055Z-1-001/CT 2026/2nd quarter/AprilMayJune2026Zone.csv`<br>also at `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2026/2nd quarter/AprilMayJune2026Zone.csv` | — | 2026 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/August, 2023/ZoneAugust2023.csv` | — | 2023 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/February 2023/February HUFSchedule1 - HUF-Schedule1.csv` | — | 2023 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/January 2023/January  HUFSchedule1 - HUF-Schedule1 (2).csv` | — | 2023 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/Oct-Nov-Dec, 2023/ZoneOCTNOVDEC23.csv` | — | 2023 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/Oct-Nov-Dec, 2023/ZoneOctober2023.csv` | — | 2023 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/September 2023/ZoneSeptember2023.csv` | — | 2023 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2024/Apr-May-Jun,2024/ZoneApr-May-June2024 - Sheet1.csv` | — | 2024 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2024/Jan-Feb-Mar, 2024/ZoneJan-Feb-Mar2024 - Sheet1.csv` | — | 2024 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2024/Oct-Nov-Dec, 2024/ZoneOct-Nov-Dec2024.csv` | — | 2024 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/1st Quarter, 2025/ZoneJan-Feb-Mar.csv` | — | 2025 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/2nd Quarter, 2025/ZoneApr-May-Jun2025.csv` | — | 2025 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/3rd Quarter, 2025-20260904T205947Z-1-001 (1)/3rd Quarter, 2025/ZoneJuly-Aug-Sep2025 - Table 1 (Pages 1-3).csv` | — | 2025 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211352Z-1-001/CT Reports/2nd quarter, 2026/AprilMayJune2026AFGTransportCo - Sheet1 (1).csv` | — | 2026 |  | — |
-| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/1stQuarter2024/XtrackJan-Feb-Mar2024 - Sheet1.csv` | — | 2024 |  | — |
-| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/2ndQuarter2024/XtrackApr-May-June2024 - Sheet1.csv` | — | 2024 |  | — |
-| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/3rdQuarter2024/XtrackJul-Aug-Sep2024 - Sheet1.csv` | — | 2024 |  | — |
-| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/4thQuarter2024/2024-10_2024-12 (1).csv` | — | 2024 |  | — |
-| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/4thQuarter2024/XtrackOct-Nov-Dec2024 - Sheet1.csv` | — | 2024 |  | — |
-| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/1st quarter, 2025/XtrackJan-Feb-Mar.csv` | — | 2025 |  | — |
-| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/2nd quarter, 2025/XtrackApr-May-Jun2025.csv` | — | 2025 |  | — |
-| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/3rd quarter, 2025/XtrackJul-Aug-Sep.csv` | — | 2025 |  | — |
-| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2026/1st quarter,2026/XtrackJan-Feb-March2026.csv` | — | 2026 |  | — |
-| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2026/2nd quarter, 2026/AprilMayJune2026XtrackLLC.csv` | — | 2026 |  | — |
-| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/CT miles reports/LastQuarter,2023/XtrackOctNovDec2023.csv` | — | 2023 |  | — |
-| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/CT miles reports/September 2023/XtrackLLCSeptember2023 - Sheet2.csv` | — | 2023 |  | — |
 
 ## Upload archives (re-upload units)
 
@@ -241,149 +265,6 @@ at the foot of this file.
 | `~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/adf853e0-files.zip` | — | — |  | — |
 | `~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/c6354ab2-fleetfinancialpipeline.zip` | — | — |  | — |
 | `~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/d9f21eac-amex.zip` | — | — |  | — |
-
-## Unclassified — open one of these before quoting it
-
-| file | entity | period | tabs | read by |
-|---|---|---|--:|---|
-| `data/raw/ifta/Ifta/afg/2nd Q 2026.pdf` | AFG | 2026 |  | — |
-| `data/raw/ifta/Ifta/afg/Q2 2026 KY AFG.pdf` | AFG | 2026 |  | — |
-| `data/raw/ifta/Ifta/afg/Q2 2026 NM AFG.pdf` | AFG | 2026 |  | — |
-| `data/raw/insurance/Insurance/afg/2026_UCR_Registration_2992973_20251231440.pdf` | AFG | — |  | — |
-| `data/raw/insurance/Insurance/afg/Cost Breakdown - Progressive Commercial Auto.pdf` | AFG | — |  | — |
-| `data/raw/insurance/Insurance/afg/photo_2026-09-04_00-38-41.jpg` | AFG | — |  | — |
-| `data/raw/insurance/Insurance/afg/photo_2026-09-04_00-39-10.jpg` | AFG | — |  | — |
-| `data/raw/insurance/Insurance/afg/photo_2026-09-04_00-39-15.jpg` | AFG | — |  | — |
-| `data/raw/insurance/Insurance/afg/photo_2026-09-04_00-39-33.jpg` | AFG | — |  | — |
-| `data/raw/insurance/Insurance/afg/photo_2026-09-04_00-39-52.jpg` | AFG | — |  | — |
-| `data/raw/insurance/Insurance/afg/photo_2026-09-04_00-40-00.jpg` | AFG | — |  | — |
-| `data/raw/insurance/Insurance/afg/photo_2026-09-04_00-40-34.jpg` | AFG | — |  | — |
-| `data/processed/xtrack_truck_report.xlsx` | XTRACK | — | 11 | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/4th Quarter, 2025-20260904T210006Z-1-001/4th Quarter, 2025/Xtrack/IFTA_2025-10-01 - 2025-12-31.pdf`<br>also at `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/4th quarter, 2025/IFTA_2025-10-01 - 2025-12-31.pdf` | XTRACK | 2025 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/4th Quarter, 2025-20260904T210006Z-1-001/4th Quarter, 2025/Xtrack/ViewFile (5).pdf`<br>also at `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/4th quarter, 2025/ViewFile (5).pdf` | XTRACK | 2025 |  | — |
-| `data/raw/ifta/Ifta/Xtrack LLC/1st Q,  XTRACK 2026.pdf` | XTRACK | 2026 |  | — |
-| `data/raw/ifta/Ifta/Xtrack LLC/2nd Q XTRACK 2026.pdf` | XTRACK | 2026 |  | — |
-| `data/raw/ifta/Ifta/Xtrack LLC/3rd Q,  XTRACK 2025 (1).pdf` | XTRACK | 2025 |  | — |
-| `data/raw/ifta/Ifta/Xtrack LLC/4th Q,  XTRACK 2025 (1).pdf` | XTRACK | 2025 |  | — |
-| `data/raw/ifta/Ifta/Xtrack LLC/Q1 2026 NM XTRACK.pdf` | XTRACK | 2026 |  | — |
-| `data/raw/ifta/Ifta/Xtrack LLC/Q1,2026 KY XTRACK.pdf` | XTRACK | 2026 |  | — |
-| `data/raw/ifta/Ifta/Xtrack LLC/Q1,2026 NY XTRACK.pdf` | XTRACK | 2026 |  | — |
-| `data/raw/ifta/Ifta/Xtrack LLC/Q2 2026 NM XTRACK.pdf` | XTRACK | 2026 |  | — |
-| `data/raw/ifta/Ifta/Xtrack LLC/Q2 2026 NY XTRACK.pdf` | XTRACK | 2026 |  | — |
-| `data/raw/ifta/Ifta/Xtrack LLC/Q2,2026 KY XTRACK.pdf` | XTRACK | 2026 |  | — |
-| `data/raw/ifta/Ifta/Xtrack LLC/Q3,2025 KY XTRACK.pdf` | XTRACK | 2025 |  | — |
-| `data/raw/ifta/Ifta/Xtrack LLC/Q3,2025 NY XTRACK.pdf` | XTRACK | 2025 |  | — |
-| `data/raw/ifta/Ifta/Xtrack LLC/Q4, 2025 KY XTRACK.pdf` | XTRACK | 2025 |  | — |
-| `data/raw/ifta/Ifta/Xtrack LLC/Q4,2025 NY XTRACK.pdf` | XTRACK | 2025 |  | — |
-| `data/raw/insurance/Insurance/Xtrack LLC Insurance/2026_UCR_Registration_4086204_202608222030.pdf` | XTRACK | — |  | — |
-| `data/raw/insurance/Insurance/Xtrack LLC Insurance/25-26 AL PD Policy Xtrack LLC.pdf` | XTRACK | — |  | — |
-| `data/raw/insurance/Insurance/Xtrack LLC Insurance/9371ff8aDocument.pdf` | XTRACK | — |  | — |
-| `data/raw/insurance/Insurance/Xtrack LLC Insurance/Incline Quote 1.pdf` | XTRACK | — |  | — |
-| `data/raw/insurance/Insurance/Xtrack LLC Insurance/POLICY DOCUMENTS FOR SIGNATURE - Signed.pdf` | XTRACK | — |  | — |
-| `data/raw/insurance/Insurance/Xtrack LLC Insurance/XTRACK MTC FINANCE_encrypted_.pdf` | XTRACK | — |  | — |
-| `data/raw/insurance/Insurance/Xtrack LLC Insurance/Xtrack LLC 25-26 Insurance Proposal - signed.pdf` | XTRACK | — |  | — |
-| `data/raw/insurance/Insurance/Xtrack LLC Insurance/Xtrack LLC_encrypted_.pdf` | XTRACK | — |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/Oct-Nov-Dec, 2023/iftareports-oct-zone all units (CT).pdf` | ZONE | 2023 |  | — |
-| `data/raw/ifta/Ifta/Zone/2025 4th qt ifta.pdf`<br>also at `data/raw/ifta/Ifta/Zone/Zone/2025 4th qt ifta.pdf` | ZONE | 2025 |  | — |
-| `data/raw/ifta/Ifta/Zone/HUWF2508305081317.pdf`<br>also at `data/raw/ifta/Ifta/Zone/Zone/HUWF2508305081317.pdf` | ZONE | — |  | — |
-| `data/raw/ifta/Ifta/Zone/HUWF2509306141268.pdf`<br>also at `data/raw/ifta/Ifta/Zone/Zone/HUWF2509306141268.pdf` | ZONE | — |  | — |
-| `data/raw/ifta/Ifta/Zone/HUWF2510206767918.pdf`<br>also at `data/raw/ifta/Ifta/Zone/Zone/HUWF2510206767918.pdf` | ZONE | — |  | — |
-| `data/raw/ifta/Ifta/Zone/HUWF2511187907176.pdf`<br>also at `data/raw/ifta/Ifta/Zone/Zone/HUWF2511187907176.pdf` | ZONE | — |  | — |
-| `data/raw/ifta/Ifta/Zone/HUWF2512269036098.pdf`<br>also at `data/raw/ifta/Ifta/Zone/Zone/HUWF2512269036098.pdf` | ZONE | — |  | — |
-| `data/raw/ifta/Ifta/Zone/HUWF2601300661908.pdf`<br>also at `data/raw/ifta/Ifta/Zone/Zone/HUWF2601300661908.pdf` | ZONE | — |  | — |
-| `data/raw/ifta/Ifta/Zone/HUWF2602271302781.pdf`<br>also at `data/raw/ifta/Ifta/Zone/Zone/HUWF2602271302781.pdf` | ZONE | — |  | — |
-| `data/raw/ifta/Ifta/Zone/HUWF2604042392032.pdf`<br>also at `data/raw/ifta/Ifta/Zone/Zone/HUWF2604042392032.pdf` | ZONE | — |  | — |
-| `data/raw/ifta/Ifta/Zone/HUWF2604213289859.pdf`<br>also at `data/raw/ifta/Ifta/Zone/Zone/HUWF2604213289859.pdf` | ZONE | — |  | — |
-| `data/raw/ifta/Ifta/Zone/HUWF2605314490680.pdf`<br>also at `data/raw/ifta/Ifta/Zone/Zone/HUWF2605314490680.pdf` | ZONE | — |  | — |
-| `data/raw/ifta/Ifta/Zone/HUWF2607035402080.pdf`<br>also at `data/raw/ifta/Ifta/Zone/Zone/HUWF2607035402080.pdf` | ZONE | — |  | — |
-| `data/raw/ifta/Ifta/Zone/HUWF2608077152193.pdf`<br>also at `data/raw/ifta/Ifta/Zone/Zone/HUWF2608077152193.pdf` | ZONE | — |  | — |
-| `data/raw/ifta/Ifta/Zone/HUWF2608267493868.pdf`<br>also at `data/raw/ifta/Ifta/Zone/Zone/HUWF2608267493868.pdf` | ZONE | — |  | — |
-| `data/raw/ifta/Ifta/Zone/Payment Receipt Form (1).pdf`<br>also at `data/raw/ifta/Ifta/Zone/Zone/Payment Receipt Form (1).pdf` | ZONE | — |  | — |
-| `data/raw/ifta/Ifta/Zone/Payment Receipt Form.pdf`<br>also at `data/raw/ifta/Ifta/Zone/Zone/Payment Receipt Form.pdf` | ZONE | — |  | — |
-| `data/raw/ifta/Ifta/Zone/ViewFile (2).pdf`<br>also at `data/raw/ifta/Ifta/Zone/Zone/ViewFile (2).pdf` | ZONE | — |  | — |
-| `data/raw/ifta/Ifta/Zone/ViewFile (3).pdf`<br>also at `data/raw/ifta/Ifta/Zone/Zone/ViewFile (3).pdf` | ZONE | — |  | — |
-| `data/raw/ifta/Ifta/Zone/ViewFile (5).pdf`<br>also at `data/raw/ifta/Ifta/Zone/Zone/ViewFile (5).pdf` | ZONE | — |  | — |
-| `data/raw/ifta/Ifta/Zone/ViewFile (7).pdf`<br>also at `data/raw/ifta/Ifta/Zone/Zone/ViewFile (7).pdf` | ZONE | — |  | — |
-| `data/raw/ifta/Ifta/Zone/Zone/ky 2025 qt3.pdf`<br>also at `data/raw/ifta/Ifta/Zone/ky 2025 qt3.pdf` | ZONE | 2025 |  | — |
-| `data/raw/ifta/Ifta/Zone/Zone/ky 2025 qt4.pdf`<br>also at `data/raw/ifta/Ifta/Zone/ky 2025 qt4.pdf` | ZONE | 2025 |  | — |
-| `data/raw/ifta/Ifta/Zone/Zone/nm 2025 3qt.pdf`<br>also at `data/raw/ifta/Ifta/Zone/nm 2025 3qt.pdf` | ZONE | 2025 |  | — |
-| `data/raw/ifta/Ifta/Zone/Zone/nm 2025 qt4.pdf`<br>also at `data/raw/ifta/Ifta/Zone/nm 2025 qt4.pdf` | ZONE | 2025 |  | — |
-| `data/raw/insurance/Insurance/Zone Insurance/2026_UCR_Registration_3456354_202512081518.pdf` | ZONE | — |  | — |
-| `data/raw/insurance/Insurance/Zone Insurance/2026_UCR_Registration_4086204_202512081526.pdf` | ZONE | — |  | — |
-| `data/raw/insurance/Insurance/Zone Insurance/Bank of America _ Online Banking _ Transfer Submitted (2).pdf` | ZONE | — |  | — |
-| `data/raw/insurance/Insurance/Zone Insurance/Bank of America _ Online Banking _ Transfer Submitted.pdf` | ZONE | — |  | — |
-| `data/raw/insurance/Insurance/Zone Insurance/ZONE OH DBA ZONE INTACT BENEFITS PACKAGE PROPOSAL - Signed.pdf` | ZONE | — |  | — |
-| `data/raw/insurance/Insurance/Zone Insurance/ZONE- OH COV CONF PAGE TO SIGN - Signed.pdf` | ZONE | — |  | — |
-| `data/raw/insurance/Insurance/Zone Insurance/ZONE- OH OCC ACC POLICY DOCS TO SIGN - Signed.pdf` | ZONE | — |  | — |
-| `data/raw/insurance/Insurance/Zone Insurance/ZONE-OH CARGO DOCS TO SIGN  - Signed.pdf` | ZONE | — |  | — |
-| `data/raw/insurance/Insurance/Zone Insurance/ZONE-OH EXCESS MTC POLICY - Signed.pdf` | ZONE | — |  | — |
-| `data/raw/insurance/Insurance/Zone Insurance/ZONE-OH LLC EXCESS CARGO - PROPOSAL FORM - Signed.pdf` | ZONE | — |  | — |
-| `data/raw/insurance/Insurance/Zone Insurance/photo_2026-09-04_00-09-33.jpg` | ZONE | — |  | — |
-| `data/raw/ifta/Ifta/CT 2026-20260904T210055Z-1-001/CT 2026/1st quarter/IFTA_2026-01-01 - 2026-03-31.pdf`<br>also at `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2026/1st quarter/IFTA_2026-01-01 - 2026-03-31.pdf` | — | 2026 |  | — |
-| `data/raw/ifta/Ifta/CT 2026-20260904T210055Z-1-001/CT 2026/1st quarter/ViewFile (2).pdf`<br>also at `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2026/1st quarter/ViewFile (2).pdf` | — | 2026 |  | — |
-| `data/raw/ifta/Ifta/CT 2026-20260904T210055Z-1-001/CT 2026/2nd quarter/2nd quarter, 2026 payment confirmation.pdf`<br>also at `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2026/2nd quarter/2nd quarter, 2026 payment confirmation.pdf` | — | 2026 |  | — |
-| `data/raw/ifta/Ifta/CT 2026-20260904T210055Z-1-001/CT 2026/2nd quarter/IFTA_2026-04-01 - 2026-06-30 (1).pdf`<br>also at `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2026/2nd quarter/IFTA_2026-04-01 - 2026-06-30 (1).pdf` | — | 2026 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/April 2023/April 2023 payment.pdf` | — | 2023 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/April 2023/Reports for all drivers CT  01.04-01.05.pdf` | — | 2023 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/August, 2023/August 2023 payment.pdf` | — | 2023 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/August, 2023/ZoneAugust2023.xlsx` | — | 2023 | 1 | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/August, 2023/iftareports-b0c43c98f7.pdf` | — | 2023 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/February 2023/iftareports-358c3f264f.pdf` | — | 2023 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/February 2023/payment .png` | — | 2023 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/January 2023/ACI Payments, Inc. - Pay Taxes, Utility Bills, Tuition & More Online.pdf` | — | 2023 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/January 2023/iftareports-a21a981b11.pdf` | — | 2023 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/July 2023/July, 2023 CT payment (1).pdf` | — | 2023 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/July 2023/iftareports-a88dd15a5d.pdf` | — | 2023 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/March 2023/March 2023 CT payment.pdf` | — | 2023 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/March 2023/ViewFile (3).pdf` | — | 2023 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/March 2023/ViewFile (4).pdf` | — | 2023 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/March 2023/iftareports-4165586982 (1).pdf` | — | 2023 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/Oct-Nov-Dec, 2023/ZoneOCTNOVDEC23 CT miles payment (1).pdf` | — | 2023 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/Oct-Nov-Dec, 2023/iftareports-cfacd21ec5.pdf` | — | 2023 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/September 2023/CT miles payment for September.pdf` | — | 2023 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/September 2023/iftareports-0d4507fe43.pdf` | — | 2023 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/September 2023/iftareports-82b22a74e0.pdf` | — | 2023 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2024/Apr-May-Jun,2024/2024-2-quarter.pdf` | — | 2024 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2024/Apr-May-Jun,2024/ViewFile.pdf` | — | 2024 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2024/Jan-Feb-Mar, 2024/ACI Payments, Inc. - Pay Taxes, Utility Bills, Tuition & More Online.pdf` | — | 2024 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2024/Jan-Feb-Mar, 2024/iftareports-bda9d64c4a.pdf` | — | 2024 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2024/Oct-Nov-Dec, 2024/Oct-Nov-Dec payment.pdf` | — | 2024 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2024/Oct-Nov-Dec, 2024/ViewFile (4).pdf` | — | 2024 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/1st Quarter, 2025/IFTA_2025-01-01_2025-03-31 (17).pdf` | — | 2025 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/1st Quarter, 2025/IFTA_2025-01-01_2025-03-31 (18).pdf`<br>also at `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/1st Quarter, 2025/IFTA_2025-01-01_2025-03-31 (19).pdf` | — | 2025 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/1st Quarter, 2025/IFTA_2025-01-01_2025-03-31 (33).pdf` | — | 2025 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/1st Quarter, 2025/IFTA_2025-01-01_2025-03-31 (35).pdf` | — | 2025 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/1st Quarter, 2025/IFTA_2025-01-01_2025-03-31 (36).pdf`<br>also at `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/1st Quarter, 2025/IFTA_2025-01-01_2025-03-31 (37).pdf` | — | 2025 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/1st Quarter, 2025/ViewFile (1).pdf` | — | 2025 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/2nd Quarter, 2025/2nd quarter payment confirmation, 2025.pdf` | — | 2025 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/2nd Quarter, 2025/IFTA_2025-04-01 - 2025-06-30 (1).pdf`<br>also at `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/2nd quarter, 2025/IFTA_2025-04-01 - 2025-06-30 (1).pdf` | — | 2025 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/3rd Quarter, 2025-20260904T205947Z-1-001 (1)/3rd Quarter, 2025/IFTA_2025-07-01 - 2025-09-30.pdf` | — | 2025 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/3rd Quarter, 2025-20260904T205947Z-1-001 (1)/3rd Quarter, 2025/ViewFile (3).pdf` | — | 2025 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/4th Quarter, 2025-20260904T210006Z-1-001/4th Quarter, 2025/IFTA_2025-10-01 - 2025-12-31 (1).pdf` | — | 2025 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/4th Quarter, 2025-20260904T210006Z-1-001/4th Quarter, 2025/ViewFile (1).pdf` | — | 2025 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211352Z-1-001/CT Reports/2nd quarter, 2026/IFTA_2026-04-01 - 2026-06-30 (3).pdf` | — | 2026 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211352Z-1-001/CT Reports/2nd quarter, 2026/IMAGE 2026-07-27 10_03_32.jpg` | — | 2026 |  | — |
-| `data/raw/ifta/Ifta/CT Reports-20260904T211352Z-1-001/CT Reports/2nd quarter, 2026/IMAGE 2026-07-27 10_03_34.jpg` | — | 2026 |  | — |
-| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/1stQuarter2024/IMAGE 2024-04-05 10_43_24.jpg` | — | 2024 |  | — |
-| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/1stQuarter2024/IMAGE 2024-04-05 10_43_26.jpg` | — | 2024 |  | — |
-| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/1stQuarter2024/XtrackLLC ACI Payments, Inc. - Pay Taxes, Utility Bills, Tuition & More Online.pdf` | — | 2024 |  | — |
-| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/2ndQuarter2024/2024-2-quarter (1).pdf` | — | 2024 |  | — |
-| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/2ndQuarter2024/Payment for 2nd quarter XtrackApr-May-June.pdf` | — | 2024 |  | — |
-| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/3rdQuarter2024/2024-7_2024-9.pdf` | — | 2024 |  | — |
-| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/3rdQuarter2024/𝗺𝘆𝗰𝗼𝗻𝗻𝗲𝗖𝗧XtrackJul-Aug-Sep2024 payment.pdf` | — | 2024 |  | — |
-| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/4thQuarter2024/ViewFile (3).pdf` | — | 2024 |  | — |
-| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/1st quarter, 2025/1st Quarter, 2025.pdf` | — | 2025 |  | — |
-| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/1st quarter, 2025/IFTA_2025-01-01_2025-03-31 (45).pdf` | — | 2025 |  | — |
-| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/1st quarter, 2025/IFTA_2025-01-01_2025-03-31 (46).pdf` | — | 2025 |  | — |
-| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/2nd quarter, 2025/2nd quarter payment confirmation.pdf` | — | 2025 |  | — |
-| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/3rd quarter, 2025/IFTA_2025-07-01 - 2025-09-30 (1).pdf` | — | 2025 |  | — |
-| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/3rd quarter, 2025/ViewFile.pdf` | — | 2025 |  | — |
-| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2026/1st quarter,2026/IFTA_2026-01-01 - 2026-03-31 (1).pdf` | — | 2026 |  | — |
-| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2026/1st quarter,2026/ViewFile.pdf` | — | 2026 |  | — |
-| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2026/2nd quarter, 2026/2nd quarter payment confirmation.pdf` | — | 2026 |  | — |
-| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2026/2nd quarter, 2026/IFTA_2026-04-01 - 2026-06-30.pdf` | — | 2026 |  | — |
-| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/CT miles reports/LastQuarter,2023/XtrackOctNovDec2023CTmiles.pdf` | — | 2023 |  | — |
-| `data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/CT miles reports/September 2023/289905  CT sep.pdf` | — | 2023 |  | — |
 
 ## Durability
 

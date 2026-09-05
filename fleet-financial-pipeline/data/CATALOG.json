@@ -4101,6 +4101,2324 @@
    ]
   },
   {
+   "path": "data/raw/ifta/Ifta/afg/2nd Q 2026.pdf",
+   "bytes": 222666,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "AFG",
+   "period": "2026",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "baf7b9dd575412c4",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/afg/Q2 2026 KY AFG.pdf",
+   "bytes": 77841,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "AFG",
+   "period": "2026",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "30d8443cfd900fce",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/afg/Q2 2026 NM AFG.pdf",
+   "bytes": 171769,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "AFG",
+   "period": "2026",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "2a9439547bc20a9d",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/4th Quarter, 2025-20260904T210006Z-1-001/4th Quarter, 2025/Xtrack/IFTA_2025-10-01 - 2025-12-31.pdf",
+   "bytes": 47066,
+   "modified": "2026-01-05",
+   "kind": "fuel_tax_return",
+   "entity": "XTRACK",
+   "period": "2025",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "75e2c1618bb50df8",
+   "copies": [
+    "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/4th quarter, 2025/IFTA_2025-10-01 - 2025-12-31.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/4th Quarter, 2025-20260904T210006Z-1-001/4th Quarter, 2025/Xtrack/ViewFile (5).pdf",
+   "bytes": 116423,
+   "modified": "2026-01-05",
+   "kind": "fuel_tax_return",
+   "entity": "XTRACK",
+   "period": "2025",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "220860c442a5757e",
+   "copies": [
+    "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/4th quarter, 2025/ViewFile (5).pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/4th Quarter, 2025-20260904T210006Z-1-001/4th Quarter, 2025/Xtrack/XtrackOct-Nov-Dec.csv",
+   "bytes": 1164,
+   "modified": "2026-01-05",
+   "kind": "fuel_tax_return",
+   "entity": "XTRACK",
+   "period": "2025",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "columns": [
+    "1FUJHHDR4NLNC0099",
+    "20KT9F",
+    "USA",
+    "MO",
+    "10000",
+    "80000",
+    "1063.16"
+   ],
+   "rows": 21,
+   "sha256": "9f15f7ce43a2d0a8",
+   "copies": [
+    "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/4th quarter, 2025/XtrackOct-Nov-Dec.csv"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/Ifta/Xtrack LLC/1st Q,  XTRACK 2026.pdf",
+   "bytes": 230114,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "XTRACK",
+   "period": "2026",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "c9c293a8d485c3c0",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/Xtrack LLC/2nd Q XTRACK 2026.pdf",
+   "bytes": 128588,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "XTRACK",
+   "period": "2026",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "6ea7a0e52c2ae3d0",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/Xtrack LLC/3rd Q,  XTRACK 2025 (1).pdf",
+   "bytes": 220045,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "XTRACK",
+   "period": "2025",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "24c6fcf8e49555a5",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/Xtrack LLC/4th Q,  XTRACK 2025 (1).pdf",
+   "bytes": 242486,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "XTRACK",
+   "period": "2025",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "ec23963e49ea7565",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/Xtrack LLC/Q1 2026 NM XTRACK.pdf",
+   "bytes": 371334,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "XTRACK",
+   "period": "2026",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "4818c156a1e10eb2",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/Xtrack LLC/Q1,2026 KY XTRACK.pdf",
+   "bytes": 70618,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "XTRACK",
+   "period": "2026",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "cbdac05794d8a042",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/Xtrack LLC/Q1,2026 NY XTRACK.pdf",
+   "bytes": 237631,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "XTRACK",
+   "period": "2026",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "81a1508f8e674b33",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/Xtrack LLC/Q2 2026 NM XTRACK.pdf",
+   "bytes": 166609,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "XTRACK",
+   "period": "2026",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "1a1d10089bf8a3d7",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/Xtrack LLC/Q2 2026 NY XTRACK.pdf",
+   "bytes": 324245,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "XTRACK",
+   "period": "2026",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "c99d74b0539e1878",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/Xtrack LLC/Q2,2026 KY XTRACK.pdf",
+   "bytes": 79624,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "XTRACK",
+   "period": "2026",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "be9f63d196ebdab5",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/Xtrack LLC/Q3,2025 KY XTRACK.pdf",
+   "bytes": 71072,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "XTRACK",
+   "period": "2025",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "cf5c84510e2a8312",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/Xtrack LLC/Q3,2025 NY XTRACK.pdf",
+   "bytes": 130217,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "XTRACK",
+   "period": "2025",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "786a164ae7257b42",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/Xtrack LLC/Q4, 2025 KY XTRACK.pdf",
+   "bytes": 71383,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "XTRACK",
+   "period": "2025",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "07263bdd38bc3fdb",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/Xtrack LLC/Q4,2025 NY XTRACK.pdf",
+   "bytes": 215617,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "XTRACK",
+   "period": "2025",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "ad19b93fa2a716a8",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/Oct-Nov-Dec, 2023/iftareports-oct-zone all units (CT).pdf",
+   "bytes": 43563,
+   "modified": "2023-11-05",
+   "kind": "fuel_tax_return",
+   "entity": "ZONE",
+   "period": "2023",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "02a5a777354ead86",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/Zone/2025 4th qt ifta.pdf",
+   "bytes": 244448,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "ZONE",
+   "period": "2025",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "daf478d9128f8570",
+   "copies": [
+    "data/raw/ifta/Ifta/Zone/Zone/2025 4th qt ifta.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/Ifta/Zone/HUWF2508305081317.pdf",
+   "bytes": 431074,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "ZONE",
+   "period": null,
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "3d8425a6a153b844",
+   "copies": [
+    "data/raw/ifta/Ifta/Zone/Zone/HUWF2508305081317.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/Ifta/Zone/HUWF2509306141268.pdf",
+   "bytes": 473115,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "ZONE",
+   "period": null,
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "755763aafa1bdd84",
+   "copies": [
+    "data/raw/ifta/Ifta/Zone/Zone/HUWF2509306141268.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/Ifta/Zone/HUWF2510206767918.pdf",
+   "bytes": 516210,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "ZONE",
+   "period": null,
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "0b5f96a221c61a46",
+   "copies": [
+    "data/raw/ifta/Ifta/Zone/Zone/HUWF2510206767918.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/Ifta/Zone/HUWF2511187907176.pdf",
+   "bytes": 515246,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "ZONE",
+   "period": null,
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "73d060e0b19fe019",
+   "copies": [
+    "data/raw/ifta/Ifta/Zone/Zone/HUWF2511187907176.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/Ifta/Zone/HUWF2512269036098.pdf",
+   "bytes": 473263,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "ZONE",
+   "period": null,
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "6498be7cd73f447f",
+   "copies": [
+    "data/raw/ifta/Ifta/Zone/Zone/HUWF2512269036098.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/Ifta/Zone/HUWF2601300661908.pdf",
+   "bytes": 471833,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "ZONE",
+   "period": null,
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "7fe7c7952f979456",
+   "copies": [
+    "data/raw/ifta/Ifta/Zone/Zone/HUWF2601300661908.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/Ifta/Zone/HUWF2602271302781.pdf",
+   "bytes": 471755,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "ZONE",
+   "period": null,
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "38cf430c551487f1",
+   "copies": [
+    "data/raw/ifta/Ifta/Zone/Zone/HUWF2602271302781.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/Ifta/Zone/HUWF2604042392032.pdf",
+   "bytes": 472432,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "ZONE",
+   "period": null,
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "481594b923e3ee5e",
+   "copies": [
+    "data/raw/ifta/Ifta/Zone/Zone/HUWF2604042392032.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/Ifta/Zone/HUWF2604213289859.pdf",
+   "bytes": 472457,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "ZONE",
+   "period": null,
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "a36c4bc2521a417c",
+   "copies": [
+    "data/raw/ifta/Ifta/Zone/Zone/HUWF2604213289859.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/Ifta/Zone/HUWF2605314490680.pdf",
+   "bytes": 472998,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "ZONE",
+   "period": null,
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "88546ec0efd08ecd",
+   "copies": [
+    "data/raw/ifta/Ifta/Zone/Zone/HUWF2605314490680.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/Ifta/Zone/HUWF2607035402080.pdf",
+   "bytes": 449050,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "ZONE",
+   "period": null,
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "9d4673c02664040a",
+   "copies": [
+    "data/raw/ifta/Ifta/Zone/Zone/HUWF2607035402080.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/Ifta/Zone/HUWF2608077152193.pdf",
+   "bytes": 302893,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "ZONE",
+   "period": null,
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "7bbe2bab60d04e90",
+   "copies": [
+    "data/raw/ifta/Ifta/Zone/Zone/HUWF2608077152193.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/Ifta/Zone/HUWF2608267493868.pdf",
+   "bytes": 258426,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "ZONE",
+   "period": null,
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "cb6958d23e1f8161",
+   "copies": [
+    "data/raw/ifta/Ifta/Zone/Zone/HUWF2608267493868.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/Ifta/Zone/Payment Receipt Form (1).pdf",
+   "bytes": 79223,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "ZONE",
+   "period": null,
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "15ce06ff26a1cdc1",
+   "copies": [
+    "data/raw/ifta/Ifta/Zone/Zone/Payment Receipt Form (1).pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/Ifta/Zone/Payment Receipt Form.pdf",
+   "bytes": 70164,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "ZONE",
+   "period": null,
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "a674aed9fcbf7bec",
+   "copies": [
+    "data/raw/ifta/Ifta/Zone/Zone/Payment Receipt Form.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/Ifta/Zone/ViewFile (2).pdf",
+   "bytes": 274992,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "ZONE",
+   "period": null,
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "1a3ad9a29c26c7aa",
+   "copies": [
+    "data/raw/ifta/Ifta/Zone/Zone/ViewFile (2).pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/Ifta/Zone/ViewFile (3).pdf",
+   "bytes": 163061,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "ZONE",
+   "period": null,
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "e419e6cd3fad99e5",
+   "copies": [
+    "data/raw/ifta/Ifta/Zone/Zone/ViewFile (3).pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/Ifta/Zone/ViewFile (5).pdf",
+   "bytes": 248418,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "ZONE",
+   "period": null,
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "c95f51e2e6532183",
+   "copies": [
+    "data/raw/ifta/Ifta/Zone/Zone/ViewFile (5).pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/Ifta/Zone/ViewFile (7).pdf",
+   "bytes": 367825,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "ZONE",
+   "period": null,
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "c156c0656ecc1fee",
+   "copies": [
+    "data/raw/ifta/Ifta/Zone/Zone/ViewFile (7).pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/Ifta/Zone/Zone/ky 2025 qt3.pdf",
+   "bytes": 70492,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "ZONE",
+   "period": "2025",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "b1cf5f3126bf4cf2",
+   "copies": [
+    "data/raw/ifta/Ifta/Zone/ky 2025 qt3.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/Ifta/Zone/Zone/ky 2025 qt4.pdf",
+   "bytes": 70418,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "ZONE",
+   "period": "2025",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "c53432062152726f",
+   "copies": [
+    "data/raw/ifta/Ifta/Zone/ky 2025 qt4.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/Ifta/Zone/Zone/nm 2025 3qt.pdf",
+   "bytes": 346985,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "ZONE",
+   "period": "2025",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "0b8e8b615916538c",
+   "copies": [
+    "data/raw/ifta/Ifta/Zone/nm 2025 3qt.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/Ifta/Zone/Zone/nm 2025 qt4.pdf",
+   "bytes": 368425,
+   "modified": "2026-09-04",
+   "kind": "fuel_tax_return",
+   "entity": "ZONE",
+   "period": "2025",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "f6890e56e6977ea8",
+   "copies": [
+    "data/raw/ifta/Ifta/Zone/nm 2025 qt4.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT 2026-20260904T210055Z-1-001/CT 2026/1st quarter/IFTA_2026-01-01 - 2026-03-31.pdf",
+   "bytes": 96502,
+   "modified": "2026-04-01",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2026",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "7643f3b50bf1e3b0",
+   "copies": [
+    "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2026/1st quarter/IFTA_2026-01-01 - 2026-03-31.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT 2026-20260904T210055Z-1-001/CT 2026/1st quarter/ViewFile (2).pdf",
+   "bytes": 142089,
+   "modified": "2026-04-06",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2026",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "97407daaea191add",
+   "copies": [
+    "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2026/1st quarter/ViewFile (2).pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT 2026-20260904T210055Z-1-001/CT 2026/1st quarter/ZoneJan-Feb-March2026.csv",
+   "bytes": 2441,
+   "modified": "2026-04-01",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2026",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "columns": [
+    "1FUJHHDR1PLNS9298",
+    "3263462",
+    "USA",
+    "IN",
+    "10000",
+    "80000",
+    "47.22"
+   ],
+   "rows": 45,
+   "sha256": "d251c11c924cfefd",
+   "copies": [
+    "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2026/1st quarter/ZoneJan-Feb-March2026.csv"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT 2026-20260904T210055Z-1-001/CT 2026/2nd quarter/2nd quarter, 2026 payment confirmation.pdf",
+   "bytes": 136747,
+   "modified": "2026-07-01",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2026",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "578bfc24d982c601",
+   "copies": [
+    "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2026/2nd quarter/2nd quarter, 2026 payment confirmation.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT 2026-20260904T210055Z-1-001/CT 2026/2nd quarter/AprilMayJune2026Zone.csv",
+   "bytes": 2115,
+   "modified": "2026-07-01",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2026",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "columns": [
+    "1FUJHHDR6NLNC0024",
+    "05KT7G",
+    "USA",
+    "MO",
+    "10000",
+    "80000",
+    "13.67"
+   ],
+   "rows": 39,
+   "sha256": "282537b9bebbb5d3",
+   "copies": [
+    "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2026/2nd quarter/AprilMayJune2026Zone.csv"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT 2026-20260904T210055Z-1-001/CT 2026/2nd quarter/IFTA_2026-04-01 - 2026-06-30 (1).pdf",
+   "bytes": 84689,
+   "modified": "2026-07-01",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2026",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "168fb389570923ac",
+   "copies": [
+    "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2026/2nd quarter/IFTA_2026-04-01 - 2026-06-30 (1).pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/April 2023/April 2023 payment.pdf",
+   "bytes": 203976,
+   "modified": "2023-05-11",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2023",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "124fbbee1c07ea97",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/April 2023/Reports for all drivers CT  01.04-01.05.pdf",
+   "bytes": 47532,
+   "modified": "2023-05-09",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2023",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "02643b98aadb73cc",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/August, 2023/August 2023 payment.pdf",
+   "bytes": 204029,
+   "modified": "2023-09-06",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2023",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "cba5d8cf888e71c1",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/August, 2023/ZoneAugust2023.csv",
+   "bytes": 2465,
+   "modified": "2023-09-06",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2023",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "columns": [
+    "\ufeff1FUJHHDR2NLNC0120",
+    "23KS4W",
+    "USA",
+    "MO",
+    "6000",
+    "80000",
+    "165"
+   ],
+   "rows": 50,
+   "sha256": "bb7ce015a1435bb2",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/August, 2023/ZoneAugust2023.xlsx",
+   "bytes": 7278,
+   "modified": "2023-10-03",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2023",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "ZoneAugust2023"
+   ],
+   "sha256": "a1dc3da020fd065d",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/August, 2023/iftareports-b0c43c98f7.pdf",
+   "bytes": 41849,
+   "modified": "2023-09-02",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2023",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "a36ed418a5af3df6",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/February 2023/February HUFSchedule1 - HUF-Schedule1.csv",
+   "bytes": 1386,
+   "modified": "2023-03-08",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2023",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "columns": [
+    "Schedule 1",
+    "\" Highway Use Fee File Creator"
+   ],
+   "rows": 24,
+   "sha256": "481438657509e2b5",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/February 2023/iftareports-358c3f264f.pdf",
+   "bytes": 28126,
+   "modified": "2023-03-08",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2023",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "a554802f9967334f",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/February 2023/payment .png",
+   "bytes": 703638,
+   "modified": "2023-03-08",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2023",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "ea593ec8df0175e5",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/January 2023/ACI Payments, Inc. - Pay Taxes, Utility Bills, Tuition & More Online.pdf",
+   "bytes": 202828,
+   "modified": "2023-02-14",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2023",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "ed40b76166f3a58e",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/January 2023/January  HUFSchedule1 - HUF-Schedule1 (2).csv",
+   "bytes": 1331,
+   "modified": "2023-02-14",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2023",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "columns": [
+    "Schedule 1",
+    "\" Highway Use Fee File Creator"
+   ],
+   "rows": 23,
+   "sha256": "0a11f445d7a0576b",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/January 2023/iftareports-a21a981b11.pdf",
+   "bytes": 42782,
+   "modified": "2023-02-02",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2023",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "43e766bae2408949",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/July 2023/July, 2023 CT payment (1).pdf",
+   "bytes": 203366,
+   "modified": "2023-08-04",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2023",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "239a0790c860fe58",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/July 2023/iftareports-a88dd15a5d.pdf",
+   "bytes": 54623,
+   "modified": "2023-08-02",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2023",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "b9b42c322916e268",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/March 2023/March 2023 CT payment.pdf",
+   "bytes": 204152,
+   "modified": "2023-05-09",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2023",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "5958b388e59ae916",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/March 2023/ViewFile (3).pdf",
+   "bytes": 109745,
+   "modified": "2023-04-05",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2023",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "dce31adaa4e30667",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/March 2023/ViewFile (4).pdf",
+   "bytes": 301122,
+   "modified": "2023-05-09",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2023",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "f1dd4c5122a4d115",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/March 2023/iftareports-4165586982 (1).pdf",
+   "bytes": 49668,
+   "modified": "2023-04-03",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2023",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "e7d04b43b6aed93c",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/Oct-Nov-Dec, 2023/ZoneOCTNOVDEC23 CT miles payment (1).pdf",
+   "bytes": 201654,
+   "modified": "2024-01-02",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2023",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "85a1e65e6eaf797a",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/Oct-Nov-Dec, 2023/ZoneOCTNOVDEC23.csv",
+   "bytes": 3738,
+   "modified": "2024-01-02",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2023",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "columns": [
+    "1FUJHHDR2NLNC0120",
+    "23KS4W",
+    "USA",
+    "MO",
+    "10000",
+    "80000",
+    "860"
+   ],
+   "rows": 74,
+   "sha256": "73f2e88c5d8ba943",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/Oct-Nov-Dec, 2023/ZoneOctober2023.csv",
+   "bytes": 3365,
+   "modified": "2023-11-05",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2023",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "columns": [
+    "1FUJHHDR2NLNC0120",
+    "23KS4W",
+    "USA",
+    "MO",
+    "10000",
+    "80000",
+    "541"
+   ],
+   "rows": 68,
+   "sha256": "0ec20d83ec59e6c2",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/Oct-Nov-Dec, 2023/iftareports-cfacd21ec5.pdf",
+   "bytes": 61046,
+   "modified": "2024-01-01",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2023",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "98154d2bbd507907",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/September 2023/CT miles payment for September.pdf",
+   "bytes": 203210,
+   "modified": "2023-10-04",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2023",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "5ad3aca2bf59fed3",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/September 2023/ZoneSeptember2023.csv",
+   "bytes": 3072,
+   "modified": "2023-10-03",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2023",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "columns": [
+    "4V4NC9EH1KN208110",
+    "84KR3D",
+    "USA",
+    "MO",
+    "10000",
+    "80000",
+    "383"
+   ],
+   "rows": 61,
+   "sha256": "8c5e6c9d38dca1c5",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/September 2023/iftareports-0d4507fe43.pdf",
+   "bytes": 44716,
+   "modified": "2023-10-03",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2023",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "0670e22d50752605",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/September 2023/iftareports-82b22a74e0.pdf",
+   "bytes": 43138,
+   "modified": "2023-10-03",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2023",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "cce6c378eaa88a62",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2024/Apr-May-Jun,2024/2024-2-quarter.pdf",
+   "bytes": 70383,
+   "modified": "2024-07-09",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2024",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "67391e3ca349c022",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2024/Apr-May-Jun,2024/ViewFile.pdf",
+   "bytes": 143828,
+   "modified": "2024-07-09",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2024",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "480a13746617e028",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2024/Apr-May-Jun,2024/ZoneApr-May-June2024 - Sheet1.csv",
+   "bytes": 2532,
+   "modified": "2024-07-09",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2024",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "columns": [
+    "3AKJHHDR1RSUY2927",
+    "AB85BI ",
+    "USA",
+    "FL",
+    "10000",
+    "80000",
+    "410"
+   ],
+   "rows": 50,
+   "sha256": "7e32f2833b456903",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2024/Jan-Feb-Mar, 2024/ACI Payments, Inc. - Pay Taxes, Utility Bills, Tuition & More Online.pdf",
+   "bytes": 209605,
+   "modified": "2024-04-05",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2024",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "c020e46f5689fcde",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2024/Jan-Feb-Mar, 2024/ZoneJan-Feb-Mar2024 - Sheet1.csv",
+   "bytes": 1777,
+   "modified": "2024-04-04",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2024",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "columns": [
+    "1FUJHHDR2NLNC0120",
+    "23KS4W",
+    "USA",
+    "MO",
+    "10000",
+    "80000",
+    "231"
+   ],
+   "rows": 35,
+   "sha256": "c1eb3ba45431aafd",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2024/Jan-Feb-Mar, 2024/iftareports-bda9d64c4a.pdf",
+   "bytes": 31621,
+   "modified": "2024-04-04",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2024",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "cfdb4594a959dd27",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2024/Oct-Nov-Dec, 2024/Oct-Nov-Dec payment.pdf",
+   "bytes": 175989,
+   "modified": "2025-01-05",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2024",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "57e45f47055df9aa",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2024/Oct-Nov-Dec, 2024/ViewFile (4).pdf",
+   "bytes": 175949,
+   "modified": "2025-01-03",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2024",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "bbdc75837799b41e",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2024/Oct-Nov-Dec, 2024/ZoneOct-Nov-Dec2024.csv",
+   "bytes": 3824,
+   "modified": "2025-01-03",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2024",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "columns": [
+    "4V4NC9EJ1GN927562",
+    "38994PZ",
+    "USA",
+    "VA",
+    "10000",
+    "80000",
+    "327"
+   ],
+   "rows": 76,
+   "sha256": "7b48b4debc5df1f5",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/1st Quarter, 2025/IFTA_2025-01-01_2025-03-31 (17).pdf",
+   "bytes": 22670,
+   "modified": "2025-04-08",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2025",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "efa828e39f9ecdc8",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/1st Quarter, 2025/IFTA_2025-01-01_2025-03-31 (18).pdf",
+   "bytes": 22321,
+   "modified": "2025-04-08",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2025",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "4a5f95b7ca6813e4",
+   "copies": [
+    "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/1st Quarter, 2025/IFTA_2025-01-01_2025-03-31 (19).pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/1st Quarter, 2025/IFTA_2025-01-01_2025-03-31 (33).pdf",
+   "bytes": 22516,
+   "modified": "2025-04-08",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2025",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "b1940cce459b4cbc",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/1st Quarter, 2025/IFTA_2025-01-01_2025-03-31 (35).pdf",
+   "bytes": 21722,
+   "modified": "2025-04-08",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2025",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "6f14ba4e5689de9c",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/1st Quarter, 2025/IFTA_2025-01-01_2025-03-31 (36).pdf",
+   "bytes": 22104,
+   "modified": "2025-04-08",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2025",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "7de3aaa452055422",
+   "copies": [
+    "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/1st Quarter, 2025/IFTA_2025-01-01_2025-03-31 (37).pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/1st Quarter, 2025/ViewFile (1).pdf",
+   "bytes": 138770,
+   "modified": "2025-04-09",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2025",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "0466e36e0b178c17",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/1st Quarter, 2025/ZoneJan-Feb-Mar.csv",
+   "bytes": 2142,
+   "modified": "2025-04-09",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2025",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "columns": [
+    "3AKJHHDR8PSUE7861",
+    "3466709",
+    "USA",
+    "IN",
+    "10000",
+    "80000",
+    "2025"
+   ],
+   "rows": 42,
+   "sha256": "d86e78f5e62b0438",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/2nd Quarter, 2025/2nd quarter payment confirmation, 2025.pdf",
+   "bytes": 173871,
+   "modified": "2025-07-02",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2025",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "9351a39adfd5cf56",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/2nd Quarter, 2025/IFTA_2025-04-01 - 2025-06-30 (1).pdf",
+   "bytes": 23153,
+   "modified": "2025-07-01",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2025",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "fddde110296f1504",
+   "copies": [
+    "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/2nd quarter, 2025/IFTA_2025-04-01 - 2025-06-30 (1).pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/2nd Quarter, 2025/ZoneApr-May-Jun2025.csv",
+   "bytes": 3697,
+   "modified": "2025-07-02",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2025",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "columns": [
+    "3AKJHHDR1RSUY2927",
+    "XA177D",
+    "USA",
+    "FL",
+    "10000",
+    "80000",
+    "839"
+   ],
+   "rows": 73,
+   "sha256": "7857be2843739e6e",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/3rd Quarter, 2025-20260904T205947Z-1-001 (1)/3rd Quarter, 2025/IFTA_2025-07-01 - 2025-09-30.pdf",
+   "bytes": 52609,
+   "modified": "2025-10-02",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2025",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "e64de2304fe58ac3",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/3rd Quarter, 2025-20260904T205947Z-1-001 (1)/3rd Quarter, 2025/ViewFile (3).pdf",
+   "bytes": 181082,
+   "modified": "2025-10-03",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2025",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "12fc0fb64e2973f1",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/3rd Quarter, 2025-20260904T205947Z-1-001 (1)/3rd Quarter, 2025/ZoneJuly-Aug-Sep2025 - Table 1 (Pages 1-3).csv",
+   "bytes": 4007,
+   "modified": "2025-10-02",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2025",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "columns": [
+    "1FUJHHDR4NLNC0037",
+    "06KT2G",
+    "USA",
+    "MO",
+    "10000",
+    "80000",
+    "530"
+   ],
+   "rows": 79,
+   "sha256": "ed4c12ec4ca33cd8",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/4th Quarter, 2025-20260904T210006Z-1-001/4th Quarter, 2025/IFTA_2025-10-01 - 2025-12-31 (1).pdf",
+   "bytes": 155728,
+   "modified": "2026-04-06",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2025",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "6d1ad9598faca80f",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/4th Quarter, 2025-20260904T210006Z-1-001/4th Quarter, 2025/ViewFile (1).pdf",
+   "bytes": 173746,
+   "modified": "2026-04-06",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2025",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "01c71272f085cff5",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211352Z-1-001/CT Reports/2nd quarter, 2026/AprilMayJune2026AFGTransportCo - Sheet1 (1).csv",
+   "bytes": 369,
+   "modified": "2026-07-27",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2026",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "columns": [
+    "3AKJHHDR5PSUS1786",
+    "3537966",
+    "USA",
+    "IN",
+    "10000",
+    "80000",
+    "1707.52"
+   ],
+   "rows": 6,
+   "sha256": "4c12820b8e987bb3",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211352Z-1-001/CT Reports/2nd quarter, 2026/IFTA_2026-04-01 - 2026-06-30 (3).pdf",
+   "bytes": 19480,
+   "modified": "2026-07-27",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2026",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "87f3bf1704633694",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211352Z-1-001/CT Reports/2nd quarter, 2026/IMAGE 2026-07-27 10_03_32.jpg",
+   "bytes": 105448,
+   "modified": "2026-07-27",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2026",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "4ee39cdb05759876",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211352Z-1-001/CT Reports/2nd quarter, 2026/IMAGE 2026-07-27 10_03_34.jpg",
+   "bytes": 74582,
+   "modified": "2026-07-27",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2026",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "d6071279466fc3f3",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/1stQuarter2024/IMAGE 2024-04-05 10_43_24.jpg",
+   "bytes": 15904,
+   "modified": "2024-04-05",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2024",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "0116910cb4690c3c",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/1stQuarter2024/IMAGE 2024-04-05 10_43_26.jpg",
+   "bytes": 14231,
+   "modified": "2024-04-05",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2024",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "9dbaa999b8745239",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/1stQuarter2024/XtrackJan-Feb-Mar2024 - Sheet1.csv",
+   "bytes": 96,
+   "modified": "2024-04-05",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2024",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "columns": [
+    "4V4NC9EH0NN606431",
+    "52KS0K",
+    "USA",
+    "MO",
+    "10000",
+    "80000",
+    "98"
+   ],
+   "rows": 1,
+   "sha256": "42077acd3bfd8f71",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/1stQuarter2024/XtrackLLC ACI Payments, Inc. - Pay Taxes, Utility Bills, Tuition & More Online.pdf",
+   "bytes": 208304,
+   "modified": "2024-04-05",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2024",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "d745ec6160745be5",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/2ndQuarter2024/2024-2-quarter (1).pdf",
+   "bytes": 24015,
+   "modified": "2024-07-09",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2024",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "d32451870fcdf143",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/2ndQuarter2024/Payment for 2nd quarter XtrackApr-May-June.pdf",
+   "bytes": 208449,
+   "modified": "2024-07-09",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2024",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "0cba41ee9b0965ec",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/2ndQuarter2024/XtrackApr-May-June2024 - Sheet1.csv",
+   "bytes": 252,
+   "modified": "2024-07-09",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2024",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "columns": [
+    "3AKJHHDR9PSUE7853",
+    "3466705",
+    "USA",
+    "IN",
+    "10000",
+    "80000",
+    "977"
+   ],
+   "rows": 4,
+   "sha256": "51500939ddff8c0f",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/3rdQuarter2024/2024-7_2024-9.pdf",
+   "bytes": 26013,
+   "modified": "2024-10-02",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2024",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "0ce8732c797874d0",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/3rdQuarter2024/XtrackJul-Aug-Sep2024 - Sheet1.csv",
+   "bytes": 347,
+   "modified": "2024-10-02",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2024",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "columns": [
+    "3AKJHHDR9PSUE7853",
+    "3466705",
+    "USA",
+    "IN",
+    "10000",
+    "80000",
+    "1312"
+   ],
+   "rows": 6,
+   "sha256": "2154f2e123dfd950",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/3rdQuarter2024/\ud835\uddfa\ud835\ude06\ud835\uddf0\ud835\uddfc\ud835\uddfb\ud835\uddfb\ud835\uddf2\ud835\uddd6\ud835\udde7XtrackJul-Aug-Sep2024 payment.pdf",
+   "bytes": 2608388,
+   "modified": "2024-10-02",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2024",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "cc1bc324790a9534",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/4thQuarter2024/2024-10_2024-12 (1).csv",
+   "bytes": 231,
+   "modified": "2025-01-02",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2024",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "columns": [
+    "Truck number",
+    "State",
+    "Total miles",
+    "VIN number"
+   ],
+   "rows": 7,
+   "sha256": "48499f43322ec6eb",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/4thQuarter2024/ViewFile (3).pdf",
+   "bytes": 98201,
+   "modified": "2025-01-02",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2024",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "9c91cbb7f4b6f3ca",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/4thQuarter2024/XtrackOct-Nov-Dec2024 - Sheet1.csv",
+   "bytes": 293,
+   "modified": "2025-01-02",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2024",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "columns": [
+    "3AKJHHDR9PSUE7853",
+    "3466705",
+    "USA",
+    "IN",
+    "10000",
+    "80000",
+    "495"
+   ],
+   "rows": 5,
+   "sha256": "96ff153657971f47",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/1st quarter, 2025/1st Quarter, 2025.pdf",
+   "bytes": 99774,
+   "modified": "2025-04-08",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2025",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "211ffa292a28a2aa",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/1st quarter, 2025/IFTA_2025-01-01_2025-03-31 (45).pdf",
+   "bytes": 20095,
+   "modified": "2025-04-08",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2025",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "d499c7832a3f17e4",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/1st quarter, 2025/IFTA_2025-01-01_2025-03-31 (46).pdf",
+   "bytes": 19166,
+   "modified": "2025-04-08",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2025",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "d57abef8efdd7a82",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/1st quarter, 2025/XtrackJan-Feb-Mar.csv",
+   "bytes": 296,
+   "modified": "2025-04-08",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2025",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "columns": [
+    "3AKJHHDR6PSUE7860",
+    "3466816",
+    "USA",
+    "IN",
+    "10000",
+    "80000",
+    "327"
+   ],
+   "rows": 5,
+   "sha256": "2abbe64a4f530bef",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/2nd quarter, 2025/2nd quarter payment confirmation.pdf",
+   "bytes": 100233,
+   "modified": "2025-07-02",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2025",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "380493703fddee19",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/2nd quarter, 2025/XtrackApr-May-Jun2025.csv",
+   "bytes": 395,
+   "modified": "2025-07-01",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2025",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "columns": [
+    "4V4NC9EH9NN311313",
+    "27KT3G",
+    "USA",
+    "IN",
+    "10000",
+    "80000",
+    "126"
+   ],
+   "rows": 7,
+   "sha256": "f37d41ddfa9131cc",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/3rd quarter, 2025/IFTA_2025-07-01 - 2025-09-30 (1).pdf",
+   "bytes": 23072,
+   "modified": "2025-10-02",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2025",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "c5b90256d5e7cb48",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/3rd quarter, 2025/ViewFile.pdf",
+   "bytes": 104402,
+   "modified": "2025-10-02",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2025",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "2c713f810ca87e48",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/3rd quarter, 2025/XtrackJul-Aug-Sep.csv",
+   "bytes": 395,
+   "modified": "2025-10-02",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2025",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "columns": [
+    "1FUJHHDR4NLNC0099",
+    "20KT9F",
+    "USA",
+    "MO",
+    "10000",
+    "80000",
+    "285"
+   ],
+   "rows": 7,
+   "sha256": "70f05424c518a33a",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2026/1st quarter,2026/IFTA_2026-01-01 - 2026-03-31 (1).pdf",
+   "bytes": 62680,
+   "modified": "2026-04-06",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2026",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "83aa4b675664e211",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2026/1st quarter,2026/ViewFile.pdf",
+   "bytes": 124620,
+   "modified": "2026-04-06",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2026",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "0954377846f96dc7",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2026/1st quarter,2026/XtrackJan-Feb-March2026.csv",
+   "bytes": 1752,
+   "modified": "2026-04-01",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2026",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "columns": [
+    "3AKJHHDR0RSUT1208",
+    "3451889.00",
+    "USA",
+    "IN",
+    "10000.00",
+    "80000.00",
+    "311.93"
+   ],
+   "rows": 28,
+   "sha256": "c7f16b448d8819f4",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2026/2nd quarter, 2026/2nd quarter payment confirmation.pdf",
+   "bytes": 144598,
+   "modified": "2026-07-01",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2026",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "be55630c9053dab0",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2026/2nd quarter, 2026/AprilMayJune2026XtrackLLC.csv",
+   "bytes": 2483,
+   "modified": "2026-07-01",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2026",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "columns": [
+    "1FUJHHDR1NLNC0044",
+    "19KT8F",
+    "USA",
+    "MO",
+    "10000",
+    "80000",
+    "543.09"
+   ],
+   "rows": 46,
+   "sha256": "4877a78ca4c9a7a9",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2026/2nd quarter, 2026/IFTA_2026-04-01 - 2026-06-30.pdf",
+   "bytes": 98302,
+   "modified": "2026-07-01",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2026",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "79729c7773bfb831",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/CT miles reports/LastQuarter,2023/XtrackOctNovDec2023.csv",
+   "bytes": 634,
+   "modified": "2024-01-25",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2023",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "columns": [
+    "Schedule 1",
+    "\" Highway Use Fee File Creator"
+   ],
+   "rows": 5,
+   "sha256": "28088c3dca88857f",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/CT miles reports/LastQuarter,2023/XtrackOctNovDec2023CTmiles.pdf",
+   "bytes": 89992,
+   "modified": "2024-01-25",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2023",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "1254f2db2f2192c5",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/CT miles reports/September 2023/289905  CT sep.pdf",
+   "bytes": 18514,
+   "modified": "2023-10-04",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2023",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "3aacf9093c01838e",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/CT miles reports/September 2023/XtrackLLCSeptember2023 - Sheet2.csv",
+   "bytes": 46,
+   "modified": "2023-10-04",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2023",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "columns": [
+    "3AKJHHDR5RSUT1205",
+    "3450626",
+    "USA",
+    "IN",
+    "10000",
+    "80000",
+    "0"
+   ],
+   "rows": 0,
+   "sha256": "564447de12747872",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/Insurance/afg/2026_UCR_Registration_2992973_20251231440.pdf",
+   "bytes": 104143,
+   "modified": "2026-09-04",
+   "kind": "insurance_policy",
+   "entity": "AFG",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "8751efbd6b484096",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/Insurance/afg/Cost Breakdown - Progressive Commercial Auto.pdf",
+   "bytes": 171158,
+   "modified": "2026-09-04",
+   "kind": "insurance_policy",
+   "entity": "AFG",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "7b42a1c7873e7143",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/Insurance/afg/photo_2026-09-04_00-38-41.jpg",
+   "bytes": 57404,
+   "modified": "2026-09-04",
+   "kind": "insurance_policy",
+   "entity": "AFG",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "7bfb9582d19ca04b",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/Insurance/afg/photo_2026-09-04_00-39-10.jpg",
+   "bytes": 45004,
+   "modified": "2026-09-04",
+   "kind": "insurance_policy",
+   "entity": "AFG",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "7ae4f7b47ca328a6",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/Insurance/afg/photo_2026-09-04_00-39-15.jpg",
+   "bytes": 35496,
+   "modified": "2026-09-04",
+   "kind": "insurance_policy",
+   "entity": "AFG",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "81a3ecb5dcafaeab",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/Insurance/afg/photo_2026-09-04_00-39-33.jpg",
+   "bytes": 55831,
+   "modified": "2026-09-04",
+   "kind": "insurance_policy",
+   "entity": "AFG",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "7cb4ffb7f38e8ff2",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/Insurance/afg/photo_2026-09-04_00-39-52.jpg",
+   "bytes": 49884,
+   "modified": "2026-09-04",
+   "kind": "insurance_policy",
+   "entity": "AFG",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "b978af6cb1fb4db3",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/Insurance/afg/photo_2026-09-04_00-40-00.jpg",
+   "bytes": 61154,
+   "modified": "2026-09-04",
+   "kind": "insurance_policy",
+   "entity": "AFG",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "3724dd0a205bbde4",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/Insurance/afg/photo_2026-09-04_00-40-34.jpg",
+   "bytes": 28087,
+   "modified": "2026-09-04",
+   "kind": "insurance_policy",
+   "entity": "AFG",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "bfb98593422b4b90",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/Insurance/Xtrack LLC Insurance/2026_UCR_Registration_4086204_202608222030.pdf",
+   "bytes": 86651,
+   "modified": "2026-08-26",
+   "kind": "insurance_policy",
+   "entity": "XTRACK",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "6645686b01a74e95",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/Insurance/Xtrack LLC Insurance/25-26 AL PD Policy Xtrack LLC.pdf",
+   "bytes": 70815,
+   "modified": "2026-09-04",
+   "kind": "insurance_policy",
+   "entity": "XTRACK",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "9a472fb7014fe677",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/Insurance/Xtrack LLC Insurance/9371ff8aDocument.pdf",
+   "bytes": 110127,
+   "modified": "2026-09-04",
+   "kind": "insurance_policy",
+   "entity": "XTRACK",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "21f3e6463bc337d6",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/Insurance/Xtrack LLC Insurance/Incline Quote 1.pdf",
+   "bytes": 336179,
+   "modified": "2026-09-04",
+   "kind": "insurance_policy",
+   "entity": "XTRACK",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "d96f41bf45b1378f",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/Insurance/Xtrack LLC Insurance/POLICY DOCUMENTS FOR SIGNATURE - Signed.pdf",
+   "bytes": 2518774,
+   "modified": "2026-08-26",
+   "kind": "insurance_policy",
+   "entity": "XTRACK",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "59e244834608248b",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/Insurance/Xtrack LLC Insurance/XTRACK MTC FINANCE_encrypted_.pdf",
+   "bytes": 286394,
+   "modified": "2026-09-04",
+   "kind": "insurance_policy",
+   "entity": "XTRACK",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "bbe10404902a13fc",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/Insurance/Xtrack LLC Insurance/Xtrack LLC 25-26 Insurance Proposal - signed.pdf",
+   "bytes": 995345,
+   "modified": "2026-09-04",
+   "kind": "insurance_policy",
+   "entity": "XTRACK",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "25927cbd9d7b569b",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/Insurance/Xtrack LLC Insurance/Xtrack LLC_encrypted_.pdf",
+   "bytes": 537646,
+   "modified": "2026-09-03",
+   "kind": "insurance_policy",
+   "entity": "XTRACK",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "9dac726c2b6c6c4c",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/Insurance/Zone Insurance/2026_UCR_Registration_3456354_202512081518.pdf",
+   "bytes": 102312,
+   "modified": "2026-09-04",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "f09be7cc078907f4",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/Insurance/Zone Insurance/2026_UCR_Registration_4086204_202512081526.pdf",
+   "bytes": 102129,
+   "modified": "2026-09-04",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "57aa81623a5667ee",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/Insurance/Zone Insurance/Bank of America _ Online Banking _ Transfer Submitted (2).pdf",
+   "bytes": 74697,
+   "modified": "2026-09-04",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "46a968ad939236c9",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/Insurance/Zone Insurance/Bank of America _ Online Banking _ Transfer Submitted.pdf",
+   "bytes": 75554,
+   "modified": "2026-09-04",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "cfe3a2f30607578f",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/Insurance/Zone Insurance/ZONE OH DBA ZONE INTACT BENEFITS PACKAGE PROPOSAL - Signed.pdf",
+   "bytes": 2022454,
+   "modified": "2026-09-04",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "a48350b13de3a37a",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/Insurance/Zone Insurance/ZONE- OH COV CONF PAGE TO SIGN - Signed.pdf",
+   "bytes": 757495,
+   "modified": "2026-09-04",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "9fc45e1304953bf4",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/Insurance/Zone Insurance/ZONE- OH OCC ACC POLICY DOCS TO SIGN - Signed.pdf",
+   "bytes": 365758,
+   "modified": "2026-09-04",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "a934645f7a9341c6",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/Insurance/Zone Insurance/ZONE-OH CARGO DOCS TO SIGN  - Signed.pdf",
+   "bytes": 1352215,
+   "modified": "2026-09-04",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "169c6e65561945ce",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/Insurance/Zone Insurance/ZONE-OH EXCESS MTC POLICY - Signed.pdf",
+   "bytes": 2080597,
+   "modified": "2026-09-04",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "8cb7a014bf5441ed",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/Insurance/Zone Insurance/ZONE-OH LLC EXCESS CARGO - PROPOSAL FORM - Signed.pdf",
+   "bytes": 910907,
+   "modified": "2026-09-04",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "0a4f2583845f97bf",
+   "copies": []
+  },
+  {
+   "path": "data/raw/insurance/Insurance/Zone Insurance/photo_2026-09-04_00-09-33.jpg",
+   "bytes": 243892,
+   "modified": "2026-09-04",
+   "kind": "insurance_policy",
+   "entity": "ZONE",
+   "period": null,
+   "note": "Signed policies, proposals and UCR registrations. Units are scheduled by VIN and cannot yet be joined to fleet numbers.",
+   "used_by": [],
+   "sha256": "b51a53cc49321f11",
+   "copies": []
+  },
+  {
    "path": "data/raw/iron/invoices/Iron lease - AFG/AFG 05.22.26.pdf",
    "bytes": 31888,
    "modified": "2026-08-28",
@@ -5576,37 +7894,34 @@
    ]
   },
   {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/4th Quarter, 2025-20260904T210006Z-1-001/4th Quarter, 2025/Xtrack/XtrackOct-Nov-Dec.csv",
-   "bytes": 1164,
-   "modified": "2026-01-05",
-   "kind": "processed_csv",
+   "path": "data/processed/xtrack_truck_report.xlsx",
+   "bytes": 231748,
+   "modified": "2026-09-04",
+   "kind": "processed_output",
    "entity": "XTRACK",
-   "period": "2025",
-   "note": "Derived output of this pipeline, not a source.",
+   "period": null,
+   "note": "Derived output of this pipeline, not a source. Regenerate it rather than reading it as evidence.",
    "used_by": [],
-   "columns": [
-    "1FUJHHDR4NLNC0099",
-    "20KT9F",
-    "USA",
-    "MO",
-    "10000",
-    "80000",
-    "1063.16"
+   "sheets": 11,
+   "sheet_names": [
+    "Weekly by truck",
+    "Truck summary",
+    "Why gross fell short",
+    "Sitting trucks",
+    "Sitting runs",
+    "Home time policy"
    ],
-   "rows": 21,
-   "sha256": "9f15f7ce43a2d0a8",
-   "copies": [
-    "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/4th quarter, 2025/XtrackOct-Nov-Dec.csv"
-   ]
+   "sha256": "7d317c332b0366ef",
+   "copies": []
   },
   {
    "path": "data/processed/boa_transactions.csv",
    "bytes": 1778490,
    "modified": "2026-09-02",
-   "kind": "processed_csv",
+   "kind": "processed_output",
    "entity": null,
    "period": null,
-   "note": "Derived output of this pipeline, not a source.",
+   "note": "Derived output of this pipeline, not a source. Regenerate it rather than reading it as evidence.",
    "used_by": [],
    "columns": [
     "source_path",
@@ -5625,10 +7940,10 @@
    "path": "data/processed/cash_categorized.csv",
    "bytes": 1262397,
    "modified": "2026-09-02",
-   "kind": "processed_csv",
+   "kind": "processed_output",
    "entity": null,
    "period": null,
-   "note": "Derived output of this pipeline, not a source.",
+   "note": "Derived output of this pipeline, not a source. Regenerate it rather than reading it as evidence.",
    "used_by": [],
    "columns": [
     "src",
@@ -5649,10 +7964,10 @@
    "path": "data/processed/statement_meta.csv",
    "bytes": 17268,
    "modified": "2026-09-02",
-   "kind": "processed_csv",
+   "kind": "processed_output",
    "entity": null,
    "period": null,
-   "note": "Derived output of this pipeline, not a source.",
+   "note": "Derived output of this pipeline, not a source. Regenerate it rather than reading it as evidence.",
    "used_by": [],
    "columns": [
     "file",
@@ -5667,586 +7982,6 @@
    ],
    "rows": 130,
    "sha256": "e13ebfa7a6281a64",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT 2026-20260904T210055Z-1-001/CT 2026/1st quarter/ZoneJan-Feb-March2026.csv",
-   "bytes": 2441,
-   "modified": "2026-04-01",
-   "kind": "processed_csv",
-   "entity": null,
-   "period": "2026",
-   "note": "Derived output of this pipeline, not a source.",
-   "used_by": [],
-   "columns": [
-    "1FUJHHDR1PLNS9298",
-    "3263462",
-    "USA",
-    "IN",
-    "10000",
-    "80000",
-    "47.22"
-   ],
-   "rows": 45,
-   "sha256": "d251c11c924cfefd",
-   "copies": [
-    "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2026/1st quarter/ZoneJan-Feb-March2026.csv"
-   ]
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT 2026-20260904T210055Z-1-001/CT 2026/2nd quarter/AprilMayJune2026Zone.csv",
-   "bytes": 2115,
-   "modified": "2026-07-01",
-   "kind": "processed_csv",
-   "entity": null,
-   "period": "2026",
-   "note": "Derived output of this pipeline, not a source.",
-   "used_by": [],
-   "columns": [
-    "1FUJHHDR6NLNC0024",
-    "05KT7G",
-    "USA",
-    "MO",
-    "10000",
-    "80000",
-    "13.67"
-   ],
-   "rows": 39,
-   "sha256": "282537b9bebbb5d3",
-   "copies": [
-    "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2026/2nd quarter/AprilMayJune2026Zone.csv"
-   ]
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/August, 2023/ZoneAugust2023.csv",
-   "bytes": 2465,
-   "modified": "2023-09-06",
-   "kind": "processed_csv",
-   "entity": null,
-   "period": "2023",
-   "note": "Derived output of this pipeline, not a source.",
-   "used_by": [],
-   "columns": [
-    "\ufeff1FUJHHDR2NLNC0120",
-    "23KS4W",
-    "USA",
-    "MO",
-    "6000",
-    "80000",
-    "165"
-   ],
-   "rows": 50,
-   "sha256": "bb7ce015a1435bb2",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/February 2023/February HUFSchedule1 - HUF-Schedule1.csv",
-   "bytes": 1386,
-   "modified": "2023-03-08",
-   "kind": "processed_csv",
-   "entity": null,
-   "period": "2023",
-   "note": "Derived output of this pipeline, not a source.",
-   "used_by": [],
-   "columns": [
-    "Schedule 1",
-    "\" Highway Use Fee File Creator"
-   ],
-   "rows": 24,
-   "sha256": "481438657509e2b5",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/January 2023/January  HUFSchedule1 - HUF-Schedule1 (2).csv",
-   "bytes": 1331,
-   "modified": "2023-02-14",
-   "kind": "processed_csv",
-   "entity": null,
-   "period": "2023",
-   "note": "Derived output of this pipeline, not a source.",
-   "used_by": [],
-   "columns": [
-    "Schedule 1",
-    "\" Highway Use Fee File Creator"
-   ],
-   "rows": 23,
-   "sha256": "0a11f445d7a0576b",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/Oct-Nov-Dec, 2023/ZoneOCTNOVDEC23.csv",
-   "bytes": 3738,
-   "modified": "2024-01-02",
-   "kind": "processed_csv",
-   "entity": null,
-   "period": "2023",
-   "note": "Derived output of this pipeline, not a source.",
-   "used_by": [],
-   "columns": [
-    "1FUJHHDR2NLNC0120",
-    "23KS4W",
-    "USA",
-    "MO",
-    "10000",
-    "80000",
-    "860"
-   ],
-   "rows": 74,
-   "sha256": "73f2e88c5d8ba943",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/Oct-Nov-Dec, 2023/ZoneOctober2023.csv",
-   "bytes": 3365,
-   "modified": "2023-11-05",
-   "kind": "processed_csv",
-   "entity": null,
-   "period": "2023",
-   "note": "Derived output of this pipeline, not a source.",
-   "used_by": [],
-   "columns": [
-    "1FUJHHDR2NLNC0120",
-    "23KS4W",
-    "USA",
-    "MO",
-    "10000",
-    "80000",
-    "541"
-   ],
-   "rows": 68,
-   "sha256": "0ec20d83ec59e6c2",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/September 2023/ZoneSeptember2023.csv",
-   "bytes": 3072,
-   "modified": "2023-10-03",
-   "kind": "processed_csv",
-   "entity": null,
-   "period": "2023",
-   "note": "Derived output of this pipeline, not a source.",
-   "used_by": [],
-   "columns": [
-    "4V4NC9EH1KN208110",
-    "84KR3D",
-    "USA",
-    "MO",
-    "10000",
-    "80000",
-    "383"
-   ],
-   "rows": 61,
-   "sha256": "8c5e6c9d38dca1c5",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2024/Apr-May-Jun,2024/ZoneApr-May-June2024 - Sheet1.csv",
-   "bytes": 2532,
-   "modified": "2024-07-09",
-   "kind": "processed_csv",
-   "entity": null,
-   "period": "2024",
-   "note": "Derived output of this pipeline, not a source.",
-   "used_by": [],
-   "columns": [
-    "3AKJHHDR1RSUY2927",
-    "AB85BI ",
-    "USA",
-    "FL",
-    "10000",
-    "80000",
-    "410"
-   ],
-   "rows": 50,
-   "sha256": "7e32f2833b456903",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2024/Jan-Feb-Mar, 2024/ZoneJan-Feb-Mar2024 - Sheet1.csv",
-   "bytes": 1777,
-   "modified": "2024-04-04",
-   "kind": "processed_csv",
-   "entity": null,
-   "period": "2024",
-   "note": "Derived output of this pipeline, not a source.",
-   "used_by": [],
-   "columns": [
-    "1FUJHHDR2NLNC0120",
-    "23KS4W",
-    "USA",
-    "MO",
-    "10000",
-    "80000",
-    "231"
-   ],
-   "rows": 35,
-   "sha256": "c1eb3ba45431aafd",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2024/Oct-Nov-Dec, 2024/ZoneOct-Nov-Dec2024.csv",
-   "bytes": 3824,
-   "modified": "2025-01-03",
-   "kind": "processed_csv",
-   "entity": null,
-   "period": "2024",
-   "note": "Derived output of this pipeline, not a source.",
-   "used_by": [],
-   "columns": [
-    "4V4NC9EJ1GN927562",
-    "38994PZ",
-    "USA",
-    "VA",
-    "10000",
-    "80000",
-    "327"
-   ],
-   "rows": 76,
-   "sha256": "7b48b4debc5df1f5",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/1st Quarter, 2025/ZoneJan-Feb-Mar.csv",
-   "bytes": 2142,
-   "modified": "2025-04-09",
-   "kind": "processed_csv",
-   "entity": null,
-   "period": "2025",
-   "note": "Derived output of this pipeline, not a source.",
-   "used_by": [],
-   "columns": [
-    "3AKJHHDR8PSUE7861",
-    "3466709",
-    "USA",
-    "IN",
-    "10000",
-    "80000",
-    "2025"
-   ],
-   "rows": 42,
-   "sha256": "d86e78f5e62b0438",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/2nd Quarter, 2025/ZoneApr-May-Jun2025.csv",
-   "bytes": 3697,
-   "modified": "2025-07-02",
-   "kind": "processed_csv",
-   "entity": null,
-   "period": "2025",
-   "note": "Derived output of this pipeline, not a source.",
-   "used_by": [],
-   "columns": [
-    "3AKJHHDR1RSUY2927",
-    "XA177D",
-    "USA",
-    "FL",
-    "10000",
-    "80000",
-    "839"
-   ],
-   "rows": 73,
-   "sha256": "7857be2843739e6e",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/3rd Quarter, 2025-20260904T205947Z-1-001 (1)/3rd Quarter, 2025/ZoneJuly-Aug-Sep2025 - Table 1 (Pages 1-3).csv",
-   "bytes": 4007,
-   "modified": "2025-10-02",
-   "kind": "processed_csv",
-   "entity": null,
-   "period": "2025",
-   "note": "Derived output of this pipeline, not a source.",
-   "used_by": [],
-   "columns": [
-    "1FUJHHDR4NLNC0037",
-    "06KT2G",
-    "USA",
-    "MO",
-    "10000",
-    "80000",
-    "530"
-   ],
-   "rows": 79,
-   "sha256": "ed4c12ec4ca33cd8",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211352Z-1-001/CT Reports/2nd quarter, 2026/AprilMayJune2026AFGTransportCo - Sheet1 (1).csv",
-   "bytes": 369,
-   "modified": "2026-07-27",
-   "kind": "processed_csv",
-   "entity": null,
-   "period": "2026",
-   "note": "Derived output of this pipeline, not a source.",
-   "used_by": [],
-   "columns": [
-    "3AKJHHDR5PSUS1786",
-    "3537966",
-    "USA",
-    "IN",
-    "10000",
-    "80000",
-    "1707.52"
-   ],
-   "rows": 6,
-   "sha256": "4c12820b8e987bb3",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/1stQuarter2024/XtrackJan-Feb-Mar2024 - Sheet1.csv",
-   "bytes": 96,
-   "modified": "2024-04-05",
-   "kind": "processed_csv",
-   "entity": null,
-   "period": "2024",
-   "note": "Derived output of this pipeline, not a source.",
-   "used_by": [],
-   "columns": [
-    "4V4NC9EH0NN606431",
-    "52KS0K",
-    "USA",
-    "MO",
-    "10000",
-    "80000",
-    "98"
-   ],
-   "rows": 1,
-   "sha256": "42077acd3bfd8f71",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/2ndQuarter2024/XtrackApr-May-June2024 - Sheet1.csv",
-   "bytes": 252,
-   "modified": "2024-07-09",
-   "kind": "processed_csv",
-   "entity": null,
-   "period": "2024",
-   "note": "Derived output of this pipeline, not a source.",
-   "used_by": [],
-   "columns": [
-    "3AKJHHDR9PSUE7853",
-    "3466705",
-    "USA",
-    "IN",
-    "10000",
-    "80000",
-    "977"
-   ],
-   "rows": 4,
-   "sha256": "51500939ddff8c0f",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/3rdQuarter2024/XtrackJul-Aug-Sep2024 - Sheet1.csv",
-   "bytes": 347,
-   "modified": "2024-10-02",
-   "kind": "processed_csv",
-   "entity": null,
-   "period": "2024",
-   "note": "Derived output of this pipeline, not a source.",
-   "used_by": [],
-   "columns": [
-    "3AKJHHDR9PSUE7853",
-    "3466705",
-    "USA",
-    "IN",
-    "10000",
-    "80000",
-    "1312"
-   ],
-   "rows": 6,
-   "sha256": "2154f2e123dfd950",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/4thQuarter2024/2024-10_2024-12 (1).csv",
-   "bytes": 231,
-   "modified": "2025-01-02",
-   "kind": "processed_csv",
-   "entity": null,
-   "period": "2024",
-   "note": "Derived output of this pipeline, not a source.",
-   "used_by": [],
-   "columns": [
-    "Truck number",
-    "State",
-    "Total miles",
-    "VIN number"
-   ],
-   "rows": 7,
-   "sha256": "48499f43322ec6eb",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/4thQuarter2024/XtrackOct-Nov-Dec2024 - Sheet1.csv",
-   "bytes": 293,
-   "modified": "2025-01-02",
-   "kind": "processed_csv",
-   "entity": null,
-   "period": "2024",
-   "note": "Derived output of this pipeline, not a source.",
-   "used_by": [],
-   "columns": [
-    "3AKJHHDR9PSUE7853",
-    "3466705",
-    "USA",
-    "IN",
-    "10000",
-    "80000",
-    "495"
-   ],
-   "rows": 5,
-   "sha256": "96ff153657971f47",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/1st quarter, 2025/XtrackJan-Feb-Mar.csv",
-   "bytes": 296,
-   "modified": "2025-04-08",
-   "kind": "processed_csv",
-   "entity": null,
-   "period": "2025",
-   "note": "Derived output of this pipeline, not a source.",
-   "used_by": [],
-   "columns": [
-    "3AKJHHDR6PSUE7860",
-    "3466816",
-    "USA",
-    "IN",
-    "10000",
-    "80000",
-    "327"
-   ],
-   "rows": 5,
-   "sha256": "2abbe64a4f530bef",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/2nd quarter, 2025/XtrackApr-May-Jun2025.csv",
-   "bytes": 395,
-   "modified": "2025-07-01",
-   "kind": "processed_csv",
-   "entity": null,
-   "period": "2025",
-   "note": "Derived output of this pipeline, not a source.",
-   "used_by": [],
-   "columns": [
-    "4V4NC9EH9NN311313",
-    "27KT3G",
-    "USA",
-    "IN",
-    "10000",
-    "80000",
-    "126"
-   ],
-   "rows": 7,
-   "sha256": "f37d41ddfa9131cc",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/3rd quarter, 2025/XtrackJul-Aug-Sep.csv",
-   "bytes": 395,
-   "modified": "2025-10-02",
-   "kind": "processed_csv",
-   "entity": null,
-   "period": "2025",
-   "note": "Derived output of this pipeline, not a source.",
-   "used_by": [],
-   "columns": [
-    "1FUJHHDR4NLNC0099",
-    "20KT9F",
-    "USA",
-    "MO",
-    "10000",
-    "80000",
-    "285"
-   ],
-   "rows": 7,
-   "sha256": "70f05424c518a33a",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2026/1st quarter,2026/XtrackJan-Feb-March2026.csv",
-   "bytes": 1752,
-   "modified": "2026-04-01",
-   "kind": "processed_csv",
-   "entity": null,
-   "period": "2026",
-   "note": "Derived output of this pipeline, not a source.",
-   "used_by": [],
-   "columns": [
-    "3AKJHHDR0RSUT1208",
-    "3451889.00",
-    "USA",
-    "IN",
-    "10000.00",
-    "80000.00",
-    "311.93"
-   ],
-   "rows": 28,
-   "sha256": "c7f16b448d8819f4",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2026/2nd quarter, 2026/AprilMayJune2026XtrackLLC.csv",
-   "bytes": 2483,
-   "modified": "2026-07-01",
-   "kind": "processed_csv",
-   "entity": null,
-   "period": "2026",
-   "note": "Derived output of this pipeline, not a source.",
-   "used_by": [],
-   "columns": [
-    "1FUJHHDR1NLNC0044",
-    "19KT8F",
-    "USA",
-    "MO",
-    "10000",
-    "80000",
-    "543.09"
-   ],
-   "rows": 46,
-   "sha256": "4877a78ca4c9a7a9",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/CT miles reports/LastQuarter,2023/XtrackOctNovDec2023.csv",
-   "bytes": 634,
-   "modified": "2024-01-25",
-   "kind": "processed_csv",
-   "entity": null,
-   "period": "2023",
-   "note": "Derived output of this pipeline, not a source.",
-   "used_by": [],
-   "columns": [
-    "Schedule 1",
-    "\" Highway Use Fee File Creator"
-   ],
-   "rows": 5,
-   "sha256": "28088c3dca88857f",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/CT miles reports/September 2023/XtrackLLCSeptember2023 - Sheet2.csv",
-   "bytes": 46,
-   "modified": "2023-10-04",
-   "kind": "processed_csv",
-   "entity": null,
-   "period": "2023",
-   "note": "Derived output of this pipeline, not a source.",
-   "used_by": [],
-   "columns": [
-    "3AKJHHDR5RSUT1205",
-    "3450626",
-    "USA",
-    "IN",
-    "10000",
-    "80000",
-    "0"
-   ],
-   "rows": 0,
-   "sha256": "564447de12747872",
    "copies": []
   },
   {
@@ -6442,1741 +8177,6 @@
    "copies": [
     "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/a5e76db3-Bestpass_Toll__2026_08272026.xlsx"
    ]
-  },
-  {
-   "path": "data/raw/ifta/Ifta/afg/2nd Q 2026.pdf",
-   "bytes": 222666,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "AFG",
-   "period": "2026",
-   "note": "",
-   "used_by": [],
-   "sha256": "baf7b9dd575412c4",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/afg/Q2 2026 KY AFG.pdf",
-   "bytes": 77841,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "AFG",
-   "period": "2026",
-   "note": "",
-   "used_by": [],
-   "sha256": "30d8443cfd900fce",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/afg/Q2 2026 NM AFG.pdf",
-   "bytes": 171769,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "AFG",
-   "period": "2026",
-   "note": "",
-   "used_by": [],
-   "sha256": "2a9439547bc20a9d",
-   "copies": []
-  },
-  {
-   "path": "data/raw/insurance/Insurance/afg/2026_UCR_Registration_2992973_20251231440.pdf",
-   "bytes": 104143,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "AFG",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "8751efbd6b484096",
-   "copies": []
-  },
-  {
-   "path": "data/raw/insurance/Insurance/afg/Cost Breakdown - Progressive Commercial Auto.pdf",
-   "bytes": 171158,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "AFG",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "7b42a1c7873e7143",
-   "copies": []
-  },
-  {
-   "path": "data/raw/insurance/Insurance/afg/photo_2026-09-04_00-38-41.jpg",
-   "bytes": 57404,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "AFG",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "7bfb9582d19ca04b",
-   "copies": []
-  },
-  {
-   "path": "data/raw/insurance/Insurance/afg/photo_2026-09-04_00-39-10.jpg",
-   "bytes": 45004,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "AFG",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "7ae4f7b47ca328a6",
-   "copies": []
-  },
-  {
-   "path": "data/raw/insurance/Insurance/afg/photo_2026-09-04_00-39-15.jpg",
-   "bytes": 35496,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "AFG",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "81a3ecb5dcafaeab",
-   "copies": []
-  },
-  {
-   "path": "data/raw/insurance/Insurance/afg/photo_2026-09-04_00-39-33.jpg",
-   "bytes": 55831,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "AFG",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "7cb4ffb7f38e8ff2",
-   "copies": []
-  },
-  {
-   "path": "data/raw/insurance/Insurance/afg/photo_2026-09-04_00-39-52.jpg",
-   "bytes": 49884,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "AFG",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "b978af6cb1fb4db3",
-   "copies": []
-  },
-  {
-   "path": "data/raw/insurance/Insurance/afg/photo_2026-09-04_00-40-00.jpg",
-   "bytes": 61154,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "AFG",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "3724dd0a205bbde4",
-   "copies": []
-  },
-  {
-   "path": "data/raw/insurance/Insurance/afg/photo_2026-09-04_00-40-34.jpg",
-   "bytes": 28087,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "AFG",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "bfb98593422b4b90",
-   "copies": []
-  },
-  {
-   "path": "data/processed/xtrack_truck_report.xlsx",
-   "bytes": 231748,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "XTRACK",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sheets": 11,
-   "sheet_names": [
-    "Weekly by truck",
-    "Truck summary",
-    "Why gross fell short",
-    "Sitting trucks",
-    "Sitting runs",
-    "Home time policy"
-   ],
-   "sha256": "7d317c332b0366ef",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/4th Quarter, 2025-20260904T210006Z-1-001/4th Quarter, 2025/Xtrack/IFTA_2025-10-01 - 2025-12-31.pdf",
-   "bytes": 47066,
-   "modified": "2026-01-05",
-   "kind": "unknown",
-   "entity": "XTRACK",
-   "period": "2025",
-   "note": "",
-   "used_by": [],
-   "sha256": "75e2c1618bb50df8",
-   "copies": [
-    "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/4th quarter, 2025/IFTA_2025-10-01 - 2025-12-31.pdf"
-   ]
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/4th Quarter, 2025-20260904T210006Z-1-001/4th Quarter, 2025/Xtrack/ViewFile (5).pdf",
-   "bytes": 116423,
-   "modified": "2026-01-05",
-   "kind": "unknown",
-   "entity": "XTRACK",
-   "period": "2025",
-   "note": "",
-   "used_by": [],
-   "sha256": "220860c442a5757e",
-   "copies": [
-    "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/4th quarter, 2025/ViewFile (5).pdf"
-   ]
-  },
-  {
-   "path": "data/raw/ifta/Ifta/Xtrack LLC/1st Q,  XTRACK 2026.pdf",
-   "bytes": 230114,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "XTRACK",
-   "period": "2026",
-   "note": "",
-   "used_by": [],
-   "sha256": "c9c293a8d485c3c0",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/Xtrack LLC/2nd Q XTRACK 2026.pdf",
-   "bytes": 128588,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "XTRACK",
-   "period": "2026",
-   "note": "",
-   "used_by": [],
-   "sha256": "6ea7a0e52c2ae3d0",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/Xtrack LLC/3rd Q,  XTRACK 2025 (1).pdf",
-   "bytes": 220045,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "XTRACK",
-   "period": "2025",
-   "note": "",
-   "used_by": [],
-   "sha256": "24c6fcf8e49555a5",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/Xtrack LLC/4th Q,  XTRACK 2025 (1).pdf",
-   "bytes": 242486,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "XTRACK",
-   "period": "2025",
-   "note": "",
-   "used_by": [],
-   "sha256": "ec23963e49ea7565",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/Xtrack LLC/Q1 2026 NM XTRACK.pdf",
-   "bytes": 371334,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "XTRACK",
-   "period": "2026",
-   "note": "",
-   "used_by": [],
-   "sha256": "4818c156a1e10eb2",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/Xtrack LLC/Q1,2026 KY XTRACK.pdf",
-   "bytes": 70618,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "XTRACK",
-   "period": "2026",
-   "note": "",
-   "used_by": [],
-   "sha256": "cbdac05794d8a042",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/Xtrack LLC/Q1,2026 NY XTRACK.pdf",
-   "bytes": 237631,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "XTRACK",
-   "period": "2026",
-   "note": "",
-   "used_by": [],
-   "sha256": "81a1508f8e674b33",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/Xtrack LLC/Q2 2026 NM XTRACK.pdf",
-   "bytes": 166609,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "XTRACK",
-   "period": "2026",
-   "note": "",
-   "used_by": [],
-   "sha256": "1a1d10089bf8a3d7",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/Xtrack LLC/Q2 2026 NY XTRACK.pdf",
-   "bytes": 324245,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "XTRACK",
-   "period": "2026",
-   "note": "",
-   "used_by": [],
-   "sha256": "c99d74b0539e1878",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/Xtrack LLC/Q2,2026 KY XTRACK.pdf",
-   "bytes": 79624,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "XTRACK",
-   "period": "2026",
-   "note": "",
-   "used_by": [],
-   "sha256": "be9f63d196ebdab5",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/Xtrack LLC/Q3,2025 KY XTRACK.pdf",
-   "bytes": 71072,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "XTRACK",
-   "period": "2025",
-   "note": "",
-   "used_by": [],
-   "sha256": "cf5c84510e2a8312",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/Xtrack LLC/Q3,2025 NY XTRACK.pdf",
-   "bytes": 130217,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "XTRACK",
-   "period": "2025",
-   "note": "",
-   "used_by": [],
-   "sha256": "786a164ae7257b42",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/Xtrack LLC/Q4, 2025 KY XTRACK.pdf",
-   "bytes": 71383,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "XTRACK",
-   "period": "2025",
-   "note": "",
-   "used_by": [],
-   "sha256": "07263bdd38bc3fdb",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/Xtrack LLC/Q4,2025 NY XTRACK.pdf",
-   "bytes": 215617,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "XTRACK",
-   "period": "2025",
-   "note": "",
-   "used_by": [],
-   "sha256": "ad19b93fa2a716a8",
-   "copies": []
-  },
-  {
-   "path": "data/raw/insurance/Insurance/Xtrack LLC Insurance/2026_UCR_Registration_4086204_202608222030.pdf",
-   "bytes": 86651,
-   "modified": "2026-08-26",
-   "kind": "unknown",
-   "entity": "XTRACK",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "6645686b01a74e95",
-   "copies": []
-  },
-  {
-   "path": "data/raw/insurance/Insurance/Xtrack LLC Insurance/25-26 AL PD Policy Xtrack LLC.pdf",
-   "bytes": 70815,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "XTRACK",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "9a472fb7014fe677",
-   "copies": []
-  },
-  {
-   "path": "data/raw/insurance/Insurance/Xtrack LLC Insurance/9371ff8aDocument.pdf",
-   "bytes": 110127,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "XTRACK",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "21f3e6463bc337d6",
-   "copies": []
-  },
-  {
-   "path": "data/raw/insurance/Insurance/Xtrack LLC Insurance/Incline Quote 1.pdf",
-   "bytes": 336179,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "XTRACK",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "d96f41bf45b1378f",
-   "copies": []
-  },
-  {
-   "path": "data/raw/insurance/Insurance/Xtrack LLC Insurance/POLICY DOCUMENTS FOR SIGNATURE - Signed.pdf",
-   "bytes": 2518774,
-   "modified": "2026-08-26",
-   "kind": "unknown",
-   "entity": "XTRACK",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "59e244834608248b",
-   "copies": []
-  },
-  {
-   "path": "data/raw/insurance/Insurance/Xtrack LLC Insurance/XTRACK MTC FINANCE_encrypted_.pdf",
-   "bytes": 286394,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "XTRACK",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "bbe10404902a13fc",
-   "copies": []
-  },
-  {
-   "path": "data/raw/insurance/Insurance/Xtrack LLC Insurance/Xtrack LLC 25-26 Insurance Proposal - signed.pdf",
-   "bytes": 995345,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "XTRACK",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "25927cbd9d7b569b",
-   "copies": []
-  },
-  {
-   "path": "data/raw/insurance/Insurance/Xtrack LLC Insurance/Xtrack LLC_encrypted_.pdf",
-   "bytes": 537646,
-   "modified": "2026-09-03",
-   "kind": "unknown",
-   "entity": "XTRACK",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "9dac726c2b6c6c4c",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/Oct-Nov-Dec, 2023/iftareports-oct-zone all units (CT).pdf",
-   "bytes": 43563,
-   "modified": "2023-11-05",
-   "kind": "unknown",
-   "entity": "ZONE",
-   "period": "2023",
-   "note": "",
-   "used_by": [],
-   "sha256": "02a5a777354ead86",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/Zone/2025 4th qt ifta.pdf",
-   "bytes": 244448,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "ZONE",
-   "period": "2025",
-   "note": "",
-   "used_by": [],
-   "sha256": "daf478d9128f8570",
-   "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/2025 4th qt ifta.pdf"
-   ]
-  },
-  {
-   "path": "data/raw/ifta/Ifta/Zone/HUWF2508305081317.pdf",
-   "bytes": 431074,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "ZONE",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "3d8425a6a153b844",
-   "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/HUWF2508305081317.pdf"
-   ]
-  },
-  {
-   "path": "data/raw/ifta/Ifta/Zone/HUWF2509306141268.pdf",
-   "bytes": 473115,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "ZONE",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "755763aafa1bdd84",
-   "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/HUWF2509306141268.pdf"
-   ]
-  },
-  {
-   "path": "data/raw/ifta/Ifta/Zone/HUWF2510206767918.pdf",
-   "bytes": 516210,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "ZONE",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "0b5f96a221c61a46",
-   "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/HUWF2510206767918.pdf"
-   ]
-  },
-  {
-   "path": "data/raw/ifta/Ifta/Zone/HUWF2511187907176.pdf",
-   "bytes": 515246,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "ZONE",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "73d060e0b19fe019",
-   "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/HUWF2511187907176.pdf"
-   ]
-  },
-  {
-   "path": "data/raw/ifta/Ifta/Zone/HUWF2512269036098.pdf",
-   "bytes": 473263,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "ZONE",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "6498be7cd73f447f",
-   "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/HUWF2512269036098.pdf"
-   ]
-  },
-  {
-   "path": "data/raw/ifta/Ifta/Zone/HUWF2601300661908.pdf",
-   "bytes": 471833,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "ZONE",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "7fe7c7952f979456",
-   "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/HUWF2601300661908.pdf"
-   ]
-  },
-  {
-   "path": "data/raw/ifta/Ifta/Zone/HUWF2602271302781.pdf",
-   "bytes": 471755,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "ZONE",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "38cf430c551487f1",
-   "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/HUWF2602271302781.pdf"
-   ]
-  },
-  {
-   "path": "data/raw/ifta/Ifta/Zone/HUWF2604042392032.pdf",
-   "bytes": 472432,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "ZONE",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "481594b923e3ee5e",
-   "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/HUWF2604042392032.pdf"
-   ]
-  },
-  {
-   "path": "data/raw/ifta/Ifta/Zone/HUWF2604213289859.pdf",
-   "bytes": 472457,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "ZONE",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "a36c4bc2521a417c",
-   "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/HUWF2604213289859.pdf"
-   ]
-  },
-  {
-   "path": "data/raw/ifta/Ifta/Zone/HUWF2605314490680.pdf",
-   "bytes": 472998,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "ZONE",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "88546ec0efd08ecd",
-   "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/HUWF2605314490680.pdf"
-   ]
-  },
-  {
-   "path": "data/raw/ifta/Ifta/Zone/HUWF2607035402080.pdf",
-   "bytes": 449050,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "ZONE",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "9d4673c02664040a",
-   "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/HUWF2607035402080.pdf"
-   ]
-  },
-  {
-   "path": "data/raw/ifta/Ifta/Zone/HUWF2608077152193.pdf",
-   "bytes": 302893,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "ZONE",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "7bbe2bab60d04e90",
-   "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/HUWF2608077152193.pdf"
-   ]
-  },
-  {
-   "path": "data/raw/ifta/Ifta/Zone/HUWF2608267493868.pdf",
-   "bytes": 258426,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "ZONE",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "cb6958d23e1f8161",
-   "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/HUWF2608267493868.pdf"
-   ]
-  },
-  {
-   "path": "data/raw/ifta/Ifta/Zone/Payment Receipt Form (1).pdf",
-   "bytes": 79223,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "ZONE",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "15ce06ff26a1cdc1",
-   "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/Payment Receipt Form (1).pdf"
-   ]
-  },
-  {
-   "path": "data/raw/ifta/Ifta/Zone/Payment Receipt Form.pdf",
-   "bytes": 70164,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "ZONE",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "a674aed9fcbf7bec",
-   "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/Payment Receipt Form.pdf"
-   ]
-  },
-  {
-   "path": "data/raw/ifta/Ifta/Zone/ViewFile (2).pdf",
-   "bytes": 274992,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "ZONE",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "1a3ad9a29c26c7aa",
-   "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/ViewFile (2).pdf"
-   ]
-  },
-  {
-   "path": "data/raw/ifta/Ifta/Zone/ViewFile (3).pdf",
-   "bytes": 163061,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "ZONE",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "e419e6cd3fad99e5",
-   "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/ViewFile (3).pdf"
-   ]
-  },
-  {
-   "path": "data/raw/ifta/Ifta/Zone/ViewFile (5).pdf",
-   "bytes": 248418,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "ZONE",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "c95f51e2e6532183",
-   "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/ViewFile (5).pdf"
-   ]
-  },
-  {
-   "path": "data/raw/ifta/Ifta/Zone/ViewFile (7).pdf",
-   "bytes": 367825,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "ZONE",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "c156c0656ecc1fee",
-   "copies": [
-    "data/raw/ifta/Ifta/Zone/Zone/ViewFile (7).pdf"
-   ]
-  },
-  {
-   "path": "data/raw/ifta/Ifta/Zone/Zone/ky 2025 qt3.pdf",
-   "bytes": 70492,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "ZONE",
-   "period": "2025",
-   "note": "",
-   "used_by": [],
-   "sha256": "b1cf5f3126bf4cf2",
-   "copies": [
-    "data/raw/ifta/Ifta/Zone/ky 2025 qt3.pdf"
-   ]
-  },
-  {
-   "path": "data/raw/ifta/Ifta/Zone/Zone/ky 2025 qt4.pdf",
-   "bytes": 70418,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "ZONE",
-   "period": "2025",
-   "note": "",
-   "used_by": [],
-   "sha256": "c53432062152726f",
-   "copies": [
-    "data/raw/ifta/Ifta/Zone/ky 2025 qt4.pdf"
-   ]
-  },
-  {
-   "path": "data/raw/ifta/Ifta/Zone/Zone/nm 2025 3qt.pdf",
-   "bytes": 346985,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "ZONE",
-   "period": "2025",
-   "note": "",
-   "used_by": [],
-   "sha256": "0b8e8b615916538c",
-   "copies": [
-    "data/raw/ifta/Ifta/Zone/nm 2025 3qt.pdf"
-   ]
-  },
-  {
-   "path": "data/raw/ifta/Ifta/Zone/Zone/nm 2025 qt4.pdf",
-   "bytes": 368425,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "ZONE",
-   "period": "2025",
-   "note": "",
-   "used_by": [],
-   "sha256": "f6890e56e6977ea8",
-   "copies": [
-    "data/raw/ifta/Ifta/Zone/nm 2025 qt4.pdf"
-   ]
-  },
-  {
-   "path": "data/raw/insurance/Insurance/Zone Insurance/2026_UCR_Registration_3456354_202512081518.pdf",
-   "bytes": 102312,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "ZONE",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "f09be7cc078907f4",
-   "copies": []
-  },
-  {
-   "path": "data/raw/insurance/Insurance/Zone Insurance/2026_UCR_Registration_4086204_202512081526.pdf",
-   "bytes": 102129,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "ZONE",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "57aa81623a5667ee",
-   "copies": []
-  },
-  {
-   "path": "data/raw/insurance/Insurance/Zone Insurance/Bank of America _ Online Banking _ Transfer Submitted (2).pdf",
-   "bytes": 74697,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "ZONE",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "46a968ad939236c9",
-   "copies": []
-  },
-  {
-   "path": "data/raw/insurance/Insurance/Zone Insurance/Bank of America _ Online Banking _ Transfer Submitted.pdf",
-   "bytes": 75554,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "ZONE",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "cfe3a2f30607578f",
-   "copies": []
-  },
-  {
-   "path": "data/raw/insurance/Insurance/Zone Insurance/ZONE OH DBA ZONE INTACT BENEFITS PACKAGE PROPOSAL - Signed.pdf",
-   "bytes": 2022454,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "ZONE",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "a48350b13de3a37a",
-   "copies": []
-  },
-  {
-   "path": "data/raw/insurance/Insurance/Zone Insurance/ZONE- OH COV CONF PAGE TO SIGN - Signed.pdf",
-   "bytes": 757495,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "ZONE",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "9fc45e1304953bf4",
-   "copies": []
-  },
-  {
-   "path": "data/raw/insurance/Insurance/Zone Insurance/ZONE- OH OCC ACC POLICY DOCS TO SIGN - Signed.pdf",
-   "bytes": 365758,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "ZONE",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "a934645f7a9341c6",
-   "copies": []
-  },
-  {
-   "path": "data/raw/insurance/Insurance/Zone Insurance/ZONE-OH CARGO DOCS TO SIGN  - Signed.pdf",
-   "bytes": 1352215,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "ZONE",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "169c6e65561945ce",
-   "copies": []
-  },
-  {
-   "path": "data/raw/insurance/Insurance/Zone Insurance/ZONE-OH EXCESS MTC POLICY - Signed.pdf",
-   "bytes": 2080597,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "ZONE",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "8cb7a014bf5441ed",
-   "copies": []
-  },
-  {
-   "path": "data/raw/insurance/Insurance/Zone Insurance/ZONE-OH LLC EXCESS CARGO - PROPOSAL FORM - Signed.pdf",
-   "bytes": 910907,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "ZONE",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "0a4f2583845f97bf",
-   "copies": []
-  },
-  {
-   "path": "data/raw/insurance/Insurance/Zone Insurance/photo_2026-09-04_00-09-33.jpg",
-   "bytes": 243892,
-   "modified": "2026-09-04",
-   "kind": "unknown",
-   "entity": "ZONE",
-   "period": null,
-   "note": "",
-   "used_by": [],
-   "sha256": "b51a53cc49321f11",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT 2026-20260904T210055Z-1-001/CT 2026/1st quarter/IFTA_2026-01-01 - 2026-03-31.pdf",
-   "bytes": 96502,
-   "modified": "2026-04-01",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2026",
-   "note": "",
-   "used_by": [],
-   "sha256": "7643f3b50bf1e3b0",
-   "copies": [
-    "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2026/1st quarter/IFTA_2026-01-01 - 2026-03-31.pdf"
-   ]
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT 2026-20260904T210055Z-1-001/CT 2026/1st quarter/ViewFile (2).pdf",
-   "bytes": 142089,
-   "modified": "2026-04-06",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2026",
-   "note": "",
-   "used_by": [],
-   "sha256": "97407daaea191add",
-   "copies": [
-    "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2026/1st quarter/ViewFile (2).pdf"
-   ]
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT 2026-20260904T210055Z-1-001/CT 2026/2nd quarter/2nd quarter, 2026 payment confirmation.pdf",
-   "bytes": 136747,
-   "modified": "2026-07-01",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2026",
-   "note": "",
-   "used_by": [],
-   "sha256": "578bfc24d982c601",
-   "copies": [
-    "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2026/2nd quarter/2nd quarter, 2026 payment confirmation.pdf"
-   ]
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT 2026-20260904T210055Z-1-001/CT 2026/2nd quarter/IFTA_2026-04-01 - 2026-06-30 (1).pdf",
-   "bytes": 84689,
-   "modified": "2026-07-01",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2026",
-   "note": "",
-   "used_by": [],
-   "sha256": "168fb389570923ac",
-   "copies": [
-    "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2026/2nd quarter/IFTA_2026-04-01 - 2026-06-30 (1).pdf"
-   ]
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/April 2023/April 2023 payment.pdf",
-   "bytes": 203976,
-   "modified": "2023-05-11",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2023",
-   "note": "",
-   "used_by": [],
-   "sha256": "124fbbee1c07ea97",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/April 2023/Reports for all drivers CT  01.04-01.05.pdf",
-   "bytes": 47532,
-   "modified": "2023-05-09",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2023",
-   "note": "",
-   "used_by": [],
-   "sha256": "02643b98aadb73cc",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/August, 2023/August 2023 payment.pdf",
-   "bytes": 204029,
-   "modified": "2023-09-06",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2023",
-   "note": "",
-   "used_by": [],
-   "sha256": "cba5d8cf888e71c1",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/August, 2023/ZoneAugust2023.xlsx",
-   "bytes": 7278,
-   "modified": "2023-10-03",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2023",
-   "note": "",
-   "used_by": [],
-   "sheets": 1,
-   "sheet_names": [
-    "ZoneAugust2023"
-   ],
-   "sha256": "a1dc3da020fd065d",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/August, 2023/iftareports-b0c43c98f7.pdf",
-   "bytes": 41849,
-   "modified": "2023-09-02",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2023",
-   "note": "",
-   "used_by": [],
-   "sha256": "a36ed418a5af3df6",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/February 2023/iftareports-358c3f264f.pdf",
-   "bytes": 28126,
-   "modified": "2023-03-08",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2023",
-   "note": "",
-   "used_by": [],
-   "sha256": "a554802f9967334f",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/February 2023/payment .png",
-   "bytes": 703638,
-   "modified": "2023-03-08",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2023",
-   "note": "",
-   "used_by": [],
-   "sha256": "ea593ec8df0175e5",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/January 2023/ACI Payments, Inc. - Pay Taxes, Utility Bills, Tuition & More Online.pdf",
-   "bytes": 202828,
-   "modified": "2023-02-14",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2023",
-   "note": "",
-   "used_by": [],
-   "sha256": "ed40b76166f3a58e",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/January 2023/iftareports-a21a981b11.pdf",
-   "bytes": 42782,
-   "modified": "2023-02-02",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2023",
-   "note": "",
-   "used_by": [],
-   "sha256": "43e766bae2408949",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/July 2023/July, 2023 CT payment (1).pdf",
-   "bytes": 203366,
-   "modified": "2023-08-04",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2023",
-   "note": "",
-   "used_by": [],
-   "sha256": "239a0790c860fe58",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/July 2023/iftareports-a88dd15a5d.pdf",
-   "bytes": 54623,
-   "modified": "2023-08-02",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2023",
-   "note": "",
-   "used_by": [],
-   "sha256": "b9b42c322916e268",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/March 2023/March 2023 CT payment.pdf",
-   "bytes": 204152,
-   "modified": "2023-05-09",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2023",
-   "note": "",
-   "used_by": [],
-   "sha256": "5958b388e59ae916",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/March 2023/ViewFile (3).pdf",
-   "bytes": 109745,
-   "modified": "2023-04-05",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2023",
-   "note": "",
-   "used_by": [],
-   "sha256": "dce31adaa4e30667",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/March 2023/ViewFile (4).pdf",
-   "bytes": 301122,
-   "modified": "2023-05-09",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2023",
-   "note": "",
-   "used_by": [],
-   "sha256": "f1dd4c5122a4d115",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/March 2023/iftareports-4165586982 (1).pdf",
-   "bytes": 49668,
-   "modified": "2023-04-03",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2023",
-   "note": "",
-   "used_by": [],
-   "sha256": "e7d04b43b6aed93c",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/Oct-Nov-Dec, 2023/ZoneOCTNOVDEC23 CT miles payment (1).pdf",
-   "bytes": 201654,
-   "modified": "2024-01-02",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2023",
-   "note": "",
-   "used_by": [],
-   "sha256": "85a1e65e6eaf797a",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/Oct-Nov-Dec, 2023/iftareports-cfacd21ec5.pdf",
-   "bytes": 61046,
-   "modified": "2024-01-01",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2023",
-   "note": "",
-   "used_by": [],
-   "sha256": "98154d2bbd507907",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/September 2023/CT miles payment for September.pdf",
-   "bytes": 203210,
-   "modified": "2023-10-04",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2023",
-   "note": "",
-   "used_by": [],
-   "sha256": "5ad3aca2bf59fed3",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/September 2023/iftareports-0d4507fe43.pdf",
-   "bytes": 44716,
-   "modified": "2023-10-03",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2023",
-   "note": "",
-   "used_by": [],
-   "sha256": "0670e22d50752605",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2023/September 2023/iftareports-82b22a74e0.pdf",
-   "bytes": 43138,
-   "modified": "2023-10-03",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2023",
-   "note": "",
-   "used_by": [],
-   "sha256": "cce6c378eaa88a62",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2024/Apr-May-Jun,2024/2024-2-quarter.pdf",
-   "bytes": 70383,
-   "modified": "2024-07-09",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2024",
-   "note": "",
-   "used_by": [],
-   "sha256": "67391e3ca349c022",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2024/Apr-May-Jun,2024/ViewFile.pdf",
-   "bytes": 143828,
-   "modified": "2024-07-09",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2024",
-   "note": "",
-   "used_by": [],
-   "sha256": "480a13746617e028",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2024/Jan-Feb-Mar, 2024/ACI Payments, Inc. - Pay Taxes, Utility Bills, Tuition & More Online.pdf",
-   "bytes": 209605,
-   "modified": "2024-04-05",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2024",
-   "note": "",
-   "used_by": [],
-   "sha256": "c020e46f5689fcde",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2024/Jan-Feb-Mar, 2024/iftareports-bda9d64c4a.pdf",
-   "bytes": 31621,
-   "modified": "2024-04-04",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2024",
-   "note": "",
-   "used_by": [],
-   "sha256": "cfdb4594a959dd27",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2024/Oct-Nov-Dec, 2024/Oct-Nov-Dec payment.pdf",
-   "bytes": 175989,
-   "modified": "2025-01-05",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2024",
-   "note": "",
-   "used_by": [],
-   "sha256": "57e45f47055df9aa",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2024/Oct-Nov-Dec, 2024/ViewFile (4).pdf",
-   "bytes": 175949,
-   "modified": "2025-01-03",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2024",
-   "note": "",
-   "used_by": [],
-   "sha256": "bbdc75837799b41e",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/1st Quarter, 2025/IFTA_2025-01-01_2025-03-31 (17).pdf",
-   "bytes": 22670,
-   "modified": "2025-04-08",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2025",
-   "note": "",
-   "used_by": [],
-   "sha256": "efa828e39f9ecdc8",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/1st Quarter, 2025/IFTA_2025-01-01_2025-03-31 (18).pdf",
-   "bytes": 22321,
-   "modified": "2025-04-08",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2025",
-   "note": "",
-   "used_by": [],
-   "sha256": "4a5f95b7ca6813e4",
-   "copies": [
-    "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/1st Quarter, 2025/IFTA_2025-01-01_2025-03-31 (19).pdf"
-   ]
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/1st Quarter, 2025/IFTA_2025-01-01_2025-03-31 (33).pdf",
-   "bytes": 22516,
-   "modified": "2025-04-08",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2025",
-   "note": "",
-   "used_by": [],
-   "sha256": "b1940cce459b4cbc",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/1st Quarter, 2025/IFTA_2025-01-01_2025-03-31 (35).pdf",
-   "bytes": 21722,
-   "modified": "2025-04-08",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2025",
-   "note": "",
-   "used_by": [],
-   "sha256": "6f14ba4e5689de9c",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/1st Quarter, 2025/IFTA_2025-01-01_2025-03-31 (36).pdf",
-   "bytes": 22104,
-   "modified": "2025-04-08",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2025",
-   "note": "",
-   "used_by": [],
-   "sha256": "7de3aaa452055422",
-   "copies": [
-    "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/1st Quarter, 2025/IFTA_2025-01-01_2025-03-31 (37).pdf"
-   ]
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/1st Quarter, 2025/ViewFile (1).pdf",
-   "bytes": 138770,
-   "modified": "2025-04-09",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2025",
-   "note": "",
-   "used_by": [],
-   "sha256": "0466e36e0b178c17",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/2nd Quarter, 2025/2nd quarter payment confirmation, 2025.pdf",
-   "bytes": 173871,
-   "modified": "2025-07-02",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2025",
-   "note": "",
-   "used_by": [],
-   "sha256": "9351a39adfd5cf56",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/2nd Quarter, 2025/IFTA_2025-04-01 - 2025-06-30 (1).pdf",
-   "bytes": 23153,
-   "modified": "2025-07-01",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2025",
-   "note": "",
-   "used_by": [],
-   "sha256": "fddde110296f1504",
-   "copies": [
-    "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/2nd quarter, 2025/IFTA_2025-04-01 - 2025-06-30 (1).pdf"
-   ]
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/3rd Quarter, 2025-20260904T205947Z-1-001 (1)/3rd Quarter, 2025/IFTA_2025-07-01 - 2025-09-30.pdf",
-   "bytes": 52609,
-   "modified": "2025-10-02",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2025",
-   "note": "",
-   "used_by": [],
-   "sha256": "e64de2304fe58ac3",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/3rd Quarter, 2025-20260904T205947Z-1-001 (1)/3rd Quarter, 2025/ViewFile (3).pdf",
-   "bytes": 181082,
-   "modified": "2025-10-03",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2025",
-   "note": "",
-   "used_by": [],
-   "sha256": "12fc0fb64e2973f1",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/4th Quarter, 2025-20260904T210006Z-1-001/4th Quarter, 2025/IFTA_2025-10-01 - 2025-12-31 (1).pdf",
-   "bytes": 155728,
-   "modified": "2026-04-06",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2025",
-   "note": "",
-   "used_by": [],
-   "sha256": "6d1ad9598faca80f",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211201Z-1-001/CT Reports/2025/4th Quarter, 2025-20260904T210006Z-1-001/4th Quarter, 2025/ViewFile (1).pdf",
-   "bytes": 173746,
-   "modified": "2026-04-06",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2025",
-   "note": "",
-   "used_by": [],
-   "sha256": "01c71272f085cff5",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211352Z-1-001/CT Reports/2nd quarter, 2026/IFTA_2026-04-01 - 2026-06-30 (3).pdf",
-   "bytes": 19480,
-   "modified": "2026-07-27",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2026",
-   "note": "",
-   "used_by": [],
-   "sha256": "87f3bf1704633694",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211352Z-1-001/CT Reports/2nd quarter, 2026/IMAGE 2026-07-27 10_03_32.jpg",
-   "bytes": 105448,
-   "modified": "2026-07-27",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2026",
-   "note": "",
-   "used_by": [],
-   "sha256": "4ee39cdb05759876",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT Reports-20260904T211352Z-1-001/CT Reports/2nd quarter, 2026/IMAGE 2026-07-27 10_03_34.jpg",
-   "bytes": 74582,
-   "modified": "2026-07-27",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2026",
-   "note": "",
-   "used_by": [],
-   "sha256": "d6071279466fc3f3",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/1stQuarter2024/IMAGE 2024-04-05 10_43_24.jpg",
-   "bytes": 15904,
-   "modified": "2024-04-05",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2024",
-   "note": "",
-   "used_by": [],
-   "sha256": "0116910cb4690c3c",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/1stQuarter2024/IMAGE 2024-04-05 10_43_26.jpg",
-   "bytes": 14231,
-   "modified": "2024-04-05",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2024",
-   "note": "",
-   "used_by": [],
-   "sha256": "9dbaa999b8745239",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/1stQuarter2024/XtrackLLC ACI Payments, Inc. - Pay Taxes, Utility Bills, Tuition & More Online.pdf",
-   "bytes": 208304,
-   "modified": "2024-04-05",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2024",
-   "note": "",
-   "used_by": [],
-   "sha256": "d745ec6160745be5",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/2ndQuarter2024/2024-2-quarter (1).pdf",
-   "bytes": 24015,
-   "modified": "2024-07-09",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2024",
-   "note": "",
-   "used_by": [],
-   "sha256": "d32451870fcdf143",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/2ndQuarter2024/Payment for 2nd quarter XtrackApr-May-June.pdf",
-   "bytes": 208449,
-   "modified": "2024-07-09",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2024",
-   "note": "",
-   "used_by": [],
-   "sha256": "0cba41ee9b0965ec",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/3rdQuarter2024/2024-7_2024-9.pdf",
-   "bytes": 26013,
-   "modified": "2024-10-02",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2024",
-   "note": "",
-   "used_by": [],
-   "sha256": "0ce8732c797874d0",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/3rdQuarter2024/\ud835\uddfa\ud835\ude06\ud835\uddf0\ud835\uddfc\ud835\uddfb\ud835\uddfb\ud835\uddf2\ud835\uddd6\ud835\udde7XtrackJul-Aug-Sep2024 payment.pdf",
-   "bytes": 2608388,
-   "modified": "2024-10-02",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2024",
-   "note": "",
-   "used_by": [],
-   "sha256": "cc1bc324790a9534",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2024/4thQuarter2024/ViewFile (3).pdf",
-   "bytes": 98201,
-   "modified": "2025-01-02",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2024",
-   "note": "",
-   "used_by": [],
-   "sha256": "9c91cbb7f4b6f3ca",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/1st quarter, 2025/1st Quarter, 2025.pdf",
-   "bytes": 99774,
-   "modified": "2025-04-08",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2025",
-   "note": "",
-   "used_by": [],
-   "sha256": "211ffa292a28a2aa",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/1st quarter, 2025/IFTA_2025-01-01_2025-03-31 (45).pdf",
-   "bytes": 20095,
-   "modified": "2025-04-08",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2025",
-   "note": "",
-   "used_by": [],
-   "sha256": "d499c7832a3f17e4",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/1st quarter, 2025/IFTA_2025-01-01_2025-03-31 (46).pdf",
-   "bytes": 19166,
-   "modified": "2025-04-08",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2025",
-   "note": "",
-   "used_by": [],
-   "sha256": "d57abef8efdd7a82",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/2nd quarter, 2025/2nd quarter payment confirmation.pdf",
-   "bytes": 100233,
-   "modified": "2025-07-02",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2025",
-   "note": "",
-   "used_by": [],
-   "sha256": "380493703fddee19",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/3rd quarter, 2025/IFTA_2025-07-01 - 2025-09-30 (1).pdf",
-   "bytes": 23072,
-   "modified": "2025-10-02",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2025",
-   "note": "",
-   "used_by": [],
-   "sha256": "c5b90256d5e7cb48",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2025/3rd quarter, 2025/ViewFile.pdf",
-   "bytes": 104402,
-   "modified": "2025-10-02",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2025",
-   "note": "",
-   "used_by": [],
-   "sha256": "2c713f810ca87e48",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2026/1st quarter,2026/IFTA_2026-01-01 - 2026-03-31 (1).pdf",
-   "bytes": 62680,
-   "modified": "2026-04-06",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2026",
-   "note": "",
-   "used_by": [],
-   "sha256": "83aa4b675664e211",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2026/1st quarter,2026/ViewFile.pdf",
-   "bytes": 124620,
-   "modified": "2026-04-06",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2026",
-   "note": "",
-   "used_by": [],
-   "sha256": "0954377846f96dc7",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2026/2nd quarter, 2026/2nd quarter payment confirmation.pdf",
-   "bytes": 144598,
-   "modified": "2026-07-01",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2026",
-   "note": "",
-   "used_by": [],
-   "sha256": "be55630c9053dab0",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/2026/2nd quarter, 2026/IFTA_2026-04-01 - 2026-06-30.pdf",
-   "bytes": 98302,
-   "modified": "2026-07-01",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2026",
-   "note": "",
-   "used_by": [],
-   "sha256": "79729c7773bfb831",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/CT miles reports/LastQuarter,2023/XtrackOctNovDec2023CTmiles.pdf",
-   "bytes": 89992,
-   "modified": "2024-01-25",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2023",
-   "note": "",
-   "used_by": [],
-   "sha256": "1254f2db2f2192c5",
-   "copies": []
-  },
-  {
-   "path": "data/raw/ifta/Ifta/CT reports-20260904T210635Z-1-001/CT reports/CT miles reports/September 2023/289905  CT sep.pdf",
-   "bytes": 18514,
-   "modified": "2023-10-04",
-   "kind": "unknown",
-   "entity": null,
-   "period": "2023",
-   "note": "",
-   "used_by": [],
-   "sha256": "3aacf9093c01838e",
-   "copies": []
   }
  ]
 }

@@ -71,6 +71,13 @@ KIND_PATTERNS = [
     (r"\.(zip|rar|7z)$", "archive",
      "Upload archive. The extracted files are catalogued separately; the archive "
      "is kept only as the re-upload unit after a container reclaim."),
+    (r"data/raw/ifta/", "fuel_tax_return",
+     "IFTA quarterly and state weight-distance returns. FILED documents, so an "
+     "independent record of miles and gallons -- identify the form by its Step 2 "
+     "division line, not by the word 'IFTA', which some returns do not extract."),
+    (r"data/raw/insurance/", "insurance_policy",
+     "Signed policies, proposals and UCR registrations. Units are scheduled by "
+     "VIN and cannot yet be joined to fleet numbers."),
     (r"data/raw/ops/", "ops_export",
      "Load-level export from the dispatch system: one row per load entry, with "
      "pickup/delivery city, gross, miles, dispatcher and pay type. The only source "
@@ -115,6 +122,9 @@ KIND_PATTERNS = [
      "Driver recruiting cost per candidate -- MVR, PSP, clearinghouse, drug test, "
      "travel -- with recruiter and hired/not-hired status. The acquisition side of "
      "the driver-turnover cost that never appears in the weekly P&L."),
+    (r"^data/processed/", "processed_output",
+     "Derived output of this pipeline, not a source. Regenerate it rather than "
+     "reading it as evidence."),
     (r"\.csv$", "processed_csv", "Derived output of this pipeline, not a source."),
 ]
 
@@ -323,11 +333,14 @@ HEADINGS = {
     "payroll": "Payroll",
     "lease_register": "Iron Lease register",
     "driver_roster": "Driver rosters",
+    "fuel_tax_return": "IFTA and state fuel-tax returns",
+    "insurance_policy": "Insurance policies and registrations",
     "ops_export": "Dispatch system export (load level)",
     "lease_invoice": "Iron Lease invoices to the operating companies",
     "card_export": "AmEx card exports",
     "recruiting_cost": "Driver recruiting costs",
     "bank_feed_csv": "Bank-feed CSV exports",
+    "processed_output": "Derived (pipeline output, not a source)",
     "processed_csv": "Derived (pipeline output, not a source)",
     "archive": "Upload archives (re-upload units)",
     "unknown": "Unclassified — open one of these before quoting it",
@@ -370,7 +383,8 @@ def markdown(cat):
             L += [""]
             continue
         if kind in ("bank_statement", "driver_settlement", "lease_invoice",
-                    "card_export", "bank_feed_csv"):
+                    "card_export", "bank_feed_csv", "fuel_tax_return",
+                    "insurance_policy"):
             # Hundreds of near-identical files: summarise, never list.
             grouped = {}
             for r in rows:
