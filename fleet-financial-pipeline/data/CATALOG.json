@@ -1,7 +1,7 @@
 {
  "generated": "2026-09-06",
- "distinct_files": 658,
- "total_paths": 816,
+ "distinct_files": 659,
+ "total_paths": 817,
  "files": [
   {
    "path": "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/3ee6cf23-Afg_stmt_AprilAugust.zip",
@@ -9068,7 +9068,7 @@
   {
    "path": "data/raw/pnl/b479b596-AFG__download.xlsx",
    "bytes": 1942794,
-   "modified": "2026-09-02",
+   "modified": "2026-09-06",
    "kind": "pnl_weekly",
    "entity": "AFG",
    "period": "2026-04-13 .. 2026-08-24",
@@ -9287,6 +9287,18 @@
    ],
    "rows": 8598,
    "sha256": "931fffe38bda3673",
+   "copies": []
+  },
+  {
+   "path": "data/processed/facts.json",
+   "bytes": 17802,
+   "modified": "2026-09-06",
+   "kind": "processed_output",
+   "entity": null,
+   "period": null,
+   "note": "Derived output of this pipeline, not a source. Regenerate it rather than reading it as evidence.",
+   "used_by": [],
+   "sha256": "300b63a555f0cac0",
    "copies": []
   },
   {

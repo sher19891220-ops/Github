@@ -8,6 +8,43 @@ This file is the set of conventions that must not be re-derived or guessed.
 
 ---
 
+## Start here: ASK before analysing
+
+**`python3 analysis/facts.py --find <term>` answers a settled question in 40
+milliseconds.** 154 established numbers -- every company's fixed and variable
+cost, overhead, break-even at five rates, insurance by policy, the Oregon
+exposure, the factoring risk -- each with its unit and the module that produced
+it. Rebuild with `--build` (20 seconds warm, about a minute cold).
+
+**WHERE THE TIME ACTUALLY WENT, MEASURED.** Answering from a module that already
+exists takes 23 seconds. But eight questions in one session produced 3,605 lines
+of Python, 20 test modules and a 4m40 suite run after nearly every change. The
+cost of a question was never the reading — it was that each one BUILT something.
+
+So the default is now: **look it up; build only when the answer needs a control**
+— a figure that must reconcile to something, a parse that can silently return
+nothing, a comparison that will be rerun as documents arrive. Those earn their
+code. "What is XTRACK's fixed cost per truck" does not; it is already computed.
+
+**STALENESS IS THE ONLY THING THAT MAKES A FACTS FILE DANGEROUS.** It caches
+CONCLUSIONS, and a conclusion outliving its evidence is exactly what this
+pipeline exists to catch. Every build records the fingerprint of the documents
+behind it; `--stale` compares that against the corpus now; the session-start hook
+reports it in the first seconds. A stale fact is reported, never served quietly.
+
+**Three layers, and only the third touches a document:**
+
+| | what it is | cost |
+|---|---|---|
+| `CLAUDE.md` | this file — every established finding, loaded automatically each session | free |
+| `docs/CATALOG.md` + `facts.json` | the index of 659 documents, and 154 answers | ~0.04s |
+| the parsers | run only for a number not yet established, or one being re-checked | 23s warm |
+
+**RE-CHECK A CHALLENGED NUMBER AT THE SOURCE ANYWAY.** Several times in this
+project that has found a real error — the `Insur/Admin/Trl` rename, the
+double-counted overhead, `$359.47` read as `$0.35`. A number served from a cache
+of conclusions is only as good as the day it was computed.
+
 ## Start here: find the file before opening any file
 
 **`docs/CATALOG.md` is the index of every source file** -- 400 of them -- with
