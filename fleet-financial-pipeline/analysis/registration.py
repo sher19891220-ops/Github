@@ -12,11 +12,13 @@ WHAT AN IDLE TRUCK STILL COSTS. IRP and HVUT are annual and prepaid, so they do
 not stop when a truck stops. That makes them the same shape as insurance and the
 opposite shape of fuel, and they belong in the cost of a parked truck.
 
-WHAT IS NOT HERE. The master insurance schedule carries 68 tractors; this file
-registers 48. A tractor that is insured and not registered cannot legally run,
-so the gap is either trucks registered under a payment not in this file, or
-plates that lapsed on the units that stopped running. It is reported as a
-question, never netted away.
+WHAT IS NOT HERE, AND WHY. The master insurance schedule carries 68 tractors and
+this file registers 48. Operator, 2026-09-06: the file is still being completed,
+and the trucks bought most recently HAVE NOT BEEN REGISTERED YET. So the gap is
+partly a document still in progress and partly a real operational state, not a
+reconciliation failure -- and the per-truck rate here is therefore the cost of a
+truck this file COVERS, stated alongside its coverage rather than spread over a
+fleet the file does not describe.
 
 AND THE BANK SETTLES IT. Registration has a named counterparty on both legs --
 `8308OHIODPSIRP DES:IRP FEE` for the plates and `IRS DES:USATAXPYMT` for the

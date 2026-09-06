@@ -28,6 +28,7 @@ unparseable cell as missing rather than as zero drops nearly every row and then
 "ties" against a zero total by accident. Empty is zero here, and the row count is
 carried so that a return which parsed nothing cannot masquerade as a nil return.
 """
+import functools
 import re
 import subprocess
 import sys
@@ -208,7 +209,15 @@ def quarter_miles(returns, carrier="ZONE OH LLC"):
             for q in got if q in OHIO_OREGON_MILES}
 
 
+@functools.lru_cache(maxsize=None)
 def load(directory=OREGON_DIR):
+    """Every Oregon return, OCR'd once per process.
+
+    OCR is the expensive step -- 23 scans at 200 dpi is about a minute -- and
+    several callers and every test module ask for the same set. Without the
+    cache a full test run spends most of its time re-reading the same images
+    and times out.
+    """
     out, failed = [], []
     for f in sorted(Path(directory).rglob("*.pdf")):
         try:

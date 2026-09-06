@@ -54,6 +54,10 @@ COMPANIES = ("ZONE", "XTRACK", "AFG")
 WEEKS_PER_YEAR = 52.0
 # The IFTA account each company files under. ZONE files as ZONE-OH.
 IFTA_NAME = {"ZONE": "ZONE-OH", "XTRACK": "XTRACK", "AFG": "AFG"}
+# The Oregon account each company files under. AFG has none on record -- and its
+# own IFTA return says it ran 1,364 Oregon miles in 2026 Q2, so `None` here means
+# "no account found", never "no Oregon exposure". analysis/oregon_gap.py prices
+# what is owed and unfiled; this module only carries what was actually paid.
 OREGON_CARRIER = {"ZONE": "ZONE OH LLC", "XTRACK": "XTRACK LLC", "AFG": None}
 # Only the quarters whose returns are in the corpus for every company, so the
 # per-mile rate is not a different period for each one.
@@ -325,7 +329,8 @@ def main():
               f"on {f['quarters']} return(s) = ${f['per_mile']:.4f}/mi" if f else "no return in the corpus"))
         print(f"      Oregon      " + (f"${o['tax']:,.0f} over {o['months']} monthly returns, "
               f"{o['oregon_miles']:,.0f} Oregon miles = ${o['per_mile']:.4f}/mi" if o
-              else "no Oregon account / no return"))
+              else "PAID NOTHING -- and its IFTA return shows Oregon miles. "
+                   "See analysis/oregon_gap.py"))
         print(f"      registration" + (f"  ${r['annual']:,.0f}/yr over {r['trucks']} trucks "
               f"= ${r['per_truck_week']:.2f}/truck-week" if r else "  not measurable"))
 

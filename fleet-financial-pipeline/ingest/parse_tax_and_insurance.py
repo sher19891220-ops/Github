@@ -192,6 +192,42 @@ def parse_ohio_return(path, body=None):
     return r
 
 
+# ---------------------------------------------------------------------------
+# PER-JURISDICTION MILES. The reason to want them: Oregon does not tax diesel
+# through IFTA, so an IFTA return lists Oregon miles at a 0.00 rate -- it
+# COUNTS the miles and charges nothing for them. That makes every IFTA return
+# an independent statement of how many Oregon miles a fleet owes a separate
+# weight-mile return on, filed by the operator, with a different state, for a
+# different tax. It is the only way to price an Oregon return that is missing.
+#
+# The two forms tabulate jurisdictions differently and both are matched here:
+#   Ohio  (OH|TAX)   `OR Diesel 0.00 436 436 71 239 $0.00 $0.00`
+#   Step-3 (IL etc)  `OR D 4688 4688 535 894 -359 0.000 0.000 $ 0.00 ...`
+JURIS_OHIO = re.compile(
+    r"^\s*([A-Z]{2})\s+Diesel\s+[\d.]+\s+([\d,]+)\s+([\d,]+)\b", re.M)
+JURIS_STEP3 = re.compile(
+    r"^\s*([A-Z]{2})\s+D\s+([\d,]+)\s+([\d,]+)\s+", re.M)
+# Two-letter tokens that are not jurisdictions. Without this the Ohio form's
+# own headings ("OR" inside prose, "ID" in a label) become states with miles.
+NOT_A_JURISDICTION = {"DE"} - {"DE"}      # placeholder: Delaware IS a state
+
+
+def jurisdiction_miles(body):
+    """{state: total miles} from whichever jurisdiction table the form uses.
+
+    Total miles, not taxable miles: the weight-mile tax is on distance operated
+    in the state, and on these returns the two columns are equal anyway. Where
+    they ever diverge, total is the conservative one for sizing an exposure.
+    """
+    out = {}
+    for rx in (JURIS_OHIO, JURIS_STEP3):
+        for st, total, taxable in rx.findall(body or ""):
+            if st in NOT_A_JURISDICTION:
+                continue
+            out[st] = max(out.get(st, 0), num(total))
+    return out
+
+
 def load_ifta(pattern=None):
     files = sorted(glob.glob(pattern or str(IFTA_DIR / "**/*.pdf"), recursive=True))
     out, failed, unread = [], [], []
@@ -201,6 +237,8 @@ def load_ifta(pattern=None):
             # Two forms in the corpus. Try both before giving up on a file --
             # the Ohio returns carry no Step 2 line and were being dropped.
             r = parse_ifta(f, body) or parse_ohio_return(f, body)
+            if r:
+                r["jurisdictions"] = jurisdiction_miles(body)
         except Exception as exc:                       # never silent
             failed.append((rel(f), f"{type(exc).__name__}: {exc}"))
             continue

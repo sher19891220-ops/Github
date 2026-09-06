@@ -329,7 +329,63 @@ rather than the least documented.
 **THE REGISTRATION RATE IS THE COST OF A TRUCK THE FILE COVERS.** It names 48
 trucks against a group fleet of 93 (ZONE 15 of 29.8 running, XTRACK 16 of 27.1,
 AFG 9 of 5.8), and the bank shows $9,648 of registration debits on no line of it.
-A floor, and the coverage is printed beside the rate rather than assumed away.
+**Operator, 2026-09-06: the file is still being completed, and the trucks bought
+most recently HAVE NOT BEEN REGISTERED YET.** So the gap is partly a document in
+progress and partly a real operational state — not a reconciliation failure. The
+rate is a floor and the coverage is printed beside it rather than assumed away.
+
+## Oregon returns that are missing, priced from the IFTA returns that are not
+
+`analysis/oregon_gap.py`. **An IFTA return counts Oregon miles at a 0.00 rate** —
+it records the distance and charges nothing, because Oregon taxes it separately.
+That makes every IFTA return an independent, operator-filed statement of exactly
+how many Oregon miles a fleet owes an Oregon return on. It is the only way to
+price an Oregon return that is not in the corpus.
+
+    ZONE   files IFTA in OHIO       -> its Ohio returns carry ZONE's Oregon miles
+    XTRACK files IFTA in ILLINOIS   -> Naperville IL; its returns carry XTRACK's
+    AFG    files IFTA in Illinois   -> and it ran Oregon too
+
+| | quarter | OR miles per IFTA | OR returns held | miles on them | **gap** | tax |
+|---|---|--:|--:|--:|--:|--:|
+| XTRACK | 2026Q2 | 4,688 | 0 | 0 | **4,688** | $1,177.63 |
+| ZONE | 2025Q4 | 4,062 | 2 | 1,758 | **2,304** | $578.76 |
+| AFG | 2026Q2 | 1,364 | 0 | 0 | **1,364** | $342.64 |
+| ZONE | 2026Q2 | 436 | 2 | 0 | **436** | $109.52 |
+| XTRACK | 2026Q1 | 314 | 0 | 0 | **314** | $78.88 |
+| ZONE | 2026Q1 | 2,968 | 3 | 2,970 | −2 | — |
+
+**9,106 Oregon miles across 5 quarters with no return in this corpus, $2,287 of
+tax at the measured $0.2512/mile rate.**
+
+**"NO RETURN IN THE CORPUS" IS NOT "NO RETURN FILED."** These are uploads, not a
+filing system. What the gap is: miles the group's own IFTA filings say were run
+in Oregon, for which no Oregon return has been sent here. Each is worth checking
+against the real filings; the dollar figure is what it costs if any turn out to
+be genuinely unfiled.
+
+**THE TAX IS A FLOOR.** ZONE's own Ohio Q2 2026 return, filed five days late, was
+charged **$957.64 penalty and $151.17 interest on $9,576.44** — better than 11%
+on top. Nothing here estimates an Oregon penalty.
+
+**AFG RAN OREGON AND HAS NO OREGON ACCOUNT ON RECORD.** Its own IFTA return
+reports 1,364 Oregon miles in 2026 Q2. Registering is the first step, not filing;
+a carrier operating Oregon unregistered is a different and larger problem than a
+late return. ZONE is account 281618, XTRACK 068825, AFG none found.
+
+**A QUARTER WITH NO OREGON OPERATION IS NOT A GAP.** XTRACK's 2025 returns carry
+no OR row at all. Pricing zero miles as a missing return invents an exposure.
+
+**THE QUARTER IS AS FINE AS THIS GETS.** IFTA reports quarterly, Oregon files
+monthly, so a missing quarter cannot be split into months from this evidence.
+Months are named (ZONE 2025Q4 = December; XTRACK 2026Q2 = April, May, June), never
+apportioned.
+
+**THE CONTROL ON THE WHOLE METHOD** is that each return's jurisdiction rows sum
+back to its own total miles. ZONE's Ohio returns hit 100.0%; the Illinois Step-3
+returns run 86–98%, so rows exist that this reader does not match — which is why
+the OR row being *found* is checked explicitly rather than assumed. Two layouts
+are matched: Ohio's `OR Diesel 0.00 436 436 …` and Step-3's `OR D 4688 4688 …`.
 
 ## Oregon: the one filing that is a SCANNED IMAGE
 
@@ -372,8 +428,8 @@ Three OCR traps, each of which produced a wrong number:
 - **ANY BRACKET SHAPE ON THE WEIGHT CELL.** `(80000`, `{80000`, `|80000`.
   Requiring one shape dropped XTRACK's only taxable row of July 2026.
 
-**Months not in the corpus:** Dec 2025, Apr 2026 for ZONE. Q2 2026 shows 0
-Oregon miles here against 436 on the Ohio return — that is April.
+**Months not in the corpus:** Dec 2025 and Apr 2026 for ZONE; all of Q1 and Q2
+2026 for XTRACK; everything for AFG. Priced in `analysis/oregon_gap.py` above.
 
 ## Is the P&L accurate? `analysis/pnl_accuracy.py` — two tiers, one that counts
 
