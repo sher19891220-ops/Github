@@ -1,7 +1,7 @@
 {
  "generated": "2026-09-06",
- "distinct_files": 632,
- "total_paths": 772,
+ "distinct_files": 658,
+ "total_paths": 816,
  "files": [
   {
    "path": "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/3ee6cf23-Afg_stmt_AprilAugust.zip",
@@ -279,6 +279,18 @@
    "note": "Upload archive. The extracted files are catalogued separately; the archive is kept only as the re-upload unit after a container reclaim.",
    "used_by": [],
    "sha256": "f063f8e059904d0b",
+   "copies": []
+  },
+  {
+   "path": "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/e0e9f810-OR_Reports20260905T230650Z1001.zip",
+   "bytes": 1475514,
+   "modified": "2026-09-06",
+   "kind": "archive",
+   "entity": null,
+   "period": null,
+   "note": "Upload archive. The extracted files are catalogued separately; the archive is kept only as the re-upload unit after a container reclaim.",
+   "used_by": [],
+   "sha256": "788f9858710ed499",
    "copies": []
   },
   {
@@ -6194,6 +6206,340 @@
    "copies": []
   },
   {
+   "path": "data/raw/ifta/d578d4a3-Dec_payment_2025.pdf",
+   "bytes": 469816,
+   "modified": "2026-09-06",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": null,
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "1bf5faec800e3022",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/d578d4a3-Dec_payment_2025.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/fd28894d-IFTA_20260801__20260901.pdf",
+   "bytes": 7676,
+   "modified": "2026-09-06",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": null,
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "a09b0d158d1c19f8",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/fd28894d-IFTA_20260801__20260901.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/oregon/290919a3-cancelled_units_from_OR.pdf",
+   "bytes": 131185,
+   "modified": "2026-09-06",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": null,
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "63852ee88378ab68",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/290919a3-cancelled_units_from_OR.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/oregon/8e18ed93-IFTA_20260601__20260630_1.pdf",
+   "bytes": 15544,
+   "modified": "2026-09-06",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": null,
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "b9c10d25c011ae3a",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/8e18ed93-IFTA_20260601__20260630_1.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/oregon/OR Reports/August, 2026/IFTA_2026-08-01 - 2026-09-01 (2).pdf",
+   "bytes": 7689,
+   "modified": "2026-09-01",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2026",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "024491e2775df862",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/oregon/OR Reports/July, 2026/IFTA_2026-07-01 - 2026-07-31 (2).pdf",
+   "bytes": 13453,
+   "modified": "2026-08-04",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2026",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "4cdf0076b0e4d7f3",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/oregon/OR Reports/July, 2026/myFile (2).pdf",
+   "bytes": 153797,
+   "modified": "2026-08-04",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2026",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "313dc791d5180a9f",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/oregon/OR Reports/June, 2026/IFTA_2026-06-01 - 2026-06-30 (2).pdf",
+   "bytes": 7691,
+   "modified": "2026-07-02",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2026",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "9b69be0660c26524",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/oregon/OR Reports/June, 2026/myFile (5).pdf",
+   "bytes": 147937,
+   "modified": "2026-07-02",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2026",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "64917080f71291bd",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/oregon/OR Reports/June, 2026/myFile (6).pdf",
+   "bytes": 9256,
+   "modified": "2026-07-02",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": "2026",
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "2a4ec2955e9936fb",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/oregon/OR Reports/MotorCarrierReceipt of Deposit payment.pdf",
+   "bytes": 1227814,
+   "modified": "2026-07-28",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": null,
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "9cb363699bfe1ca8",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/oregon/OR Reports/PNC bank direct paymentindex (1).pdf",
+   "bytes": 85065,
+   "modified": "2026-09-01",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": null,
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "f8e309e6fc163d4b",
+   "copies": []
+  },
+  {
+   "path": "data/raw/ifta/oregon/monthly/01445b43-myFile_1.pdf",
+   "bytes": 467725,
+   "modified": "2026-09-06",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": null,
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "c26c7f5a38e89c1b",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/01445b43-myFile_1.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/oregon/monthly/10bd49ec-Payment_confirmation.pdf",
+   "bytes": 252400,
+   "modified": "2026-09-06",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": null,
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "f2eab15ffa43a9ee",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/10bd49ec-Payment_confirmation.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/oregon/monthly/30a05625-myFile_1_2.pdf",
+   "bytes": 464515,
+   "modified": "2026-09-06",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": null,
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "7ddb17db2964649a",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/30a05625-myFile_1_2.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/oregon/monthly/30e85af4-Payment_confirmation_for_June_2026.pdf",
+   "bytes": 254680,
+   "modified": "2026-09-06",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": null,
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "323bdf751ed4baff",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/30e85af4-Payment_confirmation_for_June_2026.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/oregon/monthly/68f92fbb-myFile_1.pdf",
+   "bytes": 150417,
+   "modified": "2026-09-06",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": null,
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "4a9653e811b0f579",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/68f92fbb-myFile_1.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/oregon/monthly/7379c11f-Nov_2025.pdf",
+   "bytes": 469738,
+   "modified": "2026-09-06",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": null,
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "29a0b714b4222aa2",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/7379c11f-Nov_2025.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/oregon/monthly/8369c9ad-myFile_3.pdf",
+   "bytes": 367811,
+   "modified": "2026-09-06",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": null,
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "8ac2f4bf8b40b34f",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/8369c9ad-myFile_3.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/oregon/monthly/95274aca-myFile.pdf",
+   "bytes": 470127,
+   "modified": "2026-09-06",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": null,
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "afe1e6c36c610e2a",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/95274aca-myFile.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/oregon/monthly/9904c047-myFile_4.pdf",
+   "bytes": 252432,
+   "modified": "2026-09-06",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": null,
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "37f3a67317805ba7",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/9904c047-myFile_4.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/oregon/monthly/c7144d26-myFile_1_1.pdf",
+   "bytes": 474265,
+   "modified": "2026-09-06",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": null,
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "1c921022d2733c60",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/c7144d26-myFile_1_1.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/oregon/monthly/d0895135-Oct_2025_payment_confirmation.pdf",
+   "bytes": 469652,
+   "modified": "2026-09-06",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": null,
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "2c048552bc4c04e0",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/d0895135-Oct_2025_payment_confirmation.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/oregon/monthly/d53fbf42-August2026.pdf",
+   "bytes": 148860,
+   "modified": "2026-09-06",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": null,
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "0515e0a054017ab0",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/d53fbf42-August2026.pdf"
+   ]
+  },
+  {
+   "path": "data/raw/ifta/oregon/monthly/ed9379c5-myFile_2.pdf",
+   "bytes": 466570,
+   "modified": "2026-09-06",
+   "kind": "fuel_tax_return",
+   "entity": null,
+   "period": null,
+   "note": "IFTA quarterly and state weight-distance returns. FILED documents, so an independent record of miles and gallons -- identify the form by its Step 2 division line, not by the word 'IFTA', which some returns do not extract.",
+   "used_by": [],
+   "sha256": "64515c051d7fd98c",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/ed9379c5-myFile_2.pdf"
+   ]
+  },
+  {
    "path": "data/raw/insurance/Insurance/afg/2026_UCR_Registration_2992973_20251231440.pdf",
    "bytes": 104143,
    "modified": "2026-09-04",
@@ -8791,6 +9137,7 @@
     "analysis/truck_breakeven.py",
     "ingest/ingest_weekly_pnl.py",
     "tests/test_catalog.py",
+    "tests/test_cost_structure.py",
     "tests/test_pnl_accuracy.py",
     "tests/test_truck_breakeven.py",
     "tests/test_truck_weeks.py",
@@ -9015,6 +9362,7 @@
    ],
    "sha256": "c0a67cacdb0aab9e",
    "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/4cee5e89-IRP_expenses_report__List_Exact.xlsx",
     "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/55e7b638-IRP_expenses_report__List_Exact.xlsx"
    ]
   },

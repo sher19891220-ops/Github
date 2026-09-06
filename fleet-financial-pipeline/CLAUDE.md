@@ -283,6 +283,98 @@ Three parse traps, each already producing a wrong number:
 - **THE EXCEPTION LISTS OVERLAP THE FULL LIST**, so a naive concatenation counts
   a short-paid invoice twice. Key on invoice number within the entity.
 
+## Cost structure: overhead, fixed and variable, per company and group
+
+`analysis/cost_structure.py`. Two halves, and the second is the point.
+
+**WHAT THE SHEET CARRIES**, measured line by line. **WHAT THE SHEET DOES NOT
+CARRY** — registration, fuel tax and state road taxes have **no column anywhere**
+in any of the three P&Ls, and cannot be hiding in overhead either: overhead here
+is a residual of the sheet's own gross and net, so a cost the sheet never
+recorded is not inside it. Every one is measured from a document filed with a
+government, not estimated.
+
+    per company-driver truck            ZONE   XTRACK      AFG
+    truck rent, base                   1,166    1,165    1,167
+    admin / insurance / trailer          522      459      451
+    fixed company overhead               672      505      398
+    subtotal, in the sheet             2,360    2,130    2,015
+      + IRP plates + HVUT                 31       31       27   <- no column exists
+    TRUE FIXED PER TRUCK-WEEK          2,391    2,160    2,043
+      per truck-DAY                      342      309      292
+
+    fuel                              0.8163   0.8657   0.8168
+    driver pay                        0.8071   0.7922   0.8628
+    tolls                             0.0834   0.0793   0.0739
+    Iron Lease mileage                0.0225   0.0115   0.0330
+    subtotal, in the sheet            1.7169   1.7566   1.7927
+      + IFTA fuel tax                 0.0083   0.0070   0.0020   <- no column exists
+      + Oregon weight-mile            0.0003       --       --
+    TRUE VARIABLE PER LOADED MILE     1.7254   1.7636   1.7948
+    variable overhead, % of gross       3.29     4.69     3.60
+
+    overhead per week                 32,914   42,049    7,838
+      per truck-week                     938      887      766
+      fixed / variable               672/266  505/382  398/368
+
+**GROUP, PER WEEK:** $774,300 gross, 92.7 trucks (62.7 company-driver), overhead
+$82,801 = **10.7% of gross**, $893/truck-week. Fixed cost of the company-driver
+fleet $141,612/wk; variable $300,692/wk on 171,978 loaded miles.
+**$3,143/week — $163,411 a year — is cost the sheets do not carry at all.**
+
+**A MISSING FILING MUST READ AS MISSING, NEVER AS ZERO.** AFG has no Oregon
+account; if that became $0.00 it would look like the cheapest company to run
+rather than the least documented.
+
+**THE REGISTRATION RATE IS THE COST OF A TRUCK THE FILE COVERS.** It names 48
+trucks against a group fleet of 93 (ZONE 15 of 29.8 running, XTRACK 16 of 27.1,
+AFG 9 of 5.8), and the bank shows $9,648 of registration debits on no line of it.
+A floor, and the coverage is printed beside the rate rather than assumed away.
+
+## Oregon: the one filing that is a SCANNED IMAGE
+
+`ingest/parse_oregon.py`. Oregon does **not** tax diesel through IFTA — it taxes
+by **weight-mile** on its own monthly return, which is exactly why ZONE's Ohio
+IFTA returns list Oregon miles at a **0.00 rate**. 13 returns read, ZONE-OH
+(account 281618) Jul 2025 – Jul 2026 and XTRACK (account 068825) Jul–Aug 2026:
+**7,541 Oregon miles, $2,254 of weight-mile tax.** Small, and now measured.
+
+**THESE PDFs HAVE NO TEXT LAYER AT ALL** — one full-page image per page, zero
+extractable characters. Every text reader in this pipeline returns nothing on
+them and raises nothing. There was no OCR in the container; **tesseract +
+poppler are now required** for `data/raw/ifta/oregon/`.
+
+**THE FORM STATES ITS TAX THREE TIMES AND THEY MUST AGREE** — the machine stamp
+across the header (`068825 XTRACOS042666067 312.74`), the per-vehicle
+`miles x rate` (1,245 × 0.2512 = 312.74), and the box total `TOTAL FROM COLUMN
+L`. An OCR error hits one and not the others, so agreement is the control.
+11 of 13 tie exactly; the two that do not are continuation sheets that OCR'd
+badly, where the row sum UNDERSTATES and the printed box does not — so the box
+wins and the reader records which source it used.
+
+**THE INDEPENDENT PROOF:** Oregon miles on these three OCR'd scans total **2,970
+for 2026 Q1 against 2,968** on ZONE's Ohio IFTA return — a text PDF filed with a
+different state that cannot have been mis-read. Two miles apart.
+
+Three OCR traps, each of which produced a wrong number:
+
+- **OCR MANGLES ZERO WORST OF ALL.** A blank cell comes back as `Lt)`, `is)`,
+  `it)`, `ft)` or a bare `)` at least as often as `0`. Since most rows on most of
+  these returns ARE zero, a reader that treats an unparseable cell as *missing*
+  drops nearly every row and then "ties" against a zero total by accident. Empty
+  is zero, and the row count is carried so a return that parsed nothing cannot
+  masquerade as a nil return.
+- **READ THE COLUMN, NOT THE POSITION.** The column rule survives as a bare `)`
+  token: `0.2512) 359 47`. Positional reading took `)` as the tax dollars and
+  `359` as the cents and reported **$359.47 as $0.35** — a hundredfold
+  understatement that still looked like a plausible small number. Keep only
+  tokens containing digits.
+- **ANY BRACKET SHAPE ON THE WEIGHT CELL.** `(80000`, `{80000`, `|80000`.
+  Requiring one shape dropped XTRACK's only taxable row of July 2026.
+
+**Months not in the corpus:** Dec 2025, Apr 2026 for ZONE. Q2 2026 shows 0
+Oregon miles here against 436 on the Ohio return — that is April.
+
 ## Is the P&L accurate? `analysis/pnl_accuracy.py` — two tiers, one that counts
 
 The sheets are HAND-MAINTAINED, so they are an assertion to be tested. This
