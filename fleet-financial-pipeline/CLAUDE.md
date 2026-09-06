@@ -39,6 +39,42 @@ start, so a missing corpus shows up in the first seconds rather than an hour in.
 
 ---
 
+## Why runs were slow, and the cache that fixed it
+
+`ingest/cache.py`. Every parser here re-read its source documents on every call,
+and the sources are slow:
+
+    load_ifta()                177 PDFs, text layer          126.0s
+    parse_oregon.load()        23 scans, OCR at 200 dpi       94.5s
+    fleet_registry.registry()  a 1,413-row workbook           22.5s
+    one P&L workbook            27 tabs of openpyxl            9.3s
+
+`cost_structure.py` touches all of them; the test suite touches them from a dozen
+modules. **A cold run was ~5 minutes and the suite 14; they are now 38 seconds
+and 4m40.** None of that work was different the second time.
+
+    python3 ingest/cache.py            # what is cached, and how big
+    python3 ingest/cache.py --clear    # throw it away
+    FLEET_NO_CACHE=1 python3 ...       # bypass without deleting anything
+
+**INVALIDATION IS THE WHOLE DESIGN.** A cache that answers with stale numbers is
+worse than none — this pipeline exists to be right, not fast. The key is built
+from the INPUT FILES: path, size, mtime. Re-upload after a container reclaim and
+all three change; add a return to a directory and the file list changes. **There
+is no "remember to clear the cache" step**, because a step like that is forgotten
+exactly once and then believed for a week. `VERSION` in the module is the one
+invalidation a fingerprint cannot infer — bump it when a parser's output SHAPE
+changes, since that is invisible in the input files.
+
+**JSON, never pickle.** The payloads are dicts of numbers and strings, and a
+cache directory that cannot execute code on load is one less thing to reason
+about in a repo full of financial records. `data/cache/` is gitignored: it is
+derived data and rebuilds itself.
+
+**Where the remaining time goes:** the OCR and the PDF text extraction, on a cold
+corpus. That is unavoidable the first time a document is seen and free every time
+after.
+
 ## Entities
 
 | entity_id | Legal name | DOT | Notes |

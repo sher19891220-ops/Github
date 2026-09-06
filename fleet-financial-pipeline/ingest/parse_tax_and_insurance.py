@@ -38,6 +38,9 @@ import re
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import cache  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 IFTA_DIR = ROOT / "data/raw/ifta"
 INSURANCE_DIR = ROOT / "data/raw/insurance"
@@ -228,6 +231,8 @@ def jurisdiction_miles(body):
     return out
 
 
+@cache.cached("ifta", lambda: sorted(glob.glob(str(IFTA_DIR / "**/*.pdf"),
+                                                recursive=True)))
 def load_ifta(pattern=None):
     files = sorted(glob.glob(pattern or str(IFTA_DIR / "**/*.pdf"), recursive=True))
     out, failed, unread = [], [], []

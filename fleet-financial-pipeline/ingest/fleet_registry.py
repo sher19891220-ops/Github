@@ -32,6 +32,9 @@ import re
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import cache  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "ingest"))
 sys.path.insert(0, str(ROOT / "analysis"))
@@ -118,6 +121,8 @@ def last_seen_in_pnl():
     return last
 
 
+@cache.cached("fleet_registry", lambda: [str(WORKBOOK)] + [
+    str(p) for p in sorted(Path(ROOT / "data/raw/pnl").glob("*.xlsx"))])
 def registry():
     units, rows_seen = read_units()
     last = last_seen_in_pnl()

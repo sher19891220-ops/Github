@@ -35,6 +35,9 @@ import sys
 import tempfile
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import cache  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 OREGON_DIR = ROOT / "data/raw/ifta/oregon"
 DPI = 200          # 150 loses the rate column's fourth decimal; 300 is no better
@@ -209,6 +212,7 @@ def quarter_miles(returns, carrier="ZONE OH LLC"):
             for q in got if q in OHIO_OREGON_MILES}
 
 
+@cache.cached("oregon", lambda: sorted(str(x) for x in OREGON_DIR.rglob("*.pdf")))
 @functools.lru_cache(maxsize=None)
 def load(directory=OREGON_DIR):
     """Every Oregon return, OCR'd once per process.

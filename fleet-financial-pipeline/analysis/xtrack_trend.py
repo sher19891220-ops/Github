@@ -59,6 +59,7 @@ import openpyxl
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "ingest"))
 sys.path.insert(0, str(Path(__file__).parent))
+import cache  # noqa: E402
 from ingest_weekly_pnl import week_key, num, labeled, overhead_row, WANT
 from xtrack_diagnosis import read_blocks, unmapped_headers, CD_COST_FIELDS
 
@@ -133,6 +134,7 @@ def week_record(ws):
     return rec
 
 
+@cache.cached("pnl_weeks", lambda xlsx: [str(xlsx)])
 def load(xlsx):
     wb = openpyxl.load_workbook(xlsx, data_only=True)
     tabs = sorted([t for t in wb.sheetnames if week_key(t)], key=week_key)

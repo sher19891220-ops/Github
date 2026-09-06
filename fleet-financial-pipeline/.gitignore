@@ -22,3 +22,4 @@ db/*.db
 db/*.sqlite
 db/*.sqlite3
 venv/
+data/cache/
