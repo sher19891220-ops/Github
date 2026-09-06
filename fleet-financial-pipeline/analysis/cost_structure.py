@@ -208,6 +208,8 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--weeks", type=int, default=13)
+    ap.add_argument("--explain", action="store_true",
+                    help="show how every fixed line was derived, with its inputs")
     a = ap.parse_args()
     ss = {c: structure(c, a.weeks) for c in COMPANIES}
     W = 13
@@ -320,6 +322,9 @@ def main():
     print("  recorded cannot be inside it. Every figure above comes from a document")
     print("  filed with a government, not from an estimate.")
 
+    if a.explain:
+        explain(ss)
+
     print("\n  WHERE EACH FIGURE CAME FROM")
     for c in COMPANIES:
         s = ss[c]
@@ -333,6 +338,84 @@ def main():
                    "See analysis/oregon_gap.py"))
         print(f"      registration" + (f"  ${r['annual']:,.0f}/yr over {r['trucks']} trucks "
               f"= ${r['per_truck_week']:.2f}/truck-week" if r else "  not measurable"))
+
+
+def explain(ss):
+    """Where each fixed number came from, with the arithmetic shown.
+
+    Every one of these is a MEASUREMENT over a stated sample, not an allocation
+    and not a chart-of-accounts line. Printing the sample size next to the mean
+    is the point: a $1,166 rent measured on 300 truck-weeks and a $1,167 rent
+    measured on 68 are not the same claim, and the three companies landing
+    within $2 of each other is a fact about the lease market, not a rounding.
+    """
+    for c in COMPANIES:
+        s = ss[c]
+        m = s["m"]
+        print(f"\n{'=' * 79}\n{c}: HOW EACH FIXED LINE WAS DERIVED\n{'=' * 79}")
+        print(f"  window {m['from']} .. {m['to']}, {m['weeks']} weeks")
+        print(f"  {m['running_truck_weeks'] * m['weeks']:.0f} running company-driver "
+              f"truck-weeks (gross > 0) are the sample for the per-truck means")
+
+        print(f"\n  1. TRUCK RENT, BASE                        ${m['rent_base_per_week']:,.2f}")
+        print("     A weighted average of two different things, NOT one rent.")
+        print(f"       Iron Lease units, from the RATE CARD:  ${m['rent_iron_base']:,.2f}/wk"
+              f"  x {100 * m['iron_share']:.1f}% of running truck-weeks")
+        print(f"       everything else, measured in the P&L:  ${m['rent_outside_per_week']:,.2f}/wk"
+              f"  x {100 * (1 - m['iron_share']):.1f}%")
+        print(f"       = {m['iron_share']:.4f} x {m['rent_iron_base']:,.2f} + "
+              f"{1 - m['iron_share']:.4f} x {m['rent_outside_per_week']:,.2f} = "
+              f"${m['rent_base_per_week']:,.2f}")
+        print("     The Iron figure is the CONTRACT, not the charge: a parked Iron truck")
+        print("     is billed below its rate card and the difference is absorbed inside")
+        print("     Iron Lease. The per-mile part ($0.10/$0.12) is in the variable table.")
+
+        print(f"\n  2. ADMIN / INSURANCE / TRAILER             ${m['admin_per_truck_week']:,.2f}")
+        print("     The mean of ONE column of the per-unit block, over running")
+        print("     truck-weeks. It is headed 'Insur/Admin/Trl' up to 2026-06-29 and")
+        print("     'Pys/Cargo/Admin' after -- the SAME column renamed. Mapping only")
+        print("     the later spelling read 3,594 block headers as zero and overstated")
+        print("     the company-driver margin by about $0.19 a mile.")
+        print(f"     Cross-checked against the actual policies in analysis/insurance_cost.py:")
+        print(f"     XTRACK's measured insurance is $440/truck-week against the $459 here,")
+        print("     so this column is very nearly insurance at cost plus a little admin.")
+
+        print(f"\n  3. FIXED COMPANY OVERHEAD                  ${m['fixed_overhead_per_truck_week']:,.2f}")
+        print("     Overhead is a RESIDUAL from an identity that cannot drift:")
+        print(f"       gross {m['gross']:>10,.0f}")
+        print(f"       - net {m['net']:>10,.0f}")
+        print(f"       - company-driver block cost {m['cd_block_cost']:>10,.0f}")
+        print(f"       - owner-operator cost       {m['oo_gross'] - m['oo_result']:>10,.0f}")
+        print(f"       = OVERHEAD                  {m['overhead']:>10,.0f} a week")
+        print("     NEVER add up the panel's own overhead lines: they sum to 126% of")
+        print("     this, because some of what the panel calls overhead is already")
+        print("     inside the unit blocks. The components are used only for the RATIO.")
+        print(f"     fixed/variable split from those components ({100 * (1 - m['overhead_variable_share']):.1f}% fixed):")
+        for k, v in sorted(m["named"].items(), key=lambda kv: -kv[1]):
+            kind = ("VARIABLE" if k in ("factoring", "maintenance") else
+                    "27.5% fixed" if k == "tashkent" else "fixed")
+            print(f"       {k:<16}{v:>10,.0f}   {kind}")
+        print(f"     ${m['overhead']:,.0f} x {1 - m['overhead_variable_share']:.4f} fixed "
+              f"= ${m['overhead_fixed']:,.0f}, over {m['trucks']:.1f} trucks = "
+              f"${m['fixed_overhead_per_truck_week']:,.2f}")
+        print(f"     The other ${m['overhead_per_truck_week'] - m['fixed_overhead_per_truck_week']:,.2f} "
+              f"is variable and is charged as {100 * m['overhead_pct_of_gross']:.2f}% of gross,")
+        print("     not per truck -- counting it in both places halves the answer.")
+
+        r = s["reg"]
+        print(f"\n  4. IRP PLATES + HVUT                       "
+              f"${r['per_truck_week']:,.2f}" if r else "\n  4. IRP PLATES + HVUT   not measurable")
+        if r:
+            print("     The only line here that is NOT from the P&L -- there is no")
+            print("     registration column anywhere in the weekly sheets.")
+            print(f"       ${r['annual']:,.0f} a year, attributed to {c} by the company whose")
+            print(f"       P&L last carried each truck, over {r['trucks']} trucks it covers")
+            print(f"       = ${r['annual']:,.0f} / {r['trucks']} / 52 = ${r['per_truck_week']:,.2f}")
+            print("     HVUT is a flat $550 a truck-year and every group payment divides")
+            print("     by it exactly; IRP is apportioned on miles and weight and runs")
+            print("     $438 to $1,430 a truck, so this is an average of a real spread.")
+            print("     The file covers 48 trucks of a group fleet of 93 and the newest")
+            print("     trucks are not registered yet, so it is a FLOOR.")
 
 
 def true_breakeven(s, rpm):

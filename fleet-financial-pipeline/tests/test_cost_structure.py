@@ -82,3 +82,50 @@ def test_the_registration_rate_states_its_own_coverage(ss):
         assert s["reg"]["trucks"] > 0
         assert s["reg"]["per_truck_week"] == pytest.approx(
             s["reg"]["annual"] / s["reg"]["trucks"] / C.WEEKS_PER_YEAR)
+
+
+def test_rent_is_a_weighted_average_of_two_different_rents(ss):
+    """Iron Lease units are priced from the RATE CARD, everything else is
+    measured in the P&L. One blended 'rent' would be wrong for both."""
+    for c, s in ss.items():
+        m = s["m"]
+        assert m["rent_base_per_week"] == pytest.approx(
+            m["iron_share"] * m["rent_iron_base"]
+            + (1 - m["iron_share"]) * m["rent_outside_per_week"], abs=0.01), c
+        # The Iron tier is genuinely cheaper per week; that is the whole point
+        # of the rate card and why the mix matters.
+        assert m["rent_iron_base"] < m["rent_outside_per_week"], c
+
+
+def test_overhead_is_the_residual_and_the_identity_closes(ss):
+    """gross - net - CD block cost - OO cost. Every term measured, nothing
+    allocated by judgement."""
+    for c, s in ss.items():
+        m = s["m"]
+        assert m["overhead"] == pytest.approx(
+            m["gross"] - m["net"] - m["cd_block_cost"]
+            - (m["oo_gross"] - m["oo_result"]), abs=1), c
+
+
+def test_overhead_fixed_and_variable_add_back_to_the_whole(ss):
+    """The variable half is charged as a % of gross and the fixed half per
+    truck. Counting either in both places is the error this guards."""
+    for c, s in ss.items():
+        m = s["m"]
+        assert m["overhead_fixed"] + m["overhead_variable"] == pytest.approx(
+            m["overhead"], abs=1), c
+        assert 0 < m["overhead_variable_share"] < 1, c
+
+
+def test_the_explain_walkthrough_reproduces_every_headline(ss):
+    """Whatever --explain prints must be the arithmetic that produced the
+    table, not a second derivation that can drift from it."""
+    for c, s in ss.items():
+        m, r = s["m"], s["reg"]
+        assert s["fixed"]["truck rent, base"] == m["rent_base_per_week"]
+        assert s["fixed"]["admin / insurance / trailer"] == m["admin_per_truck_week"]
+        assert s["fixed"]["fixed company overhead"] == m["fixed_overhead_per_truck_week"]
+        assert m["fixed_overhead_per_truck_week"] == pytest.approx(
+            m["overhead_fixed"] / m["trucks"], abs=0.01), c
+        assert s["outside_fixed"]["IRP plates + HVUT"] == pytest.approx(
+            r["annual"] / r["trucks"] / C.WEEKS_PER_YEAR, abs=0.01), c

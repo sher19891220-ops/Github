@@ -317,6 +317,19 @@ government, not estimated.
       per truck-week                     938      887      766
       fixed / variable               672/266  505/382  398/368
 
+**HOW EACH FIXED LINE IS DERIVED** (`--explain` prints the arithmetic):
+
+| line | what it is | sample |
+|---|---|---|
+| truck rent, base | **a weighted average of TWO rents**, not one: Iron Lease units at their RATE CARD base × their share of running truck-weeks, plus everything else at the P&L's measured rent. ZONE 0.20×$823 + 0.80×$1,252. XTRACK 0.108×$778 + 0.892×$1,212. AFG 0.279×$874 + 0.721×$1,280. | 300 / 287 / 68 running CD truck-weeks |
+| admin / insurance / trailer | the mean of ONE block column — `Insur/Admin/Trl`, renamed `Pys/Cargo/Admin` after 2026-06-29. Cross-checked against the actual policies: XTRACK's measured insurance is $440 against the $459 here. | same |
+| fixed company overhead | the residual `gross − net − CD block − OO cost`, split fixed/variable on its own named components, over ALL trucks. ZONE $32,914×71.7%÷35.1. XTRACK $42,049×57.0%÷47.4. AFG $7,838×51.9%÷10.2. | 13 weeks |
+| IRP plates + HVUT | the only line not from the P&L. Annual registration attributed by last-carrying company, over the trucks the file covers: $23,995/15/52, $25,494/16/52, $12,820/9/52. | 48 trucks |
+
+The three companies land within **$2** of each other on rent through completely
+different mixes — 20%, 11% and 28% Iron Lease — which is a fact about the lease
+market, not a rounding.
+
 **GROUP, PER WEEK:** $774,300 gross, 92.7 trucks (62.7 company-driver), overhead
 $82,801 = **10.7% of gross**, $893/truck-week. Fixed cost of the company-driver
 fleet $141,612/wk; variable $300,692/wk on 171,978 loaded miles.
