@@ -386,10 +386,10 @@ def main():
   5. AGAINST ITSELF. Free, and the weakest -- a hand-kept sheet is perfectly
      capable of being internally consistent and wrong.
 
-  What is still missing to finish this: the factoring statements (to price the
-  gap between gross and deposits), the ADP register split by employee (to test
-  driver pay), and Samsara odometer history (to settle the mileage
-  independently of both the sheet and the return).""")
+  The factoring side is now read -- see analysis/factoring.py. Triumph's invoice
+  list is the outside record of REVENUE, and it says 9.7% of factored invoices
+  are at risk and 7.2% of XTRACK's booked gross never went through the factor
+  at all. Driver pay remains the one large line with no independent check.""")
 
 
 if __name__ == "__main__":

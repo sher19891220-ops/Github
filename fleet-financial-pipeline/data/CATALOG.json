@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-05",
+ "generated": "2026-09-06",
  "distinct_files": 632,
  "total_paths": 772,
  "files": [
@@ -3974,7 +3974,9 @@
    "entity": "STL",
    "period": null,
    "note": "Triumph factoring invoice list. NO amount-received column -- a 'Short Paid' status carries the FULL invoice value, so it cannot measure what was collected.",
-   "used_by": [],
+   "used_by": [
+    "ingest/parse_factoring.py"
+   ],
    "sheets": 3,
    "sheet_names": [
     "Zone",
@@ -3994,7 +3996,9 @@
    "entity": "XTRACK",
    "period": null,
    "note": "Triumph factoring invoice list. NO amount-received column -- a 'Short Paid' status carries the FULL invoice value, so it cannot measure what was collected.",
-   "used_by": [],
+   "used_by": [
+    "ingest/parse_factoring.py"
+   ],
    "sheets": 1,
    "sheet_names": [
     "Invoice List"
@@ -4012,7 +4016,9 @@
    "entity": "XTRACK",
    "period": null,
    "note": "Triumph factoring invoice list. NO amount-received column -- a 'Short Paid' status carries the FULL invoice value, so it cannot measure what was collected.",
-   "used_by": [],
+   "used_by": [
+    "ingest/parse_factoring.py"
+   ],
    "sheets": 1,
    "sheet_names": [
     "Invoice List"
@@ -8785,6 +8791,7 @@
     "analysis/truck_breakeven.py",
     "ingest/ingest_weekly_pnl.py",
     "tests/test_catalog.py",
+    "tests/test_pnl_accuracy.py",
     "tests/test_truck_breakeven.py",
     "tests/test_truck_weeks.py",
     "tests/test_xtrack_trend.py"

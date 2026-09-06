@@ -224,6 +224,65 @@ recovery chain becomes measurable.
 
 ---
 
+## Factoring: the only outside record of REVENUE
+
+`ingest/parse_factoring.py` reads Triumph's invoice lists; `analysis/factoring.py`
+sets them against the sheets. Three files, **3,190 invoices, $7.7M**, XTRACK in
+full for 2026-04-01 .. 2026-08-31 plus credit-denial lists for all three
+companies. Until these were read, every gross figure in this pipeline came from
+the group's own spreadsheets and nothing outside tested revenue at all.
+
+**$746,917 — 9.7% of factored invoices — is AT RISK**, and every dollar of it
+was booked as gross in the week the load ran and the driver was paid on it:
+
+    Paid        2,201   $5,440,361   70.4%
+    Funded        660   $1,537,443   19.9%   advanced, NOT settled by the debtor
+    Denied        185     $372,303    4.8%   the company collects these itself
+    Short Paid    128     $325,819    4.2%
+    Recoursed      13      $31,395    0.4%
+    Rejected/Held   3      $17,400    0.2%
+
+**`Funded` IS NOT `Paid`.** Funded means Triumph advanced against the invoice;
+Paid means the debtor settled it. On a recourse facility that is a different
+party carrying the risk today, so they are never added together.
+
+**ONE CUSTOMER IS 92.3% OF ALL CREDIT DENIALS: STL.** 172 invoices at $340,353
+to STL GLOBAL LOGISTICS plus 2 at $3,150 to STL TRUCKERS, credit-denied by the
+factor across **all three operating companies** and spanning **2025-07-11 to
+2026-09-01**. That is a standing credit decision, not a run of late invoices, so
+every load hauled for them since is a receivable the group finances itself. The
+P&L ALSO carries `STL charges` as an overhead COST ($73,648 ZONE, $32,613
+XTRACK, $1,045 AFG in 2026), and the bank shows **$4,759,864 wired to
+`BNF:STL TRUCKERS LLC` in 77 payments across 2024-25** and none in 2026. Money
+moves both ways with the same name on it; neither side alone gives the position.
+
+**7.2% OF XTRACK'S BOOKED GROSS NEVER WENT THROUGH TRIUMPH** — $7,733,902 in the
+sheet against $7,177,629 given to the factor over 21 weeks, a $556,273 gap. Not
+automatically an error: freight billed direct never enters this list. It is the
+size of the question.
+
+**Read the total, not the week.** The P&L books a load in the week it RAN; the
+invoice carries the date it was SUBMITTED. Weekly gaps swing ±34% on timing
+alone, so only the period total is a verdict.
+
+**THE LIST HAS NO AMOUNT-RECEIVED COLUMN.** A `Short Paid` row still carries the
+FULL invoice value. Read it for STATUS, never as a cash figure.
+
+Three parse traps, each already producing a wrong number:
+
+- **THE TOTAL ROW DOUBLES EVERY FIGURE.** Each sheet ends with a row labelled
+  `Totals` carrying the grand total in the amount column. Summing the sheet as
+  read gives exactly TWICE the real number and looks right, because it is the
+  number the file itself prints. Dropped, then used as a control: the detail must
+  sum to it. **4 of 5 sheets tie; the STL file's Xtrack tab is $11,350 SHORT of
+  its own printed total**, so rows are missing from it and anything drawn from
+  that sheet is a floor.
+- **A PLACEHOLDER INVOICE NUMBER IS NOT AN IDENTITY.** Two different invoices are
+  both numbered `TBD` — one Rejected at $5,200, one Held at $1,700 — and
+  de-duplicating on the number merged them and lost the Held one.
+- **THE EXCEPTION LISTS OVERLAP THE FULL LIST**, so a naive concatenation counts
+  a short-paid invoice twice. Key on invoice number within the entity.
+
 ## Is the P&L accurate? `analysis/pnl_accuracy.py` — two tiers, one that counts
 
 The sheets are HAND-MAINTAINED, so they are an assertion to be tested. This
