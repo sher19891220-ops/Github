@@ -80,8 +80,11 @@ def num(s):
     return float(str(s).replace(",", "").replace("$", "").strip())
 
 
-def parse_ifta(path):
-    t = text(path)
+def parse_ifta(path, body=None):
+    # `body` lets a caller that already has the text pass it in. Extracting a
+    # PDF is the expensive step and there are three readers over 177 files;
+    # re-reading for each of them turned a 40-second pass into a timeout.
+    t = body if body is not None else text(path)
     # Identify the form by its STRUCTURE, not by a keyword. These PDFs extract
     # with stray characters dropped into the headings ("Accounti ID",
     # "gallotn"), so a literal "IFTA" or "Average Fuel Consumption" is present
@@ -138,22 +141,115 @@ def check_ifta_plausibility(returns, band=PLAUSIBLE_MPG):
     return bad
 
 
+# ---------------------------------------------------------------------------
+# OHIO IS A SECOND FORM, NOT A VARIANT OF THE FIRST.
+#
+# ZONE files through OH|TAX eServices, which prints a summary table
+# ("Diesel 1,509,945 207,885 0 7.26") and no Step 2 division line at all. The
+# Step-2 reader returns an empty dict on these, and because an empty dict is
+# falsy they dropped out of load_ifta() silently -- ZONE, the largest company,
+# had NO external mileage check for that reason alone. A parser that returns
+# nothing is worse than one that raises.
+OH_PERIOD = re.compile(r"Reporting Period: *([\d/]+) *- *([\d/]+)")
+OH_NAME = re.compile(r"Company Name: *(.+)")
+OH_CONF = re.compile(r"Confirmation Code: *(\S+)")
+OH_TYPE = re.compile(r"Return Type: *(\w+)")
+OH_ACCT = re.compile(r"Account Number: *(\S+)")
+# Total distance, tax-paid volume, untaxed volume, average miles per gallon.
+OH_SUMMARY = re.compile(r"Diesel\s+([\d,]+)\s+([\d,]+)\s+([\d,]+)\s+([\d.]+)")
+OH_VEHICLES = re.compile(r"Total Vehicles Reported\s+(\d+)")
+OH_TAX = re.compile(r"Tax Due \$([\d,]+\.\d{2})")
+OH_BALANCE = re.compile(r"Balance Due \$([\d,]+\.\d{2})")
+
+
+def parse_ohio_return(path, body=None):
+    """The OH|TAX eServices IFTA return. Same facts, different form."""
+    t = body if body is not None else text(path)
+    m = OH_SUMMARY.search(t)
+    if not m or "IFTA" not in t.upper():
+        return {}
+    per = OH_PERIOD.search(t)
+    r = {"source": rel(path), "form": "OH|TAX eServices",
+         "legal_name": (OH_NAME.search(t).group(1).strip() if OH_NAME.search(t) else None),
+         "account_id": (OH_ACCT.search(t).group(1) if OH_ACCT.search(t) else None),
+         "confirmation": (OH_CONF.search(t).group(1) if OH_CONF.search(t) else None),
+         "return_type": (OH_TYPE.search(t).group(1) if OH_TYPE.search(t) else None),
+         "period_start": per.group(1) if per else None,
+         "period_end": per.group(2) if per else None,
+         "total_miles": num(m.group(1)),
+         "total_gallons": num(m.group(2)),
+         "untaxed_gallons": num(m.group(3)),
+         "stated_mpg": float(m.group(4))}
+    for key, rx in (("vehicles", OH_VEHICLES), ("tax_due", OH_TAX),
+                    ("balance_due", OH_BALANCE)):
+        g = rx.search(t)
+        if g:
+            r[key] = num(g.group(1))
+    # The form prints the mpg; recomputing it is the control that the two
+    # numbers scraped off the same line are the ones meant.
+    if r["total_gallons"]:
+        r["computed_mpg"] = r["total_miles"] / r["total_gallons"]
+    return r
+
+
 def load_ifta(pattern=None):
     files = sorted(glob.glob(pattern or str(IFTA_DIR / "**/*.pdf"), recursive=True))
-    out, failed = [], []
+    out, failed, unread = [], [], []
     for f in files:
         try:
-            r = parse_ifta(f)
+            body = text(f)
+            # Two forms in the corpus. Try both before giving up on a file --
+            # the Ohio returns carry no Step 2 line and were being dropped.
+            r = parse_ifta(f, body) or parse_ohio_return(f, body)
         except Exception as exc:                       # never silent
             failed.append((rel(f), f"{type(exc).__name__}: {exc}"))
             continue
         if r and "total_miles" in r:
             out.append(r)
+        elif _looks_like_a_return(body):
+            unread.append(rel(f))
+    # THE SAME RETURN IS FILED UNDER SEVERAL PATHS. ZONE's Ohio returns appear
+    # both in data/raw/ifta/ohio/ and inside the CT Reports archive, so a naive
+    # list held each quarter three times and any total built by summing it
+    # tripled ZONE's miles. Key on the FACTS of the return, the way the file
+    # catalog keys on content hash -- never on the path.
+    seen, unique = set(), []
+    for r in out:
+        k = (r.get("legal_name"), str(r.get("period_end")), r.get("total_miles"))
+        if k in seen:
+            r["_duplicate_of"] = k
+            continue
+        seen.add(k)
+        unique.append(r)
+    dropped = len(out) - len(unique)
+    out = unique
+    if dropped:
+        print(f"{dropped} duplicate return(s) filed under more than one path, "
+              f"counted once", file=sys.stderr)
     if failed:
         print(f"{len(failed)} file(s) raised while parsing:", file=sys.stderr)
         for f, e in failed[:10]:
             print(f"  {f}: {e}", file=sys.stderr)
+    # A return that reads as nothing is the dangerous case: it removes a whole
+    # company from the comparison without anybody noticing. Say so, loudly.
+    if unread:
+        print(f"{len(unread)} file(s) LOOK like IFTA returns and read as nothing "
+              f"-- a form this parser does not know:", file=sys.stderr)
+        for f in unread[:10]:
+            print(f"  {f}", file=sys.stderr)
     return out
+
+
+def _looks_like_a_return(body):
+    """Does this text claim to be an IFTA return, whatever form it is in?
+
+    Used only to complain about files the readers could not parse. Deliberately
+    keyword-based, which is exactly what the readers must NOT be: these PDFs
+    extract with characters dropped ('Accounti ID', 'gallotn'), so a keyword is
+    fine for raising a hand and useless for identifying a form.
+    """
+    t = (body or "").upper()
+    return ("INTERNATIONAL FUEL TAX" in t or "IFTA RETURN" in t) and "TOTAL" in t
 
 
 def main():

@@ -224,6 +224,101 @@ recovery chain becomes measurable.
 
 ---
 
+## Is the P&L accurate? `analysis/pnl_accuracy.py` — two tiers, one that counts
+
+The sheets are HAND-MAINTAINED, so they are an assertion to be tested. This
+module is the test, and it separates two very different kinds of evidence.
+
+**TIER 1, the sheet against itself.** Free, runs on every week, catches typing
+and formula damage — and cannot catch a number that is wrong the same way twice,
+which is the failure mode of a hand-kept sheet. Passing it proves almost nothing.
+
+| | ZONE | XTRACK | AFG |
+|---|---|---|---|
+| panel gross == sum of unit rows | PASS 26/26 | **FAIL 10 of 27** | PASS 20/20 |
+| net == CD + OO − overhead | $262,151 (3.83%) | $236,149 (2.55%) | $35,830 (2.17%) |
+| Other-charges itemisation | PASS | FAIL 1 week | PASS |
+| block headers recognised | PASS | PASS | PASS |
+| week coverage, truck count | PASS | PASS | PASS |
+
+**XTRACK's panel headline and its truck rows are different numbers in 10 weeks**
+between 2026-03-02 and 2026-06-15, netting **−$48,100** (−0.52% of gross), and
+the individual gaps are round: −10,099, −9,400, −9,300, −8,025, −8,000, −6,426,
++5,950, +4,000, −4,000, −2,800. ZONE and AFG tie to the dollar every week. The
+`Total gross` cell in those XTRACK weeks is not derived from the blocks below it.
+
+**TIER 2, the sheet against a record it did not write.** The strength of each
+check is exactly how independent the other record is:
+
+    IFTA returns      FILED WITH A STATE under penalty, by a different person,
+                      out of the fuel and mileage systems. The strongest check
+                      in the corpus.
+    Iron Lease bills  a counterparty's invoice
+    insurance         signed with a carrier: the premium is a fact
+    bank statements   cannot be miscoded like a manual entry, but NOT
+                      line-comparable — factoring, netting and timing sit
+                      between the sheet and the statement
+
+**THE MILEAGE TIES, AND THAT IS THE BIG RESULT.** Every cost-per-mile figure in
+this pipeline rests on it. 2026 Q2, sheet against the filed return:
+
+| | filed | sheet | gap |
+|---|--:|--:|--:|
+| ZONE | 1,118,149 | 1,096,973 | −1.9% |
+| XTRACK | 1,727,001 | 1,673,084 | −3.1% |
+| AFG | 215,151 | 216,486 | **+0.6%** |
+
+**MILES ARE NOT ALL THE SAME MILES.** The sheet keeps odometer miles (all miles,
+company drivers only) and loaded miles (every truck, revenue miles only); IFTA
+counts EVERY mile of EVERY truck under the authority, owner-operators included.
+Compare the return to loaded miles alone and the sheet looks short by the empty
+ratio plus the whole owner-operator fleet — 43% of XTRACK's trucks. Scale the
+owner-operators' loaded miles by the company drivers' own odometer-to-loaded
+ratio (1.047 on XTRACK, 1.049 ZONE, 1.012 AFG) and say so.
+
+**THE FUEL DOES NOT TIE, AND THE TWO RETURNS MISS IN OPPOSITE DIRECTIONS:**
+
+    ZONE     filed 180,944 gal, the sheet's own mpg needs 160,855   +20,089  +11.1%
+    XTRACK   filed 197,081 gal, needs 251,334                       -54,253  -27.5%
+    AFG      filed  28,083 gal, needs  28,750                          -667   -2.4%  TIES
+
+Two unrelated errors would not point opposite ways in the same quarter. This is
+one fuel allocation split the wrong way between two IFTA accounts: it roughly
+nets out at group level and leaves each return wrong on its own. **Direction
+decides the risk — understating gallons understates the tax owed**, which is the
+side an audit collects on, and that is XTRACK.
+
+**JUDGE THE FUEL ON GALLONS, NOT ON THE DERIVED OWNER-OPERATOR MPG.** The
+residual (filed gallons less the company drivers' measured burn) divides by a
+small number and swings: it called AFG "not a truck" at 10.8 mpg on a return
+whose miles tie to 0.6%. Below ~15% owner-operator share the residual is noise.
+
+**A QUARTER THE SHEET ONLY PARTLY COVERS IS SKIPPED, NEVER COMPARED.** ZONE's
+and XTRACK's sheets start 2026-02-23 and hold 6 of Q1's 13 weeks; comparing that
+to a full-quarter return measures the missing weeks and reads as a 55% error.
+
+**OHIO IS A SECOND FORM, NOT A VARIANT.** ZONE files through OH|TAX eServices,
+which prints a summary line (`Diesel 1,509,945 207,885 0 7.26`) and no Step 2
+division line at all. `parse_ifta()` returned an EMPTY DICT on those, and an
+empty dict is falsy, so they dropped out of `load_ifta()` in silence — the
+largest company had no external mileage check for that reason alone. A parser
+that returns nothing is worse than one that raises. `load_ifta()` now tries both
+forms and prints the files that look like returns and read as nothing.
+
+**THE SAME RETURN IS FILED UNDER SEVERAL PATHS.** ZONE's Ohio returns sit both in
+`data/raw/ifta/ohio/` and inside the CT Reports archive, so the list held each
+quarter three times and any total built by summing it tripled ZONE's miles. Key
+on the facts of the return, the way the catalog keys on content hash.
+
+**IRON LEASE RENT IS UNDER-CHARGED IN ALL THREE SHEETS**, most where trucks sit:
+ZONE $119,621 charged against $143,595 due (−16.7%), XTRACK $85,704 / $99,205
+(−13.6%), AFG $36,438 / $37,672 (−3.3%).
+
+**THE ORDER OF WHAT EVIDENCE PROVES:** a filing (IFTA, 2290) > a counterparty's
+invoice or policy > cash > a measuring device (Samsara, fuel-card gallons) > the
+sheet against itself. Still missing to finish the audit: factoring statements,
+the ADP register split by employee, and Samsara odometer history.
+
 ## Insurance and IFTA — the first documents filed with someone outside
 
 Both arrived 2026-09-05 (`data/raw/insurance`, `data/raw/ifta`). Everything
