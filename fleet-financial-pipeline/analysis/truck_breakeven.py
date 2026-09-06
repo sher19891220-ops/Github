@@ -64,6 +64,9 @@ WORKBOOK = {"XTRACK": "data/raw/pnl/88206141-Xtrack_LLC_download.xlsx",
             "ZONE": "data/raw/pnl/4954206d-Zone_LLC_download.xlsx",
             "AFG": "data/raw/pnl/b479b596-AFG__download.xlsx"}
 DAYS_PER_WEEK = 7
+# A truck that bought more than this much diesel in a week did not stand still.
+# Deliberately low: the point is to catch a truck that ran, not to tune a cutoff.
+MOVED_THRESHOLD = 50.0
 # Tashkent is 27.5% base salary and 72.5% commission -- measured from the payroll
 # register, see config/overhead.json. Treating all of it as fixed overstates the
 # cost of an idle truck and understates cost per mile.
@@ -128,7 +131,21 @@ def model(company="XTRACK", weeks=13):
     m["fuel_per_gallon"] = run.fuel.sum() / run.gallons.sum()
     m["mpg"] = run.odo.sum() / run.gallons.sum()
 
-    parked = cd[cd.gross <= 0]
+    # A ZERO-GROSS WEEK IS NOT THE SAME AS A PARKED TRUCK. Some of them burned
+    # $450 of diesel and paid a driver, which a truck standing in a yard cannot
+    # do -- those are trucks that MOVED and whose revenue landed in another week
+    # or another block. The money says so, the gross column does not, and the
+    # test that they are really still is that fuel and driver pay come out at
+    # exactly zero once they are excluded. Including them overstated the cost of
+    # a parked truck by 15% for ZONE and XTRACK and 69% for AFG, and it is where
+    # the "standing DEF and fees" line came from.
+    zero = cd[cd.gross <= 0]
+    moved = (zero.fuel.abs() > MOVED_THRESHOLD) | (zero.driver_pay.abs() > MOVED_THRESHOLD)
+    parked = zero[~moved]
+    m["zero_gross_weeks"] = len(zero)
+    m["moved_but_no_gross_weeks"] = int(moved.sum())
+    m["moved_but_no_gross_cost"] = (zero[moved][list(CD_COST_FIELDS)].sum(axis=1).mean()
+                                    if moved.any() else 0.0)
     m["parked_weeks"] = len(parked)
     m["parked_cost"] = parked[list(CD_COST_FIELDS)].sum(axis=1).mean()
     m["parked_lines"] = {f: parked[f].mean() for f in CD_COST_FIELDS}
@@ -166,6 +183,17 @@ def model(company="XTRACK", weeks=13):
     m["breakeven_fixed"] = m["running_fixed"] + m["fixed_overhead_per_truck_week"]
     m["rpm"] = m["cd_gross"] / m["cd_miles"]
     m["miles_per_truck"] = m["cd_miles"] / m["cd_trucks"]
+
+    # The fleet run through the model, both halves: running trucks earn at their
+    # own miles and rate, parked ones only cost. It is a model OUTPUT, not a
+    # control artefact -- controls() only compares it, so leaving it in there
+    # made it invisible to anything that did not run the controls first.
+    m["modelled_cd_result"] = (
+        weekly_result(m, m["miles_per_running_truck"], m["rpm"]) * m["running_truck_weeks"]
+        - (m["parked_cost"] + m["fixed_overhead_per_truck_week"])
+        * (m["cd_trucks"] - m["running_truck_weeks"]))
+    m["actual_cd_result"] = (m["cd_gross"] - m["cd_block_cost"]
+                             - m["overhead"] * (m["cd_trucks"] / m["trucks"]))
     return m
 
 
@@ -226,14 +254,18 @@ def controls(m):
     actual = m["cd_block_cost"] / m["cd_trucks"]
     if abs(predicted - actual) > 0.05 * actual:
         fails.append(("fitted vs actual block cost per truck-week", round(predicted - actual)))
-    # The one control that catches a double-counted overhead: run the model at
-    # the fleet's OWN miles and rate and it must land on the fleet's own result.
-    modelled = weekly_result(m, m["miles_per_truck"], m["rpm"]) * m["cd_trucks"]
-    actual = m["cd_gross"] - m["cd_block_cost"] - m["overhead"] * (
-        m["cd_trucks"] / m["trucks"])
-    if abs(modelled - actual) > 0.10 * abs(actual):
+    # The control that catches a double-counted overhead: run the model at the
+    # fleet's own miles and rate and it must land on the fleet's own result.
+    #
+    # Both halves, not one. This module produces two figures -- what a RUNNING
+    # truck earns and what a PARKED one costs -- and the fleet is a mix. Pricing
+    # every company-driver truck as though it were running charged the parked
+    # ones a running truck's rent and missed by 12.5% on ZONE, 9.6% on XTRACK
+    # and 0.2% on AFG: exactly their share of parked truck-weeks, in order. That
+    # was the control mis-stated, not the model wrong.
+    if abs(m["modelled_cd_result"] - m["actual_cd_result"]) > 0.10 * abs(m["actual_cd_result"]):
         fails.append(("model run at the fleet's own miles and rate vs its actual "
-                      "company-driver result", round(modelled - actual)))
+                      "company-driver result", round(m["modelled_cd_result"] - actual)))
     if not 0 < m["overhead_variable_share"] < 1:
         fails.append(("overhead variable share out of range", m["overhead_variable_share"]))
     if m["parked_cost"] >= m["running_fixed"]:
@@ -266,12 +298,105 @@ def idle_cost(company="XTRACK", weeks=None):
             "per_idle_truck_day": (billed + overhead) / len(sit) / DAYS_PER_WEEK}
 
 
+def compare(companies=("ZONE", "XTRACK", "AFG"), weeks=13):
+    """Break-even for each company side by side.
+
+    They are NOT the same business and the model must not flatten them: the
+    company-driver share, the Iron Lease share, the parked share and the
+    overhead per truck all differ, and each of those moves break-even on its
+    own. What is comparable is the METHOD, not the numbers.
+    """
+    ms = {c: model(c, weeks) for c in companies}
+    W = 13
+
+    def row(label, fn, fmt=",.0f"):
+        print(f"  {label:<36}" + "".join(f"{fn(ms[c]):>{W}{fmt}}" for c in companies))
+
+    print(f"== BREAK-EVEN, {weeks} WEEKS, EACH COMPANY ON ITS OWN SHEET ==")
+    print(f"  {'':<36}" + "".join(f"{c:>{W}}" for c in companies))
+    for c in companies:
+        pass
+    print(f"  {'period':<36}" + "".join(f"{ms[c]['from'][5:] + '..' + ms[c]['to'][5:]:>{W}}"
+                                        for c in companies))
+    row("gross per week", lambda m: m["gross"])
+    row("net per week", lambda m: m["net"])
+    row("company-driver trucks", lambda m: m["cd_trucks"], ",.1f")
+    row("owner-operator trucks", lambda m: m["oo_trucks"], ",.1f")
+    print()
+    row("truck rent, base", lambda m: m["rent_base_per_week"])
+    row("admin / insurance / trailer", lambda m: m["admin_per_truck_week"])
+    row("FIXED COST, RUNNING TRUCK", lambda m: m["running_fixed"])
+    row("fixed overhead per truck", lambda m: m["fixed_overhead_per_truck_week"])
+    row("= MUST BE COVERED EVERY WEEK", lambda m: m["breakeven_fixed"])
+    print()
+    row("variable cost per loaded mile", lambda m: m["cost_per_mile"], ",.4f")
+    row("variable overhead, % of gross", lambda m: 100 * m["overhead_pct_of_gross"], ",.2f")
+    row("fuel $/gal", lambda m: m["fuel_per_gallon"], ",.3f")
+    row("mpg", lambda m: m["mpg"], ",.2f")
+    print()
+    row("miles per truck now", lambda m: m["miles_per_truck"])
+    row("rate per mile now", lambda m: m["rpm"], ",.3f")
+    row("$ kept per mile at that rate",
+        lambda m: contribution_per_mile(m, m["rpm"]), ",.4f")
+    row("BREAK-EVEN MILES at that rate",
+        lambda m: breakeven_miles(m, m["rpm"]))
+    row("headroom, miles a week",
+        lambda m: m["miles_per_truck"] - breakeven_miles(m, m["rpm"]))
+    row("BREAK-EVEN RATE at those miles",
+        lambda m: breakeven_rpm(m, m["miles_per_truck"]), ",.3f")
+    print()
+    row("cost of a PARKED truck / week", lambda m: m["parked_cost"])
+    row("  + fixed overhead it still absorbs",
+        lambda m: m["fixed_overhead_per_truck_week"])
+    row("  = a lost truck-week costs",
+        lambda m: m["parked_cost"] + m["fixed_overhead_per_truck_week"])
+    row("  a lost truck-DAY costs", lambda m: m["idle_day_cost"])
+    row("parked truck-weeks in the period", lambda m: m["parked_weeks"], ",.0f")
+
+    print("\n== BREAK-EVEN MILES A WEEK, BY RATE ==")
+    print(f"  {'RPM':>6}" + "".join(f"{c:>{W}}" for c in companies))
+    for rpm in (2.40, 2.60, 2.80, 3.00, 3.20, 3.40):
+        cells = []
+        for c in companies:
+            be = breakeven_miles(ms[c], rpm)
+            cells.append(f"{be:>{W},.0f}" if be < 1e6 else f"{'never':>{W}}")
+        print(f"  {rpm:>6.2f}" + "".join(cells))
+    print("  A truck below its column's figure at that rate loses money that week.")
+
+    print("\n== WEEKLY PROFIT OR LOSS OF ONE TRUCK, BY SCENARIO ==")
+    print(f"  {'miles':>7}{'rate':>7}" + "".join(f"{c:>{W}}" for c in companies))
+    for miles, rpm in ((2000, 2.60), (2500, 2.60), (2500, 3.00), (3000, 2.80),
+                       (3500, 2.80), (3500, 3.00), (4000, 2.60), (4000, 3.00)):
+        print(f"  {miles:>7,}{rpm:>7.2f}"
+              + "".join(f"{weekly_result(ms[c], miles, rpm):>{W},.0f}" for c in companies))
+
+    print("\n== WHY THE THREE DIFFER ==")
+    for c in companies:
+        m = ms[c]
+        print(f"  {c}: fixed ${m['breakeven_fixed']:,.0f}/wk, "
+              f"${m['cost_per_mile']:.4f}/mile, {100 * m['overhead_pct_of_gross']:.2f}% "
+              f"off the top.")
+        print(f"     {100 * m['iron_share']:.0f}% of running truck-weeks are Iron Lease "
+              f"(base ${m['rent_iron_base']:,.0f} vs outside ${m['rent_outside_per_week']:,.0f}), "
+              f"{m['oo_trucks'] / m['trucks'] * 100:.0f}% of the fleet is owner-operator,")
+        print(f"     and {m['parked_weeks'] / (m['cd_trucks'] * m['weeks']) * 100:.0f}% of "
+              f"company-driver truck-weeks earned nothing.")
+    print("\n  This prices a COMPANY-DRIVER truck. Owner-operators carry their own")
+    print("  equipment and fuel and break even on entirely different numbers, which is")
+    print("  why XTRACK's fleet mix matters as much as its costs.")
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--company", default="XTRACK")
+    ap.add_argument("--company", default="XTRACK",
+                    help="ZONE, XTRACK, AFG, or 'all' for the comparison")
     ap.add_argument("--weeks", type=int, default=13)
     a = ap.parse_args()
+    if a.company.lower() == "all":
+        compare(weeks=a.weeks)
+        return
+
     m = model(a.company, a.weeks)
     D = DAYS_PER_WEEK
 

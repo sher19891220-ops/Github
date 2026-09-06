@@ -481,10 +481,54 @@ XTRACK, 2026-06-01 .. 2026-08-24: overhead $42,049/wk over 47 trucks = **$887 pe
 truck-week**, of which **$505 fixed** ($72/truck-day) and the rest 4.69% of gross
 (Tashkent commission, factoring, maintenance).
 
-    cost of a truck that does not move   $1,688/week = $241/day
-    must be covered by a running truck   $2,578/week
-    break-even                           2,646 miles at $2.80, 2,213 at $3.00,
-                                         3,290 at $2.60, 4,348 at $2.40
+**BREAK-EVEN, ALL THREE COMPANIES** (`--company all`, 13 weeks to 2026-08-24):
+
+| per company-driver truck | ZONE | XTRACK | AFG |
+|---|--:|--:|--:|
+| truck rent, base | 1,166 | 1,165 | 1,167 |
+| admin / insurance / trailer | 522 | 459 | 451 |
+| **fixed cost, running truck** | **1,688** | **1,624** | **1,617** |
+| fixed overhead per truck | 672 | 505 | 398 |
+| **must be covered every week** | **2,360** | **2,130** | **2,015** |
+| variable cost per loaded mile | 1.7169 | 1.7566 | 1.7927 |
+| variable overhead, % of gross | 3.29 | 4.69 | 3.60 |
+| miles per truck now | 2,818 | 2,546 | 3,280 |
+| rate per mile now | 2.928 | 2.968 | 3.122 |
+| **break-even miles at that rate** | **2,117** | **1,986** | **1,657** |
+| headroom, miles a week | 701 | 560 | 1,623 |
+| **break-even rate at those miles** | **2.641** | **2.721** | **2.497** |
+| a lost truck-week costs | 1,879 | 1,532 | 1,549 |
+| a lost truck-DAY costs | 268 | 219 | 221 |
+
+Break-even miles a week by rate — below the figure, that truck loses money:
+
+|  | $2.40 | $2.60 | $2.80 | $3.00 | $3.20 |
+|---|--:|--:|--:|--:|--:|
+| ZONE | 3,906 | 2,959 | 2,381 | 1,993 | 1,713 |
+| XTRACK | 4,011 | 2,951 | 2,335 | 1,931 | 1,646 |
+| AFG | 3,870 | 2,824 | 2,224 | 1,834 | 1,560 |
+
+**The three are not the same business and the model must not flatten them.**
+ZONE carries the highest fixed base ($2,360) because its overhead per truck is
+$672 against XTRACK's $505 and AFG's $398, and 20% of its company-driver
+truck-weeks earn nothing against AFG's 4%. AFG has the LOWEST break-even and the
+MOST headroom — 1,623 miles a week — because it runs 3,280 miles at $3.12.
+XTRACK has the thinnest margin per mile: $1.0725 kept at its own rate against
+ZONE's $1.1149 and AFG's $1.2165, because 4.69% comes off the top before the
+truck sees a cent.
+
+**A ZERO-GROSS WEEK IS NOT A PARKED TRUCK.** Some of them burned $450 of diesel
+and paid a driver — trucks that MOVED whose revenue landed in another week or
+another block. The proof the filter is right is that fuel and driver pay come out
+at *exactly* zero once they are excluded. Including them overstated a parked
+truck by 15% for ZONE and XTRACK and 69% for AFG, and it is where the earlier
+"standing DEF and fees $97" line came from.
+
+**Price running and parked trucks SEPARATELY when checking the model against the
+fleet.** Charging every company-driver truck a running truck's rent missed the
+actual result by 12.5% on ZONE, 9.6% on XTRACK and 0.2% on AFG — exactly their
+share of parked truck-weeks, in order. That was the control mis-stated, not the
+model wrong.
 
 **Charging an idle truck only what the P&L billed it understates it by 41%.**
 The 105 idle XTRACK truck-weeks were billed $125,197; they also absorbed $51,401
