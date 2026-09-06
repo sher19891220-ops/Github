@@ -26,6 +26,13 @@ So the default is now: **look it up; build only when the answer needs a control*
 nothing, a comparison that will be rerun as documents arrive. Those earn their
 code. "What is XTRACK's fixed cost per truck" does not; it is already computed.
 
+**A DERIVED OUTPUT THAT CARRIES A TIMESTAMP IS NOT CORPUS DRIFT.** `facts.json`
+changes content hash on every rebuild, so catalogued as a source it reported one
+MISSING plus one NEW every session. A control that always fires is a control
+nobody reads — and the drift report exists precisely so a genuinely missing
+document is noticed after a container reclaim. It is indexed, and excluded from
+`--check` (`SELF_REGENERATING` in `ingest/catalog.py`).
+
 **STALENESS IS THE ONLY THING THAT MAKES A FACTS FILE DANGEROUS.** It caches
 CONCLUSIONS, and a conclusion outliving its evidence is exactly what this
 pipeline exists to catch. Every build records the fingerprint of the documents

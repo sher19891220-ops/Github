@@ -102,3 +102,16 @@ def test_long_history_workbooks_are_recorded_as_not_yet_usable(cat):
         assert e.get("unmapped_headers"), (
             f"{e['path']} now parses cleanly -- promote it in "
             f"ingest_weekly_pnl.WORKBOOKS and delete this test")
+
+
+def test_a_self_regenerating_output_is_not_drift():
+    """data/processed/facts.json carries a build timestamp, so its content hash
+    changes on every rebuild. Catalogued as a source it reports one MISSING plus
+    one NEW every single session -- a permanent false alarm, and a control that
+    always fires is a control nobody reads."""
+    import catalog as C
+    assert C.self_regenerating({"path": "data/processed/facts.json", "copies": []})
+    assert not C.self_regenerating({"path": "data/raw/pnl/x.xlsx", "copies": []})
+    # it is still INDEXED -- excluded from the drift check, not from the catalog
+    assert any("facts.json" in e["path"] for e in
+               __import__("json").load(open(C.ROOT / "data/CATALOG.json"))["files"])

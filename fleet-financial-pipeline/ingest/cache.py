@@ -116,6 +116,18 @@ def clear():
     return n
 
 
+def _quiet_broken_pipe():
+    """`python3 ingest/cache.py | head` must not print a traceback.
+
+    A CLI that dies noisily when its output is piped teaches everyone to stop
+    piping it, and these listings are exactly the thing you pipe to head.
+    """
+    try:
+        sys.stdout.flush()
+    except BrokenPipeError:
+        os.dup2(os.open(os.devnull, os.O_WRONLY), sys.stdout.fileno())
+
+
 if __name__ == "__main__":
     if "--clear" in sys.argv:
         print(f"cleared {clear()} cache entries")
@@ -123,5 +135,9 @@ if __name__ == "__main__":
         files = sorted(CACHE_DIR.glob("*.json"))
         total = sum(f.stat().st_size for f in files)
         print(f"{len(files)} entries, {total / 1e6:.1f} MB in {CACHE_DIR}")
-        for f in files:
-            print(f"  {f.stat().st_size / 1e3:>8.0f} KB  {f.name}")
+        try:
+            for f in files:
+                print(f"  {f.stat().st_size / 1e3:>8.0f} KB  {f.name}")
+        except BrokenPipeError:
+            pass
+    _quiet_broken_pipe()

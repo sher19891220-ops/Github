@@ -9138,6 +9138,7 @@
     "ingest/ingest_weekly_pnl.py",
     "tests/test_catalog.py",
     "tests/test_cost_structure.py",
+    "tests/test_facts.py",
     "tests/test_pnl_accuracy.py",
     "tests/test_truck_breakeven.py",
     "tests/test_truck_weeks.py",
@@ -9298,7 +9299,7 @@
    "period": null,
    "note": "Derived output of this pipeline, not a source. Regenerate it rather than reading it as evidence.",
    "used_by": [],
-   "sha256": "300b63a555f0cac0",
+   "sha256": "ec28cdc7738bd915",
    "copies": []
   },
   {

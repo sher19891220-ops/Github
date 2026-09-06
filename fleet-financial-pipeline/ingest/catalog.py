@@ -465,6 +465,20 @@ def markdown(cat):
     return "\n".join(L)
 
 
+# Derived outputs that carry a build timestamp change content -- and therefore
+# content hash -- on every rebuild. Catalogued as sources they report as one
+# MISSING plus one NEW every single session, which is a permanent false alarm.
+# A control that always fires is a control nobody reads, and the drift report
+# exists precisely so a genuinely missing document is noticed after a container
+# reclaim. So these are indexed but excluded from --check.
+SELF_REGENERATING = (r"^data/processed/facts\.json$",)
+
+
+def self_regenerating(entry):
+    return any(re.search(rx, p) for rx in SELF_REGENERATING
+               for p in [entry["path"]] + entry.get("copies", []))
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -488,10 +502,13 @@ def main():
             # With --no-uploads the session upload directory is not scanned, so
             # a file that only ever existed there is not "missing" -- it is out
             # of scope for this run. A file that also has a data/raw copy is.
-            return not a.no_uploads or any(not p.startswith("~uploads/") for p in paths(entry))
+            if a.no_uploads and not any(not p.startswith("~uploads/")
+                                        for p in paths(entry)):
+                return False
+            return not self_regenerating(entry)
 
         was = {e["sha256"]: e["path"] for e in old["files"] if keep(e)}
-        now = {e["sha256"]: e["path"] for e in cat["files"]}
+        now = {e["sha256"]: e["path"] for e in cat["files"] if keep(e)}
         gone = {k: v for k, v in was.items() if k not in now}
         new = {k: v for k, v in now.items() if k not in was}
         for k, v in sorted(gone.items()):
