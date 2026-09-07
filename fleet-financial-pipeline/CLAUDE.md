@@ -402,7 +402,7 @@ government, not estimated.
 | line | what it is | sample |
 |---|---|---|
 | truck rent, base | **a weighted average of TWO rents**, not one: Iron Lease units at their RATE CARD base × their share of running truck-weeks, plus everything else at the P&L's measured rent. ZONE 0.20×$823 + 0.80×$1,252. XTRACK 0.108×$778 + 0.892×$1,212. AFG 0.279×$874 + 0.721×$1,280. | 300 / 287 / 68 running CD truck-weeks |
-| admin / insurance / trailer | the mean of ONE block column — `Insur/Admin/Trl`, renamed `Pys/Cargo/Admin` after 2026-06-29. Cross-checked against the actual policies: XTRACK's measured insurance is $440 against the $459 here. | same |
+| admin / insurance / trailer | the mean of ONE block column — `Insur/Admin/Trl` / `Pys/Cargo/Admin`. **A ROLLING PER-BLOCK RENAME, NOT A DATE CUT**: the 08-24 tab carries BOTH labels at once, block by block, as each truck's header was edited. It is also barely a measured cost — ZONE has **10 distinct values across 300 truck-weeks** ($394.38 ×118, $534.28 ×114), so it is a standard weekly charge with tiers. Against the policies it is **90–96% insurance at cost**: ZONE $470.75 measured of $521.54 charged, XTRACK $440.17 of $459.33, AFG $374.74 of $450.60. | same |
 | fixed company overhead | the residual `gross − net − CD block − OO cost`, split fixed/variable on its own named components, over ALL trucks. ZONE $32,914×71.7%÷35.1. XTRACK $42,049×57.0%÷47.4. AFG $7,838×51.9%÷10.2. | 13 weeks |
 | IRP plates + HVUT | the only line not from the P&L. Annual registration attributed by last-carrying company, over the trucks the file covers: $23,995/15/52, $25,494/16/52, $12,820/9/52. | 48 trucks |
 
@@ -794,6 +794,66 @@ into the headings ("Accounti ID", "gallotn"), so a literal "IFTA" is present in
 some returns and absent in others that are plainly the same form. Match on the
 Step 2 division line instead; keyword matching silently threw away four of
 seven valid returns.
+
+## Owner-operators: the other half of the fleet, and a different machine
+
+`analysis/owner_operator.py`. The two kinds of truck sit in DIFFERENT BLOCK
+LAYOUTS in the same weekly tab, because they are different businesses:
+
+    company driver   Unit | Driver | Gross | Mileage | Driver Salary |
+                     Insur/Admin/Trl | DEF/Fuel/Fee | Truck Rental | Toll/Scale |
+                     Additional | Subtotal | Other | Total | Per mile | Fuel avr
+    owner operator   Unit | Driver | Gross | COMPANY CHARGE | Driver Salary |
+                     DEDUCTIONS | Mileage | Truck Rental | Fuel | Toll/Scale |
+                     FUEL DISCOUNT | Other | DRIVER PAY | PROFIT | RPM
+
+**THE COMPANY'S PROFIT ON AN OWNER-OPERATOR IS THE COMPANY CHARGE PLUS THE FUEL
+DISCOUNT, AND NOTHING ELSE.** Read the sheet's own arithmetic on one block:
+gross 4,400 − charge 660 = salary 3,740; less deductions 785 + rent 1,146.60 +
+fuel 1,713.96 + toll 350.62 − fuel discount 66.28 + other 65 = **Driver Pay
+−254.90**; and **Profit 726.28 = charge 660 + fuel discount 66.28** exactly.
+
+**RENT AND FUEL ARE RECOVERED, NOT BORNE.** They sit in the driver's deductions.
+Counting them as company costs — or the negative Driver Pay as a company loss —
+inverts the sign of the whole business.
+
+    per OO truck-week                   ZONE   XTRACK      AFG
+    gross                              9,835   10,316   10,383
+    miles / rate                    3,052@3.22 3,017@3.42 2,915@3.56
+    company charge                     1,282    1,238    1,181
+      as % of gross                    13.04%   12.00%   11.37%
+    fuel discount margin                  63       61       10
+    = P&L PROFIT                       1,346    1,299    1,191   (13.7/12.6/11.5%)
+    recovered from the driver: rent      825      785    1,110
+                              fuel     2,453    2,538    2,492
+
+**WHAT THE BLOCK NEVER CHARGES AN OO TRUCK:** insurance $349/$378/$345 (it is on
+the group schedule like any other unit), IRP+HVUT $31/$31/$27, and a share of
+company overhead $938/$887/$766. Take those off and the **net is $28 / $3 / $52 a
+truck-week.**
+
+**THAT CONCLUSION TURNS ENTIRELY ON ONE ASSUMPTION** — charging an OO truck a
+FULL share of overhead. The sheets hold no evidence either way, so it is a range:
+
+    overhead share charged      ZONE   XTRACK      AFG
+    100%                          28        3       52
+     75%                         262      224      243
+     50%                         497      446      435
+      0%                         966      890      818
+
+An OO truck uses dispatch and the fuel card but no payroll run, no recruiting
+spend, no company insurance on the driver and no idle-truck carry. Splitting the
+overhead components by what an OO actually consumes is the measurement that would
+settle it; the components are already named in `truck_breakeven.model()['named']`.
+
+**BREAK-EVEN IS ON GROSS, NOT MILES.** The company cannot lose money on a mile it
+does not pay for. Gross needed: $9,631 / $10,296 / $9,932 against actual $9,835 /
+$10,316 / $10,383 — headroom of **$204 / $20 / $451** a week at a full overhead
+charge.
+
+**THE TWO CANNOT BE AVERAGED INTO ONE "COST PER TRUCK."** An OO truck earns the
+company less per week and risks it far less: no fuel to fund, no wage to pay, no
+idle truck to carry. It is a RISK trade, not a margin one.
 
 ## Registration: IRP plates and HVUT — the cost line nothing else carries
 
