@@ -36,15 +36,25 @@ def test_read_only_scope():
 def test_every_sheet_lands_on_a_path_the_pipeline_already_reads():
     """The point of exporting to .xlsx: nothing downstream changes. If a path
     here drifts from the one the readers use, the refresh silently updates a
-    file nobody opens."""
+    file nobody opens.
+
+    Every reader that has its own MASTER-first fallback (maintenance_ledger.py,
+    parse_truckmax_invoices.py) names the exact path it expects the pull to
+    land on -- checked against those constants directly, not just the two
+    dicts below, so a drift in either place is still caught."""
     sys.path.insert(0, str(ROOT / "analysis"))
+    sys.path.insert(0, str(ROOT / "ingest"))
     import ingest_weekly_pnl as W
     import truck_breakeven as B
-    known = set(W.WORKBOOKS.values()) | set(B.WORKBOOK.values())
+    import maintenance_ledger as ML
+    import parse_truckmax_invoices as PT
+    known = ({str(p.relative_to(ROOT)) for p in
+             (ML.MASTER, PT.MASTER)}
+            | set(W.WORKBOOKS.values()) | set(B.WORKBOOK.values()))
     targets = {s["path"] for s in PS.SHEETS.values()}
     assert targets & known, "no pulled workbook is one the pipeline reads"
     for s in PS.SHEETS.values():
-        assert s["path"].startswith("data/raw/pnl/"), s
+        assert s["path"].startswith("data/raw/"), s
         assert s["path"].endswith(".xlsx"), s
 
 

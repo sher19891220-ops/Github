@@ -134,9 +134,14 @@ def test_controls_pass_or_name_a_real_ledger_issue(data):
     charges, weeks, df, fails = data
     problems = TM.controls(df, fails)
     # every failure must be traceable to a named, already-documented ledger
-    # quirk (a missing unit, a stray negative) -- never a silent pass.
+    # quirk (a missing unit, a stray negative, an Iron Lease pair that no
+    # longer nets to zero -- e.g. ZONE unit 15909's 2026-08-27 reversal was
+    # entered as +46.31 instead of -46.31, a $92.62 sign-flip typo caught the
+    # moment the live sheet replaced the static export it was sampled from)
+    # -- never a silent pass.
     for p in problems:
-        assert any(k in p for k in ("no unit", "negative", "$5/mile"))
+        assert any(k in p for k in
+                   ("no unit", "negative", "$5/mile", "no longer net to zero"))
 
 
 def test_maintenance_ledger_controls_catch_a_real_nan_unit():

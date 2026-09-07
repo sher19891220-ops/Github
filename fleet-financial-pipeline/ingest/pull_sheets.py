@@ -99,6 +99,29 @@ SHEETS = {
         "title": "OLD Zone LLC Profit and Loss Weekly",
         "path": "data/raw/pnl/gs-OLD_Zone_LLC_Profit_and_Loss_Weekly.xlsx",
     },
+    # Truck Max's own invoice log. Owned by joshuafleet.zone@gmail.com, not the
+    # operator -- confirm with --whoami that the service account was actually
+    # shared on it before relying on this entry. Four payer tabs (Company,
+    # Driver, Iron Lease, Sher Imam) match the xlsx files uploaded 2026-09-07
+    # row-for-row; three more (Sheet1 and two "Copy of" variants) were never
+    # uploaded and are not yet read by any parser -- see ingest/parse_truckmax_invoices.py.
+    "TRUCKMAX": {
+        "id": "1EDzqeROS8HQGadKeix3pfdkNk9HgnbOQX7MQDyb_ekM",
+        "title": "Truck Max",
+        "path": "data/raw/truckmax/invoices/gsheet-TruckMax-master.xlsx",
+    },
+    # The live source behind the three static *_Truck_and_Trailer_Expenses_2026
+    # files analysis/maintenance_ledger.py already reads (confirmed: its ZONE,
+    # XTRACK and AFG tabs are the same data, just ahead of the static exports by
+    # $8-13k each). Owned by zonellcacc@gmail.com. Also carries five vendor tabs
+    # (PSZ, LOVES, Truck Max USA, STL exp, Penske) and four historical-year tabs
+    # (2022-2025) that predate anything else in the corpus -- none of that is
+    # parsed yet, only pulled.
+    "ZONE_MAINT_MASTER": {
+        "id": "1SCL2Kp_5h2BlMEnItwhBFVapjEyxnnuJKW3q_Z4RDQU",
+        "title": "Truck and trailer expenses ZONE (2025)",
+        "path": "data/raw/pnl/gs-ZONE_master_truck_trailer_expenses.xlsx",
+    },
 }
 
 

@@ -115,6 +115,74 @@ Setup is six steps in `pull_sheets.py`'s docstring and only the owner can do it.
 Then `python3 ingest/pull_sheets.py --whoami` proves the key loads and says which
 sheets it can actually see, before anything is downloaded.
 
+**`$GSHEETS_SERVICE_ACCOUNT` WAS UNSET AGAIN ON 2026-09-07**, in the same
+session that added the two entries below, despite a prior session setting it
+"on the remote environment" specifically so it would survive a restart. Either
+that environment configuration did not carry into this session/container, or
+it did not persist as intended. **Re-check with `--whoami` before trusting
+that TRUCKMAX or ZONE_MAINT_MASTER will actually refresh** — if the key is
+still missing, `pull_sheets.py` exits with setup instructions rather than
+failing silently, but nothing downloads until the owner repastes it.
+
+**TWO MORE SHEETS FOUND AND ADDED 2026-09-07, `TRUCKMAX` and
+`ZONE_MAINT_MASTER` — BUT THIS TIME VIA THE DRIVE MCP CONNECTOR, NOT
+`pull_sheets.py`.** With the key missing, both were fetched once by hand
+through the Drive MCP tool (`download_file_content`, base64-decoded to disk)
+to stage them and let the pipeline read them today. This is the "wrong way to
+move a workbook" the paragraph above already warned about — it works, but it
+is a one-time manual bootstrap, not the automatic refresh `pull_sheets.py`
+exists to provide. Both entries are wired into `SHEETS` so that the *next*
+`pull_sheets.py` run — once the key is restored, and once each sheet's owner
+(they are NOT the operator's own account) shares it with the service
+account's email — takes over refreshing them for real.
+
+  - **`TRUCKMAX`** (`1EDzqeROS8HQGadKeix3pfdkNk9HgnbOQX7MQDyb_ekM`, owned by
+    `joshuafleet.zone@gmail.com`) → `data/raw/truckmax/invoices/gsheet-TruckMax-master.xlsx`.
+    Confirmed: its four payer tabs (Company 423 rows, Driver 25, Iron Lease 77,
+    Sher Imam 5) are exact row-for-row matches of the four files uploaded
+    2026-09-07 — this sheet is where those came from.
+    `ingest/parse_truckmax_invoices.py` now reads this single master file when
+    it exists (`MASTER`), falling back to the four uploaded files only on a
+    machine that has never pulled it.
+    **Three tabs in this sheet are still unparsed**: `Sheet1` (551 rows, with
+    `Labor` and `Paid date` columns none of the four payer tabs have) and two
+    "Copy of" variants (540, 532 rows — smaller, plausibly older snapshots,
+    not yet confirmed). `Sheet1` has **73 rows with a date, truck and
+    description but no dollar amount at all** — real repair events as recent
+    as 2026-07-30 that are not costed anywhere in this pipeline.
+
+  - **`ZONE_MAINT_MASTER`** (`1SCL2Kp_5h2BlMEnItwhBFVapjEyxnnuJKW3q_Z4RDQU`,
+    owned by `zonellcacc@gmail.com`) → `data/raw/pnl/gs-ZONE_master_truck_trailer_expenses.xlsx`.
+    Confirmed: its `ZONE Truck and Trailer Expenses`, `XTRACK Truck and
+    Trailer Expens` and `AFG Truck and trailer exp` tabs are the SAME data as
+    the three static `*_Truck_and_Trailer_Expenses_2026.xlsx` files
+    `analysis/maintenance_ledger.py` already read — same columns, and running
+    $8-13k ahead of the static exports (ZONE $391,706 vs $383,532; XTRACK
+    $321,152 vs $308,444). `maintenance_ledger.py`'s `load()` now reads
+    `MASTER`'s matching tab first, falling back to the static per-company file
+    only if `MASTER` is absent.
+    **Switching to the live tab surfaced a real $92.62 bookkeeping error**:
+    ZONE unit 15909's Iron Lease reversal on 2026-08-27 was entered as
+    `+46.31` instead of `-46.31` (twice 46.31 is 92.62 exactly), so the
+    "Iron lease exp' rows net to zero, in pairs" control — a real,
+    already-documented check that had simply never fired against the older,
+    already-reconciled static snapshot — now does. Reported, not silently
+    corrected; `tests/test_truck_maintenance.py`'s control test recognizes
+    this failure string by name.
+    **This same sheet also has ten tabs nothing here has parsed yet**: `PSZ`
+    and `LOVES` (2025-dated, `Invoice number,Amount` and the same
+    Work-Order/Unit/Expense-side shape as the known ledgers, respectively),
+    `Truck Max USA` and four bare year tabs `Truck and Trailer Expenses
+    2022`-`2025` (the 2025 one is already sitting unused at
+    `data/raw/pnl/b5ae7b00-Zone_and_Xtrack_Truck_and_Trailer_Expenses_2025.xlsx`
+    — 1,717 rows, confirmed identical to the sheet's own 2025 tab, and never
+    referenced by any module), `STL exp` (844 rows — STL is not otherwise
+    identified in this corpus), and `Penske` (`Inv#,Inv date,Amount,Total` —
+    a truck-leasing/rental vendor, not yet cross-checked against
+    `truck_breakeven.py`'s outside-lease rate). None of this is invented or
+    assumed here — it is catalogued as present and unparsed, pending a
+    decision on which of it is worth building a reader for.
+
 ## Start here: ASK before analysing
 
 **`python3 analysis/facts.py --find <term>` answers a settled question in 40

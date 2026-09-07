@@ -35,6 +35,17 @@ from pathlib import Path
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parent.parent
+# MASTER is the Google Sheet ingest/pull_sheets.py keeps current -- confirmed
+# 2026-09-07 to be the live source behind the three static exports below: same
+# columns, same rows plus $8-13k each of activity the static exports predate.
+# Read MASTER when it exists (pull_sheets.py refreshes it in place); fall back
+# to the static export only on a machine that has never run pull_sheets.py.
+MASTER = ROOT / "data/raw/pnl/gs-ZONE_master_truck_trailer_expenses.xlsx"
+MASTER_SHEET = {
+    "XTRACK": "XTRACK Truck and Trailer Expens",
+    "ZONE": "ZONE Truck and Trailer Expenses",
+    "AFG": "AFG Truck and trailer exp",
+}
 LEDGERS = {
     "XTRACK": "data/raw/pnl/168e4bc8-XTRACK_Truck_and_Trailer_Expenses_2026.xlsx",
     "ZONE": "data/raw/pnl/5c1ac5ff-ZONE_Truck_and_Trailer_Expenses_2026.xlsx",
@@ -56,7 +67,10 @@ CATEGORIES = [
 
 
 def load(company="XTRACK", start="2026-01-01", end="2026-09-01"):
-    d = pd.read_excel(ROOT / LEDGERS[company])
+    if MASTER.exists():
+        d = pd.read_excel(MASTER, sheet_name=MASTER_SHEET[company])
+    else:
+        d = pd.read_excel(ROOT / LEDGERS[company])
     d["amount"] = pd.to_numeric(d["$ used"], errors="coerce")
     d["date"] = pd.to_datetime(d["Issued Date"], format="%m.%d.%y", errors="coerce")
     d["unit"] = d["Unit"].astype(str).str.replace(r"\.0$", "", regex=True)

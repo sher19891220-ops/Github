@@ -93,7 +93,13 @@ def test_trailers_are_separated_from_trucks_in_the_ledger():
 
 
 def test_maintenance_ledger_drops_the_rows_that_are_not_charges():
-    raw = pd.read_excel(ROOT / ML.LEDGERS["XTRACK"])
+    # Read whichever source ML.load() itself actually used -- ingest/pull_sheets.py
+    # keeps ML.MASTER current, and it runs ahead of the static export it
+    # replaces, so comparing against the wrong one compares two vintages.
+    if ML.MASTER.exists():
+        raw = pd.read_excel(ML.MASTER, sheet_name=ML.MASTER_SHEET["XTRACK"])
+    else:
+        raw = pd.read_excel(ROOT / ML.LEDGERS["XTRACK"])
     c, _ = ML.load("XTRACK")
     priced = pd.to_numeric(raw["$ used"], errors="coerce").notna()
     assert priced.sum() < 0.5 * len(raw), "most rows are date banners, not charges"

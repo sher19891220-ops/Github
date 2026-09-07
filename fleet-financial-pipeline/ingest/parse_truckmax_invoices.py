@@ -59,7 +59,13 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parent.parent
 INVOICE_DIR = ROOT / "data/raw/truckmax/invoices"
-FILES = {
+# ingest/pull_sheets.py keeps this current -- it is the single Google Sheet the
+# four uploaded files below are exact per-tab exports of (row counts matched
+# 2026-09-07: Company 423, Driver 25, Iron Lease 77, Sher Imam 5). Read it when
+# present so a fresh pull is picked up with no re-upload; fall back to the
+# uploaded files on a machine that has never run pull_sheets.py.
+MASTER = INVOICE_DIR / "gsheet-TruckMax-master.xlsx"
+_UPLOADED = {
     "company": (INVOICE_DIR / "97d35052-Company_exp.xlsx", "Company", "Zone", True),
     "driver": (INVOICE_DIR / "cead6fb1-Driver_exp.xlsx", "Driver", "Amount", True),
     "iron_lease": (INVOICE_DIR / "02be1048-Iron_Lease_exp.xlsx", "Iron Lease",
@@ -67,6 +73,13 @@ FILES = {
     "sher_imam": (INVOICE_DIR / "660f60f1-Sher_Imam.xlsx", "Sher Imam",
                  "Amount", False),
 }
+_MASTER_TABS = {
+    "company": (MASTER, "Company", "Zone", True),
+    "driver": (MASTER, "Driver", "Amount", True),
+    "iron_lease": (MASTER, "Iron Lease", "Amount", True),
+    "sher_imam": (MASTER, "Sher Imam", "Amount", False),
+}
+FILES = _MASTER_TABS if MASTER.exists() else _UPLOADED
 COLUMNS = ["date", "truck_raw", "invoice", "issue", "amount"]
 # Values seen in the Truck column that are not truck numbers at all.
 NOT_A_TRUCK = {"detailing", "cleaning"}

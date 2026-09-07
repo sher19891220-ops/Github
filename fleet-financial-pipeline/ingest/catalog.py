@@ -117,11 +117,13 @@ KIND_PATTERNS = [
      "later hits the bank as one draft -- reconcile, never sum."),
     (r"bestpass", "toll_bestpass", "Bestpass toll rail."),
     (r"data/raw/truckmax/invoices/", "truckmax_invoice_log",
-     "Truck Max's own invoice log, split into four payer workbooks (Company/"
-     "Driver/Iron Lease/Sher Imam). Additional to the *_Truck_and_Trailer_"
-     "Expenses ledgers -- zero invoice-ID overlap confirmed before combining. "
-     "Invoice numbers are reused across files and even within one file; "
-     "identity is never the invoice number alone."),
+     "Truck Max's own invoice log. ingest/pull_sheets.py keeps the live Google "
+     "Sheet (gsheet-TruckMax-master.xlsx) current; the four uploaded payer "
+     "workbooks (Company/Driver/Iron Lease/Sher Imam) it replaces are exact "
+     "per-tab exports of the same sheet, row-for-row. Additional to the "
+     "*_Truck_and_Trailer_Expenses ledgers -- zero invoice-ID overlap "
+     "confirmed before combining. Invoice numbers are reused across files and "
+     "even within one file; identity is never the invoice number alone."),
     (r"truck_and_trailer_expenses|truck_max_charges", "shop_charges",
      "Shop / truck-and-trailer charge register."),
     (r"invoice_list", "factoring_invoices",
