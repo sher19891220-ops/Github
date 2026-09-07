@@ -201,6 +201,15 @@ So the default is now: **look it up; build only when the answer needs a control*
 nothing, a comparison that will be rerun as documents arrive. Those earn their
 code. "What is XTRACK's fixed cost per truck" does not; it is already computed.
 
+**RUN ONLY THE TEST FILE THAT CHANGED, NOT THE FULL SUITE, WHILE ITERATING.**
+The full suite is ~278 tests and ~4 minutes; run it once, right before a
+commit, as the final check. While actively editing one module, run only its
+own test file (`pytest tests/test_whatever.py`) — seconds, not minutes — and
+save the full run for the end. Confirmed 2026-09-07: three full-suite runs in
+one session cost almost 12 minutes of wall-clock time that a handful of
+targeted runs would have covered in a fraction of it. This mirrors the facts.py
+lesson above exactly: most of what felt slow was never the thinking.
+
 **A DERIVED OUTPUT THAT CARRIES A TIMESTAMP IS NOT CORPUS DRIFT.** `facts.json`
 changes content hash on every rebuild, so catalogued as a source it reported one
 MISSING plus one NEW every session. A control that always fires is a control
