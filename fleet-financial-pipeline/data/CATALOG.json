@@ -1,7 +1,7 @@
 {
- "generated": "2026-09-06",
- "distinct_files": 659,
- "total_paths": 817,
+ "generated": "2026-09-07",
+ "distinct_files": 664,
+ "total_paths": 826,
  "files": [
   {
    "path": "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/3ee6cf23-Afg_stmt_AprilAugust.zip",
@@ -9076,6 +9076,7 @@
    "used_by": [
     "analysis/truck_breakeven.py",
     "ingest/ingest_weekly_pnl.py",
+    "ingest/pull_sheets.py",
     "tests/test_catalog.py"
    ],
    "sheets": 20,
@@ -9102,7 +9103,9 @@
    "entity": "XTRACK",
    "period": "2023-11-20 .. 2026-08-24",
    "note": "Weekly P&L workbook, ONE TAB PER WEEK; the week exists only in the tab name.",
-   "used_by": [],
+   "used_by": [
+    "ingest/pull_sheets.py"
+   ],
    "sheets": 145,
    "sheet_names": [
     "08.24.26-08.30.26",
@@ -9139,6 +9142,7 @@
     "tests/test_catalog.py",
     "tests/test_cost_structure.py",
     "tests/test_facts.py",
+    "tests/test_owner_operator.py",
     "tests/test_pnl_accuracy.py",
     "tests/test_truck_breakeven.py",
     "tests/test_truck_weeks.py",
@@ -9198,7 +9202,9 @@
    "entity": "ZONE",
    "period": "2024-01-01 .. 2026-08-24",
    "note": "Weekly P&L workbook, ONE TAB PER WEEK; the week exists only in the tab name.",
-   "used_by": [],
+   "used_by": [
+    "ingest/pull_sheets.py"
+   ],
    "sheets": 139,
    "sheet_names": [
     "08.24.26-08.30.26",
@@ -9293,13 +9299,13 @@
   {
    "path": "data/processed/facts.json",
    "bytes": 17802,
-   "modified": "2026-09-06",
+   "modified": "2026-09-07",
    "kind": "processed_output",
    "entity": null,
    "period": null,
    "note": "Derived output of this pipeline, not a source. Regenerate it rather than reading it as evidence.",
    "used_by": [],
-   "sha256": "ec28cdc7738bd915",
+   "sha256": "7c69dc9441337aad",
    "copies": []
   },
   {
@@ -9336,6 +9342,41 @@
    ],
    "rows": 130,
    "sha256": "e13ebfa7a6281a64",
+   "copies": []
+  },
+  {
+   "path": "data/processed/truck_maintenance.csv",
+   "bytes": 22393,
+   "modified": "2026-09-07",
+   "kind": "processed_output",
+   "entity": null,
+   "period": null,
+   "note": "Derived output of this pipeline, not a source. Regenerate it rather than reading it as evidence.",
+   "used_by": [],
+   "columns": [
+    "unit",
+    "unresolved",
+    "ytd_charged",
+    "n_charges",
+    "companies",
+    "ledger_companies",
+    "moved_companies",
+    "first_week",
+    "last_week",
+    "weeks_in_pnl",
+    "total_miles",
+    "company_cost_in_window",
+    "driver_billed_in_window",
+    "iron_lease_paid",
+    "iron_lease_credited",
+    "iron_lease_net_outstanding",
+    "second_source_company_cost",
+    "second_source_iron_lease_EXCLUDED",
+    "charges_in_window",
+    "ytd_charged_all"
+   ],
+   "rows": 168,
+   "sha256": "f7d67ee1a377c6b8",
    "copies": []
   },
   {
@@ -9474,7 +9515,8 @@
    "period": null,
    "note": "Shop / truck-and-trailer charge register.",
    "used_by": [
-    "analysis/maintenance_ledger.py"
+    "analysis/maintenance_ledger.py",
+    "tests/test_truck_maintenance.py"
    ],
    "sheets": 1,
    "sheet_names": [
@@ -9551,6 +9593,78 @@
    "sha256": "9797c3fc0ac403c3",
    "copies": [
     "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/a5e76db3-Bestpass_Toll__2026_08272026.xlsx"
+   ]
+  },
+  {
+   "path": "data/raw/truckmax/invoices/02be1048-Iron_Lease_exp.xlsx",
+   "bytes": 22956,
+   "modified": "2026-09-07",
+   "kind": "truckmax_invoice_log",
+   "entity": "IRON_LEASE",
+   "period": null,
+   "note": "Truck Max's own invoice log, split into four payer workbooks (Company/Driver/Iron Lease/Sher Imam). Additional to the *_Truck_and_Trailer_Expenses ledgers -- zero invoice-ID overlap confirmed before combining. Invoice numbers are reused across files and even within one file; identity is never the invoice number alone.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Iron Lease"
+   ],
+   "sha256": "3aa3f36f0d46e61c",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/02be1048-Iron_Lease_exp.xlsx"
+   ]
+  },
+  {
+   "path": "data/raw/truckmax/invoices/660f60f1-Sher_Imam.xlsx",
+   "bytes": 8817,
+   "modified": "2026-09-07",
+   "kind": "truckmax_invoice_log",
+   "entity": "TRUCKMAX",
+   "period": null,
+   "note": "Truck Max's own invoice log, split into four payer workbooks (Company/Driver/Iron Lease/Sher Imam). Additional to the *_Truck_and_Trailer_Expenses ledgers -- zero invoice-ID overlap confirmed before combining. Invoice numbers are reused across files and even within one file; identity is never the invoice number alone.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Sher Imam"
+   ],
+   "sha256": "14ff247597b2f701",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/660f60f1-Sher_Imam.xlsx"
+   ]
+  },
+  {
+   "path": "data/raw/truckmax/invoices/97d35052-Company_exp.xlsx",
+   "bytes": 41430,
+   "modified": "2026-09-07",
+   "kind": "truckmax_invoice_log",
+   "entity": "TRUCKMAX",
+   "period": null,
+   "note": "Truck Max's own invoice log, split into four payer workbooks (Company/Driver/Iron Lease/Sher Imam). Additional to the *_Truck_and_Trailer_Expenses ledgers -- zero invoice-ID overlap confirmed before combining. Invoice numbers are reused across files and even within one file; identity is never the invoice number alone.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Company"
+   ],
+   "sha256": "663f322b8fb6c793",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/97d35052-Company_exp.xlsx"
+   ]
+  },
+  {
+   "path": "data/raw/truckmax/invoices/cead6fb1-Driver_exp.xlsx",
+   "bytes": 16779,
+   "modified": "2026-09-07",
+   "kind": "truckmax_invoice_log",
+   "entity": "TRUCKMAX",
+   "period": null,
+   "note": "Truck Max's own invoice log, split into four payer workbooks (Company/Driver/Iron Lease/Sher Imam). Additional to the *_Truck_and_Trailer_Expenses ledgers -- zero invoice-ID overlap confirmed before combining. Invoice numbers are reused across files and even within one file; identity is never the invoice number alone.",
+   "used_by": [],
+   "sheets": 1,
+   "sheet_names": [
+    "Driver"
+   ],
+   "sha256": "19a448396d388aea",
+   "copies": [
+    "~uploads/27d87790-026b-5160-8c3b-bb714cc8e5e8/cead6fb1-Driver_exp.xlsx"
    ]
   }
  ]

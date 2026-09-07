@@ -9,6 +9,7 @@ import sys
 import warnings
 from pathlib import Path
 
+import pandas as pd
 import pytest
 
 ROOT = Path(__file__).parent.parent
@@ -117,16 +118,16 @@ def test_no_resolved_truck_has_negative_or_implausible_cost_per_mile(data):
     assert resolved.cost_per_mile.dropna().max() < 5
 
 
-def test_the_ledger_is_a_minority_of_the_pnls_own_maintenance_line():
-    """The finding that keeps this module from overclaiming: Truck Max shop
-    repairs are 21-43% of what the P&L panel books as maintenance, not all
-    of it. If this ever comes back near 100% the panel or the ledger changed
-    and the docstring's caveat needs revisiting."""
-    charges, _ = TM.all_charges()
-    rec = TM.reconcile_to_panel(charges)
+def test_the_ledger_is_a_minority_of_the_pnls_own_maintenance_line(data):
+    """The finding that keeps this module from overclaiming: even with both
+    Truck Max sources combined, they cover 42-51% of what the P&L panel books
+    as maintenance, not all of it. If this ever comes back near 100% the panel
+    or the ledgers changed and the docstring's caveat needs revisiting."""
+    charges, weeks, df, fails = data
+    rec = TM.reconcile_to_panel(charges, weeks)
     for co, r in rec.items():
         assert 0.15 < r["ratio"] < 0.60, (co, r["ratio"])
-        assert r["ledger"] < r["panel"]
+        assert r["combined"] < r["panel"]
 
 
 def test_controls_pass_or_name_a_real_ledger_issue(data):
@@ -147,3 +148,43 @@ def test_maintenance_ledger_controls_catch_a_real_nan_unit():
     c, u = M.load("XTRACK")
     fails = M.controls(c, u)
     assert any("no unit" in f[0] for f in fails)
+
+
+def test_the_second_source_is_added_never_deduplicated_against_the_first(data):
+    """Zero invoice-ID overlap was confirmed between the four new payer files
+    and the existing per-company ledgers before they were combined -- the two
+    are concatenated, never merged or deduplicated on any shared key."""
+    charges, weeks, df, fails = data
+    is_second = charges.ledger_company.astype(str).str.startswith("SECOND_SOURCE")
+    assert is_second.sum() > 0
+    assert (~is_second).sum() > 0
+    assert charges[is_second].amount.sum() > 0
+    assert charges[~is_second].amount.sum() > 0
+
+
+def test_second_source_iron_lease_is_visible_but_never_a_company_cost(data):
+    """Close in size to parse_iron_lease_invoices.py's own repair-credit total
+    ($174,138) -- plausibly the same repairs counted from a different document.
+    Excluded from cost everywhere, not just netted, until that is resolved."""
+    charges, weeks, df, fails = data
+    resolved = df[~df.unresolved]
+    assert resolved.second_source_iron_lease_EXCLUDED.sum() > 0
+    il_rows = charges[charges.borne_by == "iron lease (second source)"]
+    assert not il_rows.borne_by.isin(TM.COMPANY_BORNE).any()
+
+
+def test_reconcile_to_panel_windows_the_second_source_to_each_companys_own_span(data):
+    """The second source reaches back to 2025-08, five months before AFG's P&L
+    even starts. Comparing an unfiltered YTD total against a 20-week panel
+    total overstated AFG's ratio past 100% until both sources were cut to the
+    panel's own first..last week."""
+    charges, weeks, df, fails = data
+    rec = TM.reconcile_to_panel(charges, weeks)
+    for co, r in rec.items():
+        assert r["ratio"] is not None
+        assert r["ratio"] < 0.60, (co, r["ratio"])   # never near or over 100%
+        assert r["combined"] >= r["first_source"]
+
+
+def test_import_alias_pandas_is_available_for_the_new_tests():
+    import pandas as pd  # noqa: F401

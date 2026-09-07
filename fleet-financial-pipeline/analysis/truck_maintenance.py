@@ -45,15 +45,23 @@ zero.
 
 THIS LEDGER IS NOT ALL OF "MAINTENANCE." The weekly P&L panel carries its own
 `maintenance` figure -- a whole-fleet weekly total, independent of this file --
-and it runs 2 to nearly 5 times LARGER than what this ledger books as
-company-borne truck repairs over the same weeks (XTRACK $76,406 ledger against
-$254,488 panel, ZONE $82,375 against $192,366, AFG $9,534 against $46,202: 21,
-43 and 21 percent). So a per-truck total here is Truck Max SHOP REPAIRS
-specifically, not the P&L's whole maintenance line -- tires bought elsewhere,
-PM service, or anything paid outside Truck Max is in the panel figure and not
-in this ledger, and this module does not invent an allocation to close that
-gap. `reconcile_to_panel()` prints the two side by side so the ratio is visible
-rather than silently assumed away.
+and it originally ran 2 to nearly 5 times LARGER than what this ledger alone
+booked as company-borne truck repairs over the same weeks. `SECOND_SOURCE`
+(`ingest/parse_truckmax_invoices.py`, four payer-split invoice workbooks,
+2025-08 .. 2026-09, checked against the original ledger's own invoice IDs and
+found to share NONE of them) closes some of that gap. `reconcile_to_panel()`
+prints both sources against the panel so the remaining ratio is visible rather
+than silently assumed away.
+
+THE SECOND SOURCE'S "IRON LEASE" BUCKET IS KEPT SEPARATE AND EXCLUDED FROM
+COST, ON PURPOSE. It is Truck Max invoices where Iron Lease is the payer of
+record -- $159,187.96 -- and that is close enough in size to the $174,138 of
+"repair" CREDIT lines `parse_iron_lease_invoices.py` already reads off Iron
+Lease's own WEEKLY invoices to the operating companies that the two could be
+the same repairs counted from two different documents. Nothing in either
+source proves it either way, so this module does not guess: the bucket is
+reported, excluded from every cost total, and flagged as an open question
+rather than risking a double count in the group's total maintenance exposure.
 """
 import argparse
 import sys
@@ -68,6 +76,8 @@ warnings.filterwarnings("ignore")
 
 import maintenance_ledger as M      # noqa: E402
 import truck_weeks as T             # noqa: E402
+sys.path.insert(0, str(ROOT / "ingest"))
+import parse_truckmax_invoices as PT  # noqa: E402
 
 COMPANIES = ("XTRACK", "ZONE", "AFG")
 # borne_by values that are the OPERATING COMPANY's own cost. Everything else
@@ -103,7 +113,40 @@ def all_charges():
         out.append((co, c, fails))
     frames = [c for _, c, _ in out]
     all_fails = {co: f for co, _, f in out if f}
-    return pd.concat(frames, ignore_index=True), all_fails
+
+    second, second_file_controls = second_source_charges()
+    bad_second = [c for c in second_file_controls if not c["ties"]]
+    if bad_second:
+        all_fails["SECOND_SOURCE"] = [
+            (f"{c['payer']} invoice file does not tie to its own printed total",
+             round(c["detail_sum"] - (c["printed_total"] or 0), 2))
+            for c in bad_second]
+
+    combined = pd.concat(frames + [second], ignore_index=True)
+    return combined, all_fails
+
+
+def second_source_charges():
+    """The four payer-split invoice workbooks, in all_charges()'s own shape.
+
+    Concatenated directly into the same frame `all_charges()` returns -- unit,
+    date, amount, borne_by, ledger_company all line up column for column.
+    unit_type is 'truck' only where a real truck resolved; trailer and
+    unresolvable rows are excluded here the same way maintenance_ledger.py
+    excludes trailers from its own truck-cost figures.
+    """
+    raw, file_controls = PT.load()
+    d = raw[raw.truck.notna()].copy()
+    d["unit"] = d.truck
+    d["unit_type"] = "truck"
+    d["ledger_company"] = "SECOND_SOURCE:" + d.payer
+    # The three payers proven or assumed additive. 'iron_lease' is carried
+    # through so it is visible in the per-truck table, but per_truck() never
+    # sums it into company_cost -- see the module docstring.
+    d["borne_by"] = d.payer.map({"company": "company", "driver": "driver",
+                                 "sher_imam": "sher imam exp",
+                                 "iron_lease": "iron lease (second source)"})
+    return d, file_controls
 
 
 def all_weeks():
@@ -145,11 +188,25 @@ def per_truck(charges, weeks):
         # some of its trucks' first charges).
         cu_win = cu[cu.date.between(lo, hi)]
 
+        # COMPANY_BORNE covers both sources: the first ledger's 'company'/
+        # 'xtrack exp'/etc. values and the second source's plain 'company',
+        # which is already in COMPANY_BORNE.
         company_cost = cu_win[cu_win.borne_by.isin(COMPANY_BORNE)].amount.sum()
         driver_billed = cu_win[cu_win.borne_by == "driver"].amount.sum()
         iron = cu_win[cu_win.borne_by == "iron lease"]
         iron_paid = iron[iron.amount > 0].amount.sum()
         iron_credited = -iron[iron.amount < 0].amount.sum()
+        # Reported, never added to company_cost -- see the module docstring on
+        # why this may already be inside parse_iron_lease_invoices.py's own
+        # repair-credit figure.
+        second_source_iron_lease = cu_win[
+            cu_win.borne_by == "iron lease (second source)"].amount.sum()
+        second_source_cost = cu_win[
+            (cu_win.ledger_company.astype(str).str.startswith("SECOND_SOURCE"))
+            & cu_win.borne_by.isin(COMPANY_BORNE | {"driver"})
+        ]
+        second_source_company = second_source_cost[
+            second_source_cost.borne_by.isin(COMPANY_BORNE)].amount.sum()
 
         n_weeks = wu.week.nunique()
         total_miles = wu.miles.sum()
@@ -169,6 +226,8 @@ def per_truck(charges, weeks):
             "iron_lease_paid": iron_paid,
             "iron_lease_credited": iron_credited,
             "iron_lease_net_outstanding": iron_paid - iron_credited,
+            "second_source_company_cost": second_source_company,
+            "second_source_iron_lease_EXCLUDED": second_source_iron_lease,
             "charges_in_window": len(cu_win),
             "ytd_charged_all": cu.amount.sum(),
             "cost_per_week": company_cost / n_weeks if n_weeks else None,
@@ -177,7 +236,7 @@ def per_truck(charges, weeks):
     return pd.DataFrame(rows)
 
 
-def reconcile_to_panel(charges):
+def reconcile_to_panel(charges, weeks):
     """The ledger against the P&L's OWN maintenance line, whole fleet.
 
     Independent of the per-truck join: this compares two totals for the same
@@ -185,17 +244,46 @@ def reconcile_to_panel(charges):
     it did not write. It is not the per-truck answer -- it is the check on
     whether the ledger can be trusted as A COMPLETE PICTURE of maintenance, and
     the answer is no.
+
+    The first ledger tags a charge with the company it was FILED under
+    (`ledger_company`), which is a fact about the paperwork. The second source
+    carries no such column -- Truck Max invoiced a payer, not an operating
+    company -- so its charges are attributed here by which company's P&L
+    actually carried the truck, the same resolution `per_truck()` uses, via a
+    truck's LATEST P&L week rather than the ledger's own filing.
     """
     import truck_breakeven as B
     from xtrack_trend import load as load_weeks
+
+    last_seen_company = (weeks.sort_values("week")
+                         .groupby("unit").pnl_company.last())
+
     out = {}
     for co in COMPANIES:
         wk = load_weeks(ROOT / B.WORKBOOK[co])
         panel = sum(wk[k].get("maintenance", 0) or 0 for k in wk)
-        t = charges[(charges.ledger_company == co)]
-        ledger = t[t.borne_by.isin(COMPANY_BORNE)].amount.sum()
-        out[co] = {"panel": panel, "ledger": ledger,
-                   "ratio": ledger / panel if panel else None}
+        # The panel only speaks for the weeks it actually has. AFG's P&L starts
+        # 2026-04-13; the second source reaches back to 2025-08. Comparing an
+        # unfiltered YTD total against a 20-week panel total is why AFG showed
+        # 104% on the first pass here -- five months of charges the panel
+        # cannot possibly have booked. Both sources are cut to the panel's own
+        # first..last week before anything is summed.
+        lo, hi = min(wk), max(wk)
+
+        first = charges[(charges.ledger_company == co)
+                       & charges.date.between(lo, hi)]
+        first_cost = first[first.borne_by.isin(COMPANY_BORNE)].amount.sum()
+
+        second = charges[charges.ledger_company.astype(str)
+                         .str.startswith("SECOND_SOURCE")
+                         & charges.date.between(lo, hi)]
+        second = second[second.unit.map(last_seen_company) == co]
+        second_cost = second[second.borne_by.isin(COMPANY_BORNE)].amount.sum()
+
+        out[co] = {"panel": panel, "first_source": first_cost,
+                   "second_source": second_cost,
+                   "combined": first_cost + second_cost,
+                   "ratio": (first_cost + second_cost) / panel if panel else None}
     return out
 
 
@@ -287,15 +375,16 @@ def main():
         print(unresolved[["unit", "ytd_charged", "n_charges"]].head(10)
               .to_string(index=False, formatters={"ytd_charged": "${:,.0f}".format}))
 
-    print(f"\n== IS THIS LEDGER ALL OF MAINTENANCE? NO -- CHECKED AGAINST THE P&L'S "
-          f"OWN LINE ==")
-    rec = reconcile_to_panel(charges)
-    print(f"  {'company':<10}{'P&L panel maintenance':>24}{'this ledger, company-borne':>28}{'ratio':>8}")
+    print(f"\n== IS THIS LEDGER ALL OF MAINTENANCE? CHECKED AGAINST THE P&L'S OWN LINE ==")
+    rec = reconcile_to_panel(charges, weeks)
+    print(f"  {'company':<10}{'P&L panel':>12}{'ledger #1':>12}{'+ledger #2':>12}"
+          f"{'combined':>12}{'ratio':>8}")
     for co, r in rec.items():
-        print(f"  {co:<10}{r['panel']:>24,.0f}{r['ledger']:>28,.0f}{r['ratio']:>8.0%}")
-    print("  Only 21-43% of the P&L's own maintenance line is in this file. The rest")
-    print("  is tires, PM service or repairs paid outside Truck Max -- not invented")
-    print("  here, and not something this module can attribute to a truck.")
+        print(f"  {co:<10}{r['panel']:>12,.0f}{r['first_source']:>12,.0f}"
+              f"{r['second_source']:>12,.0f}{r['combined']:>12,.0f}{r['ratio']:>8.0%}")
+    print("  Adding the second source closes part of the gap but not all of it. The")
+    print("  rest is tires, PM service or repairs paid outside Truck Max -- not")
+    print("  invented here, and not something either file can attribute to a truck.")
 
     if a.csv:
         out = ROOT / a.csv

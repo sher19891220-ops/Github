@@ -116,6 +116,12 @@ KIND_PATTERNS = [
      "Relay Payments fuel rail. Took over in April 2026. A rail itemises what "
      "later hits the bank as one draft -- reconcile, never sum."),
     (r"bestpass", "toll_bestpass", "Bestpass toll rail."),
+    (r"data/raw/truckmax/invoices/", "truckmax_invoice_log",
+     "Truck Max's own invoice log, split into four payer workbooks (Company/"
+     "Driver/Iron Lease/Sher Imam). Additional to the *_Truck_and_Trailer_"
+     "Expenses ledgers -- zero invoice-ID overlap confirmed before combining. "
+     "Invoice numbers are reused across files and even within one file; "
+     "identity is never the invoice number alone."),
     (r"truck_and_trailer_expenses|truck_max_charges", "shop_charges",
      "Shop / truck-and-trailer charge register."),
     (r"invoice_list", "factoring_invoices",
@@ -348,6 +354,7 @@ HEADINGS = {
     "factoring_invoices": "Factoring invoice lists",
     "payroll": "Payroll",
     "lease_register": "Iron Lease register",
+    "truckmax_invoice_log": "Truck Max invoice log (four payer workbooks)",
     "driver_roster": "Driver rosters",
     "fuel_tax_return": "IFTA and state fuel-tax returns",
     "insurance_policy": "Insurance policies and registrations",

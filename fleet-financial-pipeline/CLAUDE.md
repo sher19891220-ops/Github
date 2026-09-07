@@ -1178,31 +1178,76 @@ corroborate would overstate cost per week.
                       8132 (XTRACK)       $0.1408/mi  $348.77/wk  27 wks
                       1596 (AFG/XTRACK)   $0.1150/mi  $307.21/wk  13 wks
 
-**THIS LEDGER IS NOT ALL OF "MAINTENANCE."** The P&L panel carries its own
-whole-fleet weekly `maintenance` line, and this ledger's company-borne truck
-total is only **21-43% of it**:
+**A SECOND SOURCE, ADDED 2026-09-07: Truck Max's own invoice log**
+(`ingest/parse_truckmax_invoices.py`), split into four payer workbooks --
+Company_exp ($349,624, 426 rows), Iron_Lease_exp ($159,188, 80 rows), Driver_exp
+($40,361, 27 rows), Sher_Imam ($10,139, 7 rows), 2025-08 .. 2026-09. Checked
+against the original ledger's own invoice IDs before combining: **zero overlap**,
+so the two are concatenated, never merged or deduplicated against each other.
 
-    XTRACK   ledger $76,406   panel $254,488   30%
-    ZONE     ledger $79,191   panel $192,366   41%
-    AFG      ledger  $9,534   panel  $46,202   21%
+**INVOICE NUMBERS ARE NOT UNIQUE, EVEN WITHIN ONE FILE.** `INV0015` appears
+twice in Company_exp alone -- truck 8133 on 2025-08-28, trailer 536050 on
+2025-08-27. Numbers also repeat ACROSS files: `INV0001` is $3,920.69 on truck
+289909 in Company_exp and an unrelated $1,196.57 on truck 6169 in Driver_exp.
+The shop reuses its own numbering, so identity is never the invoice number
+alone, and nothing here deduplicates on it.
 
-So a per-truck total here is **Truck Max shop repairs specifically**, not the
-P&L's whole maintenance spend -- tires, PM service or anything paid outside
-Truck Max is in the panel figure and not in this file, and nothing here invents
-an allocation to close that gap. `reconcile_to_panel()` prints both.
+**THE SECOND SOURCE'S "IRON LEASE" BUCKET IS EXCLUDED FROM COST, ON PURPOSE.**
+$159,187.96 of Truck Max invoices where Iron Lease is the payer of record is
+close enough to the **$174,138** of "repair" CREDIT lines
+`parse_iron_lease_invoices.py` already reads off Iron Lease's own WEEKLY
+invoices that the two could be the same repairs counted from two different
+documents. Neither source proves it either way -- reported, excluded from every
+cost total, flagged as open rather than risked as a double count.
 
-**40 TRUCKS CHARGED IN THE LEDGER APPEAR IN NO COMPANY'S P&L** ($51,682) --
+**A REAL BUG THIS SESSION FOUND IN ITS OWN NEW CODE, caught before it shipped:**
+`str(15862.0)` is `'15862.0'`; stripping non-digits from that string keeps the
+`0` after the decimal point, turning truck 15862 into `158620`. Every
+whole-number-float truck in three of the four files gained a spurious trailing
+digit this way -- 6867 became 68670, 15909 became 159090 -- until a whole-number
+float is now cast through `int()` before any digit-stripping runs.
+
+**COMBINED, BOTH SOURCES STILL COVER LESS THAN HALF THE P&L'S OWN LINE**, and
+the ratio is now consistent across all three companies rather than the scattered
+21-43% one source alone gave:
+
+    XTRACK   ledger #1 $67,936 + #2 $38,122 = $106,058   panel $254,488   42%
+    ZONE     ledger #1 $54,411 + #2 $28,572 = $ 82,983   panel $192,366   43%
+    AFG      ledger #1  $9,534 + #2 $14,018 = $ 23,552   panel  $46,202   44%
+
+(Figures above are windowed to each COMPANY's own panel span; a truck's
+PER-TRUCK cost table below is windowed to that TRUCK's own P&L span instead --
+the two windows serve different questions and are computed separately.)
+
+**FLEET TOTAL WITH BOTH SOURCES COMBINED:**
+
+    fleet total (company-borne, each truck's own window):  $190,264
+    over 2,195 truck-weeks and 6,133,979 miles
+    fleet average    $86.68/truck-week    $0.0310/mile
+
+    worst by $/mile   8131 (XTRACK/ZONE)  $0.2612/mi  $626.48/wk  27 wks
+                      8132 (XTRACK)       $0.2299/mi  $569.62/wk  27 wks
+                     15852 (ZONE)         $0.2275/mi  $505.01/wk  26 wks
+                      1596 (AFG/XTRACK)   $0.1881/mi  $502.34/wk  13 wks
+
+**50 TRUCKS CHARGED IN EITHER LEDGER APPEAR IN NO COMPANY'S P&L** ($~52k) --
 checked against the fleet registry: they either do not exist there at all, or
-they are exactly the units `fleet_registry.py` already found with no resolvable
+are exactly the units `fleet_registry.py` already found with no resolvable
 company (`last_week: None`). Not a join bug; the same fleet-history gap this
 pipeline has documented since the registry was first read.
 
-**A PANDAS-VERSION BUG THIS SESSION FOUND**, now fixed and regression-tested:
-pandas 3.x changed `.astype(str)` to leave a genuine `NaN` as `NaN` instead of
-stringifying it to `'nan'`. `maintenance_ledger.controls()`'s own check,
-`charged.unit.eq("nan")`, stopped catching a real no-unit charge the moment the
-pandas version changed underneath it -- silently, no error, no warning. Fixed to
-`.isna() | .eq("nan")`, covering both.
+**A PANDAS-VERSION BUG ALSO FOUND**, in code this session did not touch, now
+fixed and regression-tested: pandas 3.x changed `.astype(str)` to leave a
+genuine `NaN` as `NaN` instead of stringifying it to `'nan'`.
+`maintenance_ledger.controls()`'s own check, `charged.unit.eq("nan")`, stopped
+catching a real no-unit charge the moment the pandas version changed underneath
+it -- silently, no error, no warning. Fixed to `.isna() | .eq("nan")`.
+
+**QUICKMANAGE ("QM") IS NOT IN THE CORPUS.** The operator asked to also check
+"QM trucks and drivers expenses statements" -- no QuickManage export exists
+anywhere in `data/raw`. CLAUDE.md has referenced QuickManage as a measured
+odometer/repair-order source since before this pipeline's first commit, and it
+has never actually arrived; this module cannot read what has not been uploaded.
 
 ## The dispatch export is the only DAY in the corpus
 
