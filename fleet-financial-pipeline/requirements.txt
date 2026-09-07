@@ -21,6 +21,9 @@ pytest>=8.0
 google-api-python-client
 google-auth
 
+# QuickManage's own API (ingest/pull_quickmanage.py). Optional in the same way.
+requests>=2.31
+
 # Reading answers aloud (tools/say.py, .claude/skills/voice). Optional -- the
 # pipeline is fully functional without it. The 63 MB voice model lives in
 # /opt/piper-voices, outside the repo; say.py names the install command if the

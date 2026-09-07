@@ -1311,13 +1311,68 @@ genuine `NaN` as `NaN` instead of stringifying it to `'nan'`.
 catching a real no-unit charge the moment the pandas version changed underneath
 it -- silently, no error, no warning. Fixed to `.isna() | .eq("nan")`.
 
-**QUICKMANAGE ("QM") IS NOT IN THE CORPUS.** The operator asked to also check
-"QM trucks and drivers expenses statements" -- no QuickManage export exists
-anywhere in `data/raw`. CLAUDE.md has referenced QuickManage as a measured
-odometer/repair-order source since before this pipeline's first commit, and it
-has never actually arrived; this module cannot read what has not been uploaded.
+**QUICKMANAGE ("QM") WAS NOT IN THE CORPUS UNTIL 2026-09-07** -- the operator
+asked to check "QM trucks and drivers expenses statements" and no QuickManage
+export existed anywhere in `data/raw`. That day the operator supplied working
+`client_credentials` OAuth pairs for all three companies and
+`ingest/pull_quickmanage.py` was built and tested end to end against the real
+API (`https://api.quickmanage.com`). **What it actually turned out to expose
+corrects an assumption this file had carried since before its first commit**:
+see "QuickManage has trips and trucks, NOT odometer or repair orders" below.
 
-## The dispatch export is the only DAY in the corpus
+## QuickManage has trips and trucks, NOT odometer or repair orders
+
+Confirmed 2026-09-07 by calling the real API with working credentials for all
+three companies, not assumed. `POST /auth/token` with `{client_id,
+client_secret}` returns `data.access_token`; that Bearer token was then tried
+against every endpoint name a TMS API plausibly has:
+
+    200  /x/trucks/search    /x/trailers/search   /x/drivers/search   /x/trips/search
+    404  /x/repairs/search   /x/maintenance/search   /x/work-orders/search
+    404  /x/odometer/search  /x/odometers/search  /x/inspections/search
+    404  /x/fuel/search      /x/fuel-purchases/search   /x/service-records/search
+    404  /x/expenses/search  /x/vendors/search    /x/invoices/search
+
+**`/x/trucks/search` is a roster, not a mileage log**: `unit, vin,
+plate_number, plate_state, make, year, owner_id, status, in_service_date,
+drivers[]`. No odometer field anywhere on the record.
+
+**`/x/trips/search` is dispatch/load data — real mileage, but per TRIP, not
+per truck-week, and not an odometer reading**: each trip has `stops[]`, and
+each stop carries `distance` and `deadhead` (miles), `rate` and
+`accessorials_total` (revenue), `assigned_truck`/`assigned_trailer`/
+`assigned_drivers`, and dates. Summed across a truck's stops in a week this
+would be genuine measured mileage and revenue -- CLAUDE.md's "Mileage before
+money" section's case for it still holds -- but it is not what "odometer" or
+"repair-order" meant in the sourcing table below, and this API surface has NO
+maintenance-cost data at all, confirmed by the 404s above, not merely absent
+from what was queried.
+
+**The sourcing table's "QuickManage / Samsara → odometer, repair orders,
+revenue → measured" row is corrected**: QuickManage's `/x` API gives trips
+(mileage + revenue) and a truck/trailer/driver roster. It gives neither
+odometer readings nor repair-order cost. Whether Samsara or some other
+QuickManage surface not tried here carries those is still open -- this only
+rules out the four endpoint families above.
+
+ZONE_OH alone returned **221 trucks** and **23,510 trips** (paginated 100 at a
+time via `page`/`page_size` in the request body, not yet driven past page 0
+here). `ingest/pull_quickmanage.py` authenticates and saves raw
+trucks/trips JSON per company under `data/raw/quickmanage/<company>/`; nothing
+downstream reads it yet, and pulling the full 23,510-trip history for all
+three companies, then deciding whether it duplicates `data/raw/ops/`'s own
+per-driver-per-day dispatch rows below, is unbuilt and worth a decision before
+building it, not an assumption either way.
+
+**Credentials arrived pasted directly into a chat message**, not through the
+setup flow `pull_sheets.py` uses. They were tested via a session-only
+`export QUICKMANAGE_CREDENTIALS=...`, never written to any file in this repo
+-- `config/quickmanage_credentials.example.json` holds only placeholders, per
+the existing `config/*_credentials.json` gitignore rule. For this to survive
+a container reclaim the same way `GSHEETS_SERVICE_ACCOUNT` was meant to, the
+real JSON needs to be pasted into the remote environment's persistent
+variables as `QUICKMANAGE_CREDENTIALS` -- the one step only the operator can
+do, same as every other credential in this pipeline.
 
 ## The dispatch export is the only DAY in the corpus
 
@@ -1483,7 +1538,7 @@ its deduction lines, can close the recovery question.
 | Google Sheets | the P&L the business has been deciding on | hand-maintained — an assertion to test, never truth |
 | QuickBooks | categorized GL | stated |
 | Bank/card | independent cash movement | derived — cannot be miscoded like a manual entry |
-| QuickManage / Samsara | odometer, repair orders, revenue | measured |
+| QuickManage / Samsara | trip mileage + revenue (QuickManage, confirmed 2026-09-07); odometer and repair orders NOT found on QuickManage's `/x` API -- see "QuickManage has trips and trucks, NOT odometer or repair orders" | measured |
 
 They all normalize into `pnl_observations` / `odometer_readings` with a `source`
 column. **Do not write pairwise reconcilers.** Two sources is one pair; four is
@@ -1498,7 +1553,10 @@ pipeline.
 **Mileage before money.** Cost-per-mile is linear in mileage — a 10% mileage
 error moves cost-per-mile 10%, larger than most effects being hunted. Reconcile
 odometer readings before trusting any per-mile figure. Source preference:
-Samsara (telematics) > QuickManage > Google Sheets (hand-keyed).
+Samsara (telematics) > QuickManage > Google Sheets (hand-keyed). QuickManage's
+contribution here is trip-level `distance`/`deadhead` summed per truck-week,
+not an odometer reading -- confirmed no odometer field exists on either its
+truck or trip records.
 
 A bad odometer reading corrupts **two** deltas — the one into it and the one out
 of it. A transposed digit shows as a negative delta, then the correction back to
@@ -1626,3 +1684,10 @@ schema — table names, whether per-unit mileage history exists, whether
 QuickManage repair-order *cost* reaches `aiops` or only Samsara fault codes.
 The `finance` schema migration depends on these. Do not write the ops views
 until the real schema is inspected. State which is which in every report.
+**Partially resolved 2026-09-07, from outside `aiops` entirely**: QuickManage's
+own public `/x` API has no repair-order or odometer endpoint at all (see
+"QuickManage has trips and trucks, NOT odometer or repair orders"), so if
+`aiops` carries QuickManage repair-order cost, it did not come from this API
+surface -- either a different QuickManage surface, or the assumption that
+QuickManage is the source at all needs revisiting before the migration is
+written.
