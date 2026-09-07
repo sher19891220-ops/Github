@@ -1255,6 +1255,32 @@ corroborate would overstate cost per week.
                       8132 (XTRACK)       $0.1408/mi  $348.77/wk  27 wks
                       1596 (AFG/XTRACK)   $0.1150/mi  $307.21/wk  13 wks
 
+**A THIRD SOURCE, ADDED 2026-09-07: QuickManage's own "Spending by
+Trucks/Trailers" report**, exported from its web UI (not its API -- the `/x`
+endpoints probed the same day return 404 for anything spending-shaped; this
+report clearly exists in the product regardless). Two files, Zone-OH LLC only,
+top 10 units each by total spend, 2025-08-01..2026-09-07 (`data/raw/quickmanage/
+reports/`). Cross-checked against every ledger and Truck Max source above, same
+window, company-borne only:
+
+    TRUCKS: QuickManage is higher for 9 of 10 units, often by a lot -- two
+    units (6169 $11,124, 001 $6,404) have ZERO matching rows anywhere else in
+    the corpus. The one exception is unit 8131, where the PIPELINE is higher
+    ($22,691 vs QuickManage's $6,825) -- the opposite direction from every
+    other truck, on the fleet's own worst-$/mile unit. Not yet explained.
+
+    TRAILERS: much closer, and mixed-direction ($-2,431 to $+6,501 across the
+    10) -- no zeros, no wild multiples. Whatever QuickManage is capturing that
+    this pipeline is not, it affects TRUCKS far more than trailers.
+
+This is a top-10 leaderboard, not the underlying detail -- it names which
+units are worst, not what was charged or when, so it cannot be joined
+row-by-row the way Truck Max's invoice log can. The real fix is the full
+per-unit spending detail from QuickManage, not just its top 10; until that
+exists, treat every truck total above as a FLOOR, not the true cost, and treat
+unit 8131's reversal as a specific open question rather than assuming it
+nets out with the rest.
+
 **A SECOND SOURCE, ADDED 2026-09-07: Truck Max's own invoice log**
 (`ingest/parse_truckmax_invoices.py`), split into four payer workbooks --
 Company_exp ($349,624, 426 rows), Iron_Lease_exp ($159,188, 80 rows), Driver_exp
