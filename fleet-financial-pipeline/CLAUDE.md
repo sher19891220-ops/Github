@@ -51,8 +51,32 @@ already sees these sheets with no setup and is the right way to FIND a document
 or read a small one; it is the wrong way to move a workbook, because the file
 would come back base64-encoded through the conversation.
 
+**THE KEY LIVES IN AN ENVIRONMENT VARIABLE, NOT ON DISK.** This container is
+ephemeral and has been reclaimed mid-analysis before, taking everything untracked
+with it. `GSHEETS_SERVICE_ACCOUNT`, set on the remote environment, survives every
+restart and is never written to disk here. A file at
+`config/gsheets_service_account.json` still works as a local fallback, and the
+environment variable wins over it — a stale file from an older setup must not
+silently take precedence.
+
+**BASE64 IS THE SAFER FORM; BOTH ARE ACCEPTED.** A service account's private key
+is one long line containing literal `\n` sequences, and settings boxes variously
+strip them, turn them into real newlines, or double-escape them. Each produces an
+unreadable-key error from the crypto layer that says nothing about what went
+wrong. `read_credentials()` repairs the JSON-escaped form, names the
+spaces-for-newlines form as unrecoverable, and catches a truncated or
+wrong-file paste by FIELD NAME rather than letting it surface four calls later as
+`invalid_grant` from inside an OAuth exchange. Verified against a real RSA key
+across six paste manglings.
+
+**NO ERROR MESSAGE MAY CONTAIN KEY MATERIAL** — a stack trace carrying the
+private key leaks it into logs, transcripts and terminal scrollback. Tested.
+The only thing ever printed is `client_email`, which is the address you share the
+sheets with and is not a secret.
+
 Setup is six steps in `pull_sheets.py`'s docstring and only the owner can do it.
-Then `python3 ingest/pull_sheets.py --check`.
+Then `python3 ingest/pull_sheets.py --whoami` proves the key loads and says which
+sheets it can actually see, before anything is downloaded.
 
 ## Start here: ASK before analysing
 

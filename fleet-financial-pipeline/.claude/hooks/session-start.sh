@@ -31,6 +31,16 @@ else
   echo "No catalog yet -- run: python3 ingest/catalog.py"
 fi
 
+echo "--- google sheets ---"
+if [ -n "${GSHEETS_SERVICE_ACCOUNT:-}" ]; then
+  # Length only. Never the value: this output lands in the transcript.
+  echo "GSHEETS_SERVICE_ACCOUNT is set (${#GSHEETS_SERVICE_ACCOUNT} chars). Refresh: python3 ingest/pull_sheets.py --check"
+elif [ -f config/gsheets_service_account.json ]; then
+  echo "Service account key on disk (this container only). Refresh: python3 ingest/pull_sheets.py --check"
+else
+  echo "No Google key -- P&L comes from the .xlsx already in data/raw. See ingest/pull_sheets.py for setup."
+fi
+
 echo "--- established facts ---"
 if [ -f data/processed/facts.json ]; then
   python3 analysis/facts.py --stale 2>/dev/null || true
