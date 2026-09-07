@@ -8,6 +8,52 @@ This file is the set of conventions that must not be re-derived or guessed.
 
 ---
 
+## Connect to Google Sheets directly instead of exporting by hand
+
+`ingest/pull_sheets.py`. Proven reachable from this container: an unauthenticated
+call to `sheets.googleapis.com` returns **HTTP 403** — it reached Google and was
+refused for auth, not blocked by the network — and `google-api-python-client`
+installs cleanly. All that is missing is a key.
+
+**IT EXPORTS .xlsx, IT DOES NOT READ CELLS.** The whole pipeline depends on one
+thing the Sheets API makes awkward: **the week is only in the tab name**. So this
+uses Drive's export endpoint to fetch each sheet as a real .xlsx, writes it to
+**the path the pipeline already reads**, and stops. Nothing downstream changes,
+every parser control still applies, and the parser cache invalidates itself
+because the file's mtime moved.
+
+    ZONE_3YR   16kM262ojCO15Oxq0lHES2McFF4E-57L-U3M_6DXUp7I  11.4 MB
+    XTRACK     1tntDRbgEEGQi_43MnxcK2SpOrO7nB5qYaMjIKm7cIjs   5.9 MB
+    AFG        1ZLkSoZnuWa9ZAqIISvTRt02OOuvo1Dppap4IrRa6Vg4   0.8 MB
+    ZONE_OLD   1HI8HQbNQf5caLmd8oKa6yAxHCzl2UyorP7XLho7k52k   6.2 MB  never read
+
+**`OLD Zone LLC Profit and Loss Weekly` has never been in this corpus** — 6.2 MB,
+created 2020, last touched 2026-08-31. It is the only candidate for the pre-2026
+ZONE history the current workbook's panel layout will not parse.
+
+**READ-ONLY SCOPE, `drive.readonly`.** A service account that can only read
+cannot damage the book the business runs on, however wrong the code turns out to
+be. `config/gsheets_service_account.json` is gitignored and a test asserts it —
+a key committed to history is a real leak, and the file is created by hand later,
+so the ignore rule has to already be right.
+
+**ONLY REWRITE WHEN THE SOURCE MOVED.** Drive reports `modifiedTime`; if it is
+not newer than the local copy, nothing is downloaded. A pointless rewrite bumps
+the mtime, invalidates every cached parse, and costs twenty minutes of OCR and
+workbook reading to arrive at the same numbers.
+
+**WRITE THE WORKBOOK ATOMICALLY.** A half-written .xlsx is not a corrupt file
+openpyxl rejects loudly — it is a workbook with FEWER TABS, which parses cleanly
+and silently drops weeks.
+
+**The Google Drive MCP connector is a different tool for a different job.** It
+already sees these sheets with no setup and is the right way to FIND a document
+or read a small one; it is the wrong way to move a workbook, because the file
+would come back base64-encoded through the conversation.
+
+Setup is six steps in `pull_sheets.py`'s docstring and only the owner can do it.
+Then `python3 ingest/pull_sheets.py --check`.
+
 ## Start here: ASK before analysing
 
 **`python3 analysis/facts.py --find <term>` answers a settled question in 40
