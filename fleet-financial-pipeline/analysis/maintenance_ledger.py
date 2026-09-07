@@ -86,8 +86,13 @@ def controls(charged, uncosted):
     other_neg = charged[(charged.amount < 0) & (charged.borne_by != "iron lease")]
     if len(other_neg):
         fails.append(("negative charges outside the Iron Lease reversals", len(other_neg)))
-    if charged.unit.eq("nan").any():
-        fails.append(("charges with no unit", int(charged.unit.eq("nan").sum())))
+    # pandas 3.x changed .astype(str) to leave a genuine NaN as NaN instead of
+    # stringifying it to 'nan' -- this control read charged.unit.eq("nan") and
+    # so stopped firing the moment the pandas version changed under it, with no
+    # error and no warning. Checking for null covers both.
+    no_unit = charged.unit.isna() | charged.unit.eq("nan")
+    if no_unit.any():
+        fails.append(("charges with no unit", int(no_unit.sum())))
     return fails
 
 

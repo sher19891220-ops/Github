@@ -1141,6 +1141,71 @@ only 712 of its 1,639 rows carry an amount, and **trailers are the bigger half**
 of the spend (108 units, $162,533 vs 65 trucks, $130,352 in 2026) — folding them
 into trucks overstates cost per tractor by about half.
 
+## Maintenance cost per truck, matched to that truck's own miles and weeks
+
+`analysis/truck_maintenance.py`. Joins `maintenance_ledger.py` (what broke, on
+which unit) to `truck_weeks.py` (that unit's own miles and P&L weeks) BY UNIT,
+across all three companies at once -- not per company, because a truck's repairs
+are not filed under one company any more than its P&L rows are.
+
+**A TRUCK'S MAINTENANCE IS NOT FILED UNDER ONE COMPANY.** 40 of 118 matched
+trucks show charges or P&L weeks under more than one company -- unit 8131
+(XTRACK/ZONE, $12,633, the single largest cost in the fleet), 15862, 1596. Every
+per-truck figure here is the WHOLE truck, joined across every ledger and every
+company's P&L that ever carried it.
+
+**"WHAT WE SPEND" IS ONE OF THREE BUCKETS, AND ONLY ONE IS A COST:**
+
+    company     the operating company paid it and does not get it back
+    driver      billed to the settlement -- a RECOVERY, and whether it was
+                actually deducted is a still-open question this does not close
+    iron lease  booked when the company pays Truck Max, REVERSED when Iron
+                Lease credits it back -- nets to zero and is excluded
+
+**THE WINDOW IS CUT TO EACH TRUCK'S OWN P&L SPAN**, not the ledger's full
+2026-01-01..09-01. The P&L only reaches back to 2026-02-23 (XTRACK/ZONE) or
+2026-04-13 (AFG); dividing YTD dollars by a week count the P&L cannot
+corroborate would overstate cost per week.
+
+    fleet total (company-borne, each truck's own window):  $113,377
+    over 2,195 truck-weeks and 6,133,979 miles
+    fleet average    $51.65/truck-week    $0.0185/mile
+    median            $15.88/truck-week    $0.0064/mile      <- the average is
+                                                                 pulled up hard
+                                                                 by a few units
+
+    worst by $/mile   8131 (XTRACK/ZONE)  $0.1951/mi  $467.89/wk  27 wks
+                      8132 (XTRACK)       $0.1408/mi  $348.77/wk  27 wks
+                      1596 (AFG/XTRACK)   $0.1150/mi  $307.21/wk  13 wks
+
+**THIS LEDGER IS NOT ALL OF "MAINTENANCE."** The P&L panel carries its own
+whole-fleet weekly `maintenance` line, and this ledger's company-borne truck
+total is only **21-43% of it**:
+
+    XTRACK   ledger $76,406   panel $254,488   30%
+    ZONE     ledger $79,191   panel $192,366   41%
+    AFG      ledger  $9,534   panel  $46,202   21%
+
+So a per-truck total here is **Truck Max shop repairs specifically**, not the
+P&L's whole maintenance spend -- tires, PM service or anything paid outside
+Truck Max is in the panel figure and not in this file, and nothing here invents
+an allocation to close that gap. `reconcile_to_panel()` prints both.
+
+**40 TRUCKS CHARGED IN THE LEDGER APPEAR IN NO COMPANY'S P&L** ($51,682) --
+checked against the fleet registry: they either do not exist there at all, or
+they are exactly the units `fleet_registry.py` already found with no resolvable
+company (`last_week: None`). Not a join bug; the same fleet-history gap this
+pipeline has documented since the registry was first read.
+
+**A PANDAS-VERSION BUG THIS SESSION FOUND**, now fixed and regression-tested:
+pandas 3.x changed `.astype(str)` to leave a genuine `NaN` as `NaN` instead of
+stringifying it to `'nan'`. `maintenance_ledger.controls()`'s own check,
+`charged.unit.eq("nan")`, stopped catching a real no-unit charge the moment the
+pandas version changed underneath it -- silently, no error, no warning. Fixed to
+`.isna() | .eq("nan")`, covering both.
+
+## The dispatch export is the only DAY in the corpus
+
 ## The dispatch export is the only DAY in the corpus
 
 `data/raw/ops/` is the dispatch system's own database: one row per driver per
