@@ -8,6 +8,43 @@ This file is the set of conventions that must not be re-derived or guessed.
 
 ---
 
+## Reading an answer aloud
+
+`tools/say.py`, and `.claude/skills/voice` so it can be asked for by name. Piper,
+a neural TTS, entirely offline: the text being read is the group's margins,
+break-even and what the sheets get wrong, and that does not belong on a cloud
+voice API for the sake of a nicer accent.
+
+    python3 tools/say.py --in notes.md --out brief.mp3
+    python3 tools/say.py --in notes.md --dry-run       # words only, no audio
+
+**THE SYNTHESISER IS THE EASY HALF.** A listener cannot re-read a sentence, so a
+spoken figure has one chance to be right — and this project's text is nothing but
+figures. Always `--dry-run` first.
+
+**A RATE IS NOT A PRICE.** `$2.80` is "two dollars eighty"; `$2.928` is "two
+point nine two eight dollars". An early version truncated to two decimals and
+read `$2.928` a mile as "two dollars ninety-two" — a different rate, spoken with
+total confidence. On a 3,000-mile truck `$1.0725` and `$1.07` are eighteen
+dollars a week apart.
+
+**SUB-DOLLAR FIGURES BECOME CENTS, KEEPING EVERY PLACE.** `$0.0003` read as "zero
+point three cents" is TEN TIMES the truth. Shifting the decimal by stripping
+leading zeros destroys exactly the positional information the shift depends on;
+it uses `Decimal`.
+
+**A NORMALISER THAT RAISES IS WORSE THAN ONE THAT READS A SYMBOL ALOUD.** The
+percent rule fed the digit reader a trailing `%` and it crashed on `int('%')`.
+
+Markdown furniture is stripped — a table border read aloud is a minute of "pipe
+dash pipe dash". Tables do not work as audio at all: say the three numbers that
+matter and leave the grid on screen. About 150 words a minute, so a full cost
+structure is 4–6 minutes.
+
+**The 63 MB voice model lives in `/opt/piper-voices`, outside the repo, and a
+container reclaim takes it.** `say.py` then names the install command rather than
+failing obscurely.
+
 ## Connect to Google Sheets directly instead of exporting by hand
 
 `ingest/pull_sheets.py`. Proven reachable from this container: an unauthenticated

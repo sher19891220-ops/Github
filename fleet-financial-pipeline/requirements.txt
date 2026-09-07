@@ -20,3 +20,9 @@ pytest>=8.0
 # without a service account key is fully functional and simply cannot refresh.
 google-api-python-client
 google-auth
+
+# Reading answers aloud (tools/say.py, .claude/skills/voice). Optional -- the
+# pipeline is fully functional without it. The 63 MB voice model lives in
+# /opt/piper-voices, outside the repo; say.py names the install command if the
+# container was reclaimed and took it.
+piper-tts
