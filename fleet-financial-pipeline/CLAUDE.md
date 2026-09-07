@@ -1355,6 +1355,51 @@ API (`https://api.quickmanage.com`). **What it actually turned out to expose
 corrects an assumption this file had carried since before its first commit**:
 see "QuickManage has trips and trucks, NOT odometer or repair orders" below.
 
+## The full per-unit spend picture: `analysis/spend_picture.py`
+
+Built 2026-09-07 in response to "how much do we spend per truck/trailer, by
+week/month/quarter/year, and cost per mile" -- a broader ask than
+`truck_maintenance.py` answers (trucks only, matched to each truck's own P&L
+window, two sources). This pulls in every source that names a real unit
+number, INCLUDING TRAILERS for the first time and five previously-unparsed
+tabs from `data/raw/pnl/gs-ZONE_master_truck_trailer_expenses.xlsx`: LOVES,
+STL exp, and the 2022/2023/2024/2021 historical year tabs (2023 and 2024 have
+no header row at all -- column positions were fixed by inspection, see the
+module docstring). QuickManage contributes nothing here: its API has no
+per-unit expense endpoint at all, confirmed against ~35 guessed endpoint
+names plus a single truck's full detail record.
+
+**RESULT, COMPANY-BORNE, 2021-01 THROUGH 2026-09 (today):**
+
+    trucks    316 units   3,189 charges   $1,414,153
+    trailers  489 units   2,792 charges   $1,453,317
+
+**COST PER MILE EXISTS ONLY WHERE A P&L MILEAGE WINDOW EXISTS** -- 118 of 329
+trucks have one (2026-02-23..2026-08-24, the only span any P&L block in the
+corpus covers); the other 211 trucks have a real dollar cost and NO
+denominator, reported as such, never divided by zero or by a borrowed window.
+Trailers have NO cost-per-mile anywhere in this module for the same reason
+`truck_maintenance.py` already established: P&L mileage is filed per tractor,
+and no trailer mileage source exists in this corpus at all.
+
+**WHAT GOT EXCLUDED, AND HOW MUCH, PRINTED BY `load_all()` EVERY RUN:**
+STL-entity charges not attributed to a real unit (~$43.6k across two tabs);
+128 rows / 55 units that never carry a Unit Type anywhere and can't be
+cross-referenced (~$123.7k); 4 rows marked "truck and trailer" (~$15.7k); 16
+rows with a handwritten split expense side like "company 50/driver 50"
+(~$8.8k, excluded from the company-borne total rather than guessed into
+either side); 20 rows with a mistyped year before 2020 or after today
+(~$7.6k); and PSZ/Penske/"Truck Max USA" tabs entirely, none of which carry a
+unit column at all.
+
+`python3 analysis/spend_picture.py` regenerates `data/processed/
+spend_picture.xlsx` (Summary, Data notes, Truck cost per mile, and
+Weekly/Monthly/Quarterly/Yearly for both trucks and trailers).
+`tests/test_spend_picture.py` checks the invariants that matter most: no NaN
+unit reaches the sort, dates stay inside the sane window, a split expense
+side never counts as a full company cost, and every period granularity sums
+to the same fleet total regardless of bucket size.
+
 ## QuickManage has trips and trucks, NOT odometer or repair orders
 
 Confirmed 2026-09-07 by calling the real API with working credentials for all
