@@ -204,12 +204,21 @@ def load_positional(sheet):
 
 
 def load_truckmax():
+    """BUG FIXED 2026-09-07: this used to hardcode every row 'company'
+    regardless of which of the four payer files it came from -- discovered
+    when unit 5026 showed $6.01/mile on a single $5,106.40 charge that turned
+    out to be an IRON_LEASE-payer invoice (paid then credited back elsewhere,
+    per this pipeline's own established rule -- see truck_maintenance.py's
+    'NOT A COMPANY COST, ON PURPOSE'), not a real truck expense at all. Same
+    payer->borne_by mapping as truck_maintenance.py's all_charges()."""
     charges, controls = TMX.load()
     d = charges[charges.amount.notna() & charges.date.notna()].copy()
     d["unit"] = d.truck.where(d.truck.notna(), d.trailer)
     d["unit_type"] = d.trailer.notna().map({True: "trailer", False: "truck"})
     d = d[d.unit.notna()]
-    d["borne_by"] = "company"  # each payer file already IS the payer split
+    d["borne_by"] = d.payer.map({"company": "company", "driver": "driver",
+                                 "sher_imam": "sher imam exp",
+                                 "iron_lease": "iron lease"})
     d["source"] = "Truck Max invoice log (" + d.payer + ")"
     return d[["unit", "unit_type", "date", "amount", "borne_by", "source"]]
 
