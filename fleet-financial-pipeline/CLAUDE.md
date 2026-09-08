@@ -1355,6 +1355,44 @@ API (`https://api.quickmanage.com`). **What it actually turned out to expose
 corrects an assumption this file had carried since before its first commit**:
 see "QuickManage has trips and trucks, NOT odometer or repair orders" below.
 
+## Telematics cost per truck/trailer/week (ELD, Samsara, transponders, trailer tracking)
+
+Five invoices + two CSVs uploaded 2026-09-08 (`data/raw/eld_transponder_telematics/`,
+facts in `config/telematics_costs.json`). **The operator was explicit: this is
+SOFTWARE cost only** -- the real ELD cost also needs the ELD team's salary and
+commissions added before dividing by truck count, and that payroll figure does
+not exist anywhere in this corpus. Do not report a "real ELD cost" without it.
+
+**Green Light ELD is a flat $40.00/truck/month base rate, confirmed exactly**
+(ZONE: 32 trucks x $40 = $1280.00 on the invoice line itself) across all three
+companies -- each invoice also carries a prior-period true-up for trucks
+activated/deactivated mid-cycle, which is real invoiced money, not noise, but
+is a one-time catch-up rather than the ongoing rate:
+
+    AFG     $766.44 / 17 trucks  = $10.18/truck/week (period total, incl. true-up)
+    ZONE    $1,292.90 / 32 trucks = $9.43/truck/week
+    XTRACK  $1,700.63 / 41 trucks = $9.37/truck/week
+    base rate alone: $40/month = $9.20/truck/week
+
+**Everything else uploaded is ZONE-OH ONLY** -- no XTRACK or AFG invoice exists
+yet for Samsara, PrePass/BestPass, or trailer tracking. Unknown whether they
+don't use these vendors or the invoices simply weren't sent:
+
+    Samsara (ZONE): dashcam+streaming $7.88/truck/week (65 trucks);
+                    basic asset tracking $2.05/unit/week (13 units) --
+                    invoice was UNPAID as of upload, past its due date
+    PrePass/BestPass (ZONE): $4.00/truck/week (105 of 107 devices had a
+                    truck unit attached; 2 did not and are excluded)
+    Pedigree trailer tracking (ZONE): $5.37/trailer/week (125 trailers,
+                    Bluetooth trackers + TPMS tire/asset sensors)
+
+**STL TRUCKERS LLC's wireless bill ($6,348.99, 174 lines) is a DIFFERENT
+ENTITY**, not yet mapped to any of the three companies' trucks -- and it is
+NOT purely tablets despite a few lines literally named "MIRZA TABLET" /
+"JULY NAPERVILLE TABLETS": most lines are ~$35.20 driver-style phone plans.
+Do not treat this as "the tablet cost" -- the operator said Verizon tablet
+usage is still to come as a separate upload, and Motive is pending a deal.
+
 ## Driver arrangement rate cards and the Iron Lease truck-sale tracker
 
 Operator-supplied 2026-09-08, via chat: three rate cards (`config/

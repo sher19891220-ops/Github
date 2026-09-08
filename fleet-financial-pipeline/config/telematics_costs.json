@@ -1,0 +1,42 @@
+{
+  "_note": "One invoice per vendor per company, as uploaded 2026-09-08. This is software/hardware cost ONLY. The operator was explicit: ELD's 'real' cost also needs the ELD team's salary + commissions added before dividing by truck count -- that payroll figure does not exist anywhere in this corpus yet and must not be assumed. Motive (pending a deal) and Verizon (tablet usage) are still to come; do not treat this file as complete.",
+  "eld_green_light": {
+    "_note": "Green Light ELD LLC, 'Premium 40' plan -- confirmed a flat $40.00/truck/month base rate across all three companies (ZONE's invoice ties exactly: 32 trucks x $40 = $1280.00). Each invoice ALSO carries prior-period true-up adjustments (trucks activated/deactivated mid-cycle), which is why the per-truck total below is higher than $40 and differs by company -- those adjustments are real invoiced dollars, not noise, but they are a one-time catch-up, not the ongoing rate.",
+    "base_rate_per_truck_month": 40.00,
+    "AFG": {"total": 766.44, "trucks": 17, "period_start": "2026-08-27", "period_end": "2026-09-27",
+            "per_truck_period": 45.08, "per_truck_week": 10.18},
+    "ZONE": {"total": 1292.90, "trucks": 32, "period_start": "2026-09-01", "period_end": "2026-10-01",
+             "per_truck_period": 40.40, "per_truck_week": 9.43},
+    "XTRACK": {"total": 1700.63, "trucks": 41, "period_start": "2026-08-10", "period_end": "2026-09-10",
+               "per_truck_period": 41.48, "per_truck_week": 9.37}
+  },
+  "samsara": {
+    "_note": "ZONE-OH only -- no XTRACK or AFG Samsara invoice uploaded. Unknown whether they simply don't use Samsara or the invoice wasn't sent.",
+    "ZONE": {
+      "period_start": "2026-07-07", "period_end": "2026-08-06",
+      "truck_mounted_dashcam_and_streaming": {"total": 2194.36, "trucks": 65, "per_truck_week": 7.88},
+      "asset_tracking_basic": {"total": 114.22, "units": 13, "per_unit_week": 2.05},
+      "invoice_total": 2308.58,
+      "_note": "Invoice was UNPAID as of upload (Amount Paid $0.00, due 2026-08-06) -- past due relative to the 2026-09-08 upload date."
+    }
+  },
+  "prepass_bestpass_transponders": {
+    "_note": "ZONE-OH only. CSV had 107 device rows; 2 with no EQUIP ID (truck unit) attached, excluded from the per-truck rate below. Filename implies a Monthly cycle ending 2026-08-31.",
+    "ZONE": {"total": 1824.23, "trucks_attributed": 105, "trucks_unattributed": 2,
+             "per_truck_week": 4.00}
+  },
+  "pedigree_trailer_tracking": {
+    "_note": "ZONE-OH only, trailer-mounted equipment (Solar Bluetooth trackers + TPMS tire/asset sensors), two contract batches (100+25 trailers = 125). Period 2026-09-01..2026-09-30.",
+    "ZONE": {"total": 2781.00, "trailers": 125, "per_trailer_week": 5.37}
+  },
+  "stl_truckers_wireless": {
+    "_note": "STL TRUCKERS LLC is a DIFFERENT entity from ZONE/XTRACK/AFG -- this is its own wireless account, not yet mapped to any of the three companies' trucks. 174 lines, mostly driver-style phone lines (~$35.20/line) but includes several lines explicitly named 'MIRZA TABLET' and 'JULY NAPERVILLE TABLETS' -- so this bill is NOT purely tablets, it is STL's whole wireless account. Do not use this as 'the tablet cost' -- the operator said Verizon tablet costs are still to come separately.",
+    "total": 6348.99, "lines": 174, "bill_cycle": "08/11/2026 (plus one stray 07/11/2026 line)"
+  },
+  "still_missing": [
+    "ELD team salary + commissions -- required by the operator to compute the 'real' ELD cost; not in this corpus",
+    "XTRACK and AFG: Samsara, PrePass/BestPass, and trailer-tracking (Pedigree or equivalent) invoices",
+    "Motive (pending a deal, per the operator)",
+    "Verizon tablet usage cost (per the operator, still to be uploaded)"
+  ]
+}
