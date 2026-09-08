@@ -37,8 +37,20 @@
     "_note": "STL TRUCKERS LLC is a DIFFERENT entity from ZONE/XTRACK/AFG -- this is its own wireless account, not yet mapped to any of the three companies' trucks. 174 lines, mostly driver-style phone lines (~$35.20/line) but includes several lines explicitly named 'MIRZA TABLET' and 'JULY NAPERVILLE TABLETS' -- so this bill is NOT purely tablets, it is STL's whole wireless account. Do not use this as 'the tablet cost' -- the operator said Verizon tablet costs are still to come separately.",
     "total": 6348.99, "lines": 174, "bill_cycle": "08/11/2026 (plus one stray 07/11/2026 line)"
   },
+  "eld_team_payroll": {
+    "_note": "Filled 2026-09-08 from data/raw/payroll_staff/active_staff_payroll_jul2026.csv (transcribed from the operator's payroll PDF, reconciled to its own printed totals to the penny). 12 people under the 'ELD' department heading -- this appears to already blend salary + commission (most vary month to month; 'Bahodir IT support' is flat $300/mo every month, looking like pure base pay with no commission component). Payroll only reaches July 2026; the ELD software invoices are Aug/Sep 2026 -- a one-month gap, not a mismatch of methodology.",
+    "july_2026_total": 5799, "jan_jul_2026_avg_total": 5316,
+    "roster": ["Abduaziz Dadamuxamedov", "Avaz Azimjonov", "Babajan", "Bahodir (IT support)",
+               "Durbek Yunus", "Elyor Ubaydullayev", "Humoyun Xudoyberdiyev", "Ikrom Tohirov",
+               "Izzatillo Xamidov", "Sobitjon Abdualimov", "Ulug'bek Jaylovov", "Umedjon Shodmonov"]
+  },
+  "real_eld_cost_per_truck_week": {
+    "_note": "Software (per-company invoiced totals, this period) + ELD team payroll, divided by all 90 invoiced trucks (17 AFG + 32 ZONE + 41 XTRACK) -- this is a SHARED team across all three companies, same as Accounting/Dispatch/HR/Manager in the payroll roster, so it is spread over the whole fleet, not billed per company.",
+    "combined_eld_software_per_week": 858.76,
+    "using_july_team_payroll": {"team_per_week": 1333.54, "total_per_week": 2192.30, "per_truck_per_week": 24.36},
+    "using_jan_jul_avg_team_payroll": {"team_per_week": 1222.47, "total_per_week": 2081.23, "per_truck_per_week": 23.12}
+  },
   "still_missing": [
-    "ELD team salary + commissions -- required by the operator to compute the 'real' ELD cost; not in this corpus",
     "XTRACK and AFG: Samsara, PrePass/BestPass, and trailer-tracking (Pedigree or equivalent) invoices",
     "Motive (pending a deal, per the operator)",
     "Verizon tablet usage cost (per the operator, still to be uploaded)"

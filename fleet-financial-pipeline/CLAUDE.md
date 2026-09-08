@@ -1355,6 +1355,48 @@ API (`https://api.quickmanage.com`). **What it actually turned out to expose
 corrects an assumption this file had carried since before its first commit**:
 see "QuickManage has trips and trucks, NOT odometer or repair orders" below.
 
+## The real ELD cost: software + team payroll, completed 2026-09-08
+
+The operator's own payroll PDF (`data/raw/payroll_staff/`, transcribed to
+`active_staff_payroll_jul2026.csv`, reconciled to the PDF's own printed
+totals to the penny -- $145,728 July, $104,209 vs $104,210 Jan-Jul avg,
+off by $1 from the PDF's own rounding) has a dedicated **ELD department, 12
+people**. This is the piece the operator said was required before reporting
+a "real" ELD cost -- software alone was never the full answer.
+
+    combined ELD software (AFG+ZONE+XTRACK, this period): $858.76/week
+    ELD team payroll: $5,799/mo (July, most recent) = $1,333.54/week
+                       $5,316/mo (Jan-Jul average)   = $1,222.47/week
+
+    REAL ELD COST PER TRUCK/WEEK, 90 trucks (17+32+41):
+      using July payroll:        $24.36/truck/week
+      using Jan-Jul avg payroll: $23.12/truck/week
+
+The ELD team, like Accounting/Dispatch/HR/Manager in the same payroll
+roster, has no per-company column -- it is ONE shared team serving all
+three companies, so this is spread over the whole 90-truck fleet, not
+billed per company. Full detail in `config/telematics_costs.json`.
+
+**The payroll data itself already looks like it blends salary + commission**
+(most of the 12 vary month to month; "Bahodir IT support" is a flat
+$300/month every month, reading as pure base pay with no commission) --
+consistent with what the operator asked for without a separate commission
+figure being necessary.
+
+**One entry is flagged, not used anywhere**: "Sher Imam" appears under
+MANAGER at $104/month -- the same name attached to the Pedigree trailer-
+tracking invoice and the "sher imam exp" bucket in Truck Max data. $104/mo
+is obviously not real full compensation for whatever role this is; treat it
+as a nominal/structural payroll line, not this person's actual economics,
+until told otherwise.
+
+**This payroll roster is bigger than the ELD answer** -- 62 people across
+7 departments (Accounting, Dispatch, ELD, Fleet, HR, Manager, Update Team),
+$145,728 for July alone. It is now available in the corpus for the
+"fixed company overhead" / admin-fee reconciliation this project has
+touched before, but that reconciliation has not been built -- only the ELD
+piece was, because that is what was asked for.
+
 ## A vendor "billed to ZONE-OH" does not mean ZONE's fleet alone
 
 Found 2026-09-08, checking the PrePass/BestPass CSV at the device level
