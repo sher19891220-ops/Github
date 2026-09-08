@@ -1372,9 +1372,10 @@ either, so mixing it in here would compare unlike things.
     Transponders         3.94    3.96     4.06
     Samsara (fleet-wide, not split by company)     7.88
     Verizon (fleet-wide, not split by company)     7.07
+    Pedigree TPMS (fleet-wide, added later same day)  7.46
     Trippak                    NOT FOUND -- unmeasured, not assumed $0
     -----------------------------------------------
-    TOTAL (5 of 6 measured)   46.01   51.63   35.89
+    TOTAL (6 of 7 measured)   53.47   59.09   43.35
 
 **Verizon was already in the corpus** -- the operator believed this cost
 was still to be uploaded separately (per the 2026-09-07 chat). Found by
@@ -1382,16 +1383,23 @@ searching for the "VZWRLSS" descriptor (Verizon Wireless's own billing
 abbreviation) on both the AMEX card ($29,759.20 over 47.7 weeks) and the
 bank feed ($559.85 over 44.0 weeks, "PREPAID" plans) -- $636.42/week
 fleet-wide, no per-truck or per-company breakdown exists for it.
+**Pedigree TPMS/trailer tracking was added as a seventh item** on the
+operator's later instruction, not part of the original six -- same
+invoice as the pedigree_trailer_tracking entry above ($2,781.00, Sep 2026),
+but RE-BASED from per-trailer ($5.37/trailer/wk over 125 trailers) to
+per-truck ($7.46/truck/wk over the same 90-truck denominator as everything
+else here), since the admin fee is charged per truck, not per trailer.
 **Trippak was searched for and not found anywhere** -- not on the card, not
 on the bank feed, no invoice uploaded. Excluded from every total rather
 than guessed, so every total above is a floor.
 
-**Even missing Trippak entirely, real cost is 1.6-2.2x the $23.09/week fee**
-(XTRACK 2.0x, ZONE 2.2x, AFG 1.6x) on the five items that could be priced.
-Samsara and Verizon are billed as one account each with no per-truck split
--- applied uniformly per truck across all 90 trucks, the same unresolved
-risk PrePass already demonstrated (a single-account bill can quietly cover
-all three fleets, or may not; only a device-level export settles it).
+**Even missing Trippak entirely, real cost is now 1.9-2.6x the $23.09/week
+fee** (XTRACK 2.3x, ZONE 2.6x, AFG 1.9x) on the six items that could be
+priced. Samsara, Verizon and Pedigree are each billed as one account with
+no per-truck split -- applied uniformly per truck across all 90 trucks, the
+same unresolved risk PrePass already demonstrated (a single-account bill
+can quietly cover all three fleets, or may not; only a device-level export
+settles it).
 
 ## The same treatment applied to every department: `config/staff_overhead_costs.json`
 

@@ -31,7 +31,7 @@
     "_note": "Sums to $33 of the $100 admin fee as stated 2026-09-08 -- the remaining ~$67 of components was not given and should not be assumed or invented. SUPERSEDED for measurement purposes by admin_fee_actual_cost_per_truck_week below, which prices the same idea (what the fee is meant to cover) from real invoices and bank/card data instead of a stated estimate -- both are kept, since one is what was SAID and the other is what was MEASURED."
   },
   "admin_fee_actual_cost_per_truck_week": {
-    "_note": "Operator, 2026-09-08: the $100/month ($23.09/week) admin fee is meant to cover ONLY these six services -- IFTA, ELD, transponders, Samsara, Verizon, Trippak -- not the wider staff overhead in config/staff_overhead_costs.json. Priced from real sources: IFTA from actual filed returns (analysis/cost_structure.py's fuel_tax_per_mile, TAX-ONLY, not bundled with IRP/HVUT permits since permits were not named here), ELD from the Green Light invoices (software only, no team payroll -- team payroll is a labor cost, not a vendor fee, and none of the other five items have a labor component either), PrePass/BestPass from the device-level CSV cross-referenced to the fleet registry, Samsara and Verizon from what is actually confirmed in the corpus.",
+    "_note": "Operator, 2026-09-08: the $100/month ($23.09/week) admin fee is meant to cover ONLY six services -- IFTA, ELD, transponders, Samsara, Verizon, Trippak -- not the wider staff overhead in config/staff_overhead_costs.json. Pedigree TPMS/trailer tracking was added as a SEVENTH item on the operator's later instruction the same day, not part of the original six. Priced from real sources: IFTA from actual filed returns (analysis/cost_structure.py's fuel_tax_per_mile, TAX-ONLY, not bundled with IRP/HVUT permits since permits were not named here), ELD from the Green Light invoices (software only, no team payroll -- team payroll is a labor cost, not a vendor fee, and none of the other items have a labor component either), PrePass/BestPass from the device-level CSV cross-referenced to the fleet registry, Samsara/Verizon/Pedigree from what is actually confirmed in the corpus.",
     "stated_admin_fee_per_week": 23.09,
     "by_company_per_truck_week": {
       "XTRACK": {"ifta": 17.75, "eld_software": 9.37, "transponders": 3.94, "samsara": null, "verizon": null, "trippak": null},
@@ -39,18 +39,20 @@
       "AFG":    {"ifta": 6.70,  "eld_software": 10.18, "transponders": 4.06, "samsara": null, "verizon": null, "trippak": null}
     },
     "fleet_wide_not_split_by_company": {
-      "_note": "Samsara and Verizon are billed to one account each (Samsara to ZONE-OH; Verizon Wireless found on the AMEX card and bank feed with no per-truck or per-company breakdown anywhere in the corpus) -- PrePass proved a 'ZONE-OH' bill can cover all three fleets once checked at the device level, so the same is assumed possible here, NOT assumed absent. Applied uniformly per truck across all 90 trucks until a device-level bill says otherwise.",
+      "_note": "Samsara, Verizon and Pedigree are billed to one account each (Samsara and Pedigree to ZONE-OH; Verizon Wireless found on the AMEX card and bank feed with no per-truck or per-company breakdown anywhere in the corpus) -- PrePass proved a 'ZONE-OH' bill can cover all three fleets once checked at the device level, so the same is assumed possible here, NOT assumed absent. Applied uniformly per truck across all 90 trucks until a device-level bill says otherwise.",
       "samsara_per_truck_week": 7.88,
       "verizon_per_truck_week": 7.07,
       "verizon_detail": "AMEX 'VZWRLSS' charges $29,759.20 over 47.7 weeks ($623.70/wk) + bank 'VZWRLSS*PREPAID' charges $559.85 over 44.0 weeks ($12.72/wk) = $636.42/wk fleet-wide / 90 trucks. Found 2026-09-08 already in the existing AMEX/bank data -- the operator believed this cost was still to be uploaded separately; it was not needed.",
+      "pedigree_tpms_per_truck_week": 7.46,
+      "pedigree_detail": "ADDED 2026-09-08 on the operator's instruction -- not one of the six originally named. Same Pedigree invoice as config/telematics_costs.json's pedigree_trailer_tracking ($2,781.00, Sep 1-30 2026, $671.28/wk fleet-wide) -- re-based from per-trailer ($5.37/trailer/wk over 125 trailers) to per-truck ($7.46/truck/wk over the same 90-truck denominator as everything else here), since the admin fee is charged per truck, not per trailer.",
       "trippak_per_truck_week": null,
       "trippak_note": "NOT FOUND anywhere in this corpus -- not on the AMEX card, not on the bank feed, no invoice uploaded. Cannot be priced yet; not assumed to be $0."
     },
     "total_measured_per_truck_week": {
-      "_note": "Sum of ifta + eld_software + transponders (per company) + samsara + verizon (fleet-wide) -- Trippak excluded from every total since it is unmeasured, so every total below is a FLOOR, not the complete six-item cost.",
-      "XTRACK": 46.01, "ZONE": 51.63, "AFG": 35.89
+      "_note": "Sum of ifta + eld_software + transponders (per company) + samsara + verizon + pedigree_tpms (fleet-wide) -- Trippak excluded from every total since it is unmeasured, so every total below is a FLOOR, not the complete cost.",
+      "XTRACK": 53.47, "ZONE": 59.09, "AFG": 43.35
     },
-    "conclusion": "Even missing Trippak entirely, the real cost of the six named services is 1.6-2.2x the $23.09/week the admin fee actually charges (XTRACK 2.0x, ZONE 2.2x, AFG 1.6x) -- the fee does not cover what it was stated to cover, on the five of six items that could be measured."
+    "conclusion": "Even missing Trippak entirely, real cost is now 1.9-2.6x the $23.09/week the admin fee actually charges (XTRACK 2.3x, ZONE 2.6x, AFG 1.9x) -- the fee does not cover what it was stated to cover, on the six of seven items that could be measured."
   },
   "admin_fee_history_and_exceptions": {
     "old_owner_operators_rate": 150,
