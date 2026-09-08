@@ -1355,6 +1355,44 @@ API (`https://api.quickmanage.com`). **What it actually turned out to expose
 corrects an assumption this file had carried since before its first commit**:
 see "QuickManage has trips and trucks, NOT odometer or repair orders" below.
 
+## What the $100 admin fee is actually meant to cover, priced for real
+
+Operator, 2026-09-08: the admin fee covers ONLY six things -- IFTA, ELD,
+transponders, Samsara, Verizon, Trippak -- not the wider staff overhead
+above. That changes the comparison from the last section: it is not "admin
+fee vs everything," it is "admin fee vs these six line items," priced in
+`config/driver_arrangement_rates.json`'s new `admin_fee_actual_cost_per_truck_week`
+key. ELD here is SOFTWARE ONLY, not the software+team figure two sections up
+-- team payroll is a labor cost, and none of the other five items have one
+either, so mixing it in here would compare unlike things.
+
+    $/truck/week      XTRACK    ZONE     AFG
+    IFTA               17.75   23.29     6.70
+    ELD (software)       9.37    9.43    10.18
+    Transponders         3.94    3.96     4.06
+    Samsara (fleet-wide, not split by company)     7.88
+    Verizon (fleet-wide, not split by company)     7.07
+    Trippak                    NOT FOUND -- unmeasured, not assumed $0
+    -----------------------------------------------
+    TOTAL (5 of 6 measured)   46.01   51.63   35.89
+
+**Verizon was already in the corpus** -- the operator believed this cost
+was still to be uploaded separately (per the 2026-09-07 chat). Found by
+searching for the "VZWRLSS" descriptor (Verizon Wireless's own billing
+abbreviation) on both the AMEX card ($29,759.20 over 47.7 weeks) and the
+bank feed ($559.85 over 44.0 weeks, "PREPAID" plans) -- $636.42/week
+fleet-wide, no per-truck or per-company breakdown exists for it.
+**Trippak was searched for and not found anywhere** -- not on the card, not
+on the bank feed, no invoice uploaded. Excluded from every total rather
+than guessed, so every total above is a floor.
+
+**Even missing Trippak entirely, real cost is 1.6-2.2x the $23.09/week fee**
+(XTRACK 2.0x, ZONE 2.2x, AFG 1.6x) on the five items that could be priced.
+Samsara and Verizon are billed as one account each with no per-truck split
+-- applied uniformly per truck across all 90 trucks, the same unresolved
+risk PrePass already demonstrated (a single-account bill can quietly cover
+all three fleets, or may not; only a device-level export settles it).
+
 ## The same treatment applied to every department: `config/staff_overhead_costs.json`
 
 Same method as ELD -- each department's payroll ÷ 90 trucks (no department
