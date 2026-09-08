@@ -1355,6 +1355,44 @@ API (`https://api.quickmanage.com`). **What it actually turned out to expose
 corrects an assumption this file had carried since before its first commit**:
 see "QuickManage has trips and trucks, NOT odometer or repair orders" below.
 
+## The same treatment applied to every department: `config/staff_overhead_costs.json`
+
+Same method as ELD -- each department's payroll ÷ 90 trucks (no department
+in this payroll file has a per-company column, so all seven are shared
+cross-company teams, spread over the whole fleet):
+
+    $/truck/week          July      Jan-Jul avg    headcount
+    ACCOUNTING            14.05      12.27          5
+    DISPATCH             260.17     173.36         19
+    ELD                   14.82      13.58         12
+    FLEET                 23.16      19.48         11
+    HR                    18.73      14.79          6
+    MANAGER                29.54      22.81          2
+    UPDATE_TEAM           11.88       9.97          7
+
+**DISPATCH IS NOT LIKE THE OTHER SIX.** It is 6-18x every other department
+and swings hard month to month (one dispatcher: $7,114 -> $9,738 -> $11,627
+May-June-July) because it is commission on gross freight booked, not a flat
+wage. `config/dispatch_commission.json` already has the rate schedule
+(supplied 2026-09-02) but confirmed 2026-09-08 by grep: **nothing in this
+repo ever consumes that file** -- so this payroll figure is the first
+actual measured dispatch cost, not a double-count of anything already in
+`cost_structure.py`.
+
+**Two totals, not one**, because Dispatch answers a different question than
+the other six:
+
+    all seven departments:     $372.35/truck/week (July), $266.27 (avg)
+    excluding Dispatch:        $112.18/truck/week (July), $92.91 (avg)
+
+**Compared to the stated $100/month ($23.09/week) driver admin fee**
+(`config/driver_arrangement_rates.json`): real shared-staff overhead is
+4-5x that even EXCLUDING Dispatch, 12-16x including it. This is a
+factual gap, not a claim the fee was ever meant to cover it all -- freight
+margin, not the fee, is presumably what closes the rest. Reported because
+every stated rate in this project gets checked against a measured source,
+not because the gap itself proves anything is wrong.
+
 ## The real ELD cost: software + team payroll, completed 2026-09-08
 
 The operator's own payroll PDF (`data/raw/payroll_staff/`, transcribed to
