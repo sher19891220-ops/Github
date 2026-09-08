@@ -1355,6 +1355,58 @@ API (`https://api.quickmanage.com`). **What it actually turned out to expose
 corrects an assumption this file had carried since before its first commit**:
 see "QuickManage has trips and trucks, NOT odometer or repair orders" below.
 
+## Worst-to-best maintenance/breakdown ranking and trend: `analysis/breakdown_trend.py`
+
+Built on `spend_picture.py`'s already-reconciled multi-source charge data
+(2021-2026) -- ranks every truck and trailer by total spend, adds
+cost-per-mile for trucks, and classifies each unit's monthly spend pattern
+as `one-time` (one month is >=60% of the whole multi-year total, or there
+is only ever one priced month), `worsening` (later half of its active
+months costs >1.5x the earlier half), `improving` (<0.67x), or `steady`.
+Two-halves-by-TOTAL was chosen over a regression slope on purpose: most
+units have long $0 stretches between real repairs, and a trend line through
+mostly-zero months is dominated by where the one spike sits, not by whether
+cost is actually climbing -- comparing two totals survives that.
+
+**BUG FOUND AND FIXED THE SAME DAY IT WAS BUILT**: the first version's
+`monthly_series()` filtered by unit number only, not unit_type. Any unit
+with even one row mistagged to the other type (truck 8093: 66 rows tagged
+'truck' worth $33,539.06, one stray row tagged 'trailer' worth $237.50)
+had its ENTIRE total appear in BOTH the truck and trailer tables --
+`tests/test_breakdown_trend.py` guards this exact case as a regression
+(caught by a value_counts() eyeball check before any test existed, then
+formalized). Some unit numbers genuinely ARE reused across a truck and a
+separate trailer (43 confirmed) -- that overlap is real and expected; what
+is never allowed is the same dollar total under both.
+
+**RESULT, worst 10 trucks by total spend** (of 300 with any charge,
+$1,215,312 combined):
+
+    7039    $45,375  one-time (1 month only -- a single large event)
+    8130    $42,013  steady    ($0.1435/mi)
+    8132    $38,146  worsening ($0.2357/mi)
+    8093    $33,539  worsening ($0.0863/mi)
+    8094    $32,541  worsening ($0.0838/mi)
+    8131    $31,215  worsening ($0.2705/mi -- the fleet's worst $/mile truck)
+    8083    $30,868  worsening ($0.0614/mi)
+    8092    $28,203  worsening ($0.0758/mi)
+    8133    $28,160  worsening ($0.0953/mi)
+    6178    $27,899  one-time (7 months, one dominates)
+
+**THE FLEET-WIDE ANSWER TO "IS THIS GETTING WORSE": YES, DOLLAR-WEIGHTED,
+NOT JUST A FEW UNITS.** 48.6% of all truck dollars and 48.3% of all
+trailer dollars sit in units classified `worsening` -- not a long tail of
+isolated one-time breakdowns (`one-time` is only 23.6% of truck dollars,
+25.5% of trailer dollars despite being the MOST COMMON label by unit count,
+164 of 300 trucks -- most one-time hits are small; the big dollars are
+concentrated in units getting worse). Fleet-wide monthly company-borne
+spend (all units) climbed from ~$45k/month in late 2024 to ~$140k/month by
+mid-2026 -- a real, sustained increase over 18+ months, not noise.
+
+`python3 analysis/breakdown_trend.py` writes `data/processed/
+breakdown_trend.xlsx` (Trucks worst to best, Trailers worst to best, Data
+notes).
+
 ## What the $100 admin fee is actually meant to cover, priced for real
 
 Operator, 2026-09-08: the admin fee covers ONLY six things -- IFTA, ELD,
