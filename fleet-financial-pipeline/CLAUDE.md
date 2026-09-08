@@ -1355,6 +1355,32 @@ API (`https://api.quickmanage.com`). **What it actually turned out to expose
 corrects an assumption this file had carried since before its first commit**:
 see "QuickManage has trips and trucks, NOT odometer or repair orders" below.
 
+## Driver arrangement rate cards and the Iron Lease truck-sale tracker
+
+Operator-supplied 2026-09-08, via chat: three rate cards (`config/
+driver_arrangement_rates.json`) -- Lease-to-walk-away ($1,650/wk fixed + 13
+cpm), Lease-to-purchase ($1,750/wk fixed), Owner-Operator ($650/wk fixed) --
+plus admin-fee history (old owners $150, new OO/LO $100, $125 with own
+tablet, $140 with own transponder) and a partial new-admin-fee breakdown
+(ELD $15 + transponders $5 + Samsara $10 + Trippak $3 = $33 of the $100,
+the rest not given).
+
+**STATED RATE DOES NOT MATCH OBSERVED CHARGING**, confirmed against the
+"Iron lease Leased trucks" Google Sheet (12 weekly snapshots, 2026-06-16
+..2026-09-01, saved to `data/raw/iron_lease/leased_trucks_weekly.csv`, 132
+rows): truck 2703 (Nelson Reginald, $75,000 lease-to-purchase balance) is
+charged a clean **$1,500/week**, not the $1,000 "truck payment" in the rate
+card above. Other drivers on the same sheet (Alphonse Jefferson, truck 4851)
+show irregular, lumpy paydowns instead of any fixed weekly amount. Do not
+assume the stated rate card is what is actually being charged until this is
+reconciled -- both are recorded, neither overwrites the other.
+
+The tracker also shows drivers moving between arrangements mid-lease
+("Temporary skip, working as LO" / "Lease to walkaway" / "CD") and one
+truck taken back entirely (Norgaisse Aldens, unit 9859, $72,655 balance
+zeroed 2025-08-05) -- a real default/recovery event, not yet priced anywhere
+else in this corpus.
+
 ## The full per-unit spend picture: `analysis/spend_picture.py`
 
 Built 2026-09-07 in response to "how much do we spend per truck/trailer, by

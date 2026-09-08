@@ -1,0 +1,42 @@
+{
+  "_note": "Operator-supplied 2026-09-08, via chat, not yet reconciled against any P&L or the Iron Lease truck-sale sheet (data/raw/pnl -- see 'Iron lease Leased trucks' Google Sheet, id 1X28pWOL4DDTpml9ZcNyqiukUVLxrSn5qmu0riI-gAOg). CROSS-CHECK BEFORE USING IN A COST MODEL: the lease-to-purchase sheet shows truck 2703 (Nelson Reginald) being charged $1,500/week against its $75,000 balance, not the $1,000 'truck payment' below -- other drivers on that sheet show irregular, lumpy paydowns instead of a fixed weekly amount. This file records what the operator STATED the rate card is, not what is actually being charged.",
+  "lease_to_walk_away": {
+    "truck_rent": 900,
+    "insurance": 450,
+    "trailer_rent": 200,
+    "admin_fee": 100,
+    "mileage_charge_cpm": 0.13,
+    "total_fixed": 1650,
+    "_note": "mileage_charge_cpm is variable, per mile -- total_fixed excludes it, matching how the operator wrote it (Total: $1650 with mileage listed separately above)."
+  },
+  "lease_to_purchase": {
+    "truck_payment": 1000,
+    "insurance": 450,
+    "trailer_rent": 200,
+    "admin_fee": 100,
+    "total_fixed": 1750,
+    "_note": "truck_payment pays down the Overall Amount on the Iron Lease truck-sale sheet -- see the $1,500/week vs $1,000 discrepancy noted above."
+  },
+  "owner_operator": {
+    "insurance": 350,
+    "trailer_rent": 200,
+    "admin_fee": 100,
+    "total_fixed": 650
+  },
+  "admin_fee_new_breakdown": {
+    "ELD": 15,
+    "transponders_prepass_bestpass": 5,
+    "Samsara": 10,
+    "Trippak": 3,
+    "_note": "Sums to $33 of the $100 admin fee as stated 2026-09-08 -- the remaining ~$67 of components was not given and should not be assumed or invented."
+  },
+  "admin_fee_history_and_exceptions": {
+    "old_owner_operators_rate": 150,
+    "new_OO_and_LO_rate": 100,
+    "note_uzbek": "Eski ownerladaniki $150 qopketgan, yengiladan OO va LO obkeliw uchun $100 qiberila diyilgan ekan, kop eski driverladan change qimaganmiz admin feeni",
+    "translation_approx": "Old owners' fee stayed at $150; for bringing in new OO and LO the fee was set at $100, but many old drivers' fee was never changed to match.",
+    "own_tablet_rate": 125,
+    "own_transponder_rate": 140,
+    "_note": "own_tablet_rate and own_transponder_rate are reduced admin fees for a driver who supplies their own hardware instead of the company's -- NOT additive to the base $100/$150, they appear to REPLACE it for that driver. Not yet confirmed against any driver's actual settlement."
+  }
+}
