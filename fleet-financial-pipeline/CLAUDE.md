@@ -1355,6 +1355,51 @@ API (`https://api.quickmanage.com`). **What it actually turned out to expose
 corrects an assumption this file had carried since before its first commit**:
 see "QuickManage has trips and trucks, NOT odometer or repair orders" below.
 
+## A vendor "billed to ZONE-OH" does not mean ZONE's fleet alone
+
+Found 2026-09-08, checking the PrePass/BestPass CSV at the device level
+(`ingest/registration.py`'s fleet registry, matched against every EQUIP ID):
+the account is billed under ZONE-OH LLC, but its 107 devices are **XTRACK 41,
+ZONE 36, AFG 17, 11 unresolved** -- all three companies' trucks on one
+"ZONE-OH" invoice. Corrected per-company rates now in `config/
+telematics_costs.json`: XTRACK $3.94/truck/wk, ZONE $3.96, AFG $4.06.
+
+**Samsara and Pedigree trailer tracking are ALSO billed to ZONE-OH, and this
+same check CANNOT be run on them** -- both invoices give aggregate quantities
+only (13/65/65 for Samsara; 100+25 trailers for Pedigree), no per-device unit
+list. Do not assume they split 41/36/17 like PrePass did; that split is
+PrePass-specific evidence, not a fleet-wide constant. The real fix is asking
+each vendor for the same device-level CSV PrePass already provides.
+
+## SaaS/app charges pulled from the verified AMEX and bank sources
+
+`config/saas_app_charges.json`. Searched `ingest/ingest_amex.py`'s deduped
+10,271-transaction card export and `data/processed/boa_transactions.csv`
+(147 statements, each verified to its own balance delta) for DAT, 8x8,
+RingCentral, Samsara, Green Light ELD, Pedigree, PrePass/BestPass,
+QuickBooks, GoDaddy, Google -- all fleet-wide, none split by company, since
+neither source names a truck or company on a SaaS charge.
+
+**Three things that would corrupt this if taken at face value:**
+
+1. **DAT has two non-overlapping payment windows, never summed as one
+   number**: bank ACH Jan-Aug 2024 ($206.78/wk), then AMEX Mar 2025 onward
+   ($663.04/wk), with an unexplained gap between them.
+2. **Green Light ELD's real channel is PayPal on the AMEX card**
+   ($630.11/wk, 42 charges) -- the 10 bank-ACH "GREENLIGHT" hits ($320
+   total, all inside one 2-week window) are almost certainly bank account
+   micro-verification pings, not subscription payments, and are excluded.
+3. **Samsara and Pedigree's AMEX totals ($643.36/wk and $696.40/wk across
+   ~18 months) are the long-run recurring cost, separate from the single
+   September 2026 ZONE-OH invoices** in the telematics section above ($2,309
+   and $2,781 for one month) -- one is a trend, the other is a snapshot;
+   neither replaces the other.
+
+**Not found on either rail**: Microsoft/Outlook, Verizon, Motive (pending a
+deal per the operator), Zoom, Slack, Adobe, DocuSign, Truckstop.com, ITS
+Dispatch. Either paid through an account this corpus doesn't have yet, or not
+actually subscribed.
+
 ## Telematics cost per truck/trailer/week (ELD, Samsara, transponders, trailer tracking)
 
 Five invoices + two CSVs uploaded 2026-09-08 (`data/raw/eld_transponder_telematics/`,

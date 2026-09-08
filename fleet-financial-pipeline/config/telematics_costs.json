@@ -11,7 +11,7 @@
                "per_truck_period": 41.48, "per_truck_week": 9.37}
   },
   "samsara": {
-    "_note": "ZONE-OH only -- no XTRACK or AFG Samsara invoice uploaded. Unknown whether they simply don't use Samsara or the invoice wasn't sent.",
+    "_note": "Billed to ZONE-OH LLC -- but PrePass was ALSO billed under ZONE-OH and turned out to cover all three companies' trucks once checked at the device level (see prepass_bestpass_transponders above). This invoice gives only aggregate quantities (13 / 65 / 65), no per-truck unit list, so the same check cannot be run here -- treat 'ZONE-OH billed' as billing-name only, NOT proof this is ZONE's fleet alone.",
     "ZONE": {
       "period_start": "2026-07-07", "period_end": "2026-08-06",
       "truck_mounted_dashcam_and_streaming": {"total": 2194.36, "trucks": 65, "per_truck_week": 7.88},
@@ -21,13 +21,17 @@
     }
   },
   "prepass_bestpass_transponders": {
-    "_note": "ZONE-OH only. CSV had 107 device rows; 2 with no EQUIP ID (truck unit) attached, excluded from the per-truck rate below. Filename implies a Monthly cycle ending 2026-08-31.",
-    "ZONE": {"total": 1824.23, "trucks_attributed": 105, "trucks_unattributed": 2,
-             "per_truck_week": 4.00}
+    "_note": "CORRECTED 2026-09-08: the account is BILLED under ZONE-OH LLC but the 107 devices are NOT all ZONE's own trucks -- cross-referenced every EQUIP ID against ingest/registration.py's fleet registry and found trucks from all three companies on this one invoice. 'ZONE-OH only' in the note above was about the BILLING NAME, not which fleets it covers -- those are different facts, and only the device-level CSV made the difference visible. Same risk applies to Samsara and Pedigree below, which give quantities only, no per-device unit list, so their true per-company split CANNOT be checked the same way and is NOT assumed to match this 41/36/17 split.",
+    "trucks_by_company": {"XTRACK": 41, "ZONE": 36, "AFG": 17, "unresolved": 11},
+    "unresolved_note": "11 devices: 2 rows had a blank EQUIP ID, 9 had a unit number not found in the fleet registry (retired truck, trailer, or a 4th entity).",
+    "XTRACK": {"total": 702.59, "trucks": 41, "per_truck_week": 3.94},
+    "ZONE": {"total": 620.60, "trucks": 36, "per_truck_week": 3.96},
+    "AFG": {"total": 300.05, "trucks": 17, "per_truck_week": 4.06},
+    "unresolved": {"total": 179.35, "devices": 11}
   },
   "pedigree_trailer_tracking": {
-    "_note": "ZONE-OH only, trailer-mounted equipment (Solar Bluetooth trackers + TPMS tire/asset sensors), two contract batches (100+25 trailers = 125). Period 2026-09-01..2026-09-30.",
-    "ZONE": {"total": 2781.00, "trailers": 125, "per_trailer_week": 5.37}
+    "_note": "Billed to ZONE-OH LLC, trailer-mounted equipment (Solar Bluetooth trackers + TPMS tire/asset sensors), two contract batches (100+25 trailers = 125). Period 2026-09-01..2026-09-30. UNLIKE PrePass, this invoice gives only aggregate quantities per batch, no per-trailer unit list -- so whether these 125 trailers are ZONE's alone or span all three companies (as PrePass turned out to) CANNOT be checked without a per-unit breakdown from Pedigree. Do not assume it splits the same way as PrePass.",
+    "billed_to": "ZONE-OH LLC", "total": 2781.00, "trailers": 125, "per_trailer_week": 5.37
   },
   "stl_truckers_wireless": {
     "_note": "STL TRUCKERS LLC is a DIFFERENT entity from ZONE/XTRACK/AFG -- this is its own wireless account, not yet mapped to any of the three companies' trucks. 174 lines, mostly driver-style phone lines (~$35.20/line) but includes several lines explicitly named 'MIRZA TABLET' and 'JULY NAPERVILLE TABLETS' -- so this bill is NOT purely tablets, it is STL's whole wireless account. Do not use this as 'the tablet cost' -- the operator said Verizon tablet costs are still to come separately.",
