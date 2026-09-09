@@ -180,6 +180,55 @@ async def handle_voice(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"❌ Error processing voice: {e}")
 
 
+async def handle_audio(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
+    """Handle audio file attachments (mp3, m4a, wav, etc.)"""
+    user_id = update.effective_user.id
+    if not is_allowed(user_id):
+        log.warning("Blocked user %s", user_id)
+        return
+
+    chat_id = update.effective_chat.id
+    await ctx.bot.send_chat_action(chat_id=chat_id, action=ChatAction.TYPING)
+
+    try:
+        audio = update.message.audio
+        mime = audio.mime_type or ""
+        suffix = "." + mime.split("/")[-1] if "/" in mime else ".mp3"
+        file = await ctx.bot.get_file(audio.file_id)
+
+        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
+            tmp_path = tmp.name
+            await file.download_to_drive(tmp_path)
+
+        transcription = await transcribe_voice(tmp_path)
+        Path(tmp_path).unlink(missing_ok=True)
+
+        if not transcription:
+            await update.message.reply_text("❌ Could not transcribe audio file")
+            return
+
+        await update.message.reply_text(f"🎤 Transcribed: _{transcription}_", parse_mode="Markdown")
+
+        try:
+            data = await _backend("post", "/chat", json={"chat_id": chat_id, "message": transcription})
+            reply = data.get("reply", "")
+        except Exception as e:
+            await update.message.reply_text(f"❌ Backend error: {e}")
+            return
+
+        for chunk in _split(reply, 4000):
+            if not chunk.strip():
+                continue
+            try:
+                await update.message.reply_text(chunk, parse_mode="Markdown")
+            except Exception:
+                await update.message.reply_text(chunk)
+
+    except Exception as e:
+        log.error("Audio handling error: %s", e)
+        await update.message.reply_text(f"❌ Error processing audio: {e}")
+
+
 async def handle_message(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     if not is_allowed(user_id):
@@ -247,7 +296,8 @@ def main():
     app.add_handler(CommandHandler("clear", cmd_clear))
     app.add_handler(CommandHandler("status", cmd_status))
     app.add_handler(CommandHandler("id", cmd_id))
-    app.add_handler(MessageHandler(filters.VOICE, handle_voice))  # Voice handler
+    app.add_handler(MessageHandler(filters.VOICE, handle_voice))
+    app.add_handler(MessageHandler(filters.AUDIO, handle_audio))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     log.info("Axel Telegram bot starting — backend: %s", BACKEND_URL)
     log.info("Voice transcription enabled via Whisper")
