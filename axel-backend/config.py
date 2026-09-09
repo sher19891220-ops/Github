@@ -24,3 +24,9 @@ ALLOWED_SHELL_PATHS = [p for p in os.environ.get("ALLOWED_SHELL_PATHS", "").spli
 
 # Whether to allow arbitrary shell commands (set False for stricter safety)
 ALLOW_SHELL = os.environ.get("ALLOW_SHELL", "true").lower() == "true"
+
+# Secret for the /deploy webhook — generate with: python -c "import secrets; print(secrets.token_hex(32))"
+DEPLOY_SECRET = os.environ.get("DEPLOY_SECRET", "")
+
+# Public URL of this backend (used by remote Claude Code sessions to call /deploy)
+AXEL_URL = os.environ.get("AXEL_URL", "")

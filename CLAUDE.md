@@ -108,6 +108,8 @@ launchctl list | grep axel        # check both are running
 | TELEGRAM_TOKEN | yes | Bot auth + proactive send |
 | TELEGRAM_CHAT_ID | yes | Sher's chat ID |
 | BACKEND_API_KEY | yes | Secures /chat endpoint |
+| DEPLOY_SECRET | yes | Secures /deploy webhook — generate: `python -c "import secrets; print(secrets.token_hex(32))"` |
+| AXEL_URL | yes | Public URL of this backend e.g. `http://192.168.1.x:8000` or Tailscale URL |
 | CLAUDE_MODEL | no | `config.py` default is `claude-sonnet-5`; **`.env` currently pins `claude-sonnet-4-5`**, which wins |
 | HOST | no | Default `0.0.0.0` — binds all interfaces. Set `127.0.0.1` to restrict to loopback |
 | DB_PATH | no | Default `axel.db` |
@@ -115,6 +117,25 @@ launchctl list | grep axel        # check both are running
 
 `.env` is gitignored per-directory (`axel-backend/.gitignore`, `axel-telegram/.gitignore`),
 along with `*.db`, `*.log`, `logs/`, `venv/`, and `__pycache__/`.
+
+## Remote deploy webhook
+
+`POST /deploy` — pulls latest git and restarts both services. Secured by `X-Deploy-Secret` header.
+
+```bash
+# From any machine that can reach the Mac mini
+curl -s -X POST http://<AXEL_URL>/deploy \
+  -H "X-Deploy-Secret: <DEPLOY_SECRET>" | python3 -m json.tool
+```
+
+From a Claude Code cloud session, I call this automatically when asked to deploy — I look up
+`AXEL_URL` and `DEPLOY_SECRET` from the user's environment or memory.
+
+Setup on Mac mini — add to `axel-backend/.env`:
+```
+DEPLOY_SECRET=<generate with: python -c "import secrets; print(secrets.token_hex(32))">
+AXEL_URL=http://192.168.1.x:8000   # or Tailscale hostname
+```
 
 ## Gotchas
 
