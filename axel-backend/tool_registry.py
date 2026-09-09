@@ -4,9 +4,11 @@ Add new tools here — one entry in TOOLS, one branch in dispatch().
 """
 
 import json
+import logging
 import os
 
 from tools import (
+    composio_tools,
     docker_tools,
     finance_tools,
     google_tools,
@@ -19,6 +21,8 @@ from tools import (
     tasks,
 )
 
+log = logging.getLogger(__name__)
+
 
 def _check_setup() -> dict:
     """Report which integrations are configured and ready."""
@@ -27,8 +31,13 @@ def _check_setup() -> dict:
     plaid_ready = bool(os.environ.get("PLAID_CLIENT_ID") and (os.environ.get("PLAID_ACCESS_TOKENS") or os.environ.get("PLAID_ACCESS_TOKEN")))
     qb_ready = bool(os.environ.get("QB_CLIENT_ID") and os.environ.get("QB_REFRESH_TOKEN"))
 
+    composio_key = os.environ.get("COMPOSIO_API_KEY", "")
     statuses = {
         "shell_and_files": {"ready": True, "note": "Full Mac mini access available"},
+        "composio_social": {
+            "ready": bool(composio_key),
+            "note": "Ready" if composio_key else "Set COMPOSIO_API_KEY in .env (get from composio.io/settings)",
+        },
         "gmail_drive_sheets_calendar": {
             "ready": os.path.exists(google_token),
             "note": "Ready" if os.path.exists(google_token) else "Run: python setup_google_auth.py (needs credentials.json first)",
@@ -53,7 +62,7 @@ def _check_setup() -> dict:
 
 # ── Tool definitions (sent to Claude) ─────────────────────────────────────────
 
-TOOLS = [
+_ALL_TOOLS = [
     # SYSTEM
     {
         "name": "run_shell",
@@ -216,6 +225,58 @@ TOOLS = [
             "properties": {"category": {"type": "string", "description": "Optional: profile | business | project | system | contact | recurring"}},
         },
     },
+    {
+        "name": "remember_this",
+        "description": "Save a rich memory with natural language content, category, tags, and importance. Better than save_memory for context-rich facts like 'Sher prefers morning calls' or 'TMS uses Supabase hosted on us-east-1'.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "content": {"type": "string", "description": "The memory content in plain language"},
+                "category": {"type": "string", "description": "general | profile | business | project | contact | preference | decision | tms | axel"},
+                "tags": {"type": "string", "description": "Comma-separated tags e.g. 'freight, rates, chicago'"},
+                "importance": {"type": "integer", "description": "1=low, 2=minor, 3=normal, 4=important, 5=critical (default 3)"},
+            },
+            "required": ["content"],
+        },
+    },
+    {
+        "name": "recall",
+        "description": "Search all rich memories by keyword. Returns results ordered by importance then date. Use before asking Sher — the answer may already be stored.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string"},
+                "category": {"type": "string", "description": "Narrow to a specific category (optional)"},
+                "limit": {"type": "integer", "description": "Max results (default 20)"},
+            },
+            "required": ["query"],
+        },
+    },
+    {
+        "name": "list_rich_memories",
+        "description": "List stored rich memories, optionally filtered by category. Shows importance and tags.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "category": {"type": "string"},
+                "limit": {"type": "integer", "description": "Max results (default 50)"},
+            },
+        },
+    },
+    {
+        "name": "forget_memory",
+        "description": "Delete a rich memory by its ID (from recall or list_rich_memories).",
+        "input_schema": {
+            "type": "object",
+            "properties": {"memory_id": {"type": "integer"}},
+            "required": ["memory_id"],
+        },
+    },
+    {
+        "name": "get_memory_categories",
+        "description": "List all memory categories with counts and last-updated timestamps.",
+        "input_schema": {"type": "object", "properties": {}},
+    },
 
     # RESEARCH
     {
@@ -249,6 +310,117 @@ TOOLS = [
             "type": "object",
             "properties": {"url": {"type": "string"}},
             "required": ["url"],
+        },
+    },
+    {
+        "name": "scrape_page",
+        "description": "Scrape a webpage and return clean structured content. Use use_js=true for JS-heavy sites (SPAs, React apps).",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "url": {"type": "string"},
+                "use_js": {"type": "boolean", "description": "Use Playwright for JS-heavy pages (default false)"},
+            },
+            "required": ["url"],
+        },
+    },
+    {
+        "name": "deep_research",
+        "description": "Research a topic by searching the web and fetching the top pages. Returns synthesized content from multiple sources. Use for comprehensive research.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "topic": {"type": "string"},
+                "max_urls": {"type": "integer", "description": "Number of pages to fetch (default 5)"},
+            },
+            "required": ["topic"],
+        },
+    },
+    {
+        "name": "crawl_domain",
+        "description": "Crawl a website by following internal links from a starting URL. Useful for extracting content from a whole site.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "start_url": {"type": "string"},
+                "max_pages": {"type": "integer", "description": "Max pages to crawl (default 10)"},
+            },
+            "required": ["start_url"],
+        },
+    },
+    {
+        "name": "lookup_carrier_fmcsa",
+        "description": "Look up a carrier on FMCSA SAFER system. Returns safety rating, insurance status, operating authority, and out-of-service rate.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "dot_number": {"type": "string", "description": "USDOT number (e.g. '1234567')"},
+                "mc_number": {"type": "string", "description": "MC number (e.g. 'MC-123456' or '123456')"},
+            },
+        },
+    },
+    {
+        "name": "extract_freight_rates",
+        "description": "Research current freight market rates for a lane. Searches DAT, FreightWaves, and other sources for $/mile benchmarks.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "origin": {"type": "string", "description": "Origin city/state e.g. 'Chicago, IL'"},
+                "destination": {"type": "string", "description": "Destination city/state e.g. 'Dallas, TX'"},
+                "equipment": {"type": "string", "description": "van | reefer | flatbed (default: van)"},
+            },
+            "required": ["origin", "destination"],
+        },
+    },
+
+    # SOCIAL MEDIA & MESSAGING (Composio)
+    {
+        "name": "instagram_post",
+        "description": "Post a photo or video to Sher's Instagram. Requires a publicly accessible image/video URL.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "image_url": {"type": "string", "description": "Publicly accessible HTTPS URL of image (JPG) or video (MP4)"},
+                "caption": {"type": "string", "description": "Instagram caption (max 2200 chars). Include hashtags here."},
+                "media_type": {"type": "string", "enum": ["IMAGE", "VIDEO", "REELS"], "description": "Default: IMAGE"},
+            },
+            "required": ["image_url"],
+        },
+    },
+    {
+        "name": "linkedin_post",
+        "description": "Post to Sher's LinkedIn profile. Can include a link or image.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "text": {"type": "string", "description": "Post content. Supports line breaks. No hard length limit but 1300 chars optimal."},
+                "url": {"type": "string", "description": "Optional link to share"},
+                "image_url": {"type": "string", "description": "Optional image URL to attach"},
+            },
+            "required": ["text"],
+        },
+    },
+    {
+        "name": "twitter_post",
+        "description": "Post a tweet to Sher's Twitter/X account. Max 280 characters.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "text": {"type": "string", "description": "Tweet text (max 280 chars)"},
+            },
+            "required": ["text"],
+        },
+    },
+    {
+        "name": "whatsapp_send",
+        "description": "Send a WhatsApp message to a phone number. Use for driver communications, load offers, delivery confirmations.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "phone_number": {"type": "string", "description": "International format, digits only, e.g. '15551234567'"},
+                "message": {"type": "string", "description": "Message text"},
+            },
+            "required": ["phone_number", "message"],
         },
     },
 
@@ -583,6 +755,72 @@ TOOLS = [
 ]
 
 
+# ── Availability gating ───────────────────────────────────────────────────────
+#
+# Every tool below is only usable if its integration is configured. Advertising
+# one that isn't means Claude offers it, calls it, and gets a config error back
+# — burning a turn and misleading the user about what Axel can do. So the tool
+# list is filtered at startup to what actually works.
+#
+# Tools absent from this map have no external dependency and are always shown.
+# Configure an integration and restart, and its tools reappear on their own.
+
+_TOOL_INTEGRATION = {
+    **dict.fromkeys(
+        ["instagram_post", "linkedin_post", "twitter_post", "whatsapp_send"],
+        "composio_social",
+    ),
+    **dict.fromkeys(
+        ["gmail_list", "gmail_read", "gmail_send",
+         "sheets_read", "sheets_write", "sheets_list",
+         "calendar_list", "calendar_create",
+         "drive_list", "drive_read"],
+        "gmail_drive_sheets_calendar",
+    ),
+    **dict.fromkeys(
+        ["outlook_list", "outlook_read", "outlook_send", "outlook_reply"],
+        "outlook",
+    ),
+    **dict.fromkeys(["bank_accounts", "bank_transactions"], "bank_accounts_plaid"),
+    **dict.fromkeys(
+        ["qb_invoices", "qb_expenses", "qb_profit_loss", "qb_customers"],
+        "quickbooks",
+    ),
+}
+
+
+def available_tools() -> list:
+    """_ALL_TOOLS filtered to integrations that are actually configured."""
+    statuses = _check_setup()["integrations"]
+    out = []
+    for t in _ALL_TOOLS:
+        integration = _TOOL_INTEGRATION.get(str(t["name"]), "")
+        if statuses.get(integration, {"ready": True})["ready"]:
+            out.append(t)
+    return out
+
+
+TOOLS = available_tools()
+
+
+def tool_summary() -> str:
+    """One-line availability report. Call after logging is configured —
+    this module is imported before main.py runs basicConfig, so logging
+    at import time is silently dropped."""
+    hidden = len(_ALL_TOOLS) - len(TOOLS)
+    if not hidden:
+        return f"Tools: all {len(TOOLS)} available"
+    shown = {str(t["name"]) for t in TOOLS}
+    missing = sorted({
+        _TOOL_INTEGRATION[str(t["name"])]
+        for t in _ALL_TOOLS if str(t["name"]) not in shown
+    })
+    return (
+        f"Tools: {len(TOOLS)} of {len(_ALL_TOOLS)} available — "
+        f"{hidden} hidden (unconfigured: {', '.join(missing)})"
+    )
+
+
 # ── Dispatcher ─────────────────────────────────────────────────────────────────
 
 def dispatch(tool_name: str, tool_input: dict, context: dict) -> str:
@@ -626,6 +864,16 @@ def dispatch(tool_name: str, tool_input: dict, context: dict) -> str:
                 result = memory.search_memory(tool_input["query"])
             case "list_memory":
                 result = memory.list_memory(tool_input.get("category", ""))
+            case "remember_this":
+                result = memory.remember_this(tool_input["content"], tool_input.get("category", "general"), tool_input.get("tags", ""), tool_input.get("source", "axel"), tool_input.get("importance", 3))
+            case "recall":
+                result = memory.recall(tool_input["query"], tool_input.get("category", ""), tool_input.get("limit", 20))
+            case "list_rich_memories":
+                result = memory.list_rich_memories(tool_input.get("category", ""), tool_input.get("limit", 50))
+            case "forget_memory":
+                result = memory.forget_memory(tool_input["memory_id"])
+            case "get_memory_categories":
+                result = memory.get_memory_categories()
 
             # Research
             case "search_web":
@@ -634,6 +882,26 @@ def dispatch(tool_name: str, tool_input: dict, context: dict) -> str:
                 result = research.search_news(tool_input["topic"], tool_input.get("max_results", 8))
             case "fetch_url":
                 result = research.fetch_url(tool_input["url"])
+            case "scrape_page":
+                result = research.scrape_page(tool_input["url"], tool_input.get("use_js", False))
+            case "deep_research":
+                result = research.deep_research(tool_input["topic"], tool_input.get("max_urls", 5))
+            case "crawl_domain":
+                result = research.crawl_domain(tool_input["start_url"], tool_input.get("max_pages", 10))
+            case "lookup_carrier_fmcsa":
+                result = research.lookup_carrier_fmcsa(tool_input.get("dot_number", ""), tool_input.get("mc_number", ""))
+            case "extract_freight_rates":
+                result = research.extract_freight_rates(tool_input["origin"], tool_input["destination"], tool_input.get("equipment", "van"))
+
+            # Social media (Composio)
+            case "instagram_post":
+                result = composio_tools.instagram_post(tool_input["image_url"], tool_input.get("caption", ""), tool_input.get("media_type", "IMAGE"))
+            case "linkedin_post":
+                result = composio_tools.linkedin_post(tool_input["text"], tool_input.get("url", ""), tool_input.get("image_url", ""))
+            case "twitter_post":
+                result = composio_tools.twitter_post(tool_input["text"])
+            case "whatsapp_send":
+                result = composio_tools.whatsapp_send(tool_input["phone_number"], tool_input["message"])
 
             # Docker
             case "docker_list":

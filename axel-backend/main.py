@@ -5,7 +5,10 @@ The Telegram bot calls /chat to get AXEL responses.
 
 import asyncio
 import logging
+import os
+import subprocess
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import Depends, FastAPI, Header, HTTPException
@@ -13,8 +16,9 @@ from pydantic import BaseModel
 
 import axel_engine
 import conversation
-from config import BACKEND_API_KEY, HOST, PORT
+from config import BACKEND_API_KEY, DEPLOY_SECRET, HOST, PORT
 from db import init_db
+from tool_registry import tool_summary
 from tools.scheduler import check_and_send_due
 
 logging.basicConfig(
@@ -35,6 +39,7 @@ async def lifespan(app: FastAPI):
     # Check scheduled messages every minute
     scheduler.add_job(check_and_send_due, "interval", minutes=1, id="scheduled_msgs")
     scheduler.start()
+    log.info(tool_summary())
     log.info("AXEL backend online.")
     yield
     scheduler.shutdown()
@@ -124,6 +129,39 @@ def status():
         "memories": memories["count"],
         "scheduler": "running" if scheduler.running else "stopped",
     }
+
+
+# ── Deploy webhook ────────────────────────────────────────────────────────────
+
+_REPO_DIR = Path(__file__).parent.parent  # ~/Github
+_BACKEND_PLIST = os.path.expanduser("~/Library/LaunchAgents/com.axel.backend.plist")
+_TELEGRAM_PLIST = os.path.expanduser("~/Library/LaunchAgents/com.axel.telegram.plist")
+
+
+def _run(cmd: list[str], cwd: str | None = None) -> str:
+    r = subprocess.run(cmd, capture_output=True, text=True, timeout=60, cwd=cwd)
+    return (r.stdout + r.stderr).strip()
+
+
+@app.post("/deploy")
+async def deploy(x_deploy_secret: str = Header(default="")):
+    if not DEPLOY_SECRET or x_deploy_secret != DEPLOY_SECRET:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    pull = _run(["git", "pull"], cwd=str(_REPO_DIR))
+    log.info("Deploy pull: %s", pull)
+
+    async def _restart():
+        await asyncio.sleep(1)
+        _run(["launchctl", "unload", _TELEGRAM_PLIST])
+        _run(["launchctl", "load",   _TELEGRAM_PLIST])
+        _run(["launchctl", "unload", _BACKEND_PLIST])
+        # Backend restarts itself — load fires after unload kills this process
+        subprocess.Popen(["launchctl", "load", _BACKEND_PLIST])
+
+    asyncio.create_task(_restart())
+
+    return {"success": True, "pull": pull, "restarting": True}
 
 
 # ── Entry point ────────────────────────────────────────────────────────────────

@@ -48,8 +48,20 @@ def init_db():
                 created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
             );
 
+            CREATE TABLE IF NOT EXISTS agent_memories (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                content     TEXT NOT NULL,
+                category    TEXT DEFAULT 'general',
+                tags        TEXT DEFAULT '',
+                source      TEXT DEFAULT 'axel',
+                importance  INTEGER DEFAULT 3,
+                created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
+
             CREATE INDEX IF NOT EXISTS idx_conv_chat ON conversations(chat_id, id);
             CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
             CREATE INDEX IF NOT EXISTS idx_memory_key ON memory(key);
             CREATE INDEX IF NOT EXISTS idx_scheduled_fire ON scheduled_messages(fire_at, sent);
+            CREATE INDEX IF NOT EXISTS idx_memories_category ON agent_memories(category);
+            CREATE INDEX IF NOT EXISTS idx_memories_importance ON agent_memories(importance);
         """)
