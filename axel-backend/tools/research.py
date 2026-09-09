@@ -1,3 +1,4 @@
+import os
 import re
 import subprocess
 import httpx
@@ -8,6 +9,18 @@ try:
     _ddgs_available = True
 except ImportError:
     _ddgs_available = False
+
+try:
+    from firecrawl import FirecrawlApp as _FirecrawlApp
+    _firecrawl_available = True
+except ImportError:
+    _firecrawl_available = False
+
+def _firecrawl():
+    key = os.environ.get("FIRECRAWL_API_KEY", "")
+    if key and _firecrawl_available:
+        return _FirecrawlApp(api_key=key)
+    return None
 
 _HEADERS = {
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -72,6 +85,14 @@ def _extract_main_content(html: str) -> str:
 
 
 def fetch_url(url: str) -> dict:
+    fc = _firecrawl()
+    if fc:
+        try:
+            result = fc.scrape_url(url, params={"formats": ["markdown"]})
+            content = result.get("markdown") or result.get("content", "")
+            return {"url": url, "content": content[:10000], "method": "firecrawl"}
+        except Exception:
+            pass  # fall through to httpx
     try:
         with httpx.Client(timeout=20, follow_redirects=True, headers=_HEADERS) as client:
             resp = client.get(url)
@@ -110,6 +131,14 @@ with sync_playwright() as p:
 
 def scrape_page(url: str, use_js: bool = False) -> dict:
     """Scrape a page and return clean structured content."""
+    fc = _firecrawl()
+    if fc:
+        try:
+            result = fc.scrape_url(url, params={"formats": ["markdown"], "actions": [{"type": "wait", "milliseconds": 2000}] if use_js else []})
+            content = result.get("markdown") or result.get("content", "")
+            return {"url": url, "content": content[:10000], "word_count": len(content.split()), "method": "firecrawl"}
+        except Exception:
+            pass
     result = fetch_url_js(url) if use_js else fetch_url(url)
     if "error" in result:
         return result
@@ -123,20 +152,27 @@ def scrape_page(url: str, use_js: bool = False) -> dict:
 
 def deep_research(topic: str, max_urls: int = 5) -> dict:
     """Research a topic: search + fetch top pages + return synthesized content."""
-    # Step 1: search
+    fc = _firecrawl()
+    if fc:
+        try:
+            result = fc.search(topic, limit=max_urls)
+            pages = []
+            for r in (result.get("data") or result if isinstance(result, list) else []):
+                pages.append({"url": r.get("url", ""), "content": (r.get("markdown") or r.get("content", ""))[:3000]})
+            if pages:
+                return {"topic": topic, "sources": len(pages), "pages": pages, "method": "firecrawl"}
+        except Exception:
+            pass
+    # Fallback: DuckDuckGo search + httpx fetch
     search = search_web(topic, max_results=max_urls + 3)
     if "error" in search:
         return search
     urls = [r["url"] for r in search["results"] if r.get("url")][:max_urls]
-    # Step 2: fetch each page
     pages = []
     for url in urls:
         result = fetch_url(url)
         if "content" in result:
-            pages.append({
-                "url": url,
-                "content": result["content"][:3000],
-            })
+            pages.append({"url": url, "content": result["content"][:3000]})
     return {
         "topic": topic,
         "sources": len(pages),

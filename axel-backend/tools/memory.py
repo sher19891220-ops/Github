@@ -1,4 +1,20 @@
+import os
+
 from db import conn
+
+try:
+    from mem0 import MemoryClient as _Mem0Client
+    _mem0_available = True
+except ImportError:
+    _mem0_available = False
+
+_MEM0_USER = "sher"
+
+def _mem0():
+    key = os.environ.get("MEM0_API_KEY", "")
+    if key and _mem0_available:
+        return _Mem0Client(api_key=key)
+    return None
 
 
 # ── Key-value memory (legacy, keep for compatibility) ──────────────────────
@@ -67,17 +83,37 @@ def remember_this(
 ) -> dict:
     """Save a rich memory with category, tags, and importance (1=low, 5=critical)."""
     importance = max(1, min(5, importance))
+    m0 = _mem0()
+    if m0:
+        try:
+            metadata = {"category": category, "tags": tags, "importance": importance, "source": source}
+            result = m0.add(content, user_id=_MEM0_USER, metadata=metadata)
+            mem_id = (result[0].get("id") if isinstance(result, list) else result.get("id")) or 0
+            return {"success": True, "id": mem_id, "category": category, "importance": importance, "backend": "mem0"}
+        except Exception:
+            pass  # fall through to SQLite
     with conn() as c:
         cur = c.execute(
             "INSERT INTO agent_memories (content, category, tags, source, importance) VALUES (?, ?, ?, ?, ?)",
             (content, category, tags, source, importance),
         )
         mem_id = cur.lastrowid
-    return {"success": True, "id": mem_id, "category": category, "importance": importance}
+    return {"success": True, "id": mem_id, "category": category, "importance": importance, "backend": "sqlite"}
 
 
 def recall(query: str, category: str = "", limit: int = 20) -> dict:
     """Search all memories (both key-value and rich) by keyword."""
+    m0 = _mem0()
+    if m0:
+        try:
+            filters = {"AND": [{"user_id": _MEM0_USER}]}
+            if category:
+                filters["AND"].append({"metadata": {"category": category}})
+            results = m0.search(query, user_id=_MEM0_USER, limit=limit)
+            memories = [{"id": r.get("id"), "content": r.get("memory", ""), "category": (r.get("metadata") or {}).get("category", ""), "tags": (r.get("metadata") or {}).get("tags", ""), "importance": (r.get("metadata") or {}).get("importance", 3), "score": r.get("score")} for r in (results if isinstance(results, list) else [])]
+            return {"query": query, "results": memories, "count": len(memories), "backend": "mem0"}
+        except Exception:
+            pass  # fall through to SQLite
     with conn() as c:
         if category:
             rows = c.execute(
@@ -93,7 +129,7 @@ def recall(query: str, category: str = "", limit: int = 20) -> dict:
                 "ORDER BY importance DESC, created_at DESC LIMIT ?",
                 (f"%{query}%", f"%{query}%", f"%{query}%", limit),
             ).fetchall()
-    return {"query": query, "results": [dict(r) for r in rows], "count": len(rows)}
+    return {"query": query, "results": [dict(r) for r in rows], "count": len(rows), "backend": "sqlite"}
 
 
 def list_rich_memories(category: str = "", limit: int = 50) -> dict:

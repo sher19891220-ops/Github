@@ -29,5 +29,11 @@ requests>=2.32.0
 # Composio — Instagram, LinkedIn, Twitter/X, WhatsApp
 composio-core>=0.7.0
 
+# Firecrawl — web scraping & research (cloud API, falls back to httpx+BS4)
+firecrawl-py>=1.0.0
+
+# Mem0 — persistent AI memory (cloud API, falls back to SQLite)
+mem0ai>=0.1.0
+
 # Voice transcription (Whisper)
 openai-whisper>=20231117

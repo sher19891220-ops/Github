@@ -28,6 +28,12 @@ ALLOW_SHELL = os.environ.get("ALLOW_SHELL", "true").lower() == "true"
 # Composio — social media & WhatsApp (Instagram, LinkedIn, Twitter, WhatsApp)
 COMPOSIO_API_KEY = os.environ.get("COMPOSIO_API_KEY", "")
 
+# Firecrawl — cloud web scraping API (firecrawl.dev → API Keys)
+FIRECRAWL_API_KEY = os.environ.get("FIRECRAWL_API_KEY", "")
+
+# Mem0 — cloud AI memory API (app.mem0.ai → Settings → API Keys)
+MEM0_API_KEY = os.environ.get("MEM0_API_KEY", "")
+
 # Secret for the /deploy webhook — generate with: python -c "import secrets; print(secrets.token_hex(32))"
 DEPLOY_SECRET = os.environ.get("DEPLOY_SECRET", "")
 
