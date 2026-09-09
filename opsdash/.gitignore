@@ -1,0 +1,10 @@
+node_modules/
+.env
+.env.*
+*.tsbuildinfo
+
+# Real financial documents never enter version control. This repository is
+# public, and fuel/toll/maintenance reports carry card numbers, account
+# numbers and driver names. Redacted fixtures under tests/fixtures/redacted
+# are the only ones that get committed.
+tests/fixtures/real/
