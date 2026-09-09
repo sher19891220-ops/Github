@@ -157,13 +157,10 @@ async def deploy(x_deploy_secret: str = Header(default="")):
         await asyncio.sleep(1)
         _run(["launchctl", "unload", _TELEGRAM_PLIST])
         _run(["launchctl", "load",   _TELEGRAM_PLIST])
-        # Schedule backend reload BEFORE unload — unload kills this process,
-        # so the Popen'd shell survives as an orphan and reloads 3s later.
-        subprocess.Popen(
-            ["bash", "-c",
-             f"sleep 3 && launchctl load {_BACKEND_PLIST}"],
-        )
-        _run(["launchctl", "unload", _BACKEND_PLIST])
+        # Kill ourselves — launchd KeepAlive=true auto-restarts the backend.
+        # launchctl load from a subprocess always fails with I/O error.
+        import signal as _signal
+        os.kill(os.getpid(), _signal.SIGTERM)
 
     asyncio.create_task(_restart())
 
