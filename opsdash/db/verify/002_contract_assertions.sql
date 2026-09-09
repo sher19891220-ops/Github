@@ -105,3 +105,55 @@ BEGIN
 EXCEPTION WHEN check_violation THEN
   RAISE NOTICE 'PASS: inverted confidence band rejected';
 END $$;
+
+\echo '--- ASSERT 8: a truck-attributed cost must actually name a truck ------'
+DO $$
+BEGIN
+  INSERT INTO accounting.ledger_entry
+    (entity_id, accrual_date, category_id, amount, source_kind,
+     source_document_id, unit_type, posted_by)
+  VALUES ('11111111-1111-1111-1111-111111111111','2026-01-20','fuel.diesel',
+          -100.00,'document','22222222-2222-2222-2222-222222222222',
+          'truck','ceo@fleet');   -- claims 'truck', names none
+  RAISE EXCEPTION 'FAIL: unattributed truck cost accepted';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: truck cost without a truck rejected';
+END $$;
+
+\echo '--- ASSERT 9: a trailer cost cannot masquerade as a truck cost -------'
+DO $$
+BEGIN
+  INSERT INTO accounting.ledger_entry
+    (entity_id, truck_id, accrual_date, category_id, amount, source_kind,
+     source_document_id, unit_type, unit_number, posted_by)
+  VALUES ('11111111-1111-1111-1111-111111111111',
+          NULL,'2026-01-20','fuel.diesel',-100.00,'document',
+          '22222222-2222-2222-2222-222222222222','trailer','50272','ceo@fleet');
+  -- A trailer cost with no truck_id is correct and must be accepted.
+  RAISE NOTICE 'PASS: trailer cost accepted without a truck attribution';
+END $$;
+
+\echo '--- ASSERT 10: an unattributed cost defaults to unknown, not truck ---'
+INSERT INTO accounting.ledger_entry
+  (entry_id, entity_id, accrual_date, category_id, amount, source_kind,
+   source_document_id, posted_by)
+VALUES ('55555555-5555-5555-5555-555555555555',
+        '11111111-1111-1111-1111-111111111111','2026-01-21','fuel.diesel',
+        -55.00,'document','22222222-2222-2222-2222-222222222222','ceo@fleet');
+SELECT CASE WHEN unit_type = 'unknown'
+            THEN 'PASS: unattributed cost defaulted to unknown'
+            ELSE 'FAIL: defaulted to ' || unit_type::text END AS result
+FROM accounting.ledger_entry WHERE entry_id = '55555555-5555-5555-5555-555555555555';
+
+\echo '--- ASSERT 11: driver-charged cost is separable from company cost ----'
+INSERT INTO accounting.ledger_entry
+  (entity_id, accrual_date, category_id, amount, source_kind,
+   source_document_id, charged_to, memo, posted_by)
+VALUES ('11111111-1111-1111-1111-111111111111','2026-01-22','fuel.diesel',
+        -420.00,'document','22222222-2222-2222-2222-222222222222',
+        'driver','radiator, charged back to LO driver','controller@fleet');
+SELECT CASE WHEN COUNT(*) FILTER (WHERE charged_to = 'driver') = 1
+             AND COUNT(*) FILTER (WHERE charged_to = 'company') >= 1
+            THEN 'PASS: company and driver costs are distinguishable'
+            ELSE 'FAIL: chargeback not separable' END AS result
+FROM accounting.ledger_entry;

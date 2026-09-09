@@ -42,14 +42,26 @@ $PSQL -c "CREATE DATABASE aiops_verify;" >/dev/null
 echo "db-verify: applying migrations..."
 for m in "$ROOT"/db/migrations/*.sql; do
   echo "  $(basename "$m")"
-  $PSQL -d aiops_verify -f "$m" >/dev/null
+  set +e
+  MOUT="$($PSQL -d aiops_verify -f "$m" 2>&1)"; MRC=$?
+  set -e
+  if [[ $MRC -ne 0 ]]; then
+    echo "db-verify: FAILED applying $(basename "$m")" >&2
+    echo "$MOUT" >&2
+    exit 1
+  fi
 done
 
 echo "db-verify: running contract assertions..."
-OUT="$($PSQL -d aiops_verify -f "$ROOT/db/verify/002_contract_assertions.sql" 2>&1)"
+# Captured without `set -e` aborting: a failed assertion run must be REPORTED,
+# not swallowed. An earlier version exited silently here, which is the worst
+# possible behaviour for a gate — it looked like nothing was wrong.
+set +e
+OUT="$($PSQL -d aiops_verify -f "$ROOT/db/verify/002_contract_assertions.sql" 2>&1)"; ARC=$?
+set -e
 echo "$OUT" | grep -E '^(NOTICE|psql).*(PASS|FAIL)|PASS:|FAIL:' | sed -E 's/^.*(PASS|FAIL)/  \1/' || true
 
-if echo "$OUT" | grep -q 'FAIL'; then
+if [[ $ARC -ne 0 ]] || echo "$OUT" | grep -q 'FAIL'; then
   echo "db-verify: FAILED — the schema does not enforce what the contract claims." >&2
   echo "$OUT" >&2
   exit 1

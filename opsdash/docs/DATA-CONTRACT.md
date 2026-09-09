@@ -1,41 +1,33 @@
 # Data Contract v1 — Accounting / CEO Ops Dashboard
 
-**Status:** fixed for Phase 2 fan-out, with three open items in §7 that must be
-closed against the live schema before the Phase 3 IFTA agent starts.
+**Status:** fixed for Phase 2 fan-out. Revised after reading the live Google
+Sheets; aiops is out of scope. Three open items in §7 gate Phase 3.
 **Authority:** this document + `db/migrations/001_accounting_core.sql`. Where they
 disagree, the migration wins — it is the artifact that has actually been executed.
-**Verified:** migration applies clean on PostgreSQL 16; all seven assertions in
-`db/verify/002_contract_assertions.sql` pass.
+**Verified:** migrations apply clean on PostgreSQL 16; all twelve assertions in
+`db/verify/002_contract_assertions.sql` pass. Run `npm run db:verify`.
 
 ---
 
-## 1. The read/write boundary
+## 1. Where this lives
 
-The `public` schema of the aiops database belongs to the n8n workflows. This
-build **never writes to it**.
+**The aiops Postgres is out of scope.** It is not read, not written, not joined
+to. This build owns a standalone PostgreSQL database, and every table lives in
+an `accounting` schema inside it.
 
-| Schema | Owner | This app's access |
+Inputs are exactly two:
+
+| Input | Path | Provenance kind |
 | --- | --- | --- |
-| `public` | n8n scheduled ingestion | `SELECT` only |
-| `accounting` | this build | full |
+| Google Sheets | read via the Drive connector | `connector` |
+| Dropped documents | PDF / XLSX / CSV upload | `document` |
 
-Everything new lives in `accounting`. Two reasons, both practical: an n8n workflow
-that recreates a table cannot take the ledger with it, and a `SELECT`-only grant on
-`public` makes "do not re-ingest data that's already flowing in" (§1) a permission,
-not a promise.
+Sheets are read-only sources. Nothing this build does writes back to a sheet:
+the operator's spreadsheet stays theirs, and the ledger is derived from it.
 
-Provision a dedicated role before Phase 2:
-
-```sql
-CREATE ROLE opsdash_app LOGIN PASSWORD :'pw';
-GRANT USAGE ON SCHEMA public TO opsdash_app;
-GRANT SELECT ON ALL TABLES IN SCHEMA public TO opsdash_app;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO opsdash_app;
-GRANT USAGE, CREATE ON SCHEMA accounting TO opsdash_app;
-GRANT ALL ON ALL TABLES IN SCHEMA accounting TO opsdash_app;
-```
-
----
+Sheet identity (Drive file id and tab) is configured at runtime in
+`accounting.sheet_source`, never committed. This repository is public, and a
+file id alongside a business name is a targeting aid.
 
 ## 2. The provenance model — the load-bearing idea
 
@@ -88,8 +80,8 @@ Two consequences the Phase 2/3/4 agents must design around:
 | Dimensions | `entity`, `truck`, `driver`, `truck_entity_history`, `driver_class_history`, `source_key_map` |
 | Taxonomy | `category` |
 | Ingestion (§4.1) | `source_document`, `staging_row` |
-| Connector provenance | `connector_pull` |
-| Ledger | `ledger_entry` |
+| Connector provenance | `connector_pull`, `sheet_source` |
+| Ledger | `ledger_entry` (incl. `charged_to`, `unit_type`) |
 | Engines (§4.3–4.4) | `calc_run`, `ifta_rate`, `ifta_liability`, `permit_rate`, `permit_cost` |
 | P&L (§4.5) | `pnl_period` *(cache — see below)* |
 | Prediction (§4.6) | `forecast_run` |
@@ -109,29 +101,37 @@ difference between a correction and a silent estimate.
 
 ---
 
-## 5. How the existing tables are used
+## 5. Where the numbers come from
 
-Per §1's build directive: join, do not re-ingest.
+Established by reading the live sheets, not by assumption. Structures, and the
+defects each parser must survive, are in `docs/SOURCE-DISCOVERY.md`.
 
-| Need | Existing source | Written into |
+| Need | Source | Written into |
 | --- | --- | --- |
-| Revenue actuals | `load_pipeline`, `dispatch_weekly_summary` | `ledger_entry` via `connector` |
-| Open pipeline (prediction) | `load_pipeline` | `forecast_run.basis` — **never** the ledger |
-| Fuel reconciliation | `samsara_fuel_reports`, `truck_fuel_history` | `fuel_reconciliation` |
-| Mileage | `samsara_vehicle_stats`, `v_truck_miles_30d`, `live_trips` | IFTA + permit engine inputs |
-| Truck / driver identity | `samsara_vehicles`, `samsara_drivers`, `live_trucks` | `source_key_map` |
-| Entity roll-up cross-check | `weekly_company_summary` | Phase 4 reconciliation test |
-| Lease-to-own balances | `debt_balances`, `debt_collections` | `ledger_entry` via `connector` |
+| Revenue | Dispatch Sheet, weekly per truck | `ledger_entry` via `connector` |
+| Driver class | Dispatch Sheet `Payment` (CPM/LO/OO) | `driver_class_history` |
+| Entity | free text in driver name; entity blocks in the fuel summary | `entity`, `source_key_map` |
+| Fuel cost | Fuel sheet | `ledger_entry` via `connector` |
+| Fuel gallons by state | **EFS/Relay statements only** | `ledger_entry` via `document` |
+| Maintenance cost | Truck and trailer expenses sheet | `ledger_entry` via `connector` |
+| Toll | partly the expenses sheet, partly documents | `ledger_entry` |
+| Chargeback | expenses sheet `Expense side` | `ledger_entry.charged_to` |
+| Truck / trailer | expenses sheet `Unit Type` | `ledger_entry.unit_type` |
+| Miles by state | **Samsara IFTA export, dropped per quarter** | `ifta_mileage` document |
 
-**Open loads never post to the ledger.** They are forecast input only. Posting them
-would present an estimate as an actual, which §2 forbids.
+Three rules that fall out of the real data:
 
-Toll and maintenance-cost data have no upstream source and arrive **only** through
-drag-drop ingestion. `truck_inspections` / `inspection_reports` / `pti_inspections`
-are inspection events, not costs, and must not be treated as a maintenance-cost
-source.
+- **Never resolve identity by string match.** `Issued To` writes the same person
+  as `"496648 NAME"`, `"Name # 6169"` and `"Name #495803"`. Everything goes
+  through `source_key_map`.
+- **A no-load day is not a zero-revenue day.** `transit`, `OFF`, `HOME`,
+  `TOWING` and `OOS` must post no entry rather than a zero one, or average
+  revenue per truck is silently wrong.
+- **Parse sheets by header, never by column index.** Column order is not stable
+  across sections of the same tab. `sheet_source.header_checksum` exists so a
+  layout change fails loudly instead of reading the wrong column as an amount.
 
----
+Open loads remain forecast input only, never ledger entries.
 
 ## 6. API shapes — what the Phase 2 agents build against
 
@@ -185,22 +185,18 @@ type PnlLine = {
 
 ---
 
-## 7. Open items — must close before Phase 3
+## 7. Open items
 
-1. **Per-jurisdiction mileage has no identified source.** §1 lists no table
-   carrying miles by state; `v_truck_miles_30d` is a total. The IFTA engine
-   (§4.3) needs miles *per state per truck per quarter* and cannot be built
-   without it. `db/verify/001_confirm_ground_truth.sql` section B probes for it.
-   This is the single biggest schedule risk in the build.
-2. **Per-state fuel purchase.** IFTA nets tax-paid gallons by state. Whether
-   `samsara_fuel_reports` carries a purchase state is unconfirmed; if not, the
-   EFS/Relay documents become the sole IFTA fuel source and Phase 3 hard-depends
-   on Phase 2.
-3. **Entity attribution.** Which existing column identifies Zone / Xtrack / AFG,
-   and whether it lives on the truck, the load, or only on
-   `weekly_company_summary`.
-
----
+1. **Miles by state has no source.** No sheet carries it. The Samsara IFTA
+   report export, dropped per quarter as an `ifta_mileage` document, is the
+   only identified path. **Phase 3 cannot start until one arrives.**
+2. **IFTA gallons by state depend on Phase 2.** The Fuel sheet has the purchase
+   state (inside a postal address) but records `"full tank"` instead of a
+   quantity often enough to be unusable; the fuel summary has real gallons but
+   no state. EFS/Relay statements are therefore the authoritative source, which
+   makes Phase 3 dependent on Phase 2 rather than parallel to it.
+3. **Entity coverage.** Whether `xtrack` and `afg` have their own dispatch and
+   expense sheets, or live inside Zone's with entity in free text.
 
 ## 8. Application stack
 

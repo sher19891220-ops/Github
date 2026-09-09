@@ -72,25 +72,26 @@ needs a deploy.
 Revenue, cost and margin as you booked them, for the last four completed weeks.
 The prediction panel is back-tested against these and reports its real error.
 
-## 6. Database access — unblocks everything
+## 6. Google Sheets access — already working
 
-A connection string for the aiops Postgres. Read-only is enough to start:
+Nothing needed. The Drive connector reads your live sheets directly, and the
+structures have been confirmed against real data — see `SOURCE-DISCOVERY.md`.
 
-```
-postgresql://user:password@host:5432/aiops
-```
-
-Send it through a channel you would send a password through, not in a file that
-gets committed. With it I can run `db/verify/001_confirm_ground_truth.sql`,
-confirm the ground-truth table list still matches, and settle the three open
-items in the data contract.
+**The aiops Postgres is out of scope.** No connection string is needed; that
+earlier request is withdrawn.
 
 ---
 
 ## Priority, if you are sending in stages
 
-1. **Database connection string** — closes three open contract items in one pass.
-2. **Reference data** (§4) — nothing can be attributed to a truck or entity without it.
-3. **Documents** (§1) — opens Phase 2 for both parallel agents.
-4. **Filed IFTA quarter** (§2) — opens Phase 3.
+1. **A Samsara IFTA report export** for one quarter — the only unresolved input
+   in the whole build. Nothing else can supply miles by state.
+2. **EFS/Relay fuel statements** (§1) — opens Phase 2, and carries the gallons
+   the IFTA engine needs, which the Fuel sheet does not reliably record.
+3. **A filed IFTA quarter** (§2) — the number the engine gets validated against.
+4. **Answers to the four questions** at the end of `SOURCE-DISCOVERY.md` — each
+   one is a wrong-number risk, not a nicety.
 5. **Trailing weeks** (§5) — needed only at Phase 5.
+
+Toll and maintenance documents matter less than they did: those costs are
+already maintained in your expense sheet, which the build now reads directly.

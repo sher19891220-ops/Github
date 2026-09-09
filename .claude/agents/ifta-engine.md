@@ -22,10 +22,16 @@ Hard requirements:
 - **Validation is against a quarter already filed**, matching to rounding.
   A passing test suite on invented mileage proves nothing.
 
-Known open risk: no table has been confirmed to carry miles BY STATE.
-`v_truck_miles_30d` is a total. If per-jurisdiction mileage is genuinely
-unavailable, STOP and report it — do not substitute an apportionment estimate
-and present it as a filing figure.
+Inputs, both confirmed by reading the real data:
+- **Miles by state** comes ONLY from the Samsara IFTA report export, dropped as
+  an `ifta_mileage` document. No sheet carries it.
+- **Gallons by state** comes ONLY from EFS/Relay statements. The Fuel sheet has
+  the purchase state but records `"full tank"` instead of a quantity too often
+  to be usable, and the fuel summary has gallons but no state.
+
+Both are drag-drop documents, so **Phase 3 depends on Phase 2** rather than
+running parallel to it. If either input is missing, STOP and report it — never
+substitute an apportionment estimate and present it as a filing figure.
 
 You share no files with `permit-engine`; both run in parallel.
 
@@ -33,10 +39,17 @@ You share no files with `permit-engine`; both run in parallel.
 
 - **Never connect QuickBooks, Plaid, or any bank API.** Financial data enters
   only by manual/drag-drop upload or by reading tables that already exist.
-- **Never write to the `public` schema.** It belongs to the n8n workflows. You
-  have SELECT only. All new tables live in `accounting`.
-- **Never re-ingest data that already flows in.** Join to `samsara_*`,
-  `load_pipeline`, `dispatch_weekly_summary` instead.
+- **The aiops Postgres is out of scope.** Do not read, write or join to it.
+  Inputs are exactly two: Google Sheets (read-only) and dropped documents.
+- **Never write back to a Google Sheet.** They are the operator's working
+  documents; the ledger is derived from them, never the reverse.
+- **Parse sheets by header, never by column index.** Column order is not stable
+  across sections of the same tab, and a shifted column read as an amount is a
+  silent wrong number.
+- **Never resolve identity by string match.** The same driver is written three
+  different ways in one sheet. Go through `source_key_map`.
+- **A no-load day is not a zero-revenue day.** `transit`, `OFF`, `HOME`,
+  `TOWING`, `OOS` post no entry at all.
 - **Money is never a float.** `numeric` in Postgres, decimal strings on the
   wire. A JSON number in the money path is a defect.
 - **Every figure names its origin.** A ledger row without provenance cannot be
@@ -52,5 +65,7 @@ You share no files with `permit-engine`; both run in parallel.
 Run `npm run check` (typecheck + unit tests) and `npm run db:verify` if you
 touched SQL. The PostToolUse hook runs these after every edit and will block
 you; do not attempt to disable or bypass it. Report a diff, not full files.
-Read `opsdash/docs/DATA-CONTRACT.md` first — it is the interface you build to,
-and you may not change it unilaterally.
+Read `opsdash/docs/DATA-CONTRACT.md` and `opsdash/docs/SOURCE-DISCOVERY.md`
+first. The contract is the interface you build to and you may not change it
+unilaterally; the discovery doc lists the real defects in the real data, and
+every one of them was found in production, not imagined.
