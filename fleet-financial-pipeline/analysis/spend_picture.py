@@ -398,6 +398,84 @@ def truck_cost_per_mile(d):
     return pd.DataFrame(rows)
 
 
+def truck_company(units):
+    """Which operating company each truck unit belongs to, best available
+    source first. NEVER CALL THIS ON A TRAILER NUMBER -- no trailer
+    registry or trailer P&L block exists anywhere in this corpus, but that
+    does NOT mean every trailer number safely returns None: confirmed
+    2026-09-09, 19 of 504 trailer numbers spuriously resolve (e.g. '8131',
+    '15739', '15852') because those same digits are ALSO a real truck's
+    unit number elsewhere in the fleet (43 such reused numbers are already
+    documented in breakdown_trend.py). The registry has no way to know
+    which equipment type a bare number means -- the caller must never pass
+    it a number known to be a trailer's. company_rollup() below enforces
+    this by only ever building its unit list from truck-tagged rows.
+
+    Two sources, in preference order:
+      1. registration.py's IRP-plate registry (361 units) -- an ongoing
+         legal registration, so it tends to cover a truck for its whole
+         active life, not just the P&L's own 27-week window.
+      2. truck_maintenance.py's P&L blocks (118 units, 2026-02-23..08-24
+         only) -- the truck's LAST P&L week's company, same convention
+         cost_structure.py's own _company_of() already uses.
+    Confirmed 2026-09-09: together these resolve 92 of 301 trucks (30.6% of
+    units) but 58.3% of truck DOLLARS ($708,045 of $1,215,019) -- the
+    unresolved 209 are disproportionately older/pre-2025 trucks with a
+    registration or P&L history from before either source's window.
+    """
+    import registration as REG
+    idx = REG.unit_index()
+
+    def reg_company(u):
+        rows = idx.get(str(u))
+        if not rows:
+            return None
+        return max(rows, key=lambda r: r.get("last_week") or "").get("company")
+
+    weeks = TM.all_weeks()
+    weeks["unit"] = weeks.unit.astype(str).str.strip()
+    pnl_last = weeks.sort_values("week").groupby("unit").pnl_company.last().to_dict()
+
+    return {u: reg_company(u) or pnl_last.get(u) for u in units}
+
+
+def company_rollup(d, cpm):
+    """Truck totals, monthly-by-company, and company-level cost-per-mile
+    (total $ / total miles across every attributed truck, never an average
+    of per-truck rates). Unresolved trucks are reported as their own row,
+    'UNATTRIBUTED', not silently dropped or guessed into a company.
+
+    THE SAME co_map MUST BE USED FOR BOTH `trucks` AND `cpm`, built from
+    their UNION. Building it separately from each frame's own unit list
+    was a real bug found 2026-09-09: cpm carries extra units (from
+    truck_maintenance.py's P&L weeks) that have miles but zero charges, so
+    they never appear in `trucks` at all -- computing co_map from `trucks`
+    alone left them out of the dict entirely, `.map()` turned that missing
+    key into NaN same as a genuinely unresolved unit, and their real miles
+    landed in the UNATTRIBUTED bucket while contributing $0 cost, producing
+    a nonsense $0.00/mile for UNATTRIBUTED instead of leaving it uncomputable.
+    """
+    trucks = d[(d.unit_type == "truck") & (d.borne_by == "company")].copy()
+    co_map = truck_company(set(trucks.unit) | set(cpm.unit))
+    trucks["pnl_company"] = trucks.unit.map(co_map).fillna("UNATTRIBUTED")
+
+    total = trucks.groupby("pnl_company").amount.agg(["count", "sum"])
+    total.columns = ["charges", "total_spend"]
+
+    cpm2 = cpm.copy()
+    cpm2["pnl_company"] = cpm2.unit.map(co_map).fillna("UNATTRIBUTED")
+    per_mile = cpm2.groupby("pnl_company").agg(
+        cost_in_pnl_window=("cost_in_pnl_window", "sum"),
+        miles_in_pnl_window=("miles_in_pnl_window", "sum"))
+    per_mile["cost_per_mile"] = (per_mile.cost_in_pnl_window
+                                 / per_mile.miles_in_pnl_window)
+    per_mile.loc[per_mile.miles_in_pnl_window <= 0, "cost_per_mile"] = float("nan")
+
+    monthly = (trucks.groupby(["pnl_company", "month"]).amount.sum()
+              .unstack(fill_value=0.0))
+    return total.join(per_mile[["cost_per_mile"]]), monthly
+
+
 def main():
     d, notes = load_all()
     d = add_periods(d)
@@ -415,12 +493,15 @@ def main():
         })
     summary = pd.DataFrame(summary_rows)
     cpm = truck_cost_per_mile(d)
+    co_total, co_monthly = company_rollup(d, cpm)
 
     with pd.ExcelWriter(out, engine="xlsxwriter") as xw:
         summary.to_excel(xw, sheet_name="Summary", index=False)
         pd.DataFrame({"note": notes}).to_excel(xw, sheet_name="Data notes", index=False)
         cpm.sort_values("total_cost_all_time", ascending=False).to_excel(
             xw, sheet_name="Truck cost per mile", index=False)
+        co_total.to_excel(xw, sheet_name="Trucks by Company")
+        co_monthly.to_excel(xw, sheet_name="Trucks Monthly by Company")
         for period, label in (("week", "Weekly"), ("month", "Monthly"),
                               ("quarter", "Quarterly"), ("year", "Yearly")):
             r = rollup(d, period)
@@ -428,6 +509,9 @@ def main():
             r.loc["trailer"].to_excel(xw, sheet_name=f"Trailers {label}")
 
     print(f"wrote {out}")
+    print()
+    print("=== TRUCKS BY COMPANY ===")
+    print(co_total.to_string())
     print()
     print(summary.to_string(index=False))
     print()

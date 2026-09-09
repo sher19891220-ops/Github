@@ -1355,6 +1355,74 @@ API (`https://api.quickmanage.com`). **What it actually turned out to expose
 corrects an assumption this file had carried since before its first commit**:
 see "QuickManage has trips and trucks, NOT odometer or repair orders" below.
 
+## Maintenance/breakdown cost by company: trucks only, and only 30.6% of units
+
+Added to `spend_picture.py` (`truck_company()`, `company_rollup()`) 2026-09-09.
+Attributes each TRUCK to a company from two sources in preference order: the
+IRP-plate registry (an ongoing legal registration, tends to cover a truck's
+whole active life) then, if that misses, `truck_maintenance.py`'s P&L blocks
+(only 2026-02-23..08-24). **TRAILERS ARE NEVER ATTRIBUTABLE THIS WAY** --
+confirmed every trailer unit number returns `None` from the IRP registry;
+no trailer registry or trailer P&L block exists anywhere in this corpus.
+
+    $/truck/company        charges   total spend   cost/mile
+    AFG                        320    $143,504      $0.0399
+    XTRACK                     754    $347,464      $0.0383
+    ZONE                       450    $217,077      $0.0276
+    UNATTRIBUTED              1,564    $506,975         --
+
+Only 92 of 301 trucks (30.6% of units) resolve to a company, but that 30.6%
+carries 58.3% of the dollars ($708,045 of $1,215,019) -- the unresolved 209
+are disproportionately older, pre-2025 trucks that predate both the IRP
+registry and the current P&L's window, not the current active fleet.
+
+**BUG FOUND AND FIXED THE SAME DAY**: the first version built the unit-to-
+company map separately from the charges frame and the cost-per-mile frame.
+`truck_cost_per_mile()`'s frame carries extra units with real P&L miles but
+zero charges (never appear in the charges frame at all) -- computing the
+map from charges alone left those units out of the dict, `.map()` turned
+the missing key into the same NaN as a genuinely unresolved unit, and their
+real miles landed in the UNATTRIBUTED bucket while contributing $0 cost,
+producing a nonsense $0.00/mile instead of leaving it correctly uncomputable.
+Fixed by building the map ONCE from the union of both frames' units, used
+everywhere; regression-tested (`test_company_rollup_totals_match_the_
+ungrouped_truck_total`, `test_unattributed_company_has_no_fabricated_cost_
+per_mile`, `test_trailers_are_never_attributed_to_a_company`).
+
+`Trucks by Company` and `Trucks Monthly by Company` sheets now in
+`data/processed/spend_picture.xlsx`.
+
+## Verizon is 60 lines, not one per truck -- corrected 2026-09-09
+
+The operator caught this: the earlier `$7.07/truck/week` Verizon figure
+spread the $636.42/week fleet-wide total over all 90 trucks, but the
+Verizon account only covers **60 lines**. Some drivers supply their own
+tablet and should not be charged for a line the company isn't providing.
+
+    real per-line cost: $636.42/wk / 60 lines = $10.61/line/week ($46.13/month)
+    coverage gap: 90 trucks - 60 company lines = 30 trucks presumptively
+                  on a driver-owned tablet
+
+$46.13/line/month sits in the normal range for an LTE data-only tablet
+plan -- consistent with, though not proof of, the stated 60-line count.
+**No per-line Verizon bill exists anywhere in this corpus** to confirm it
+exactly or name which 30 trucks are on their own device -- the only
+per-line wireless CSV on file is STL Truckers LLC's own account, a
+different entity, not usable as a stand-in. `$10.61/truck/week` applies
+only to a truck actually holding one of the 60 company lines; a driver on
+the existing `own_tablet_rate` ($125/month) schedule should carry $0
+Verizon cost here, since that higher flat fee already stands in for
+supplying their own device -- charging both would be double-counting.
+The company-level totals in `admin_fee_actual_cost_per_truck_week` keep
+the old $7.07 fleet-average rather than guess which of each company's
+trucks hold one of the 60 lines; `verizon_60_lines` in
+`config/driver_arrangement_rates.json` has the corrected per-line figure
+for a truck known to have a company tablet.
+
+**What would resolve this for good**: a per-line Verizon export naming the
+device/user on each of the 60 lines, the same shape as the PrePass
+`CHARGESBYDEVICE` CSV that made the truck-level PrePass split possible.
+
 ## Worst-to-best maintenance/breakdown ranking and trend: `analysis/breakdown_trend.py`
 
 Built on `spend_picture.py`'s already-reconciled multi-source charge data

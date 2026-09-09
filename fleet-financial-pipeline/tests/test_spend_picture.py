@@ -9,6 +9,7 @@ import sys
 import warnings
 from pathlib import Path
 
+import pandas as pd
 import pytest
 
 ROOT = Path(__file__).parent.parent
@@ -80,3 +81,59 @@ def test_no_negative_or_implausible_cost_per_mile(loaded):
     resolved = cpm[cpm.cost_per_mile.notna()]
     assert (resolved.cost_per_mile >= 0).all()
     assert resolved.cost_per_mile.max() < 10
+
+
+def test_company_rollup_totals_match_the_ungrouped_truck_total(loaded):
+    """Regression for the bug found 2026-09-09: co_map was originally built
+    separately for the charges frame and the cpm frame (which carries extra
+    zero-charge, real-mileage units from the P&L). Real miles for those
+    units fell into UNATTRIBUTED while contributing $0 cost, producing a
+    nonsense $0.00/mile instead of an uncomputable one."""
+    d, notes = loaded
+    d = SP.add_periods(d)
+    cpm = SP.truck_cost_per_mile(d)
+    total, monthly = SP.company_rollup(d, cpm)
+    truck_total = d[(d.unit_type == "truck") & (d.borne_by == "company")].amount.sum()
+    assert total.total_spend.sum() == pytest.approx(truck_total, rel=1e-6)
+
+
+def test_unattributed_company_has_no_fabricated_cost_per_mile(loaded):
+    d, notes = loaded
+    d = SP.add_periods(d)
+    cpm = SP.truck_cost_per_mile(d)
+    total, monthly = SP.company_rollup(d, cpm)
+    assert "UNATTRIBUTED" in total.index
+    assert pd.isna(total.loc["UNATTRIBUTED", "cost_per_mile"])
+    assert total.drop("UNATTRIBUTED").cost_per_mile.notna().all()
+
+
+def test_company_rollup_never_feeds_an_exclusively_trailer_unit_to_truck_company(loaded):
+    """No trailer registry or trailer P&L block exists in this corpus, so
+    company_rollup() must never call truck_company() on a unit that is
+    ONLY ever a trailer -- never touched a truck row anywhere.
+
+    Two things this test deliberately does NOT require, because both are
+    real and correct, not bugs:
+      - cpm.unit legitimately includes trucks with real P&L weeks but zero
+        maintenance charges ever, so they carry no unit_type tag at all in
+        the charges-only frame `d` -- excluding them from truck_company
+        would be wrong, they are real trucks.
+      - truck_company() itself is not guaranteed to return None for every
+        trailer NUMBER in isolation -- 19 of 504 trailer numbers spuriously
+        resolve (e.g. '8131', '15739', '15852') because those same digits
+        are ALSO a real truck's unit number elsewhere in the fleet (43 such
+        reused numbers are already documented in breakdown_trend.py); that
+        collision is expected, since a bare number carries no equipment
+        type, and those units ARE legitimately trucks too.
+    What must never happen: a unit that appears in `d` exclusively as a
+    trailer, never once as a truck, being handed to truck_company()."""
+    d, notes = loaded
+    d = SP.add_periods(d)
+    cpm = SP.truck_cost_per_mile(d)
+    exclusively_trailer = (set(d[d.unit_type == "trailer"].unit)
+                           - set(d[d.unit_type == "truck"].unit))
+    assert len(exclusively_trailer) > 0
+    trucks_frame_units = set(d[(d.unit_type == "truck")
+                              & (d.borne_by == "company")].unit)
+    fed_to_truck_company = trucks_frame_units | set(cpm.unit)
+    assert fed_to_truck_company.isdisjoint(exclusively_trailer)

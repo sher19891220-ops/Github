@@ -42,14 +42,27 @@
       "_note": "Samsara, Verizon and Pedigree are billed to one account each (Samsara and Pedigree to ZONE-OH; Verizon Wireless found on the AMEX card and bank feed with no per-truck or per-company breakdown anywhere in the corpus) -- PrePass proved a 'ZONE-OH' bill can cover all three fleets once checked at the device level, so the same is assumed possible here, NOT assumed absent. Applied uniformly per truck across all 90 trucks until a device-level bill says otherwise.",
       "samsara_per_truck_week": 7.88,
       "verizon_per_truck_week": 7.07,
-      "verizon_detail": "AMEX 'VZWRLSS' charges $29,759.20 over 47.7 weeks ($623.70/wk) + bank 'VZWRLSS*PREPAID' charges $559.85 over 44.0 weeks ($12.72/wk) = $636.42/wk fleet-wide / 90 trucks. Found 2026-09-08 already in the existing AMEX/bank data -- the operator believed this cost was still to be uploaded separately; it was not needed.",
+      "verizon_detail": "SUPERSEDED 2026-09-09 -- see verizon_60_lines below. This $7.07 spread the $636.42/wk fleet-wide Verizon total over all 90 trucks, which the operator corrected: the Verizon account only covers 60 lines, not one per truck. $7.07 understates the true per-line cost for the trucks that actually have one and wrongly charges the ~30 that don't. Left here, not deleted, so the correction is visible against what it replaced.",
       "pedigree_tpms_per_truck_week": 7.46,
       "pedigree_detail": "ADDED 2026-09-08 on the operator's instruction -- not one of the six originally named. Same Pedigree invoice as config/telematics_costs.json's pedigree_trailer_tracking ($2,781.00, Sep 1-30 2026, $671.28/wk fleet-wide) -- re-based from per-trailer ($5.37/trailer/wk over 125 trailers) to per-truck ($7.46/truck/wk over the same 90-truck denominator as everything else here), since the admin fee is charged per truck, not per trailer.",
       "trippak_per_truck_week": null,
       "trippak_note": "NOT FOUND anywhere in this corpus -- not on the AMEX card, not on the bank feed, no invoice uploaded. Cannot be priced yet; not assumed to be $0."
     },
+    "verizon_60_lines": {
+      "_note": "Operator, 2026-09-09: the Verizon account is only 60 lines, not one per truck -- some owners supply their own tablet/line and should not be charged for one the company isn't providing. No per-line Verizon bill exists in this corpus (the only per-line wireless CSV on file is STL TRUCKERS LLC's own account -- a different entity, see config/saas_app_charges.json -- not usable as a stand-in for this fleet's Verizon lines). This is the best computable estimate from the aggregate, not a verified per-line list.",
+      "verizon_total_per_week": 636.42,
+      "lines": 60,
+      "per_line_per_week": 10.61,
+      "per_line_per_month": 46.13,
+      "sanity_check": "$46.13/line/month is in the normal range for an LTE data-only tablet plan, which is consistent with (does not prove) the stated 60-line count -- there is no independent per-line invoice to confirm it exactly.",
+      "coverage_gap": {
+        "total_trucks": 90, "company_tablet_lines": 60, "likely_own_tablet_trucks": 30,
+        "_note": "90 trucks (17 AFG + 32 ZONE + 41 XTRACK, the same denominator used everywhere else in this file) minus 60 company-provided lines leaves 30 trucks presumptively on a driver-owned tablet -- consistent with the own_tablet_rate ($125) admin-fee variant already recorded below for drivers who supply their own hardware. WHICH specific 30 trucks these are is not determinable from anything in this corpus; only a per-line Verizon export (device/user per line, like the PrePass CHARGESBYDEVICE CSV format) or each driver's actual admin-fee schedule from settlement data would identify them by name."
+      },
+      "how_to_apply": "$10.61/truck/week applies ONLY to a truck whose driver has a company-provided tablet -- not uniformly across all 90 trucks the way the superseded $7.07 figure did. A driver on the own_tablet_rate ($125/month) schedule should carry $0 Verizon cost here, since they are already paying a different, higher flat fee that stands in for supplying their own device, not receiving both a discount rate AND a company tablet."
+    },
     "total_measured_per_truck_week": {
-      "_note": "Sum of ifta + eld_software + transponders (per company) + samsara + verizon + pedigree_tpms (fleet-wide) -- Trippak excluded from every total since it is unmeasured, so every total below is a FLOOR, not the complete cost.",
+      "_note": "Sum of ifta + eld_software + transponders (per company) + samsara + verizon + pedigree_tpms (fleet-wide) -- Trippak excluded from every total since it is unmeasured, so every total below is a FLOOR, not the complete cost. STILL USES THE SUPERSEDED $7.07 flat Verizon spread, not verizon_60_lines' $10.61 -- which of each company's trucks actually hold one of the 60 lines is not known, so this fleet-average is kept as the conservative company-level figure rather than guessing a per-company split. Use verizon_60_lines directly for a specific truck known to have a company tablet.",
       "XTRACK": 53.47, "ZONE": 59.09, "AFG": 43.35
     },
     "conclusion": "Even missing Trippak entirely, real cost is now 1.9-2.6x the $23.09/week the admin fee actually charges (XTRACK 2.3x, ZONE 2.6x, AFG 1.9x) -- the fee does not cover what it was stated to cover, on the six of seven items that could be measured."
