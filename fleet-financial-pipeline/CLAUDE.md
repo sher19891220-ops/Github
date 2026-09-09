@@ -1423,6 +1423,30 @@ for a truck known to have a company tablet.
 device/user on each of the 60 lines, the same shape as the PrePass
 `CHARGESBYDEVICE` CSV that made the truck-level PrePass split possible.
 
+### The line count wasn't actually steady at 60 -- it grew, recently
+
+The operator gave a second data point the same day: "each tablet with line
+costs about $40." Dividing each individual AMEX monthly invoice by $40
+(rather than the 47-week average, which blends eras together) surfaces
+something real:
+
+    2025-10-31 .. 2026-05-31   $2,360-2,371/month -> 59.0-59.1 lines,
+                               ROCK STEADY for 8 straight months --
+                               matches the stated 60 almost exactly
+    2026-07-01                 $2,784.73 -> 69.6 lines
+    2026-07-31                 $2,868.73 -> 71.7 lines
+
+**The account held ~59 lines for 8 months, then grew to ~70-72 by July
+2026** -- 11-13 more lines, ~$440-480/month more than the steady-state
+baseline. NOT YET EXPLAINED whether this is legitimate fleet growth or
+unaccounted creep -- exactly the kind of thing the operator asked to catch
+by raising the 60-line question in the first place. Using the CURRENT
+figure instead of the historical one: 90 trucks - ~72 current lines leaves
+~18 trucks on a driver-owned tablet, not 30. Both the historical and
+current estimates are in `config/driver_arrangement_rates.json`'s
+`verizon_60_lines` -- neither overwrites the other, since which one is
+"right" depends on which period is being priced.
+
 ## Worst-to-best maintenance/breakdown ranking and trend: `analysis/breakdown_trend.py`
 
 Built on `spend_picture.py`'s already-reconciled multi-source charge data

@@ -49,15 +49,31 @@
       "trippak_note": "NOT FOUND anywhere in this corpus -- not on the AMEX card, not on the bank feed, no invoice uploaded. Cannot be priced yet; not assumed to be $0."
     },
     "verizon_60_lines": {
-      "_note": "Operator, 2026-09-09: the Verizon account is only 60 lines, not one per truck -- some owners supply their own tablet/line and should not be charged for one the company isn't providing. No per-line Verizon bill exists in this corpus (the only per-line wireless CSV on file is STL TRUCKERS LLC's own account -- a different entity, see config/saas_app_charges.json -- not usable as a stand-in for this fleet's Verizon lines). This is the best computable estimate from the aggregate, not a verified per-line list.",
+      "_note": "Operator, 2026-09-09: the Verizon account is only 60 lines, not one per truck -- some owners supply their own tablet/line and should not be charged for one the company isn't providing. Operator also gave a reference price, same message: 'each tablet with line costs about $40'. No per-line Verizon bill exists in this corpus (the only per-line wireless CSV on file is STL TRUCKERS LLC's own account -- a different entity, see config/saas_app_charges.json -- not usable as a stand-in). Dividing each individual monthly AMEX invoice by $40 (not just the multi-month average) surfaces something real: the line count was NOT steady at 60 the whole time.",
+      "implied_line_count_by_invoice": {
+        "_note": "AMEX 'VZWRLSS APOCC VISB' charges, individually, divided by $40 -- confirmed 2026-09-09.",
+        "2025-10-31_through_2026-05-31": "$2,360-2,371/month -> 59.0-59.1 lines, ROCK STEADY for 8 straight months -- matches the operator's stated 60 almost exactly",
+        "2026-07-01": "$2,784.73 -> 69.6 lines",
+        "2026-07-31": "$2,868.73 -> 71.7 lines",
+        "conclusion": "The account held at ~59 lines (matching the stated 60) from October 2025 through May 2026, then grew to ~70-72 lines by July 2026 -- an increase of 11-13 lines in roughly two months, worth ~$440-480/month more than the steady-state baseline. This is either legitimate fleet growth (new drivers/trucks added) or unaccounted growth worth investigating -- exactly the kind of creep the operator asked to catch. NOT YET EXPLAINED which."
+      },
       "verizon_total_per_week": 636.42,
+      "verizon_total_per_week_NOTE": "This is the 47.7-week AVERAGE and blends the old ~59-line era with the new ~71-line one -- it understates the CURRENT run-rate. Use current_per_line below for where things stand now.",
+      "current_per_line": {
+        "_note": "Based on the most recent invoice (2026-07-31, $2,868.73) and the operator's $40/line reference.",
+        "most_recent_invoice_per_week": 662.87,
+        "implied_current_lines": 72,
+        "per_line_per_week": 9.20,
+        "per_line_per_month": 40.00
+      },
       "lines": 60,
       "per_line_per_week": 10.61,
       "per_line_per_month": 46.13,
-      "sanity_check": "$46.13/line/month is in the normal range for an LTE data-only tablet plan, which is consistent with (does not prove) the stated 60-line count -- there is no independent per-line invoice to confirm it exactly.",
+      "sanity_check": "Superseded by implied_line_count_by_invoice above -- the $46.13/month implied by the 47-week average was itself a symptom of blending two different eras together, not a stable per-line rate. The operator's own $40/line figure is the better anchor now that it can be checked against individual invoices instead of one long average.",
       "coverage_gap": {
-        "total_trucks": 90, "company_tablet_lines": 60, "likely_own_tablet_trucks": 30,
-        "_note": "90 trucks (17 AFG + 32 ZONE + 41 XTRACK, the same denominator used everywhere else in this file) minus 60 company-provided lines leaves 30 trucks presumptively on a driver-owned tablet -- consistent with the own_tablet_rate ($125) admin-fee variant already recorded below for drivers who supply their own hardware. WHICH specific 30 trucks these are is not determinable from anything in this corpus; only a per-line Verizon export (device/user per line, like the PrePass CHARGESBYDEVICE CSV format) or each driver's actual admin-fee schedule from settlement data would identify them by name."
+        "total_trucks": 90, "company_tablet_lines_historical": 60, "company_tablet_lines_current": 72,
+        "likely_own_tablet_trucks_historical": 30, "likely_own_tablet_trucks_current": 18,
+        "_note": "90 trucks (17 AFG + 32 ZONE + 41 XTRACK, the same denominator used everywhere else in this file) minus the CURRENT ~72 lines leaves ~18 trucks presumptively on a driver-owned tablet, not 30 -- fewer than the historical estimate, because more company lines now exist. Consistent with the own_tablet_rate ($125) admin-fee variant already recorded below for drivers who supply their own hardware. WHICH specific trucks these are is not determinable from anything in this corpus; only a per-line Verizon export (device/user per line, like the PrePass CHARGESBYDEVICE CSV format) or each driver's actual admin-fee schedule from settlement data would identify them by name."
       },
       "how_to_apply": "$10.61/truck/week applies ONLY to a truck whose driver has a company-provided tablet -- not uniformly across all 90 trucks the way the superseded $7.07 figure did. A driver on the own_tablet_rate ($125/month) schedule should carry $0 Verizon cost here, since they are already paying a different, higher flat fee that stands in for supplying their own device, not receiving both a discount rate AND a company tablet."
     },
