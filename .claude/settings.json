@@ -19,7 +19,40 @@
       "Bash(source *)",
       "Bash(bash *)",
       "Bash(launchctl *)",
-      "Bash(tail *)"
+      "Bash(tail *)",
+      "Bash(npm *)",
+      "Bash(node *)",
+      "Bash(npx *)",
+      "Bash(docker *)",
+      "Bash(brew *)",
+      "Bash(find *)",
+      "Bash(ps *)",
+      "Bash(kill *)",
+      "Bash(mv *)",
+      "Bash(grep *)",
+      "mcp__axel__*",
+      "mcp__context7__*",
+      "mcp__playwright__*"
     ]
+  },
+  "mcpServers": {
+    "axel": {
+      "type": "stdio",
+      "command": "/Users/sher/Github/axel-backend/venv/bin/python",
+      "args": ["/Users/sher/Github/axel-backend/mcp_server.py"],
+      "env": {
+        "PYTHONPATH": "/Users/sher/Github/axel-backend"
+      }
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"]
+    },
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp"]
+    }
   }
 }
