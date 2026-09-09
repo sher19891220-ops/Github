@@ -33,7 +33,7 @@ composio-core>=0.7.0
 firecrawl-py>=1.0.0
 
 # Mem0 — persistent AI memory (cloud API, falls back to SQLite)
-mem0ai>=0.1.0
+mem0ai>=2.0.0
 
 # Voice transcription (Whisper)
 openai-whisper>=20231117

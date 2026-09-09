@@ -4,6 +4,7 @@ from db import conn
 
 try:
     from mem0 import MemoryClient as _Mem0Client
+    from mem0.client.types import SearchMemoryOptions as _SearchOpts
     _mem0_available = True
 except ImportError:
     _mem0_available = False
@@ -87,8 +88,9 @@ def remember_this(
     if m0:
         try:
             metadata = {"category": category, "tags": tags, "importance": importance, "source": source}
+            # mem0ai v2: user_id as kwarg, metadata as kwarg
             result = m0.add(content, user_id=_MEM0_USER, metadata=metadata)
-            mem_id = (result[0].get("id") if isinstance(result, list) else result.get("id")) or 0
+            mem_id = result.get("event_id", result.get("id", 0))
             return {"success": True, "id": mem_id, "category": category, "importance": importance, "backend": "mem0"}
         except Exception:
             pass  # fall through to SQLite
@@ -106,11 +108,13 @@ def recall(query: str, category: str = "", limit: int = 20) -> dict:
     m0 = _mem0()
     if m0:
         try:
-            filters = {"AND": [{"user_id": _MEM0_USER}]}
+            # mem0ai v2: user_id must be in filters dict, not top-level kwarg
+            f: dict = {"AND": [{"user_id": _MEM0_USER}]}
             if category:
-                filters["AND"].append({"metadata": {"category": category}})
-            results = m0.search(query, user_id=_MEM0_USER, limit=limit)
-            memories = [{"id": r.get("id"), "content": r.get("memory", ""), "category": (r.get("metadata") or {}).get("category", ""), "tags": (r.get("metadata") or {}).get("tags", ""), "importance": (r.get("metadata") or {}).get("importance", 3), "score": r.get("score")} for r in (results if isinstance(results, list) else [])]
+                f["AND"].append({"metadata": {"category": category}})
+            raw = m0.search(query, options=_SearchOpts(filters=f, top_k=limit))
+            results_list = raw.get("results", []) if isinstance(raw, dict) else raw
+            memories = [{"id": r.get("id"), "content": r.get("memory", ""), "category": (r.get("metadata") or {}).get("category", ""), "tags": (r.get("metadata") or {}).get("tags", ""), "importance": (r.get("metadata") or {}).get("importance", 3), "score": r.get("score")} for r in results_list]
             return {"query": query, "results": memories, "count": len(memories), "backend": "mem0"}
         except Exception:
             pass  # fall through to SQLite
