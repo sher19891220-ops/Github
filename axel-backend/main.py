@@ -148,7 +148,9 @@ async def deploy(x_deploy_secret: str = Header(default="")):
     if not DEPLOY_SECRET or x_deploy_secret != DEPLOY_SECRET:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
+    _run(["git", "stash"], cwd=str(_REPO_DIR))
     pull = _run(["git", "pull", "origin", "claude/repo-install-setup-qkrfre"], cwd=str(_REPO_DIR))
+    _run(["git", "stash", "pop"], cwd=str(_REPO_DIR))
     log.info("Deploy pull: %s", pull)
 
     async def _restart():
