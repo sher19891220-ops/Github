@@ -124,6 +124,18 @@ _ALL_TOOLS = [
         "description": "Check which integrations are configured and ready. Run this to see what Axel can currently access.",
         "input_schema": {"type": "object", "properties": {}, "required": []},
     },
+    {
+        "name": "configure_api_key",
+        "description": "Write or update an API key or env var in axel-backend/.env. Use this to activate integrations without editing files manually.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "key": {"type": "string", "description": "The env var name, e.g. FIRECRAWL_API_KEY"},
+                "value": {"type": "string", "description": "The value to set"},
+            },
+            "required": ["key", "value"],
+        },
+    },
 
     # TASKS
     {
@@ -842,6 +854,8 @@ def dispatch(tool_name: str, tool_input: dict, context: dict) -> str:
                 result = system.search_files(tool_input["pattern"], tool_input.get("directory", "~"))
             case "check_setup":
                 result = _check_setup()
+            case "configure_api_key":
+                result = system.configure_api_key(tool_input["key"], tool_input["value"])
 
             # Tasks
             case "create_task":

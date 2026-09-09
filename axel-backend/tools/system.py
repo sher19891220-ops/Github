@@ -71,3 +71,26 @@ def search_files(pattern: str, directory: str = "~") -> dict:
         return {"matches": matches[:100], "count": len(matches)}
     except Exception as e:
         return {"error": str(e)}
+
+
+def configure_api_key(key: str, value: str) -> dict:
+    """Write or update a KEY=VALUE pair in axel-backend/.env."""
+    env_path = os.path.join(os.path.dirname(__file__), "..", ".env")
+    env_path = os.path.normpath(env_path)
+    try:
+        lines = open(env_path).read().splitlines() if os.path.exists(env_path) else []
+        updated = False
+        new_lines = []
+        for line in lines:
+            if line.startswith(f"{key}="):
+                new_lines.append(f"{key}={value}")
+                updated = True
+            else:
+                new_lines.append(line)
+        if not updated:
+            new_lines.append(f"{key}={value}")
+        with open(env_path, "w") as f:
+            f.write("\n".join(new_lines) + "\n")
+        return {"success": True, "key": key, "action": "updated" if updated else "added"}
+    except Exception as e:
+        return {"error": str(e)}

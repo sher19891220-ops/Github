@@ -6,7 +6,7 @@ set -e
 
 REPO="$HOME/Github"
 ENV_FILE="$REPO/axel-backend/.env"
-BRANCH="claude/security-and-cost-guardrails"
+BRANCH="claude/repo-install-setup-qkrfre"
 
 echo "=== Axel Deploy Bootstrap ==="
 
@@ -20,7 +20,21 @@ else
   echo "  Secret: $SECRET"
 fi
 
-# 2. Add AXEL_URL if not already set
+# 2. Set Firecrawl API key if not already configured
+_set_env() {
+  local k="$1" v="$2"
+  if grep -q "^${k}=" "$ENV_FILE" 2>/dev/null; then
+    echo "✓ $k already set"
+  else
+    echo "${k}=${v}" >> "$ENV_FILE"
+    echo "✓ $k added"
+  fi
+}
+
+_set_env "FIRECRAWL_API_KEY" "fc-f117eba8ba5847acbbd2b9f3a83c85d0"
+_set_env "MEM0_API_KEY" "m0-0IwE4krtwgHfwaRZe2EBEiNwclPSIkDnDFA74atg"
+
+# 3. Add AXEL_URL if not already set
 if grep -q "^AXEL_URL=" "$ENV_FILE" 2>/dev/null; then
   echo "✓ AXEL_URL already set"
 else
@@ -36,18 +50,18 @@ else
   fi
 fi
 
-# 3. Pull latest code
+# 4. Pull latest code
 echo ""
 echo "=== Pulling latest code ==="
 git -C "$REPO" fetch origin "$BRANCH"
 git -C "$REPO" pull origin "$BRANCH"
 
-# 4. Install any new Python deps
+# 5. Install any new Python deps
 echo ""
 echo "=== Installing dependencies ==="
-"$REPO/axel-backend/venv/bin/pip" install -q composio-core openai-whisper 2>&1 | tail -5
+"$REPO/axel-backend/venv/bin/pip" install -q -r "$REPO/axel-backend/requirements.txt" 2>&1 | tail -5
 
-# 5. Restart both services
+# 7. Restart both services
 echo ""
 echo "=== Restarting services ==="
 launchctl unload ~/Library/LaunchAgents/com.axel.telegram.plist 2>/dev/null || true
