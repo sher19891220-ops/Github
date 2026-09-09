@@ -8,6 +8,7 @@ import logging
 import os
 
 from tools import (
+    composio_tools,
     docker_tools,
     finance_tools,
     google_tools,
@@ -30,8 +31,13 @@ def _check_setup() -> dict:
     plaid_ready = bool(os.environ.get("PLAID_CLIENT_ID") and (os.environ.get("PLAID_ACCESS_TOKENS") or os.environ.get("PLAID_ACCESS_TOKEN")))
     qb_ready = bool(os.environ.get("QB_CLIENT_ID") and os.environ.get("QB_REFRESH_TOKEN"))
 
+    composio_key = os.environ.get("COMPOSIO_API_KEY", "")
     statuses = {
         "shell_and_files": {"ready": True, "note": "Full Mac mini access available"},
+        "composio_social": {
+            "ready": bool(composio_key),
+            "note": "Ready" if composio_key else "Set COMPOSIO_API_KEY in .env (get from composio.io/settings)",
+        },
         "gmail_drive_sheets_calendar": {
             "ready": os.path.exists(google_token),
             "note": "Ready" if os.path.exists(google_token) else "Run: python setup_google_auth.py (needs credentials.json first)",
@@ -364,6 +370,57 @@ _ALL_TOOLS = [
                 "equipment": {"type": "string", "description": "van | reefer | flatbed (default: van)"},
             },
             "required": ["origin", "destination"],
+        },
+    },
+
+    # SOCIAL MEDIA & MESSAGING (Composio)
+    {
+        "name": "instagram_post",
+        "description": "Post a photo or video to Sher's Instagram. Requires a publicly accessible image/video URL.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "image_url": {"type": "string", "description": "Publicly accessible HTTPS URL of image (JPG) or video (MP4)"},
+                "caption": {"type": "string", "description": "Instagram caption (max 2200 chars). Include hashtags here."},
+                "media_type": {"type": "string", "enum": ["IMAGE", "VIDEO", "REELS"], "description": "Default: IMAGE"},
+            },
+            "required": ["image_url"],
+        },
+    },
+    {
+        "name": "linkedin_post",
+        "description": "Post to Sher's LinkedIn profile. Can include a link or image.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "text": {"type": "string", "description": "Post content. Supports line breaks. No hard length limit but 1300 chars optimal."},
+                "url": {"type": "string", "description": "Optional link to share"},
+                "image_url": {"type": "string", "description": "Optional image URL to attach"},
+            },
+            "required": ["text"],
+        },
+    },
+    {
+        "name": "twitter_post",
+        "description": "Post a tweet to Sher's Twitter/X account. Max 280 characters.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "text": {"type": "string", "description": "Tweet text (max 280 chars)"},
+            },
+            "required": ["text"],
+        },
+    },
+    {
+        "name": "whatsapp_send",
+        "description": "Send a WhatsApp message to a phone number. Use for driver communications, load offers, delivery confirmations.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "phone_number": {"type": "string", "description": "International format, digits only, e.g. '15551234567'"},
+                "message": {"type": "string", "description": "Message text"},
+            },
+            "required": ["phone_number", "message"],
         },
     },
 
@@ -710,6 +767,10 @@ _ALL_TOOLS = [
 
 _TOOL_INTEGRATION = {
     **dict.fromkeys(
+        ["instagram_post", "linkedin_post", "twitter_post", "whatsapp_send"],
+        "composio_social",
+    ),
+    **dict.fromkeys(
         ["gmail_list", "gmail_read", "gmail_send",
          "sheets_read", "sheets_write", "sheets_list",
          "calendar_list", "calendar_create",
@@ -831,6 +892,16 @@ def dispatch(tool_name: str, tool_input: dict, context: dict) -> str:
                 result = research.lookup_carrier_fmcsa(tool_input.get("dot_number", ""), tool_input.get("mc_number", ""))
             case "extract_freight_rates":
                 result = research.extract_freight_rates(tool_input["origin"], tool_input["destination"], tool_input.get("equipment", "van"))
+
+            # Social media (Composio)
+            case "instagram_post":
+                result = composio_tools.instagram_post(tool_input["image_url"], tool_input.get("caption", ""), tool_input.get("media_type", "IMAGE"))
+            case "linkedin_post":
+                result = composio_tools.linkedin_post(tool_input["text"], tool_input.get("url", ""), tool_input.get("image_url", ""))
+            case "twitter_post":
+                result = composio_tools.twitter_post(tool_input["text"])
+            case "whatsapp_send":
+                result = composio_tools.whatsapp_send(tool_input["phone_number"], tool_input["message"])
 
             # Docker
             case "docker_list":

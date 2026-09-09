@@ -25,3 +25,9 @@ intuit-oauth>=1.2.0
 # Microsoft / Outlook
 msal>=1.30.0
 requests>=2.32.0
+
+# Composio — Instagram, LinkedIn, Twitter/X, WhatsApp
+composio-core>=0.7.0
+
+# Voice transcription (Whisper)
+openai-whisper>=20231117

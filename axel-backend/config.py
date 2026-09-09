@@ -25,6 +25,9 @@ ALLOWED_SHELL_PATHS = [p for p in os.environ.get("ALLOWED_SHELL_PATHS", "").spli
 # Whether to allow arbitrary shell commands (set False for stricter safety)
 ALLOW_SHELL = os.environ.get("ALLOW_SHELL", "true").lower() == "true"
 
+# Composio — social media & WhatsApp (Instagram, LinkedIn, Twitter, WhatsApp)
+COMPOSIO_API_KEY = os.environ.get("COMPOSIO_API_KEY", "")
+
 # Secret for the /deploy webhook — generate with: python -c "import secrets; print(secrets.token_hex(32))"
 DEPLOY_SECRET = os.environ.get("DEPLOY_SECRET", "")
 
