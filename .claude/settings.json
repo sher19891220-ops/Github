@@ -37,7 +37,8 @@
       "mcp__playwright__*",
       "mcp__firecrawl__*",
       "mcp__mem0__*",
-      "mcp__sequentialthinking__*"
+      "mcp__sequentialthinking__*",
+      "mcp__axel-memory__*"
     ]
   },
   "mcpServers": {
@@ -78,6 +79,14 @@
       "args": ["-y", "@mem0ai/mem0-mcp"],
       "env": {
         "MEM0_API_KEY": "${MEM0_API_KEY}"
+      }
+    },
+    "axel-memory": {
+      "type": "stdio",
+      "command": "/Users/sher/Github/axel-backend/venv/bin/python",
+      "args": ["/Users/sher/Github/axel-backend/memory_mcp.py"],
+      "env": {
+        "PYTHONPATH": "/Users/sher/Github/axel-backend"
       }
     }
   }

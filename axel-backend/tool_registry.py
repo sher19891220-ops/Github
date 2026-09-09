@@ -219,6 +219,58 @@ _ALL_TOOLS = [
             "properties": {"category": {"type": "string", "description": "Optional: profile | business | project | system | contact | recurring"}},
         },
     },
+    {
+        "name": "remember_this",
+        "description": "Save a rich memory with natural language content, category, tags, and importance. Better than save_memory for context-rich facts like 'Sher prefers morning calls' or 'TMS uses Supabase hosted on us-east-1'.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "content": {"type": "string", "description": "The memory content in plain language"},
+                "category": {"type": "string", "description": "general | profile | business | project | contact | preference | decision | tms | axel"},
+                "tags": {"type": "string", "description": "Comma-separated tags e.g. 'freight, rates, chicago'"},
+                "importance": {"type": "integer", "description": "1=low, 2=minor, 3=normal, 4=important, 5=critical (default 3)"},
+            },
+            "required": ["content"],
+        },
+    },
+    {
+        "name": "recall",
+        "description": "Search all rich memories by keyword. Returns results ordered by importance then date. Use before asking Sher — the answer may already be stored.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string"},
+                "category": {"type": "string", "description": "Narrow to a specific category (optional)"},
+                "limit": {"type": "integer", "description": "Max results (default 20)"},
+            },
+            "required": ["query"],
+        },
+    },
+    {
+        "name": "list_rich_memories",
+        "description": "List stored rich memories, optionally filtered by category. Shows importance and tags.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "category": {"type": "string"},
+                "limit": {"type": "integer", "description": "Max results (default 50)"},
+            },
+        },
+    },
+    {
+        "name": "forget_memory",
+        "description": "Delete a rich memory by its ID (from recall or list_rich_memories).",
+        "input_schema": {
+            "type": "object",
+            "properties": {"memory_id": {"type": "integer"}},
+            "required": ["memory_id"],
+        },
+    },
+    {
+        "name": "get_memory_categories",
+        "description": "List all memory categories with counts and last-updated timestamps.",
+        "input_schema": {"type": "object", "properties": {}},
+    },
 
     # RESEARCH
     {
@@ -252,6 +304,66 @@ _ALL_TOOLS = [
             "type": "object",
             "properties": {"url": {"type": "string"}},
             "required": ["url"],
+        },
+    },
+    {
+        "name": "scrape_page",
+        "description": "Scrape a webpage and return clean structured content. Use use_js=true for JS-heavy sites (SPAs, React apps).",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "url": {"type": "string"},
+                "use_js": {"type": "boolean", "description": "Use Playwright for JS-heavy pages (default false)"},
+            },
+            "required": ["url"],
+        },
+    },
+    {
+        "name": "deep_research",
+        "description": "Research a topic by searching the web and fetching the top pages. Returns synthesized content from multiple sources. Use for comprehensive research.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "topic": {"type": "string"},
+                "max_urls": {"type": "integer", "description": "Number of pages to fetch (default 5)"},
+            },
+            "required": ["topic"],
+        },
+    },
+    {
+        "name": "crawl_domain",
+        "description": "Crawl a website by following internal links from a starting URL. Useful for extracting content from a whole site.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "start_url": {"type": "string"},
+                "max_pages": {"type": "integer", "description": "Max pages to crawl (default 10)"},
+            },
+            "required": ["start_url"],
+        },
+    },
+    {
+        "name": "lookup_carrier_fmcsa",
+        "description": "Look up a carrier on FMCSA SAFER system. Returns safety rating, insurance status, operating authority, and out-of-service rate.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "dot_number": {"type": "string", "description": "USDOT number (e.g. '1234567')"},
+                "mc_number": {"type": "string", "description": "MC number (e.g. 'MC-123456' or '123456')"},
+            },
+        },
+    },
+    {
+        "name": "extract_freight_rates",
+        "description": "Research current freight market rates for a lane. Searches DAT, FreightWaves, and other sources for $/mile benchmarks.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "origin": {"type": "string", "description": "Origin city/state e.g. 'Chicago, IL'"},
+                "destination": {"type": "string", "description": "Destination city/state e.g. 'Dallas, TX'"},
+                "equipment": {"type": "string", "description": "van | reefer | flatbed (default: van)"},
+            },
+            "required": ["origin", "destination"],
         },
     },
 
@@ -691,6 +803,16 @@ def dispatch(tool_name: str, tool_input: dict, context: dict) -> str:
                 result = memory.search_memory(tool_input["query"])
             case "list_memory":
                 result = memory.list_memory(tool_input.get("category", ""))
+            case "remember_this":
+                result = memory.remember_this(tool_input["content"], tool_input.get("category", "general"), tool_input.get("tags", ""), tool_input.get("source", "axel"), tool_input.get("importance", 3))
+            case "recall":
+                result = memory.recall(tool_input["query"], tool_input.get("category", ""), tool_input.get("limit", 20))
+            case "list_rich_memories":
+                result = memory.list_rich_memories(tool_input.get("category", ""), tool_input.get("limit", 50))
+            case "forget_memory":
+                result = memory.forget_memory(tool_input["memory_id"])
+            case "get_memory_categories":
+                result = memory.get_memory_categories()
 
             # Research
             case "search_web":
@@ -699,6 +821,16 @@ def dispatch(tool_name: str, tool_input: dict, context: dict) -> str:
                 result = research.search_news(tool_input["topic"], tool_input.get("max_results", 8))
             case "fetch_url":
                 result = research.fetch_url(tool_input["url"])
+            case "scrape_page":
+                result = research.scrape_page(tool_input["url"], tool_input.get("use_js", False))
+            case "deep_research":
+                result = research.deep_research(tool_input["topic"], tool_input.get("max_urls", 5))
+            case "crawl_domain":
+                result = research.crawl_domain(tool_input["start_url"], tool_input.get("max_pages", 10))
+            case "lookup_carrier_fmcsa":
+                result = research.lookup_carrier_fmcsa(tool_input.get("dot_number", ""), tool_input.get("mc_number", ""))
+            case "extract_freight_rates":
+                result = research.extract_freight_rates(tool_input["origin"], tool_input["destination"], tool_input.get("equipment", "van"))
 
             # Docker
             case "docker_list":
