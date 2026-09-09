@@ -30,9 +30,14 @@
       "Bash(kill *)",
       "Bash(mv *)",
       "Bash(grep *)",
+      "Bash(rm *)",
+      "Bash(touch *)",
       "mcp__axel__*",
       "mcp__context7__*",
-      "mcp__playwright__*"
+      "mcp__playwright__*",
+      "mcp__firecrawl__*",
+      "mcp__mem0__*",
+      "mcp__sequentialthinking__*"
     ]
   },
   "mcpServers": {
@@ -53,6 +58,27 @@
       "type": "stdio",
       "command": "npx",
       "args": ["-y", "@playwright/mcp"]
+    },
+    "sequentialthinking": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+    },
+    "firecrawl": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "firecrawl-mcp"],
+      "env": {
+        "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}"
+      }
+    },
+    "mem0": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@mem0ai/mem0-mcp"],
+      "env": {
+        "MEM0_API_KEY": "${MEM0_API_KEY}"
+      }
     }
   }
 }
