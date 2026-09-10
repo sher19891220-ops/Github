@@ -87,8 +87,18 @@ header, never by index.
 - **`Location` is a full postal address**, e.g.
   `"66377 <street>, Belmont, OH 43718, United States"`. **The IFTA purchase
   state is extractable from it**, which is the one genuinely good news here.
-- **`Gallon` is frequently the literal string `"full tank"`**, not a number.
-  This is the blocker for using this sheet as the IFTA gallons source.
+- **`Gallon` is almost never a number.** Measured by the parser across the real
+  file: of 1,499 purchase rows, **1,461 — 97.5% — carry `"full tank"` or
+  similar** rather than a quantity. An independent count over raw cells agrees
+  (only ~6.8% numeric). Values like `80g` also appear.
+  **This is decisive: the fuel sheet cannot supply IFTA gallons at all.** EFS
+  and Relay statements are not a preferred source, they are the *only* source,
+  and Phase 3 therefore hard-depends on Phase 2. Quantity is emitted as `null`
+  — never 0, never inferred.
+- **Jurisdiction survives, though.** The two-letter state parses out of the
+  postal address for **1,469 of 1,499** rows. So this sheet knows *where* fuel
+  was bought but not *how much* — useful for corroborating an EFS statement,
+  useless on its own.
 - `Price` is written `3.56$` — **suffix** dollar sign.
 - Free-text noise in the driver/location columns, some non-English.
 - Diagnostic fault-code text shares the sheet in places.
