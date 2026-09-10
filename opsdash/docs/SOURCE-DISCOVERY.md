@@ -422,7 +422,8 @@ index in the first cell; that is the reliable boundary.
 
 The IRP invoice is billed to **ZONE-OH LLC** and covers 42 units. The settlement
 sheet says **24 of those units are operated under Xtrack or AFG**, and the
-operator separately confirmed two more (5417, 5852) as Xtrack.
+operator separately confirmed more as Xtrack. (Two of those, `5417` and `5852`,
+later proved to be numbering artefacts rather than separate trucks — see §11g.)
 
 So the entity that *registers and pays* is not always the entity that *operates
 and earns*. Booking the whole invoice to Zone would overstate Zone's cost and
@@ -463,7 +464,7 @@ registered but absent from the list.
 | 9859 | no | registered on **Xtrack's** IRP account |
 | 6169 | no | registered on **Xtrack's** IRP account |
 | **15852** | **yes** | registered as `5852` on the invoice — a dropped leading digit, confirmed by VIN and plate |
-| 5417, 5852 | yes | registered here; operator says both are Xtrack, and neither appears in the settlement sheet |
+| 5417 | yes | the office numbers this unit `5091`; the BMV used the VIN tail. Same VIN and plate |
 
 **Correction — 15852 is registered.** An earlier revision of this section, and
 the answer given to the operator, said it was not. Both were wrong, and the
