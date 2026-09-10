@@ -178,9 +178,9 @@ column. That was measured against the full 2026 sheet rather than assumed.
 | Measure | Result |
 | --- | --- |
 | Truck-week rows | 335 |
-| Gross revenue on the sheet | ~$2.68M |
+| Gross revenue on the sheet | *(withheld — public repo)* |
 | Rows carrying an explicit entity marker | **15 (4.5%)** |
-| Revenue that would default to Zone | **~$2.54M (94.9%)** |
+| Revenue that would default to Zone | **94.9%** |
 | Trucks marked inconsistently week to week | **7** |
 
 Those 7 trucks are the proof. The same truck is marked one week and unmarked
@@ -238,3 +238,60 @@ Hometime, the decal registry, Maintenance History, a daily update list, and
 Risk Management. **Maintenance History** in particular may overlap or conflict
 with the expenses sheet already mapped in §5, and should be reconciled before
 the maintenance cost path is built, so the same repair is not counted twice.
+
+---
+
+## 11. A fourth entity, and an inter-company layer
+
+The `Maintenance History` sheet linked from the fleet index **returns 404** — it
+is not shared with the connected account. Access is needed before its overlap
+with the expenses sheet can be judged, so that question stays open.
+
+Searching for it surfaced something else: **`Accounting Zone - Shop`**, updated
+daily. It is not per-truck maintenance. It is an **inter-company settlement
+ledger between Zone LLC and Truck Max USA LLC**, the repair shop, holding three
+stacked tables:
+
+1. Shop invoices issued to Zone against Zone's payments, with a standing shop
+   debt balance.
+2. A shop P&L — labour hours split `Zone LLC` vs `Others`, two labour rates,
+   parts at original and sell price, and a daily shop balance.
+3. Bank-derived detail: payroll transfers and card transactions with merchant
+   categories.
+
+Three consequences.
+
+**There is a fourth entity.** Truck Max USA LLC is a related repair business,
+not a carrier. A fifth name, Solid Progress LLC, appears as a payer. Neither is
+in the three-entity model the contract assumes.
+
+**There is a real double-count risk, and it is not the one that was asked
+about.** The shop invoices Zone in bulk; the expenses sheet itemises repairs per
+truck. Those are plausibly the *same money* at two levels of granularity.
+Ingesting both would count shop cost twice. The per-truck itemisation is what
+the ledger wants; the settlement sheet is a control total to reconcile against,
+not a second cost source.
+
+**Cross-entity P&L needs inter-company elimination.** A payment from Zone to
+Truck Max is a cost to Zone and revenue to the shop. Rolled up naively, group
+margin is overstated on both sides. This is ordinary consolidation and the
+contract does not model it yet.
+
+Minor note: the merchant-category column is unreliable — sizeable amounts are
+coded to categories that plainly do not match the spend. Do not derive cost
+categories from it.
+
+**No live bank connection is involved.** This is a hand-maintained sheet, so
+§2's prohibition holds. It does mean bank-derived data reaches the ledger by way
+of a spreadsheet, which is worth stating plainly rather than discovering later.
+
+## 12. Open decisions
+
+1. **Is Truck Max USA in scope?** If the CEO dashboard should show group margin
+   across the carriers *and* the shop, entities need an `is_internal` flag and
+   the roll-up needs an elimination step. If the shop is simply a vendor to
+   Zone, it stays a cost line and nothing changes.
+2. **Access to `Maintenance History`**, to settle its overlap with the expenses
+   sheet.
+3. **Which layer is the maintenance source of record** — the per-truck expense
+   rows, or the shop invoices. Both cannot post.
