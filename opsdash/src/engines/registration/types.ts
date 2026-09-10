@@ -82,6 +82,48 @@ export interface UnitStatusRow {
 }
 
 // ---------------------------------------------------------------------
+// VIN -> operating-entity crosswalk (parsed from irp_unit_operator.csv)
+//
+// The registration entity (whoever's name is on the IRP invoice) is not
+// always the entity that operates the truck and earns from it. See
+// docs/SOURCE-DISCOVERY.md §11e. `operatingEntityKey` is the raw crosswalk
+// label ('zone', 'xtrack', 'afg', 'sher_imam', 'iron_lease', 'UNRESOLVED') —
+// never itself an `entity_id`; mapping a key to a real `entity_id` happens
+// externally (`RegistrationPostingInput.operatorEntityByKey`), the same way
+// `truckByVin` resolves a VIN to a truck id outside this engine.
+// ---------------------------------------------------------------------
+
+export interface UnitOperatorRow {
+  irpUnit: string;
+  vin: string;
+  /** 'zone' | 'xtrack' | 'afg' | 'sher_imam' | 'iron_lease' | 'UNRESOLVED',
+   *  taken verbatim from the crosswalk. Never inferred from any other
+   *  string (unit number, lane text, etc.) — see CLAUDE.md §2. */
+  operatingEntityKey: string;
+  /** Date of the settlement-sheet snapshot (or operator statement) this
+   *  assignment is drawn from, or null when the source is a one-off
+   *  operator statement rather than a dated snapshot. */
+  asOf: IsoDate | null;
+  /** Free-text provenance ('settlement sheet (latest snapshot)', 'operator
+   *  stated - owner', 'no source', ...) — kept so a recharge can be
+   *  explained, never used as a posting decision itself. */
+  source: string;
+}
+
+/** A unit whose registration-cost routing needs a human look before the
+ *  recharge is trusted at face value — either because the named operator is
+ *  not an ordinary carrier (`sher_imam`, `iron_lease`), or because no
+ *  operator could be determined at all (`UNRESOLVED`, which stays with the
+ *  payer rather than inventing one). Surfaced separately from the row-level
+ *  `needsConfirmation` flag so the orchestrator can list them without
+ *  re-scanning every ledger row. */
+export interface NeedsConfirmationUnit {
+  unitNumber: string;
+  vin: string;
+  operatorKey: string;
+}
+
+// ---------------------------------------------------------------------
 // Engine input / output
 // ---------------------------------------------------------------------
 
@@ -120,6 +162,22 @@ export interface RegistrationPostingInput {
   /** The date the caller is posting as of. Determines which amortization
    *  months have closed and may therefore produce a posted ledger entry. */
   asOf: IsoDate;
+  /** VIN -> operating-entity crosswalk (irp_unit_operator.csv), parsed
+   *  externally via `parseUnitOperatorCsv`. Optional and omitted entirely
+   *  preserves the pre-recharge behavior: every unit's cost stays with
+   *  `entityId` (the payer), no recharge, no receivable — this is what
+   *  keeps the 25 pre-existing tests passing unchanged. Once supplied,
+   *  EVERY unit on the roster must have a row (even an explicit UNRESOLVED
+   *  one) — a unit silently missing from the crosswalk is not allowed to
+   *  fall back to "no recharge" by omission. */
+  operatorAssignments?: UnitOperatorRow[];
+  /** Maps a crosswalk operator key ('zone', 'xtrack', 'afg', 'sher_imam',
+   *  'iron_lease') to its resolved `entity_id`, resolved externally exactly
+   *  like `truckByVin`. Never consulted for the 'UNRESOLVED' sentinel key,
+   *  which is handled structurally (stays with the payer) rather than
+   *  looked up. A key present in `operatorAssignments` but absent here is
+   *  an error, not a silent default. */
+  operatorEntityByKey?: Record<string, string>;
 }
 
 /** A ledger row this engine wants inserted. Not a DB id yet — `key` is a
@@ -127,6 +185,9 @@ export interface RegistrationPostingInput {
  *  `.prepaidEntryKey` can point at one without a real `entry_id` existing. */
 export interface LedgerEntryDraft {
   key: string;
+  /** The entity whose P&L (or, for an intercompany leg, balance sheet)
+   *  carries this row. For an ordinary cost row this is the operator the
+   *  truck runs under; for a receivable row it is the payer. */
   entityId: string;
   truckId: string | null;
   unitType: UnitType;
@@ -143,6 +204,22 @@ export interface LedgerEntryDraft {
   sourceDocumentId: string;
   memo: string;
   postedBy: string;
+  /** Mirrors `ledger_entry.paid_by_entity_id`: null means "same as
+   *  entityId" (the ordinary case). Set only when this cost was funded by
+   *  another group company — i.e. entityId is the operator and this names
+   *  the payer. */
+  paidByEntityId: string | null;
+  /** Mirrors `ledger_entry.counterparty_entity_id`: the other side of an
+   *  intercompany balance. Required (non-null) on every
+   *  `receivable.intercompany` / `payable.intercompany` row, per migration
+   *  004's `intercompany_names_counterparty` check; null on every ordinary
+   *  cost row. */
+  counterpartyEntityId: string | null;
+  /** True when the operating entity behind this row is not an ordinary
+   *  carrier (`sher_imam`, `iron_lease`) or could not be determined at all
+   *  (`UNRESOLVED`) — the recharge (or lack of one) is structurally correct
+   *  but wants a human look before being trusted at face value. */
+  needsConfirmation: boolean;
 }
 
 export interface AmortizationScheduleRowDraft {
@@ -150,6 +227,8 @@ export interface AmortizationScheduleRowDraft {
   /** Local key of the `LedgerEntryDraft` recording the original prepaid
    *  payment this row spreads out. */
   prepaidEntryKey: string;
+  /** The entity this month's cost recognition lands on — the operator, once
+   *  a truck's registration cost is recharged. */
   entityId: string;
   truckId: string | null;
   unitNumber: string;
@@ -166,6 +245,20 @@ export interface AmortizationScheduleRowDraft {
    *  in `postedEntries` this row produced. Null for every future month —
    *  a commitment, never an actual. */
   postedEntryKey: string | null;
+  /** Mirrors `amortization_schedule.paid_by_entity_id`: null means "same as
+   *  entityId". Set to the payer when this month's cost is recharged to a
+   *  different operating entity. Each month uses the operator's latest
+   *  known assignment as of when this posting ran — a future transfer is
+   *  never modeled ahead of time, per SOURCE-DISCOVERY §11d/§11e. Note:
+   *  migration 004 gives `amortization_schedule` no `counterparty_entity_id`
+   *  column, so this table can only ever record the cost side of a
+   *  recharge (who bears it, who paid) — never who the receivable is owed
+   *  by. That is why the receivable itself is posted as an immediate
+   *  `ledger_entry` (see `RegistrationPostingResult.intercompanyEntries`),
+   *  not as a scheduled row. */
+  paidByEntityId: string | null;
+  /** See `LedgerEntryDraft.needsConfirmation`. */
+  needsConfirmation: boolean;
 }
 
 export interface HvutChargedToTotals {
@@ -191,11 +284,32 @@ export interface RegistrationPostingReconciliation {
   hvutUnitCountByChargedTo: HvutChargedToCounts;
   weightGroup: number;
   unitCount: number;
+  /** Combined IRP + HVUT cost, bucketed by where it actually lands
+   *  (`entityId`) after the recharge: 'zone', 'xtrack', 'afg', 'sher_imam',
+   *  'iron_lease', 'unresolved'. Present (all six keys, zero-filled) even
+   *  when `operatorAssignments` is omitted, in which case everything is
+   *  under 'zone'. Sums to `irpAllocatedTotal` + `hvutTotal` exactly. */
+  costByOperatorKey: Record<'zone' | 'xtrack' | 'afg' | 'sher_imam' | 'iron_lease' | 'unresolved', Decimal>;
+  /** Sum of every `intercompanyEntries` amount — Zone's total intercompany
+   *  receivable across every recharged unit and stream. Zero when
+   *  `operatorAssignments` is omitted. */
+  intercompanyReceivableTotal: Decimal;
+  /** Units whose operator needs a human look before the recharge (or the
+   *  decision not to recharge, for UNRESOLVED) is trusted at face value. */
+  needsConfirmationUnits: NeedsConfirmationUnit[];
 }
 
 export interface RegistrationPostingResult {
   prepaidEntries: LedgerEntryDraft[];
   scheduleRows: AmortizationScheduleRowDraft[];
   postedEntries: LedgerEntryDraft[];
+  /** Zone's intercompany receivables against recharged operators — one row
+   *  per (recharged unit, cost stream), for that stream's full annual
+   *  allocation, dated at the stream's payment date. Posted immediately,
+   *  like `prepaidEntries`, because the underlying cash already moved on
+   *  that date; NOT gated by `isMonthClosed`, which governs only the
+   *  monthly *expense-recognition* timeline in `postedEntries`. Always `[]`
+   *  when `operatorAssignments` is omitted. */
+  intercompanyEntries: LedgerEntryDraft[];
   reconciliation: RegistrationPostingReconciliation;
 }

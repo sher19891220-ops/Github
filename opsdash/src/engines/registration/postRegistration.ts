@@ -16,8 +16,10 @@ import type {
   HvutChargedToTotals,
   IrpInvoiceUnit,
   LedgerEntryDraft,
+  NeedsConfirmationUnit,
   RegistrationPostingInput,
   RegistrationPostingResult,
+  UnitOperatorRow,
   UnitStatusRow,
 } from './types';
 
@@ -25,7 +27,42 @@ const COVERAGE_MONTHS = 12;
 const IRP_CATEGORY = 'permit.irp';
 const HVUT_CATEGORY = 'tax.hvut';
 const PREPAID_CATEGORY = 'prepaid.registration';
+const RECEIVABLE_CATEGORY = 'receivable.intercompany';
 const CURRENCY = 'USD';
+
+/** The crosswalk's sentinel for "no operator could be determined" — stays
+ *  with the payer rather than inventing an operator. Not itself an operator
+ *  key, so it is never looked up in `operatorEntityByKey`. */
+const UNRESOLVED_OPERATOR_KEY = 'UNRESOLVED';
+
+/** Operators that are not ordinary carriers (owner / title-holder on a
+ *  paid-off unit). The recharge is still correct in principle — cost
+ *  follows the truck — but the orchestrator must surface these for human
+ *  confirmation rather than silently treating them like Xtrack or AFG. */
+const NEEDS_CONFIRMATION_OPERATOR_KEYS = new Set(['sher_imam', 'iron_lease']);
+
+/** Canonical labels for `reconciliation.costByOperatorKey`, independent of
+ *  whatever opaque `entity_id` each key actually resolves to. */
+type OperatorBucket = 'zone' | 'xtrack' | 'afg' | 'sher_imam' | 'iron_lease' | 'unresolved';
+const OPERATOR_BUCKETS: OperatorBucket[] = ['zone', 'xtrack', 'afg', 'sher_imam', 'iron_lease', 'unresolved'];
+
+interface UnitOperatorResolution {
+  /** Raw crosswalk key ('zone', 'xtrack', ..., 'UNRESOLVED'), or null when
+   *  no crosswalk was supplied at all (pre-recharge callers). */
+  operatorKey: string | null;
+  /** The operator's resolved `entity_id`, but ONLY when it differs from the
+   *  payer — i.e. only when set does a recharge candidate exist. Null for
+   *  "same as payer" (including the 'zone' key), for UNRESOLVED, and for
+   *  "no crosswalk supplied". */
+  operatorEntityId: string | null;
+  needsConfirmation: boolean;
+}
+
+interface StreamBearer {
+  entityId: string;
+  paidByEntityId: string | null;
+  recharged: boolean;
+}
 
 /**
  * Every unit on this invoice must share one weight group, because an even
@@ -76,6 +113,72 @@ function byVinAscending(a: IrpInvoiceUnit, b: IrpInvoiceUnit): number {
   return a.vin < b.vin ? -1 : a.vin > b.vin ? 1 : 0;
 }
 
+/**
+ * Resolves which entity a unit's registration cost follows, per
+ * docs/SOURCE-DISCOVERY.md §11e. Returns `operatorEntityId: null` whenever
+ * there is nothing to recharge — no crosswalk supplied, the operator IS the
+ * payer, or the operator is genuinely UNRESOLVED (which stays with the
+ * payer rather than inventing one, per the operator's explicit decision).
+ */
+function resolveUnitOperator(
+  unit: IrpInvoiceUnit,
+  operatorByVin: Map<string, UnitOperatorRow> | null,
+  operatorEntityByKey: Record<string, string>,
+  payerEntityId: string,
+): UnitOperatorResolution {
+  if (!operatorByVin) {
+    return { operatorKey: null, operatorEntityId: null, needsConfirmation: false };
+  }
+  const row = operatorByVin.get(unit.vin);
+  if (!row) {
+    throw new Error(
+      `Unit ${unit.unitNumber} (VIN ${unit.vin}) has no row in the operator crosswalk — cannot determine which ` +
+        `entity its registration cost follows. Add a row (even an explicit UNRESOLVED one) rather than ` +
+        `defaulting silently.`,
+    );
+  }
+  if (row.operatingEntityKey === UNRESOLVED_OPERATOR_KEY) {
+    // Zone did pay, and there is no evidence of another operator: stays
+    // with Zone, but flagged for review rather than treated as an ordinary
+    // zone-operated unit.
+    return { operatorKey: row.operatingEntityKey, operatorEntityId: null, needsConfirmation: true };
+  }
+  const resolvedEntityId = operatorEntityByKey[row.operatingEntityKey];
+  if (!resolvedEntityId) {
+    throw new Error(
+      `Unit ${unit.unitNumber} (VIN ${unit.vin}): operator key "${row.operatingEntityKey}" has no resolved ` +
+        `entity id in operatorEntityByKey — refusing to invent one.`,
+    );
+  }
+  const needsConfirmation = NEEDS_CONFIRMATION_OPERATOR_KEYS.has(row.operatingEntityKey);
+  if (resolvedEntityId === payerEntityId) {
+    return { operatorKey: row.operatingEntityKey, operatorEntityId: null, needsConfirmation };
+  }
+  return { operatorKey: row.operatingEntityKey, operatorEntityId: resolvedEntityId, needsConfirmation };
+}
+
+/** The bearer of a single cost stream (IRP, or HVUT for this unit): the
+ *  operator when this stream is a company cost AND the operator differs
+ *  from the payer, otherwise the payer with no recharge. Driver-borne and
+ *  unknown-borne HVUT never recharge — that money isn't a company cost at
+ *  all, so there is nothing to reassign between group companies; it stays
+ *  exactly where it always has, on the payer's books, pending resolution
+ *  against the driver. */
+function bearerFor(streamChargedTo: ChargedTo, unitOperator: UnitOperatorResolution, payerEntityId: string): StreamBearer {
+  if (unitOperator.operatorEntityId && streamChargedTo === 'company') {
+    return { entityId: unitOperator.operatorEntityId, paidByEntityId: payerEntityId, recharged: true };
+  }
+  return { entityId: payerEntityId, paidByEntityId: null, recharged: false };
+}
+
+/** The canonical reporting bucket a stream's cost lands in, independent of
+ *  the opaque entity_id it actually resolved to. */
+function bucketFor(unitOperator: UnitOperatorResolution, bearer: StreamBearer): OperatorBucket {
+  if (bearer.recharged) return unitOperator.operatorKey as OperatorBucket;
+  if (unitOperator.operatorKey === UNRESOLVED_OPERATOR_KEY) return 'unresolved';
+  return 'zone';
+}
+
 function sumHvutByChargedTo(
   perUnitHvutCents: { unit: IrpInvoiceUnit; chargedTo: ChargedTo; cents: number }[],
 ): { totals: HvutChargedToTotals; counts: HvutChargedToCounts } {
@@ -106,6 +209,12 @@ export function buildRegistrationPosting(input: RegistrationPostingInput): Regis
   const irpInvoiceTotalCents = assertFeeLinesReconcile(feeLines, invoiceTotal);
 
   const statusByVin = new Map(unitStatuses.map((r) => [r.vin, r] as const));
+  // Omitting operatorAssignments entirely preserves the pre-recharge
+  // behavior byte-for-byte: every unit's cost stays with the payer.
+  const operatorByVin = input.operatorAssignments
+    ? new Map(input.operatorAssignments.map((r) => [r.vin, r] as const))
+    : null;
+  const operatorEntityByKey = input.operatorEntityByKey ?? {};
 
   const orderedUnits = [...units].sort(byVinAscending);
   const n = orderedUnits.length;
@@ -155,6 +264,13 @@ export function buildRegistrationPosting(input: RegistrationPostingInput): Regis
       sourceDocumentId: input.irpSourceDocumentId,
       memo: `IRP renewal ${header.accountNo}/${header.fleetNo}, run ${header.runDate}: prepaid registration asset.`,
       postedBy: input.postedBy,
+      // The recharge splits how the cost is RECOGNIZED (see scheduleRows /
+      // postedEntries), never the fact that Zone is the one who actually
+      // sent the cash for the whole invoice. This row stays exactly as it
+      // was before the recharge existed.
+      paidByEntityId: null,
+      counterpartyEntityId: null,
+      needsConfirmation: false,
     },
     {
       key: 'hvut-prepaid',
@@ -174,6 +290,9 @@ export function buildRegistrationPosting(input: RegistrationPostingInput): Regis
       sourceDocumentId: input.hvutSourceDocumentId,
       memo: `HVUT (Form 2290) for fleet ${header.fleetNo}: prepaid road-tax asset.`,
       postedBy: input.postedBy,
+      paidByEntityId: null,
+      counterpartyEntityId: null,
+      needsConfirmation: false,
     },
   ];
 
@@ -189,6 +308,11 @@ export function buildRegistrationPosting(input: RegistrationPostingInput): Regis
 
   const scheduleRows: AmortizationScheduleRowDraft[] = [];
   const postedEntries: LedgerEntryDraft[] = [];
+  const intercompanyEntries: LedgerEntryDraft[] = [];
+  const needsConfirmationUnits: NeedsConfirmationUnit[] = [];
+  const costByOperatorKeyCents: Record<OperatorBucket, number> = {
+    zone: 0, xtrack: 0, afg: 0, sher_imam: 0, iron_lease: 0, unresolved: 0,
+  };
 
   for (let i = 0; i < n; i++) {
     const unit = orderedUnits[i] as IrpInvoiceUnit;
@@ -199,11 +323,74 @@ export function buildRegistrationPosting(input: RegistrationPostingInput): Regis
     const hvut = perUnitHvut[i] as { unit: IrpInvoiceUnit; chargedTo: ChargedTo; cents: number };
     const hvutMonthlyCents = evenSplitCents(hvut.cents, COVERAGE_MONTHS);
 
+    // Resolved once per unit — "each month the operator's latest known
+    // entity", never a re-derivation per month, since a schedule row that
+    // hasn't posted yet may in principle move with a future transfer, but
+    // this posting run only ever knows about the assignment as of today.
+    const unitOperator = resolveUnitOperator(unit, operatorByVin, operatorEntityByKey, entityId);
+    if (unitOperator.needsConfirmation) {
+      needsConfirmationUnits.push({
+        unitNumber: unit.unitNumber,
+        vin: unit.vin,
+        operatorKey: unitOperator.operatorKey as string,
+      });
+    }
+
     const streams = [
-      { categoryId: IRP_CATEGORY, prepaidKey: 'irp-prepaid', monthly: irpMonthlyCents, chargedTo: 'company' as ChargedTo, basis: 'even_split' as const, sourceDocumentId: input.irpSourceDocumentId },
-      { categoryId: HVUT_CATEGORY, prepaidKey: 'hvut-prepaid', monthly: hvutMonthlyCents, chargedTo: hvut.chargedTo, basis: 'actual' as const, sourceDocumentId: input.hvutSourceDocumentId },
+      {
+        categoryId: IRP_CATEGORY, prepaidKey: 'irp-prepaid', monthly: irpMonthlyCents,
+        fullYearCents: irpUnitCents, chargedTo: 'company' as ChargedTo, basis: 'even_split' as const,
+        sourceDocumentId: input.irpSourceDocumentId, paymentDate: input.irpPaymentDate,
+      },
+      {
+        categoryId: HVUT_CATEGORY, prepaidKey: 'hvut-prepaid', monthly: hvutMonthlyCents,
+        fullYearCents: hvut.cents, chargedTo: hvut.chargedTo, basis: 'actual' as const,
+        sourceDocumentId: input.hvutSourceDocumentId, paymentDate: input.hvutPaymentDate,
+      },
     ];
     for (const stream of streams) {
+      const bearer = bearerFor(stream.chargedTo, unitOperator, entityId);
+      costByOperatorKeyCents[bucketFor(unitOperator, bearer)] += stream.fullYearCents;
+
+      // The recharge (bullet 2 of the operator's decision): Zone's claim
+      // against the operator is a real, present fact as of the moment Zone
+      // paid — it does not wait for the benefit to be consumed month by
+      // month, so it posts once, in full, dated at payment. This is also
+      // the only place it CAN post: accounting.amortization_schedule (see
+      // migration 004) was given paid_by_entity_id but no
+      // counterparty_entity_id, so a monthly *scheduled* receivable could
+      // never name who it's owed by. The cost side doesn't have this
+      // problem — entity_id (operator) + paid_by_entity_id (Zone) fully
+      // describes it on every schedule row below.
+      if (bearer.recharged) {
+        intercompanyEntries.push({
+          key: `receivable:${stream.categoryId}:${unit.unitNumber}`,
+          entityId, // Zone, the payer, holds the receivable
+          truckId,
+          unitType: 'truck',
+          unitNumber: unit.unitNumber,
+          categoryId: RECEIVABLE_CATEGORY,
+          amount: decimalFromCents(stream.fullYearCents), // positive: an asset to Zone
+          currency: CURRENCY,
+          accrualDate: stream.paymentDate,
+          chargedTo: 'company',
+          allocationBasis: stream.basis,
+          allocationNote:
+            `Intercompany receivable: unit ${unit.unitNumber}'s ${stream.categoryId} (${decimalFromCents(stream.fullYearCents)}) ` +
+            `follows the truck to operator "${unitOperator.operatorKey}" per docs/SOURCE-DISCOVERY.md §11e. Zone paid ` +
+            `the full invoice on ${stream.paymentDate}, so the receivable is booked in full at that date rather ` +
+            `than spread over the amortization schedule.`,
+          sourceKind: 'document',
+          sourceDocumentId: stream.sourceDocumentId,
+          memo: `Intercompany receivable from operator "${unitOperator.operatorKey}" for unit ${unit.unitNumber} ` +
+            `(VIN ${unit.vin}), ${stream.categoryId}.`,
+          postedBy: input.postedBy,
+          paidByEntityId: null,
+          counterpartyEntityId: unitOperator.operatorEntityId,
+          needsConfirmation: unitOperator.needsConfirmation,
+        });
+      }
+
       for (let m = 0; m < COVERAGE_MONTHS; m++) {
         const periodMonth = months[m] as IsoDate;
         const cents = stream.monthly[m] as number;
@@ -214,7 +401,7 @@ export function buildRegistrationPosting(input: RegistrationPostingInput): Regis
           const key = `${stream.categoryId}:${unit.unitNumber}:${periodMonth}`;
           postedEntries.push({
             key,
-            entityId,
+            entityId: bearer.entityId,
             truckId,
             unitType: 'truck', // HVUT applies only to power units; all 42 units here are trucks, never trailers
             unitNumber: unit.unitNumber,
@@ -232,6 +419,9 @@ export function buildRegistrationPosting(input: RegistrationPostingInput): Regis
             sourceDocumentId: stream.sourceDocumentId,
             memo: `${stream.categoryId} recognition for unit ${unit.unitNumber} (VIN ${unit.vin}), ${periodMonth}.`,
             postedBy: input.postedBy,
+            paidByEntityId: bearer.paidByEntityId,
+            counterpartyEntityId: null,
+            needsConfirmation: unitOperator.needsConfirmation,
           });
           postedEntryKey = key;
         }
@@ -239,7 +429,7 @@ export function buildRegistrationPosting(input: RegistrationPostingInput): Regis
         scheduleRows.push({
           sourceDocumentId: stream.sourceDocumentId,
           prepaidEntryKey: stream.prepaidKey,
-          entityId,
+          entityId: bearer.entityId,
           truckId,
           unitNumber: unit.unitNumber,
           vin: unit.vin,
@@ -250,15 +440,23 @@ export function buildRegistrationPosting(input: RegistrationPostingInput): Regis
           allocationBasis: stream.basis,
           closed,
           postedEntryKey,
+          paidByEntityId: bearer.paidByEntityId,
+          needsConfirmation: unitOperator.needsConfirmation,
         });
       }
     }
   }
 
+  const costByOperatorKey = Object.fromEntries(
+    OPERATOR_BUCKETS.map((bucket) => [bucket, decimalFromCents(costByOperatorKeyCents[bucket])]),
+  ) as Record<OperatorBucket, Decimal>;
+  const intercompanyReceivableTotalCents = sumCents(intercompanyEntries.map((e) => centsFromDecimal(e.amount)));
+
   return {
     prepaidEntries,
     scheduleRows,
     postedEntries,
+    intercompanyEntries,
     reconciliation: {
       irpFeeLineTotal: decimalFromCents(irpInvoiceTotalCents),
       irpInvoiceTotal: invoiceTotal,
@@ -274,6 +472,9 @@ export function buildRegistrationPosting(input: RegistrationPostingInput): Regis
       hvutUnitCountByChargedTo,
       weightGroup,
       unitCount: n,
+      costByOperatorKey,
+      intercompanyReceivableTotal: decimalFromCents(intercompanyReceivableTotalCents),
+      needsConfirmationUnits,
     },
   };
 }
