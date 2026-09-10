@@ -166,3 +166,75 @@ identified source. Phase 3 cannot start until one arrives.
 4. `Iron lease Leased trucks` — is that lease-to-own contracts, or third-party
    equipment leasing? It determines whether it feeds `driver_class_history` or a
    lease cost category.
+
+---
+
+## 8. Entity attribution — measured, and it does not work
+
+All three entities share one dispatch sheet (confirmed by the operator), so
+entity for **all revenue** rests on the free-text marker in the driver-name
+column. That was measured against the full 2026 sheet rather than assumed.
+
+| Measure | Result |
+| --- | --- |
+| Truck-week rows | 335 |
+| Gross revenue on the sheet | ~$2.68M |
+| Rows carrying an explicit entity marker | **15 (4.5%)** |
+| Revenue that would default to Zone | **~$2.54M (94.9%)** |
+| Trucks marked inconsistently week to week | **7** |
+
+Those 7 trucks are the proof. The same truck is marked one week and unmarked
+the next, so a blank means *the marker was omitted*, not *this is Zone*.
+Parsing entity from the dispatch text would misattribute roughly **95% of
+revenue to a single entity**.
+
+The scale of the error is clear from the fuel summary, which does carry
+structured entity blocks: **xtrack has 52 drivers, zone 40, afg 18.** xtrack is
+the largest entity by headcount, yet naive parsing would hand nearly all
+revenue to zone.
+
+### What was tried
+
+1. **Driver → entity from the fuel summary.** 110 drivers mapped with **zero
+   ambiguity** — no driver appears under two entities. Covers 203/335 rows
+   (**61% of revenue**). Good signal, insufficient alone.
+2. **Truck → entity, derived from the above.** Resolves 61 of 82 trucks, but
+   **4 trucks come back with conflicting entities** across weeks — drivers move
+   between trucks, and some rows are team drivers.
+3. **Truck → entity from the IRP plate series** in the decal registry. **No
+   discrimination**: all three entities span the same plate formats.
+
+### Conclusion
+
+No sheet examined carries a reliable truck-or-driver → entity mapping. Since
+cross-entity P&L roll-up is the core of the CEO dashboard, this is a **blocking
+input**, equal in severity to the missing state mileage. It needs an
+authoritative roster from the operator, loaded into `entity`,
+`truck_entity_history` and `source_key_map`.
+
+Until then, any entity-sliced figure would be confidently wrong, which the
+"no silent estimates" rule forbids.
+
+## 9. The decal registry — a crosswalk worth having
+
+The sheet linked as "IFTA" from the fleet index is **not** mileage by state. It
+is a registration registry: `UNIT # | IFTA Decal # | IRP Plate # | Samsara
+serial`. It does not close the IFTA gap.
+
+It is valuable for a different reason: it maps roughly **90 trucks to their
+Samsara device serials**, which is exactly the join the Samsara IFTA mileage
+export will need. It seeds `source_key_map` for `source_system = 'samsara'`.
+
+Caveats: several units appear in multiple sections with **different decal
+numbers** (different registration years), one unit number is literally
+`"<n> Inactive"`, and some rows carry a state prefix (`MO #`, `OH #`, `IL #`,
+`IN #`) marking base jurisdiction. Load the most recent section, not the first
+match.
+
+## 10. Other sheets discovered
+
+The fleet sheet is an index. It links to: PM & DOT, Weekly Performance,
+Hometime, the decal registry, Maintenance History, a daily update list, and
+Risk Management. **Maintenance History** in particular may overlap or conflict
+with the expenses sheet already mapped in §5, and should be reconciled before
+the maintenance cost path is built, so the same repair is not counted twice.
