@@ -655,3 +655,52 @@ Two identity corrections belong here: the unit the registration record calls
 company, and paid for by an investor, all at once. Collapsing these into one
 "entity" column is what produced two earlier mistakes — a title holder treated
 as an operator, and an owner-held unit treated as unattributed.
+
+---
+
+## 14. Scanned documents — measured, not assumed
+
+The accounting team needs to drop any file — PDF, spreadsheet, or a phone
+photo of an invoice — and have it read. Tested against the real IRP document
+rather than a sample: rendered to an image at 200 dpi and OCR'd, discarding the
+text layer, to simulate a scan.
+
+| Measure | Result |
+| --- | --- |
+| Document structure recovered | fully — headers, columns and rows all legible |
+| **VINs recovered exactly** | **33 of 42 (79%)** |
+| Distinct numbers recovered | 47 of 50 |
+
+**79% is not good enough to post.** One VIN in five wrong means one truck in
+five misattributed, and a misread digit in an amount is both catastrophic and
+silent. So OCR output **never reaches the ledger directly** — it fills the
+review queue, which already exists for exactly this reason.
+
+### Check digits close most of the gap
+
+A concrete failure: OCR read `3AKJHHDRINSMY1471` where the truth is
+`3AKJHHDR9NSMY1471`. Two facts make that recoverable rather than a guess:
+
+1. **`I`, `O` and `Q` never appear in a VIN.** Their presence is proof of a
+   misread, not a suspicion.
+2. **Position 9 is a check digit computed from the other sixteen characters.**
+   All 42 real VINs validate against it. The garbled character here *was*
+   position 9, so recomputing it returned the true VIN exactly.
+
+The same principle generalises: the check digit detects a misread anywhere in
+the VIN even when it cannot correct it, which converts a silent wrong answer
+into a flagged one. That is the whole game — a field that is *known* doubtful
+gets human attention; a field that is quietly wrong does not.
+
+**Design rule that follows:** every extracted field carries a confidence, and
+anything that fails a structural check (VIN check digit, a total that does not
+sum, a date outside the document's period) is flagged for review rather than
+accepted. Extraction assists the accountant; it does not replace them.
+
+### Tooling
+
+`pdftotext` for PDFs with a text layer, `pdftoppm` plus `tesseract` for scanned
+pages and images, `exceljs` for spreadsheets. Tesseract is a **system**
+dependency, not an npm one — a deployment without it silently loses the ability
+to read scans, so it belongs in the deploy checklist rather than being
+discovered in production.
