@@ -1,0 +1,27 @@
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --fg: #16181d;
+  --muted: #5b6270;
+  --line: #e3e6ea;
+  --accent: #1f6feb;
+  --warn: #b45309;
+  --bad: #b42318;
+  --good: #067647;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #12141a; --fg: #e9ecf1; --muted: #98a1b0; --line: #262b35;
+    --accent: #6ea8ff; --warn: #f0a35e; --bad: #f97066; --good: #47c88a;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 14px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+/* Money is read in columns and compared down the page; tabular figures stop
+   digits from dancing between rows. */
+.num { font-variant-numeric: tabular-nums; text-align: right; }

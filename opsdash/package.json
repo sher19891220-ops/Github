@@ -2,22 +2,33 @@
   "name": "opsdash",
   "version": "0.1.0",
   "private": true,
-  "engines": { "node": ">=20.0.0" },
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:unit": "vitest run tests/unit",
     "db:verify": "bash scripts/db-verify.sh",
-    "check": "npm run typecheck && npm run test:unit"
+    "check": "npm run typecheck && npm run test:unit",
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start",
+    "db:local": "bash scripts/db-local.sh"
   },
   "dependencies": {
     "pg": "^8.16.3",
-    "zod": "^4.4.3"
+    "zod": "^4.4.3",
+    "next": "^15.5.23",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
   },
   "devDependencies": {
     "@types/node": "^26.2.0",
     "@types/pg": "^8.15.5",
     "typescript": "5.9",
-    "vitest": "^4.1.11"
+    "vitest": "^4.1.11",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4"
   }
 }

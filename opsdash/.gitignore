@@ -8,3 +8,6 @@ node_modules/
 # numbers and driver names. Redacted fixtures under tests/fixtures/redacted
 # are the only ones that get committed.
 tests/fixtures/real/
+
+.next/
+next-env.d.ts
