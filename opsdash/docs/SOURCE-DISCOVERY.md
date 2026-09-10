@@ -59,9 +59,16 @@ groups of three** (`lane text`, `amount`, `miles`), then `Gross | Miles | RPM`.
    `$ 2,346` (leading space, comma) all appear in the same column.
 3. **The miles column sometimes carries a `$`** — `| $1,265.00 | $775 |`
    is revenue 1265, miles 775. Reading column 3 as money double-counts.
-4. **Non-revenue days are free text**: `transit`, `OFF`, `HOME`, `stuck`,
-   `TOWING`, `Truck is not ready`, `OOS`, `Sick`, `truck change`. These are
-   not zero-revenue — they are *no load*, and must not post a zero entry.
+4. **Day-cell lane text is free-form**: `transit`, `OFF`, `HOME`, `stuck`,
+   `TOWING`, `Truck is not ready`, `OOS`, `Sick`, `truck change`. A day with no
+   amount is *no load* and must post no entry rather than a zero one.
+   **But the words are not the signal.** Measured across the sheet: 484 day-cells
+   match one of those keywords, and **28 of them also carry a real amount** that
+   is part of the truck's Gross total — about **$49.5k of genuine revenue** a
+   keyword filter would silently delete. Presence of a parseable amount in the
+   amount cell is the only reliable no-load test. *(An earlier revision of these
+   notes got this wrong and prescribed the keyword filter; the parser agent
+   caught it against real data.)*
 5. **`#DIV/0!` appears in the RPM column** for trucks with no miles.
 6. Merged cells above the day groups (`[merged] Week-1`).
 7. Blank truck numbers on rows that still carry a driver.
@@ -177,7 +184,7 @@ column. That was measured against the full 2026 sheet rather than assumed.
 
 | Measure | Result |
 | --- | --- |
-| Truck-week rows | 335 |
+| Truck-week rows | 337 |
 | Gross revenue on the sheet | *(withheld — public repo)* |
 | Rows carrying an explicit entity marker | **15 (4.5%)** |
 | Revenue that would default to Zone | **94.9%** |
@@ -204,16 +211,49 @@ revenue to zone.
 3. **Truck → entity from the IRP plate series** in the decal registry. **No
    discrimination**: all three entities span the same plate formats.
 
+### A roster table was missed on the first pass
+
+**Correction.** An earlier revision of these notes concluded no sheet carried a
+truck → entity mapping. That was wrong. The dispatch workbook contains a
+**roster table further down the same file** (around lines 249–468), missed
+because the first pass stopped at the truck-week blocks:
+
+`Dispatcher Name | № | Truck # | Driver name | Company Type | Inactive date`
+
+It maps units explicitly: **31 Xtrack LLC, 22 Zone OH LLC, 3 AFG, 6 Inactive**.
+An `Inactive date` column and a `Need to Transfer` marker also appear, which are
+transfer signals in their own right.
+
+Measured against the trucks that actually earn revenue:
+
+| Measure | Result |
+| --- | --- |
+| Revenue-bearing trucks | 82 |
+| Covered by the roster | **58 (71%)** |
+| **Revenue covered** | **74.2%** |
+| Uncovered trucks | 24 |
+
+Split of the covered revenue: **Xtrack 34.0%**, Zone OH 32.5%, Inactive 4.1%,
+AFG 3.6%. That independently confirms the §8 argument — **Xtrack is the largest
+entity by revenue, not Zone** — and kills any default-to-Zone rule for good.
+
 ### Conclusion
 
-No sheet examined carries a reliable truck-or-driver → entity mapping. Since
-cross-entity P&L roll-up is the core of the CEO dashboard, this is a **blocking
-input**, equal in severity to the missing state mileage. It needs an
-authoritative roster from the operator, loaded into `entity`,
-`truck_entity_history` and `source_key_map`.
+Entity attribution is **no longer a hard blocker, but it is not solved either**.
+The roster covers 74% of revenue; the free-text markers covered 4.5%. The
+remaining ~26% still needs the operator's roster, and the roster's own accuracy
+is unverified against the trucks that were marked inconsistently week to week.
 
-Until then, any entity-sliced figure would be confidently wrong, which the
-"no silent estimates" rule forbids.
+Order of precedence for resolution, best first:
+1. The operator's confirmed roster (authoritative, effective-dated).
+2. This embedded `Company Type` roster (74% of revenue).
+3. The fuel summary's driver → entity blocks (61%, zero ambiguity).
+4. Free-text markers in the dispatch driver name (4.5%, unreliable).
+
+None of this belongs in a parser. Resolution happens in the review/commit layer
+through `source_key_map`, so that a figure can always be traced to *which*
+source decided its entity. Until a truck is resolved, its entity is null — an
+unattributed figure is recoverable, a confidently wrong one is not.
 
 ## 9. The decal registry — a crosswalk worth having
 

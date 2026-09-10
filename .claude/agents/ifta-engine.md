@@ -48,8 +48,10 @@ You share no files with `permit-engine`; both run in parallel.
   silent wrong number.
 - **Never resolve identity by string match.** The same driver is written three
   different ways in one sheet. Go through `source_key_map`.
-- **A no-load day is not a zero-revenue day.** `transit`, `OFF`, `HOME`,
-  `TOWING`, `OOS` post no entry at all.
+- **A no-load day is decided by the amount cell, never by the lane text.** No
+  parseable amount means no entry (not a zero one). Do NOT filter on words like
+  `transit`/`OFF`/`TOWING`: 28 real day-cells carry those words alongside a
+  genuine amount, and a keyword filter deletes ~$49.5k of revenue.
 - **Money is never a float.** `numeric` in Postgres, decimal strings on the
   wire. A JSON number in the money path is a defect.
 - **Every figure names its origin.** A ledger row without provenance cannot be

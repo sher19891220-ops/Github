@@ -124,9 +124,13 @@ Three rules that fall out of the real data:
 - **Never resolve identity by string match.** `Issued To` writes the same person
   as `"496648 NAME"`, `"Name # 6169"` and `"Name #495803"`. Everything goes
   through `source_key_map`.
-- **A no-load day is not a zero-revenue day.** `transit`, `OFF`, `HOME`,
-  `TOWING` and `OOS` must post no entry rather than a zero one, or average
-  revenue per truck is silently wrong.
+- **A no-load day is decided by the amount cell, never by the lane text.** A day
+  with no parseable amount posts no entry — not a zero one, or average revenue
+  per truck is silently wrong. But do **not** filter on words like `transit`,
+  `OFF` or `TOWING`: measured against the real sheet, 28 day-cells carry one of
+  those words *and* a real amount that is part of the truck's Gross total. A
+  keyword filter deletes about $49.5k of genuine revenue and breaks
+  reconciliation. Presence of an amount is the only reliable signal.
 - **Parse sheets by header, never by column index.** Column order is not stable
   across sections of the same tab. `sheet_source.header_checksum` exists so a
   layout change fails loudly instead of reading the wrong column as an amount.
