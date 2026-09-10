@@ -157,3 +157,62 @@ SELECT CASE WHEN COUNT(*) FILTER (WHERE charged_to = 'driver') = 1
             THEN 'PASS: company and driver costs are distinguishable'
             ELSE 'FAIL: chargeback not separable' END AS result
 FROM accounting.ledger_entry;
+
+\echo '--- ASSERT 12: intercompany recharge keeps both sides straight --------'
+INSERT INTO accounting.entity (entity_id, code, legal_name)
+VALUES ('66666666-6666-6666-6666-666666666666','XTRACK','Xtrack LLC');
+INSERT INTO accounting.category (category_id, category_group, display_name, sign)
+VALUES ('permit.test','permit','Permit test',-1) ON CONFLICT DO NOTHING;
+
+-- Zone pays; the cost belongs to Xtrack, who operates the truck.
+INSERT INTO accounting.ledger_entry
+  (entity_id, paid_by_entity_id, accrual_date, category_id, amount,
+   source_kind, source_document_id, posted_by)
+VALUES ('66666666-6666-6666-6666-666666666666','11111111-1111-1111-1111-111111111111',
+        '2026-09-30','permit.test',-1879.98,'document',
+        '22222222-2222-2222-2222-222222222222','engine');
+-- Zone's matching receivable from Xtrack.
+INSERT INTO accounting.ledger_entry
+  (entity_id, counterparty_entity_id, accrual_date, category_id, amount,
+   source_kind, source_document_id, posted_by)
+VALUES ('11111111-1111-1111-1111-111111111111','66666666-6666-6666-6666-666666666666',
+        '2026-09-30','receivable.intercompany',1879.98,'document',
+        '22222222-2222-2222-2222-222222222222','engine');
+\echo 'PASS: recharge and its receivable both accepted'
+
+\echo '--- ASSERT 13: an intercompany balance must name a counterparty ------'
+DO $$
+BEGIN
+  INSERT INTO accounting.ledger_entry
+    (entity_id, accrual_date, category_id, amount, source_kind,
+     source_document_id, posted_by)
+  VALUES ('11111111-1111-1111-1111-111111111111','2026-09-30',
+          'receivable.intercompany',100.00,'document',
+          '22222222-2222-2222-2222-222222222222','engine');
+  RAISE EXCEPTION 'FAIL: unmatched intercompany balance accepted';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: intercompany without a counterparty rejected';
+END $$;
+
+\echo '--- ASSERT 14: a company cannot owe itself ---------------------------'
+DO $$
+BEGIN
+  INSERT INTO accounting.ledger_entry
+    (entity_id, counterparty_entity_id, accrual_date, category_id, amount,
+     source_kind, source_document_id, posted_by)
+  VALUES ('11111111-1111-1111-1111-111111111111','11111111-1111-1111-1111-111111111111',
+          '2026-09-30','receivable.intercompany',100.00,'document',
+          '22222222-2222-2222-2222-222222222222','engine');
+  RAISE EXCEPTION 'FAIL: self-counterparty accepted';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: self-counterparty rejected';
+END $$;
+
+\echo '--- ASSERT 15: group roll-up does not double-count the recharge ------'
+SELECT CASE
+  WHEN (SELECT COUNT(*) FROM accounting.ledger_entry
+        WHERE category_id LIKE '%.intercompany') = 1
+   AND (SELECT COUNT(*) FROM accounting.v_ledger_consolidated
+        WHERE category_id LIKE '%.intercompany') = 0
+  THEN 'PASS: intercompany legs excluded from the consolidated view'
+  ELSE 'FAIL: consolidated view still carries intercompany legs' END AS result;
