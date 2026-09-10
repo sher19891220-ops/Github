@@ -1,0 +1,581 @@
+{
+  "_README": [
+    "Operator-supplied overhead. NOT measured from the bank and NOT verifiable from it:",
+    "ADP is one payroll rail for at least five companies and mixes driver settlements",
+    "with office salaries, so no query separates an office salary from a driver's pay.",
+    "Every figure sourced here must be labelled operator-supplied wherever it is quoted.",
+    "",
+    "THE ROSTER MIXES PERIODS. People are paid weekly; premises are billed monthly.",
+    "So there is no file-level period -- EVERY line carries its own 'period', and the",
+    "loader refuses to read a line that does not declare one. A single global period",
+    "was the first reading of this data and it was wrong: it priced office, yard and",
+    "shop at 52x instead of 12x, overstating fixed cost by about 6,900 a week.",
+    "",
+    "Weekly is settled for the people by the mechanic lines: 50-55 hours is a week,",
+    "and monthly would put the COO at 19,200 a year. Monthly for premises is the",
+    "operator's explicit confirmation.",
+    "",
+    "The shop block is EXCLUDED from trucking break-even at the operator's instruction",
+    "('we will calculate shop independently'). Recorded so the exclusion is explicit",
+    "and reversible (--include-shop), not silently dropped."
+  ],
+  "currency": "USD",
+  "as_of": "2026-09-02",
+  "source": "operator, supplied in session",
+  "us_staff_1099": [
+    {
+      "name": "Sirojjiddin",
+      "role": "fleet and staff",
+      "amount": 1000,
+      "period": "week"
+    },
+    {
+      "name": "Otkir aka",
+      "role": "fleet",
+      "amount": 2000,
+      "period": "week"
+    },
+    {
+      "name": "Morales Zarate Lisberth",
+      "role": "cleaning",
+      "amount": 1000,
+      "period": "week"
+    },
+    {
+      "name": "Samuel Gonzalez Frank",
+      "role": "fleet and staff",
+      "amount": 1000,
+      "period": "week"
+    },
+    {
+      "name": "Bereket Inc (Aika)",
+      "role": "claims",
+      "amount": 1200,
+      "period": "week"
+    },
+    {
+      "name": "Solid Progress (Marat)",
+      "role": "unspecified",
+      "amount": 2000,
+      "period": "week"
+    },
+    {
+      "name": "Evan",
+      "role": "COO",
+      "amount": 1600,
+      "period": "week"
+    }
+  ],
+  "us_staff_1099_stated_total": 9800,
+  "w2": [
+    {
+      "name": "Sherkhonkhuja Imamkhodjaev",
+      "entity": "ZONE",
+      "amount": 500,
+      "_note": "CONFIRMED 2026-09-02: Sherkhonkhuja Imamkhodjaev draws 500 from EACH entity, so the group total is 1,000/wk, not 500. This closes the open question of whether one salary was shown against both books.",
+      "period": "week"
+    },
+    {
+      "name": "Sherkhonkhuja Imamkhodjaev",
+      "entity": "XTRACK",
+      "amount": 500,
+      "_note": "CONFIRMED 2026-09-02: Sherkhonkhuja Imamkhodjaev draws 500 from EACH entity, so the group total is 1,000/wk, not 500. This closes the open question of whether one salary was shown against both books.",
+      "period": "week"
+    }
+  ],
+  "owners": [
+    {
+      "name": "Sher Trucking",
+      "amount": 2500,
+      "period": "week",
+      "_note": "2,500 each, confirmed by the operator 2026-09-02"
+    },
+    {
+      "name": "Zuhritdinaka",
+      "amount": 2500,
+      "period": "week",
+      "_note": "2,500 each, confirmed by the operator 2026-09-02"
+    }
+  ],
+  "owners_stated_total": 5000,
+  "offshore": {
+    "_note": "MEASURED, not estimated. From the Tashkent payroll register (62 staff, July 2026 and Jan-Jul averages). This replaces the operator's verbal >30,000/wk and resolves the three-way disagreement: July actual is 33,630/wk, which confirms the operator; the Jan-Jul average of 24,048/wk is what the bank was seeing at 25,105/wk; and the weekly P&L's 25,462/wk covers ZONE+XTRACK only.",
+    "source": "payrolljuly2026.pdf / payrollactivestaffaverage.pdf, 62 staff, parsed and reconciled to the register's own 'All staff' totals to the dollar",
+    "headcount": 62,
+    "monthly": {
+      "2026-05": 99563,
+      "2026-06": 125596,
+      "2026-07": 145728,
+      "jan_jul_avg": 104210
+    },
+    "july_2026_split": {
+      "base_salary": 40020,
+      "bonus": 17171,
+      "commission_adjustments": 88537,
+      "total": 145728,
+      "_note": "73% of the Tashkent cost is bonus and commission, NOT base salary. DISPATCH alone is 101,824 a month at 91% variable. So Tashkent is mostly a VARIABLE cost that scales with freight, and treating all of it as fixed overhead -- which this model did until now -- overstates fixed cost and understates cost per mile."
+    },
+    "by_department_july": {
+      "DISPATCH": 101824,
+      "MANAGER": 11562,
+      "FLEET": 9065,
+      "HR": 7330,
+      "ELD": 5799,
+      "ACCOUNTING": 5500,
+      "UPDATE_TEAM": 4648
+    },
+    "fixed_per_week": 9235.384615384615,
+    "variable_per_week_july": 24394.153846153848,
+    "total_per_week_july": 33629.53846153846,
+    "growth": "May 99,563 -> June 125,596 -> July 145,728: +46% in two months, +10,653/wk",
+    "confirmed": true
+  },
+  "open_questions": [
+    "SHOP REVENUE: what does the shop actually bill ZONE, XTRACK and AFG, per week? Without it the shop P&L has a cost side only.",
+    "SHOP PARTS: parts purchases per week. Inferred at ~12,300/wk from the events log; not confirmed.",
+    "MAINTENANCE RATE: trucking's variable model uses 0.220/mile, an estimate. Recorded shop events for 2026 imply 0.102/mile. If the lower figure is right, contribution rises and break-even falls sharply. The shop ledger settles it.",
+    "Does the 4,000/mo shop facility line cover rent alone, or utilities and consumables too? Operator marked it 'for now'.",
+    "Office, yard and shop may share one payee (13,000/mo combined). Confirm against the bank before splitting per company.",
+    "Tashkent commission is 73% of that cost and grew 46% in two months. What is the commission formula, and is it on gross revenue or on margin? A commission on GROSS pays out the same on a loss-making load as a profitable one."
+  ],
+  "us_office_and_yard": {
+    "_note": "operator confirmed 2026-09-02: MONTHLY. Office 4,000/mo, yard 5,000/mo.",
+    "office": 4000,
+    "yard": 5000,
+    "stated_total": 9000,
+    "period": "month"
+  },
+  "weeks_per_month": 4.333333333333333,
+  "entities": {
+    "_note": "The shop is a SEPARATE ENTITY, not a line of trucking overhead (operator, 2026-09-02). It sells maintenance to ZONE, XTRACK and AFG and buys parts and labour; it has its own P&L and its own break-even. Trucking carries the shop's BILLINGS as a variable cost per mile -- never the shop's own cost lines, which would double-count. On consolidation the shop's revenue eliminates against trucking's maintenance expense.",
+    "shop": {
+      "kind": "cost_centre_billing_out",
+      "facility": {
+        "amount": 4000,
+        "period": "month",
+        "provisional": true,
+        "_note": "operator said 'for now' -- may be incomplete"
+      },
+      "labour": [
+        {
+          "name": "Qoshmat Will",
+          "role": "shop manager",
+          "basis": "fixed",
+          "amount": 1800,
+          "period": "week"
+        },
+        {
+          "name": "Jumash aka",
+          "rate": 40,
+          "hours": 54,
+          "basis": "hourly",
+          "amount": 2160,
+          "period": "week",
+          "_note": "operator 2026-09-02: shop works 54 hours; Vlad usually 50"
+        },
+        {
+          "name": "Vlad",
+          "rate": 45,
+          "hours": 50,
+          "basis": "hourly",
+          "amount": 2250,
+          "period": "week",
+          "_note": "operator 2026-09-02: shop works 54 hours; Vlad usually 50, and 45/hr not 35"
+        },
+        {
+          "name": "Ilfat",
+          "rate": 32,
+          "hours": 54,
+          "basis": "hourly",
+          "amount": 1728,
+          "period": "week",
+          "_note": "operator 2026-09-02: shop works 54 hours; Vlad usually 50"
+        },
+        {
+          "name": "Alovuddin",
+          "rate": 23,
+          "hours": 54,
+          "basis": "hourly",
+          "amount": 1242,
+          "period": "week",
+          "_note": "operator 2026-09-02: shop works 54 hours; Vlad usually 50"
+        }
+      ],
+      "parts": {
+        "amount": null,
+        "period": null,
+        "_note": "NOT SUPPLIED. Recorded breakdown events for Jan-Aug 2026 total 763,325 against 335,942 of labour and facility over the same weeks; the ~427,383 gap is the shape of parts, but that is inference from a cost log, not the shop's purchase ledger."
+      },
+      "revenue": {
+        "_note": "NOT SUPPLIED. The Cases log records events by payer -- ZONE 654,239, STL 69,685, driver 39,401 for Jan-Aug 2026 -- but it is a breakdown COST log, and whether those figures are what the shop BILLED or what the event COST is unresolved. Needs the shop ledger."
+      }
+    },
+    "iron_lease": {
+      "kind": "asset_holding_company",
+      "_note": "Operator, 2026-09-03: Iron Lease owns the trucks and leases them to all three operating companies. It charges each company TWO things per truck: a weekly rent, and a per-mile fee for mechanical maintenance. It is responsible for mechanical repairs ONLY -- not body damage, not windshields, not tyres, and not trailers, which fall to the shop. Trucks only.",
+      "measured_from": "Iron lease register, 57 weekly tabs, 862 truck-weeks, 1,808,081 miles",
+      "weekly_rent": {
+        "per_charged_truck_week": 932.82,
+        "common_rates": [
+          735,
+          900,
+          1000,
+          2000,
+          630
+        ],
+        "by_entity_per_truck_week": {
+          "ZONE": 761,
+          "XTRACK": 900,
+          "AFG": 995
+        }
+      },
+      "mileage_charge": {
+        "rate_per_mile": 0.106,
+        "most_common": 0.1,
+        "total": 191716.58,
+        "_note": "this is the truck MECHANICAL maintenance rate, and it replaces the 0.102-0.220 band the model was carrying"
+      },
+      "efs_maintenance": {
+        "total": 297304.06,
+        "per_mile": 0.1644,
+        "_open_question": "exceeds the mileage charge by 105,587 (0.058/mi). If this is Iron Lease's cost it loses 55 cents on every dollar it charges for mechanical work; if the operating companies bear it directly then truck maintenance costs them 0.270/mi and group break-even is 2,136 miles a truck-week rather than 1,700. The register does not say which.",
+        "scope_answer": "296,778.59 of the 297,304.06 -- 99.8% -- lands on the 36 leased trucks, and only 525.47 anywhere else. Iron Lease covers trucks only, so this line is TRUCK mechanical work. It is not trailer spend. What the register cannot say is whether it is over-the-road breakdowns only or includes scheduled service, since it carries no job codes."
+      },
+      "idle": {
+        "truck_weeks_total": 862,
+        "truck_weeks_zero_miles": 328,
+        "rent_charged_on_idle": 308005.4,
+        "_note": "44% of all rent billed was on trucks that moved no miles"
+      },
+      "why_the_bank_cannot_see_this": "Iron Lease is a related party, so these payments leave the operating accounts as intercompany and never reach the lease_rent category. That is the whole of the 46,634/wk gap between the P&Ls' truck rent and the bank's.",
+      "fleet": {
+        "_note": "Operator, 2026-09-03. Iron Lease does not own the whole fleet -- these are the trucks it leases out.",
+        "leased_trucks": [
+          "15862",
+          "15909",
+          "15739",
+          "4772",
+          "15852",
+          "8482",
+          "7605",
+          "6799",
+          "9859",
+          "6867",
+          "2639",
+          "4716",
+          "1489",
+          "1431",
+          "1500",
+          "1722",
+          "1662",
+          "1568",
+          "1645",
+          "4727",
+          "3773",
+          "5269",
+          "4928",
+          "5007",
+          "5026",
+          "4937",
+          "1542",
+          "4713",
+          "1471",
+          "4709",
+          "4549",
+          "4553",
+          "1365",
+          "1596",
+          "3898",
+          "4546"
+        ],
+        "lease_to_own": {
+          "_note": "drivers buying the truck from us; shown as 'rented' in the register until paid off. 4851 is SOLD -- paid in full and no longer in our possession -- and must not be counted as fleet.",
+          "2703": "Nelson Reginald / rented",
+          "8671": "Jean Beaufils / rented",
+          "4851": "SOLD and out of possession -- operator confirms: remove from fleet",
+          "4864": "Accident / rented",
+          "4857": "Aw Abou / rented",
+          "1564": "Felix Yvener / rented",
+          "4718": "Junior Virgile / rented",
+          "1682": "Colas Jasmin / rented",
+          "5413": "Derilus Evanuel / accident 2026-08-22, in repair. Driver moved to truck 7126 meanwhile -- which is why 5413 has no register rows."
+        },
+        "register_coverage": {
+          "distinct_trucks_in_register": 35,
+          "on_leased_list_and_in_register": 27,
+          "on_leased_list_absent_from_register": [
+            "1365",
+            "1596",
+            "3898",
+            "4546",
+            "4549",
+            "4553",
+            "4713",
+            "4928",
+            "5026"
+          ],
+          "lease_to_own_found_in_register": [
+            "1564",
+            "1682",
+            "2703",
+            "4718",
+            "4851",
+            "4857",
+            "4864",
+            "8671"
+          ],
+          "in_register_on_neither_list": 0,
+          "_note": "Nine of the 36 leased trucks carry no register rows in this period -- they are on the list but were never billed. 5413 is absent too. And 4851, which the operator says is SOLD, still appears in the register.",
+          "absent_explained": {
+            "1365, 1596, 3898, 4546": "investor-owned, not Iron Lease assets",
+            "5413": "accident 2026-08-22, in repair, driver on 7126",
+            "4549, 4553, 4713, 4928, 5026": "operator believes still in the yard -- safety checks after purchase, and waiting on titles to register. Not yet on the road, so no rows."
+          }
+        },
+        "investor_owned": {
+          "_note": "Operator, 2026-09-03: 1365, 1596, 3898 and 4546 belong to an outside investor, not to us and not to Iron Lease. We find the driver, run the truck, and take a 10% company charge on gross; we pay driver, fuel, tolls, truck payment and insurance out of the gross, and whatever remains goes to the investor. So these units carry a contractor payout line and must not be counted as our fleet, nor their costs as ours.",
+          "trucks": [
+            "1365",
+            "1596",
+            "3898",
+            "4546"
+          ],
+          "model": {
+            "company_charge_pct": 10,
+            "we_pay": [
+              "driver salary",
+              "fuel",
+              "tolls",
+              "truck payment",
+              "insurance"
+            ],
+            "residual": "contractor payout to the investor"
+          }
+        },
+        "zone_stl_lease_to_purchase": {
+          "_note": "Operator, 2026-09-03: the 80xx/81xx block belongs to ZONE, bought from STL on a lease-to-purchase option. Zone's own trucks -- not Iron Lease assets, not an outside lease. 101,284 of Truck Max spend over the year.",
+          "trucks": [
+            "8033",
+            "8083",
+            "8091",
+            "8092",
+            "8093",
+            "8094",
+            "8130",
+            "8131",
+            "8132",
+            "8133",
+            "8136"
+          ]
+        },
+        "outside_leases": {
+          "_note": "identified from the ZONE truck-and-trailer ledger's source column",
+          "Penske_units": 28,
+          "Ryder_units": 4,
+          "ledger_spend_2026": {
+            "Penske": 65156.93,
+            "Ryder": 17846.28
+          }
+        }
+      }
+    },
+    "truck_max": {
+      "kind": "shop_vendor",
+      "billing_convention": "Operator, 2026-09-03: Truck Max invoices ZONE for almost everything regardless of which company the truck belongs to. The fleet and accounting teams then redistribute the charge to the proper company. So the payer columns in the Truck Max file are a BILLING ADDRESS, not the cost bearer, and this file carries no record of the redistribution.",
+      "consequence": "An earlier reading of this file -- that Zone paid 56,033 of shop work on Iron Lease's own trucks and should have billed it to Iron Lease -- does NOT follow. That figure shows Zone was invoiced, which is the normal convention here. Whether Iron Lease ultimately bore it can only be seen in the redistribution journal, which is not in this corpus.",
+      "spend_year_to_2026_08_20": {
+        "total": 536803.45,
+        "iron_lease_trucks": 192853.1,
+        "trailers": 135432.58,
+        "zone_stl": 101283.89,
+        "still_unidentified": 34783.03,
+        "lease_to_own": 18947.43,
+        "owner_operator": 13851.36,
+        "ryder": 11299.25,
+        "unknown_unit": 7676.4,
+        "zone_other": 5701.78,
+        "sold_4851": 5314.44,
+        "investor": 3783.32,
+        "penske": 3098.02
+      }
+    }
+  },
+  "sheet_vs_actual": {
+    "_note": "The weekly P&L books LESS owner pay than is actually paid. Recorded so any figure taken from the sheet can be corrected rather than quietly trusted.",
+    "owners_booked_in_sheet_per_week": {
+      "ZONE": 2000,
+      "XTRACK": 500,
+      "AFG": 0,
+      "total": 2500
+    },
+    "owners_actually_paid_per_week": {
+      "two_owners": 5000,
+      "w2_same_person_both_entities": 1000,
+      "total": 6000
+    },
+    "understated_per_week": 3500,
+    "allocation": {
+      "_note": "Operator, 2026-09-02: distribute the 5,000 of owner pay across all three companies. Basis is truck share, matching how the rest of group overhead is allocated. The 1,000 of W2 is NOT allocated -- it is 500 drawn specifically from ZONE and 500 from XTRACK, so it stays where it is paid.",
+      "basis": "average trucks over the 26 weekly tabs (ZONE 35.8, XTRACK 40.9); AFG 17.2 from the monthly series, because its weekly export is still a single tab",
+      "per_week": {
+        "ZONE": {
+          "owners": 1907,
+          "w2": 500,
+          "true": 2407,
+          "booked": 2000,
+          "gap": 407
+        },
+        "XTRACK": {
+          "owners": 2178,
+          "w2": 500,
+          "true": 2678,
+          "booked": 500,
+          "gap": 2178
+        },
+        "AFG": {
+          "owners": 915,
+          "w2": 0,
+          "true": 915,
+          "booked": 0,
+          "gap": 915
+        }
+      },
+      "profit_overstated_over_the_period": {
+        "ZONE": 10589,
+        "XTRACK": 58794,
+        "AFG": 23794,
+        "total": 93178
+      }
+    },
+    "checked": "Not hidden in 'Other charges' -- that block is itemised (max truck, trailer insurance and charge, credit card, ADP fee, factoring, Loves, STL, maintenance, returned-truck tolls, freight) and carries no owner line in any week, early layout or late."
+  },
+  "allocation_policy": {
+    "_note": "Operator, 2026-09-03.",
+    "us_office_salaries_and_owners": {
+      "rule": "split EQUALLY three ways",
+      "amount_per_week": 17876.92,
+      "per_company": 5958.97,
+      "why": "These are fixed group costs. Nothing about the US office or the owners' draw scales with a particular company's freight, so no usage basis applies and an equal split is the honest one. The sheets had ZONE carrying 2,025 of owner pay against XTRACK's 375 and AFG's nothing, which reflected nothing."
+    },
+    "tashkent": {
+      "rule": "allocate on each company's share of gross",
+      "amount_per_week": 33629.54,
+      "per_company": {
+        "ZONE": 13438,
+        "XTRACK": 17567,
+        "AFG": 2625
+      },
+      "why": "This one SHOULD differ between companies and does so for a real reason. The payroll register shows 73% of the Tashkent cost is bonus and commission, and dispatch alone -- 70% of the department -- is 91% variable. Commission is paid on the freight each company moves, so a company booking more gross genuinely generates more Tashkent cost. The sheets' own split already tracks gross closely (40.0/52.2/7.8 against gross shares of 36.6/51.8/11.7), so the proportions are kept and only the total is corrected to the payroll actual.",
+      "sheets_understate_by_per_week": 10812
+    },
+    "effect": {
+      "_note": "overhead per truck-week and break-even after redistribution",
+      "per_truck_week": {
+        "ZONE": 606,
+        "XTRACK": 523,
+        "AFG": 505,
+        "GROUP": 548
+      },
+      "per_mile": {
+        "ZONE": 0.214,
+        "XTRACK": 0.199,
+        "AFG": 0.339,
+        "GROUP": 0.219
+      },
+      "breakeven_miles": {
+        "ZONE": 2681,
+        "XTRACK": 1972,
+        "AFG": 1086
+      },
+      "was": {
+        "ZONE": 2545,
+        "XTRACK": 1740,
+        "AFG": 623
+      },
+      "group_result_per_week": 30412,
+      "was_group_result": 47880,
+      "why_lower": "the sheets under-book total overhead by 17,560 a week"
+    }
+  },
+  "mileage_definitions": {
+    "_note": "Operator, 2026-09-03. The two panel mileage figures measure different populations and different mile types; they are not reconcilable to each other.",
+    "total_odometer_mileage": "company drivers only; ALL miles run, loaded and empty",
+    "total_mileage": "all trucks including owner-operator and lease-to-own; LOADED miles only",
+    "which_denominator": {
+      "revenue_per_mile": "total mileage (loaded, all trucks)",
+      "cost_per_mile": "total mileage (loaded, all trucks)",
+      "fuel_economy_and_fuel_cost_per_mile": "odometer miles (company drivers, all miles)",
+      "break_even_miles": "loaded miles per truck-week, since loaded miles earn the revenue"
+    },
+    "deadhead_last_4_weeks": {
+      "ZONE": 0.066,
+      "XTRACK": 0.076,
+      "AFG": 0.104,
+      "_note": "company-driver trucks only: odometer against their own loaded miles"
+    }
+  },
+  "entity_office_costs": {
+    "_note": "Operator, 2026-09-04. Office cost billed to a NAMED entity, so these are NOT split equally the way the shared office and yard are -- each lands on the entity that incurs it.",
+    "period": "month",
+    "lines": [
+      {
+        "entity": "AFG LLC",
+        "amount": 450
+      },
+      {
+        "entity": "Runstar",
+        "amount": 250
+      },
+      {
+        "entity": "Zone LLC",
+        "amount": 250
+      }
+    ],
+    "stated_total_per_month": 950,
+    "per_week": 219.23076923076925,
+    "open_questions": [
+      "Runstar has not appeared anywhere else in this corpus -- not in the bank accounts, the P&Ls, the payroll or the fleet lists. Is it a fourth entity, and does it carry trucks or costs this model should be picking up?",
+      "XTRACK has no line here. Deliberate, or an omission?"
+    ]
+  },
+  "factoring_status_caveat": {
+    "_note": "Operator's team, 2026-09-04. RETRACTS an earlier reading. The Triumph invoice list has NO amount-received column, so a 'Short Paid' flag carries the FULL invoice value regardless of whether the shortfall was 1.75 or the whole load. Treating status-flagged invoice value as money at risk overstates it by orders of magnitude.",
+    "landstar": {
+      "invoices": 41,
+      "invoice_value": 110475,
+      "actual_exposure": 71.75,
+      "explanation": "Landstar deducts a 1.75 fee per load. Standard across carriers, not specific to this group, and payment itself has never been a problem. 41 invoices x 1.75 = 71.75, against the 110,475 of invoice value the Short Paid flag carries."
+    },
+    "stl": {
+      "note": "STL was credit-DENIED by the factor, so Triumph rejects every STL load. That is a credit decision on STL, not a collection failure.",
+      "denied_all_three_companies": 332153,
+      "collected_directly": 80346,
+      "still_open": 251807,
+      "by_company": {
+        "ZONE": {
+          "invoices": 120,
+          "value": 236357,
+          "paid": 41081
+        },
+        "XTRACK": {
+          "invoices": 45,
+          "value": 88366,
+          "paid": 39265
+        },
+        "AFG": {
+          "invoices": 4,
+          "value": 7430,
+          "paid": 0
+        }
+      },
+      "related_party_flag": "STL TRUCKERS LLC and STL GLOBAL LOGISTICS LLC appear here as CUSTOMERS while STL also appears as a supplier -- trucks bought from STL and 'STL charges' in the weekly P&Ls. Related party on both sides of the ledger; the 251,807 open is owed by a party this group also buys from."
+    },
+    "restated": {
+      "reported_at_risk": 416179,
+      "landstar_portion_real": 71.75,
+      "stl_portion": "credit decision, 24% already collected directly",
+      "genuinely_unquantified": 235495,
+      "conclusion": "Only the 235,495 from other customers remains unquantified, and even that is invoice value rather than measured shortfall. The 416,179 figure should not be used."
+    }
+  }
+}
