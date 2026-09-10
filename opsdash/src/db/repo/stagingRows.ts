@@ -5,11 +5,20 @@
  * statement. Every edit lands in `reviewed_payload` and the normalized
  * columns, which is what keeps "what the machine read" and "what the
  * operator decided" separately traceable (DATA-CONTRACT.md §4).
+ *
+ * `edit` is `Partial<StagingRowEdit>` from `@/contract/types` — the shape
+ * the UI workstream defined and now imports directly. It carries no
+ * `reviewedPayload`/`status`/`reviewedBy`: `reviewedPayload` is derived here
+ * from whichever normalized fields changed, `status` moves to
+ * `under_review` automatically (an edit can never reopen a `committed` row,
+ * and can never itself set `committed` — only `POST /commit` does that),
+ * and `reviewedBy` is a side channel the route reads from a header rather
+ * than the body, since the contract type has no slot for it.
  */
-import { isDecimal, isIsoDate, type StagingRow } from '@/contract/types';
+import { isDecimal, isIsoDate, type StagingRow, type StagingRowEdit } from '@/contract/types';
 import { withTransaction } from '@/db/pool';
 import { STAGING_ROW_COLUMNS_SQL, mapDbRowToStagingRowRecord, toWireStagingRow } from './mappers';
-import type { StagingRowEdit, StagingRowRecord, UpdateStagingRowResult } from './types';
+import type { StagingRowRecord, UpdateStagingRowResult } from './types';
 
 type QueryFn = (text: string, params?: readonly unknown[]) => Promise<unknown[]>;
 
@@ -24,7 +33,6 @@ export async function getStagingRowRecord(rowId: string): Promise<StagingRowReco
 }
 
 const VALUE_FIELDS = [
-  'reviewedPayload',
   'entityId',
   'truckId',
   'driverId',
@@ -33,16 +41,18 @@ const VALUE_FIELDS = [
   'amount',
   'quantity',
   'jurisdiction',
+  'reviewNotes',
 ] as const satisfies readonly (keyof StagingRowEdit)[];
 
 function pick<V>(editValue: V | undefined, current: V): V {
   return editValue !== undefined ? editValue : current;
 }
 
-export async function updateStagingRow(rowId: string, edit: StagingRowEdit): Promise<UpdateStagingRowResult> {
-  if (edit.status === 'committed') {
-    return { ok: false, reason: 'invalid', message: 'status cannot be set to "committed" via PATCH; use POST /api/documents/:id/commit.' };
-  }
+export async function updateStagingRow(
+  rowId: string,
+  edit: Partial<StagingRowEdit>,
+  reviewedBy = 'unknown',
+): Promise<UpdateStagingRowResult> {
   if (edit.amount !== undefined && edit.amount !== null && !isDecimal(edit.amount)) {
     return { ok: false, reason: 'invalid', message: `amount "${edit.amount}" is not a valid decimal string.` };
   }
@@ -74,7 +84,6 @@ export async function updateStagingRow(rowId: string, edit: StagingRowEdit): Pro
 
     const next: StagingRow = {
       ...current,
-      reviewedPayload: pick(edit.reviewedPayload, current.reviewedPayload),
       entityId: pick(edit.entityId, current.entityId),
       truckId: pick(edit.truckId, current.truckId),
       driverId: pick(edit.driverId, current.driverId),
@@ -84,26 +93,16 @@ export async function updateStagingRow(rowId: string, edit: StagingRowEdit): Pro
       quantity: pick(edit.quantity, current.quantity),
       jurisdiction: pick(edit.jurisdiction, current.jurisdiction),
       reviewNotes: pick(edit.reviewNotes, current.reviewNotes),
-      status: edit.status ?? (touchesValue && current.status !== 'committed' ? 'under_review' : current.status),
+      status: touchesValue && current.status !== 'committed' ? 'under_review' : current.status,
     };
 
-    // If the caller didn't hand us a reviewed_payload directly but did touch
-    // a normalized field, snapshot the post-edit normalized view into
-    // reviewed_payload — that is the operator's edit, kept distinct from the
-    // untouched parsed_payload.
-    let reviewedPayloadToWrite = next.reviewedPayload;
-    if (edit.reviewedPayload === undefined && VALUE_FIELDS.some((f) => f !== 'reviewedPayload' && edit[f] !== undefined)) {
-      reviewedPayloadToWrite = {
-        ...(current.reviewedPayload ?? {}),
-        entityId: next.entityId,
-        truckId: next.truckId,
-        driverId: next.driverId,
-        accrualDate: next.accrualDate,
-        categoryId: next.categoryId,
-        amount: next.amount,
-        quantity: next.quantity,
-        jurisdiction: next.jurisdiction,
-      };
+    // reviewed_payload is never sent by the caller (the contract's
+    // StagingRowEdit has no field for it) — it is always derived here, a
+    // sparse overlay of exactly the fields this edit touched, so it answers
+    // "what did a human actually change" distinctly from parsedPayload.
+    let reviewedPayloadToWrite = current.reviewedPayload;
+    if (touchesValue) {
+      reviewedPayloadToWrite = { ...(current.reviewedPayload ?? {}), ...edit };
     }
 
     await q(
@@ -126,7 +125,7 @@ export async function updateStagingRow(rowId: string, edit: StagingRowEdit): Pro
         next.jurisdiction,
         next.status,
         next.reviewNotes,
-        edit.reviewedBy ?? 'unknown',
+        reviewedBy,
       ],
     );
 

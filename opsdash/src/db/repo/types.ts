@@ -6,7 +6,7 @@
  * §6) — `toWireStagingRow` strips these fields before a `StagingRow` ever
  * reaches an HTTP response, so the API surface matches the contract exactly.
  */
-import type { DocType, StagingRow, StagingStatus } from '@/contract/types';
+import type { DocType, StagingRow } from '@/contract/types';
 
 /** `charged_to` / `unit_type` as the DB enums spell them. */
 export type ChargedTo = 'company' | 'driver' | 'split' | 'unknown';
@@ -27,7 +27,14 @@ export interface StagingRowRecord extends StagingRow {
   committedEntryId: string | null;
 }
 
-export interface DocumentSummary {
+/**
+ * The exact 5-field shape DATA-CONTRACT.md §6 specifies for
+ * `GET /api/documents/:id` (singular). Deliberately distinct from
+ * `@/contract/types`' richer `DocumentSummary` (9 fields, added later for the
+ * list screen — see documents.ts's `listDocumentSummaries`): the fixed
+ * singular-GET shape is not renegotiated just because a sibling type grew.
+ */
+export interface DocumentStatusSummary {
   documentId: string;
   docType: DocType | string;
   parseStatus: 'pending' | 'parsed' | 'failed';
@@ -39,30 +46,6 @@ export interface CommitResult {
   committed: number;
   rejected: number;
   entryIds: string[];
-}
-
-/**
- * The PATCH body shape. DATA-CONTRACT.md §6 references `Partial<StagingRowEdit>`
- * but never defines it — this is the persistence layer's best-effort
- * reconstruction (the editable subset of `StagingRow`, plus `reviewedBy` for
- * the audit columns the wire type never exposes). Recommend the contract
- * owner adopt this formally; see final report.
- */
-export interface StagingRowEdit {
-  reviewedPayload?: Record<string, unknown> | null;
-  entityId?: string | null;
-  truckId?: string | null;
-  driverId?: string | null;
-  accrualDate?: string | null;
-  categoryId?: string | null;
-  amount?: string | null;
-  quantity?: string | null;
-  jurisdiction?: string | null;
-  status?: StagingStatus;
-  reviewNotes?: string | null;
-  /** Who made the edit. Tracked in `reviewed_by`/`reviewed_at`; never echoed
-   *  back on the wire because `StagingRow` has no slot for it. */
-  reviewedBy?: string;
 }
 
 export type UpdateStagingRowResult =

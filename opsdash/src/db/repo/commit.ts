@@ -95,7 +95,7 @@ export async function commitDocument(documentId: string, postedBy: string, opts:
              'unassigned'
            ),
            $5::date, $6, $7, $8, $9, 'document', $10, $11,
-           COALESCE($12, 'company'), COALESCE($13, 'unknown'), $14, $15
+           COALESCE($12::accounting.charged_to, 'company'), COALESCE($13::accounting.unit_type, 'unknown'), $14, $15
          )
          ON CONFLICT (staging_row_id) WHERE staging_row_id IS NOT NULL DO NOTHING
          RETURNING entry_id`,

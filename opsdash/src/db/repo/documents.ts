@@ -10,13 +10,13 @@
  * parseByDocType.ts).
  */
 import { createHash, randomUUID } from 'node:crypto';
-import type { StagingRow } from '@/contract/types';
+import type { DocumentSummary as ContractDocumentSummary, StagingRow } from '@/contract/types';
 import { query, withTransaction } from '@/db/pool';
 import { putBlob } from './blobStore';
 import { insertStagingRows } from './insertStagingRows';
 import { LEDGER_ENTRY_COLUMNS_SQL, STAGING_ROW_COLUMNS_SQL, mapDbRowToStagingRowRecord, toWireStagingRow } from './mappers';
 import { isTextDecodable, parseByDocType } from './parseByDocType';
-import type { DocumentSummary } from './types';
+import type { DocumentStatusSummary } from './types';
 
 export interface CreateDocumentInput {
   docType: string;
@@ -136,7 +136,8 @@ export async function setDocumentParseResult(
   );
 }
 
-export async function getDocumentSummary(documentId: string): Promise<DocumentSummary | null> {
+/** The exact DATA-CONTRACT.md §6 shape for `GET /api/documents/:id`. */
+export async function getDocumentSummary(documentId: string): Promise<DocumentStatusSummary | null> {
   const rows = await query<{
     document_id: string;
     doc_type: string;
@@ -157,36 +158,46 @@ export async function getDocumentSummary(documentId: string): Promise<DocumentSu
   return {
     documentId: r.document_id,
     docType: r.doc_type,
-    parseStatus: r.parse_status as DocumentSummary['parseStatus'],
+    parseStatus: r.parse_status as DocumentStatusSummary['parseStatus'],
     parseError: r.parse_error,
     rowCount: r.row_count,
   };
 }
 
-/** Not wired to a route (not in DATA-CONTRACT.md §6's fixed list), but part
- *  of the "list documents" repo requirement — available for a future
- *  document-inbox screen without needing a schema or contract change. */
-export async function listDocuments(): Promise<DocumentSummary[]> {
+/** `GET /api/documents` (plural) — the richer shape `@/contract/types`'
+ *  `DocumentSummary` defines for the document-list screen. `duplicateOf` is
+ *  always null here: that field only ever has meaning on the response to
+ *  the upload call itself, never on an already-existing document. */
+export async function listDocumentSummaries(): Promise<ContractDocumentSummary[]> {
   const rows = await query<{
     document_id: string;
     doc_type: string;
+    file_name: string;
     parse_status: string;
     parse_error: string | null;
     row_count: number;
+    uploaded_at: string;
+    sha256: string;
   }>(
-    `SELECT sd.document_id, sd.doc_type, sd.parse_status, sd.parse_error,
-            COUNT(sr.staging_row_id)::int AS row_count
+    `SELECT sd.document_id, sd.doc_type, sd.file_name, sd.parse_status, sd.parse_error,
+            COUNT(sr.staging_row_id)::int AS row_count,
+            to_char(sd.uploaded_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') AS uploaded_at,
+            sd.sha256
      FROM accounting.source_document sd
      LEFT JOIN accounting.staging_row sr ON sr.document_id = sd.document_id
-     GROUP BY sd.document_id, sd.doc_type, sd.parse_status, sd.parse_error, sd.uploaded_at
+     GROUP BY sd.document_id, sd.doc_type, sd.file_name, sd.parse_status, sd.parse_error, sd.uploaded_at, sd.sha256
      ORDER BY sd.uploaded_at DESC`,
   );
   return rows.map((r) => ({
     documentId: r.document_id,
-    docType: r.doc_type,
-    parseStatus: r.parse_status as DocumentSummary['parseStatus'],
+    docType: r.doc_type as ContractDocumentSummary['docType'],
+    fileName: r.file_name,
+    parseStatus: r.parse_status as ContractDocumentSummary['parseStatus'],
     parseError: r.parse_error,
     rowCount: r.row_count,
+    uploadedAt: r.uploaded_at,
+    sha256: r.sha256,
+    duplicateOf: null,
   }));
 }
 

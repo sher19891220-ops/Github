@@ -1,7 +1,9 @@
 /**
  * POST /api/documents — DATA-CONTRACT.md §6.
+ * GET  /api/documents  — added per the coordinator's relay of the UI
+ *   workstream's gap report: `-> { documents: DocumentSummary[] }`.
  *
- * multipart/form-data with fields:
+ * POST: multipart/form-data with fields:
  *   file        (required) the dropped PDF/XLSX/CSV/text
  *   docType     (required) one of the accounting.doc_type values
  *   uploadedBy  (optional) defaults to "unknown"
@@ -12,7 +14,12 @@
  * see src/db/repo/documents.ts.
  */
 import { NextResponse } from 'next/server';
-import { createDocument } from '@/db/repo/documents';
+import { createDocument, listDocumentSummaries } from '@/db/repo/documents';
+
+export async function GET(): Promise<Response> {
+  const documents = await listDocumentSummaries();
+  return NextResponse.json({ documents });
+}
 
 export async function POST(request: Request): Promise<Response> {
   let form: FormData;
