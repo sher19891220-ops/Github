@@ -149,6 +149,9 @@ GET    /api/documents/:id/rows        -> { rows: StagingRow[] }
 PATCH  /api/staging/:rowId            body: Partial<StagingRowEdit> -> { row: StagingRow }
 POST   /api/documents/:id/commit      -> { committed: n, rejected: n, entryIds: string[] }
 GET    /api/ledger                    ?entity&truck&driver&from&to&category -> { entries: LedgerEntry[] }
+GET    /api/documents                 -> { documents: DocumentSummary[] }
+GET    /api/reference                 -> ReferenceData   (picker option lists)
+GET    /api/registration/overhead     -> { rates: TruckOverheadRate[] }
 GET    /api/pnl                       ?grain&from&to&entity&truck&driver&driverClass -> { lines: PnlLine[] }
 ```
 
@@ -182,6 +185,19 @@ type PnlLine = {
   entryCount: number
 }
 ```
+
+The last three were added after the review screens were built. The first pass
+specified what the ingestion *flow* needed and missed what a usable *screen*
+needs around it: listing documents, the option lists every picker requires, and
+a route serving the overhead rates the engine already computes. The UI
+workstream flagged them rather than inventing local shapes, which is the
+behaviour the contract-first rule exists to produce.
+
+`StagingRowEdit`, `DocumentSummary`, `ParseStatus`, `NamedOption`,
+`CategoryOption` and `ReferenceData` are defined in `src/contract/types.ts`.
+`CategoryOption` carries `categoryGroup` and `sign` because a picker needs
+both — without them the UI infers direction from a category's name, which is
+how a cost eventually renders as revenue.
 
 `POST /commit` is all-or-nothing per document and idempotent: the
 `ux_ledger_staging_once` index means a repeated commit cannot double-post

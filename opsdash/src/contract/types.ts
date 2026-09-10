@@ -102,3 +102,76 @@ export function isIsoDate(value: unknown): value is IsoDate {
   const parsed = new Date(`${value}T00:00:00Z`);
   return !Number.isNaN(parsed.getTime()) && parsed.toISOString().startsWith(value);
 }
+
+/* ------------------------------------------------------------------------
+ * Additions closing gaps the review screens hit.
+ *
+ * The first pass at §6 specified the endpoints the ingestion flow needed and
+ * missed the ones a usable screen needs around it: listing documents, the
+ * shape of an edit, the option lists every picker requires, and a way to
+ * serve the overhead rates the engine already computes. Each was flagged by
+ * the UI workstream rather than invented locally, and is promoted here so
+ * both sides build to one definition instead of two that drift.
+ * --------------------------------------------------------------------- */
+
+/** Mirrors `source_document.parse_status`'s CHECK constraint. */
+export type ParseStatus = 'pending' | 'parsed' | 'failed';
+
+export interface DocumentSummary {
+  documentId: string;
+  docType: DocType;
+  fileName: string;
+  parseStatus: ParseStatus;
+  parseError: string | null;
+  rowCount: number;
+  uploadedAt: string;
+  sha256: string;
+  /** Set when an upload was a byte-identical repeat: reported, not re-ingested. */
+  duplicateOf: string | null;
+}
+
+/**
+ * Every field a human may change on a staging row before commit.
+ *
+ * Deliberately excludes `parsedPayload`. What the parser read is immutable;
+ * an edit is expressed as `reviewedPayload` plus these normalized columns,
+ * so the difference between the two remains visible afterwards.
+ */
+export interface StagingRowEdit {
+  entityId: string | null;
+  truckId: string | null;
+  driverId: string | null;
+  accrualDate: IsoDate | null;
+  categoryId: string | null;
+  amount: Decimal | null;
+  quantity: Decimal | null;
+  jurisdiction: string | null;
+  reviewNotes: string | null;
+}
+
+export interface NamedOption {
+  id: string;
+  label: string;
+  /** Inactive options still render so historical rows stay explicable, but
+   *  must not be offered for new selections. */
+  isActive: boolean;
+}
+
+/**
+ * Categories carry their group and sign because the screen needs both: the
+ * group drives which P&L line a row lands on, and the sign says whether a
+ * positive amount is money in or money out. Without them the UI would have
+ * to infer direction from the category name, which is how a cost eventually
+ * gets rendered as revenue.
+ */
+export interface CategoryOption extends NamedOption {
+  categoryGroup: CategoryGroup;
+  sign: 1 | -1;
+}
+
+export interface ReferenceData {
+  entities: NamedOption[];
+  trucks: NamedOption[];
+  drivers: NamedOption[];
+  categories: CategoryOption[];
+}
