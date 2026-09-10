@@ -31,6 +31,8 @@ Github/
 │   └── config.py       Bot env vars
 │
 ├── install_mac_services.sh   One-shot launchd installer for both services
+├── setup_claude_mcp.sh      Wire Axel MCP server into Claude Code globally
+├── setup_skills.sh          Install Claude Code skills + plugins (run once on Mac mini)
 └── CLAUDE.md           This file
 ```
 
@@ -151,6 +153,41 @@ AXEL_URL=http://192.168.1.x:8000   # or Tailscale hostname
   from `httpx/_models.py` — httpx ASCII-encodes header values. Check the key before
   chasing UTF-8.
 - `start.sh` is an older manual start script; launchd uses `start_backend.sh`.
+
+## Claude Code Skills + Plugins
+
+Run `bash ~/Github/setup_skills.sh` once on any machine to install:
+
+| Tool | What it does | Use for |
+|------|-------------|---------|
+| **archify** skill | Architecture + flow diagrams → interactive HTML | TMS system design, Axel architecture, API docs, client decks |
+| **gpt-image-2-style-library** skill | 530+ image prompt templates | Marketing, social media, product shots, ads |
+| **wiki / wiki-ingest / wiki-query / autoresearch** skills | Obsidian second brain | TMS research, driver ops notes, freight data, meeting notes |
+| **commit-commands** plugin | Streamlined git workflow | All projects |
+| **pr-review-toolkit** plugin | Comprehensive PR review agents | All projects |
+| **feature-dev** plugin | Feature development workflow | All projects |
+| **hookify** plugin | Create hooks from conversation patterns | All projects |
+| **github** plugin | GitHub integration | All projects |
+| **linear** plugin | Linear task management | TMS, freight, driver ops |
+
+### Wiki vault setup (first time)
+
+After installing skills, initialize a vault — Claude handles the rest:
+```
+/wiki   → follow prompts to create vault at ~/Documents/AxelWiki
+```
+
+### Image prompts (marketing / social)
+
+```
+/gpt-image-2-style-library   → browse templates for product shots, editorial, ads
+```
+
+### Architecture diagrams
+
+```
+/archify   → describe any system in plain text → interactive HTML diagram
+```
 
 ## Branch
 
