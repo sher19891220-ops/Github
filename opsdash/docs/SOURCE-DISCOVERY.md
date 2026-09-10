@@ -357,6 +357,41 @@ clean entity signal; neither is currently shared.
 No Quick Manage file or export exists in Drive. It is an external system, and
 data entry into it is reportedly under way. Access route unknown.
 
+### The company list — transfer remarks found, and measured
+
+The per-company workbook (driver list and unit list per tab, inactive rows
+listed below the active ones with remarks) **does** carry the transfer notes.
+Measured across it, excluding safety-violation prose that merely contains the
+word "transfer":
+
+| | Count | Share |
+| --- | --- | --- |
+| Usable transfer remarks | 46 | — |
+| Name a destination entity | 23 | 50% |
+| **Also carry a date** | **1** | **2%** |
+| No destination named at all | 23 | 50% |
+
+Destinations seen: Zone 13, Xtrack 9, AFG 1. Spelling varies across
+`transfer`, `transfered`, `transferred`, and one remark is a future intention
+(`transfer afg next week`) rather than a completed move.
+
+**Verdict: the remarks prove transfers happen and roughly where, but cannot
+reconstruct effective-dated history.** Ledger attribution needs the date — a
+truck that moved to Xtrack in August must not have its July revenue
+reattributed. With 2% dated, this source alone cannot do that, which is why a
+purpose-built transfer log is the right answer rather than better parsing.
+
+### PII warning on the company list
+
+That workbook contains **Social Security numbers, driver licence numbers, dates
+of birth and home addresses**. It must never reach this repository, public or
+private, and it should not be pasted into tickets, prompts or exports.
+
+Extraction from it is restricted to unit numbers and remark text, with SSN,
+DOB, licence and VIN patterns stripped before anything is written out. Any
+future ingestion of driver data must take the qualification fields it needs and
+leave the identity documents where they are.
+
 ### Corrected header
 
 The expenses cost table header is fuller than §5 first recorded. Both variants
