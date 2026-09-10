@@ -36,8 +36,9 @@ function splitCsvLine(line: string): string[] {
 }
 
 /** `as_of` is `MM.DD.YY` (real data: `08.30.26`) or blank (operator-stated
- *  assignments with no dated snapshot, e.g. sher_imam/iron_lease/UNRESOLVED
- *  rows). Blank means null, never a guessed date. */
+ *  assignments with no dated snapshot, e.g. a `UNRESOLVED` row or one
+ *  sourced from a one-off operator statement rather than a settlement-sheet
+ *  snapshot). Blank means null, never a guessed date. */
 function parseAsOf(raw: string, lineNumber: number): IsoDate | null {
   const trimmed = raw.trim();
   if (trimmed === '') return null;

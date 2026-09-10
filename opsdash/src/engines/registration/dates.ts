@@ -36,3 +36,35 @@ export function isMonthClosed(periodMonth: IsoDate, asOf: IsoDate): boolean {
   // ISO 'YYYY-MM-DD' strings compare lexicographically exactly like dates.
   return asOf >= nextMonth;
 }
+
+/** Last calendar day of a period-month, as an ISO date, e.g. `2027-08-01` ->
+ *  `2027-08-31`. Computed via "day 0 of the next month", which JS's `Date`
+ *  resolves correctly for every month including February in a leap year —
+ *  no hardcoded 28/30/31 table to get wrong. */
+export function lastDayOfPeriodMonth(periodMonth: IsoDate): IsoDate {
+  const [y, m] = periodMonth.split('-').map(Number) as [number, number];
+  const d = new Date(Date.UTC(y, m, 0)); // day 0 of month `m` (1-indexed) = last day of month `m`
+  const yyyy = String(d.getUTCFullYear()).padStart(4, '0');
+  const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const dd = String(d.getUTCDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+/**
+ * Inclusive day count between two ISO dates, computed in UTC so no local
+ * timezone can shift either date across a midnight boundary. This is what
+ * lets a per-truck daily rate be computed from the real coverage window
+ * (e.g. 365 days for 2026-09-01..2027-08-31) instead of assuming a fixed
+ * 365 and quietly drifting wrong on the next leap-year renewal.
+ */
+export function daysBetweenInclusive(startIso: IsoDate, endIso: IsoDate): number {
+  const [sy, sm, sd] = startIso.split('-').map(Number) as [number, number, number];
+  const [ey, em, ed] = endIso.split('-').map(Number) as [number, number, number];
+  const startUtc = Date.UTC(sy, sm - 1, sd);
+  const endUtc = Date.UTC(ey, em - 1, ed);
+  const diffDays = Math.round((endUtc - startUtc) / 86_400_000);
+  if (diffDays < 0) {
+    throw new Error(`Coverage end ${endIso} is before coverage start ${startIso}`);
+  }
+  return diffDays + 1;
+}

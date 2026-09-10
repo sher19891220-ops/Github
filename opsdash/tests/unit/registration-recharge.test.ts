@@ -6,12 +6,17 @@ import {
   parseIrpVehicleStatusReport,
   parseUnitOperatorCsv,
   parseUnitStatusCsv,
+  scaledFromAnalysisRate,
 } from '@/engines/registration';
-import type { IrpFeeLine, RegistrationPostingInput, RegistrationPostingResult } from '@/engines/registration';
+import type { IrpFeeLine, RegistrationPostingInput, RegistrationPostingResult, UnitOperatorRow } from '@/engines/registration';
 import { centsFromDecimal, decimalFromCents, sumCents } from '@/engines/registration/money';
 
 // Real, live documents — never synthetic. See CLAUDE.md §2 and
-// docs/SOURCE-DISCOVERY.md §11d/§11e.
+// docs/SOURCE-DISCOVERY.md §11d/§11e. The operator crosswalk was corrected
+// by the operator: Iron Lease (asset-holding, no IRP account) and
+// owner-held units are never an *operator* — title and operation are
+// different facts, and every unit Iron Lease held title to is operated by
+// Zone. Only zone/xtrack/afg appear as `operating_entity` now.
 const ROSTER_PATH = '/home/user/opsdash-fixtures/irp_invoice_units.txt';
 const STATUS_PATH = '/home/user/opsdash-fixtures/irp_unit_status.csv';
 const OPERATOR_PATH = '/home/user/opsdash-fixtures/irp_unit_operator.csv';
@@ -29,15 +34,11 @@ const REAL_HVUT_RATE = '550.00';
 const ZONE_ENTITY_ID = 'entity-zone-oh';
 const XTRACK_ENTITY_ID = 'entity-xtrack';
 const AFG_ENTITY_ID = 'entity-afg';
-const SHER_IMAM_ENTITY_ID = 'entity-sher-imam';
-const IRON_LEASE_ENTITY_ID = 'entity-iron-lease';
 
 const OPERATOR_ENTITY_BY_KEY: Record<string, string> = {
   zone: ZONE_ENTITY_ID,
   xtrack: XTRACK_ENTITY_ID,
   afg: AFG_ENTITY_ID,
-  sher_imam: SHER_IMAM_ENTITY_ID,
-  iron_lease: IRON_LEASE_ENTITY_ID,
 };
 
 describe.skipIf(!haveFixtures)('registration engine — intercompany recharge', () => {
@@ -71,15 +72,19 @@ describe.skipIf(!haveFixtures)('registration engine — intercompany recharge', 
   }
 
   describe('parseUnitOperatorCsv', () => {
-    it('parses all 42 rows by header, matching the documented operator counts', () => {
+    it('parses all 42 rows by header, matching the corrected operator counts', () => {
       expect(operatorAssignments).toHaveLength(42);
       const counts: Record<string, number> = {};
       for (const r of operatorAssignments) counts[r.operatingEntityKey] = (counts[r.operatingEntityKey] ?? 0) + 1;
-      expect(counts).toEqual({ zone: 12, xtrack: 16, afg: 6, sher_imam: 3, iron_lease: 2, UNRESOLVED: 3 });
+      // Iron Lease held title to two of these units (4864, 6379), but Zone
+      // operates both — title and operation are different facts, and this
+      // crosswalk records operation only. Neither Iron Lease nor an
+      // owner-held unit appears here at all.
+      expect(counts).toEqual({ zone: 14, xtrack: 16, afg: 6, UNRESOLVED: 6 });
     });
 
     it('parses a dated snapshot as an ISO date and a blank as null, never inventing one', () => {
-      const dated = operatorAssignments.find((r) => r.source.includes('settlement sheet'))!;
+      const dated = operatorAssignments.find((r) => r.source.includes('settlement sheet') && r.asOf !== null)!;
       expect(dated.asOf).toMatch(/^\d{4}-\d{2}-\d{2}$/);
       const undated = operatorAssignments.find((r) => r.operatingEntityKey === 'UNRESOLVED')!;
       expect(undated.asOf).toBeNull();
@@ -106,11 +111,11 @@ describe.skipIf(!haveFixtures)('registration engine — intercompany recharge', 
     });
 
     it('throws rather than inventing an entity id for an unmapped operator key', () => {
-      const input = makeInput({ operatorEntityByKey: { zone: ZONE_ENTITY_ID } }); // xtrack/afg/... missing
+      const input = makeInput({ operatorEntityByKey: { zone: ZONE_ENTITY_ID } }); // xtrack/afg missing
       expect(() => buildRegistrationPosting(input)).toThrow(/no resolved entity id/i);
     });
 
-    it('readiness 1 (regression): the 25 pre-existing reconciliation figures are untouched by adding a crosswalk', () => {
+    it('readiness 1 (regression): the pre-existing reconciliation figures are untouched by adding a crosswalk', () => {
       const result = buildRegistrationPosting(makeInput({ asOf: '2027-01-01' }));
       expect(result.reconciliation.irpAllocatedTotal).toBe('78959.21');
       expect(result.reconciliation.hvutTotal).toBe('23100.00');
@@ -172,15 +177,14 @@ describe.skipIf(!haveFixtures)('registration engine — intercompany recharge', 
       const result = buildRegistrationPosting(makeInput({ asOf: '2027-01-01' }));
       const receivableTotalCents = sumCents(result.intercompanyEntries.map((e) => centsFromDecimal(e.amount)));
       expect(decimalFromCents(receivableTotalCents)).toBe(result.reconciliation.intercompanyReceivableTotal);
-      expect(result.reconciliation.intercompanyReceivableTotal).toBe('59009.50');
+      expect(result.reconciliation.intercompanyReceivableTotal).toBe('49609.60');
 
       // Cross-check against the per-operator cost buckets: the receivable
-      // total must equal every non-zone, non-unresolved bucket summed.
+      // total must equal every non-zone, non-unresolved bucket summed —
+      // just xtrack and afg now that a non-carrier can never hold a bucket.
       const rechargedBucketCents =
         centsFromDecimal(result.reconciliation.costByOperatorKey.xtrack) +
-        centsFromDecimal(result.reconciliation.costByOperatorKey.afg) +
-        centsFromDecimal(result.reconciliation.costByOperatorKey.sher_imam) +
-        centsFromDecimal(result.reconciliation.costByOperatorKey.iron_lease);
+        centsFromDecimal(result.reconciliation.costByOperatorKey.afg);
       expect(decimalFromCents(rechargedBucketCents)).toBe(result.reconciliation.intercompanyReceivableTotal);
     });
 
@@ -207,12 +211,10 @@ describe.skipIf(!haveFixtures)('registration engine — intercompany recharge', 
       const result = buildRegistrationPosting(makeInput({ asOf: '2027-01-01' }));
       const c = result.reconciliation.costByOperatorKey;
       expect(c).toEqual({
-        zone: '35759.76',
+        zone: '37869.72',
         xtrack: '35579.72',
         afg: '14029.88',
-        sher_imam: '5639.94',
-        iron_lease: '3759.96',
-        unresolved: '7289.95',
+        unresolved: '14579.89',
       });
       const grandTotalCents = Object.values(c).reduce((acc, v) => acc + centsFromDecimal(v), 0);
       expect(decimalFromCents(grandTotalCents)).toBe('102059.21');
@@ -247,15 +249,23 @@ describe.skipIf(!haveFixtures)('registration engine — intercompany recharge', 
       for (const e of result.intercompanyEntries) expect(isDecimal(e.amount)).toBe(true);
       for (const v of Object.values(result.reconciliation.costByOperatorKey)) expect(isDecimal(v)).toBe(true);
       expect(isDecimal(result.reconciliation.intercompanyReceivableTotal)).toBe(true);
+      for (const r of result.overheadRates) {
+        expect(isDecimal(r.annualTotal)).toBe(true);
+        expect(isDecimal(r.monthlyLedger)).toBe(true);
+        // dailyRate/weeklyRate are intentionally NOT `Decimal` (they carry
+        // six decimal places, more precision than the ledger's `isDecimal`
+        // wire check allows) — but they are still decimal strings, never a
+        // float, checked exactly via `scaledFromAnalysisRate` elsewhere.
+        expect(typeof r.dailyRate).toBe('string');
+        expect(typeof r.weeklyRate).toBe('string');
+      }
     });
 
-    it('flags sher_imam, iron_lease and UNRESOLVED units as needsConfirmation, and no others', () => {
+    it('flags only UNRESOLVED units as needsConfirmation, and no others', () => {
       const result = buildRegistrationPosting(makeInput({ asOf: '2027-01-01' }));
       const flagged = result.reconciliation.needsConfirmationUnits;
-      expect(flagged).toHaveLength(8); // 3 sher_imam + 2 iron_lease + 3 UNRESOLVED
-      const byKey: Record<string, number> = {};
-      for (const u of flagged) byKey[u.operatorKey] = (byKey[u.operatorKey] ?? 0) + 1;
-      expect(byKey).toEqual({ sher_imam: 3, iron_lease: 2, UNRESOLVED: 3 });
+      expect(flagged).toHaveLength(6);
+      expect(flagged.every((u) => u.operatorKey === 'UNRESOLVED')).toBe(true);
 
       const flaggedUnitNumbers = new Set(flagged.map((u) => u.unitNumber));
       for (const row of [...result.scheduleRows, ...result.postedEntries, ...result.intercompanyEntries]) {
@@ -266,23 +276,12 @@ describe.skipIf(!haveFixtures)('registration engine — intercompany recharge', 
     it('UNRESOLVED units stay with Zone: no recharge, no receivable, but the money is still booked in full', () => {
       const result = buildRegistrationPosting(makeInput({ asOf: '2027-01-01' }));
       const unresolvedUnits = operatorAssignments.filter((r) => r.operatingEntityKey === 'UNRESOLVED').map((r) => r.irpUnit);
-      expect(unresolvedUnits).toHaveLength(3);
+      expect(unresolvedUnits).toHaveLength(6);
       for (const unitNumber of unresolvedUnits) {
         const rows = result.scheduleRows.filter((r) => r.unitNumber === unitNumber);
         expect(rows.every((r) => r.entityId === ZONE_ENTITY_ID)).toBe(true);
         expect(rows.every((r) => r.paidByEntityId === null)).toBe(true);
         expect(result.intercompanyEntries.some((e) => e.unitNumber === unitNumber)).toBe(false);
-      }
-    });
-
-    it('sher_imam and iron_lease units ARE recharged like ordinary operators, just flagged', () => {
-      const result = buildRegistrationPosting(makeInput({ asOf: '2027-01-01' }));
-      const sherImamUnits = operatorAssignments.filter((r) => r.operatingEntityKey === 'sher_imam').map((r) => r.irpUnit);
-      for (const unitNumber of sherImamUnits) {
-        const irpRows = result.scheduleRows.filter((r) => r.unitNumber === unitNumber && r.categoryId === 'permit.irp');
-        expect(irpRows.every((r) => r.entityId === SHER_IMAM_ENTITY_ID)).toBe(true);
-        expect(irpRows.every((r) => r.paidByEntityId === ZONE_ENTITY_ID)).toBe(true);
-        expect(result.intercompanyEntries.some((e) => e.key === `receivable:permit.irp:${unitNumber}`)).toBe(true);
       }
     });
 
@@ -302,11 +301,29 @@ describe.skipIf(!haveFixtures)('registration engine — intercompany recharge', 
     it('zone-operated units never appear in intercompanyEntries', () => {
       const result = buildRegistrationPosting(makeInput({ asOf: '2027-01-01' }));
       const zoneUnits = operatorAssignments.filter((r) => r.operatingEntityKey === 'zone').map((r) => r.irpUnit);
-      expect(zoneUnits).toHaveLength(12);
+      expect(zoneUnits).toHaveLength(14);
       for (const unitNumber of zoneUnits) {
         expect(result.intercompanyEntries.some((e) => e.unitNumber === unitNumber)).toBe(false);
         const rows = result.scheduleRows.filter((r) => r.unitNumber === unitNumber);
         expect(rows.every((r) => r.entityId === ZONE_ENTITY_ID && r.paidByEntityId === null)).toBe(true);
+      }
+    });
+
+    it('title held by Iron Lease does not change the recharge: units 4864 and 6379 are ordinary zone-operated units', () => {
+      // Per the operator's decision: title (who owns) and operation (who
+      // runs, and earns from, the truck) are different facts. These two
+      // units' `source` column notes Iron Lease holds title, but
+      // `operating_entity` correctly says 'zone' — so they must post and
+      // recharge exactly like any other zone-operated unit, with no special
+      // flag and no receivable.
+      const result = buildRegistrationPosting(makeInput({ asOf: '2027-01-01' }));
+      const titleHeldUnits = operatorAssignments.filter((r) => r.source.includes('title Iron Lease')).map((r) => r.irpUnit);
+      expect(titleHeldUnits).toEqual(['4864', '6379']);
+      for (const unitNumber of titleHeldUnits) {
+        const rows = result.scheduleRows.filter((r) => r.unitNumber === unitNumber);
+        expect(rows.every((r) => r.entityId === ZONE_ENTITY_ID && r.paidByEntityId === null)).toBe(true);
+        expect(rows.every((r) => r.needsConfirmation === false)).toBe(true);
+        expect(result.intercompanyEntries.some((e) => e.unitNumber === unitNumber)).toBe(false);
       }
     });
 
@@ -316,6 +333,154 @@ describe.skipIf(!haveFixtures)('registration engine — intercompany recharge', 
       expect(result.prepaidEntries.every((e) => e.entityId === ZONE_ENTITY_ID && e.paidByEntityId === null && e.counterpartyEntityId === null)).toBe(true);
       const irpPrepaid = result.prepaidEntries.find((e) => e.key === 'irp-prepaid')!;
       expect(irpPrepaid.amount).toBe('-78959.21');
+    });
+  });
+
+  describe('non-carrier recharge guard (Change 1)', () => {
+    /** Simulates a crosswalk row that (incorrectly) names a title holder or
+     *  an owner-held unit as the operator — exactly the bug the operator
+     *  flagged: "the previous run got this wrong because it let title
+     *  override operator". The real, corrected fixture never contains
+     *  these values; this constructs the bad input directly to prove the
+     *  engine refuses it rather than silently recharging or reassigning
+     *  it. */
+    function withBadOperator(operatingEntityKey: string): UnitOperatorRow[] {
+      return operatorAssignments.map((r) =>
+        r.irpUnit === '1431' ? { ...r, operatingEntityKey } : r,
+      );
+    }
+
+    it('throws when the crosswalk names a title-holding entity (iron_lease) as the operator', () => {
+      const input = makeInput({ operatorAssignments: withBadOperator('iron_lease') });
+      expect(() => buildRegistrationPosting(input)).toThrow(/not a valid recharge target/i);
+    });
+
+    it('throws when the crosswalk names an owner-held unit (sher_imam) as the operator', () => {
+      const input = makeInput({ operatorAssignments: withBadOperator('sher_imam') });
+      expect(() => buildRegistrationPosting(input)).toThrow(/not a valid recharge target/i);
+    });
+
+    it('throws on a non-carrier operator even when operatorEntityByKey happens to resolve it — the guard is not a lookup-miss fallback', () => {
+      const input = makeInput({
+        operatorAssignments: withBadOperator('iron_lease'),
+        operatorEntityByKey: { ...OPERATOR_ENTITY_BY_KEY, iron_lease: 'entity-iron-lease' },
+      });
+      expect(() => buildRegistrationPosting(input)).toThrow(/not a valid recharge target/i);
+    });
+
+    it('never silently reassigns a non-carrier operator to the payer — it throws instead of degrading to "stays with Zone"', () => {
+      const input = makeInput({ operatorAssignments: withBadOperator('iron_lease') });
+      expect(() => buildRegistrationPosting(input)).toThrow();
+      // Confirm this is NOT the same code path as UNRESOLVED (which is a
+      // deliberate, documented "stays with the payer" outcome, not an
+      // error): UNRESOLVED never throws.
+      expect(() => buildRegistrationPosting(makeInput())).not.toThrow();
+    });
+  });
+
+  describe('per-truck overhead rate (Change 2)', () => {
+    it('reports one overhead rate row per unit, unconditionally (even without an operator crosswalk)', () => {
+      const withCrosswalk = buildRegistrationPosting(makeInput({ asOf: '2027-01-01' }));
+      expect(withCrosswalk.overheadRates).toHaveLength(42);
+
+      const withoutCrosswalk = buildRegistrationPosting(
+        makeInput({ operatorAssignments: undefined, operatorEntityByKey: undefined, asOf: '2027-01-01' }),
+      );
+      expect(withoutCrosswalk.overheadRates).toHaveLength(42);
+    });
+
+    it('annualPerUnit is IRP allocation + HVUT for that unit (1,879.98 + 550.00 = 2,429.98, or 1,879.99 + 550.00 = 2,429.99)', () => {
+      const result = buildRegistrationPosting(makeInput({ asOf: '2027-01-01' }));
+      const totals = result.overheadRates.map((r) => r.annualTotal);
+      expect(totals.filter((t) => t === '2429.99')).toHaveLength(5);
+      expect(totals.filter((t) => t === '2429.98')).toHaveLength(37);
+    });
+
+    it('the coverage window is the real registration year, 2026-09-01 through 2027-08-31 (365 days)', () => {
+      const result = buildRegistrationPosting(makeInput({ asOf: '2027-01-01' }));
+      for (const r of result.overheadRates) {
+        expect(r.coverageStart).toBe('2026-09-01');
+        expect(r.coverageEnd).toBe('2027-08-31');
+        expect(r.coverageDays).toBe(365);
+      }
+    });
+
+    it('readiness 6: dailyRate * coverageDays equals annualPerUnit to the cent, for every unit', () => {
+      const result = buildRegistrationPosting(makeInput({ asOf: '2027-01-01' }));
+      expect(result.overheadRates.length).toBeGreaterThan(0);
+      for (const r of result.overheadRates) {
+        const dailyMicroDollars = scaledFromAnalysisRate(r.dailyRate); // dollars * 1e6
+        const reconstructedCents = Math.round((dailyMicroDollars * r.coverageDays) / 10_000);
+        expect(decimalFromCents(reconstructedCents)).toBe(r.annualTotal);
+      }
+    });
+
+    it('weeklyRate is exactly dailyRate * 7', () => {
+      const result = buildRegistrationPosting(makeInput({ asOf: '2027-01-01' }));
+      for (const r of result.overheadRates) {
+        const daily = scaledFromAnalysisRate(r.dailyRate);
+        const weekly = scaledFromAnalysisRate(r.weeklyRate);
+        expect(weekly).toBe(daily * 7);
+      }
+    });
+
+    it('weeklyRate * 52 does NOT equal the annual figure — 52 weeks is 364 days, one short of the real year, and that gap is expected', () => {
+      const result = buildRegistrationPosting(makeInput({ asOf: '2027-01-01' }));
+      const r = result.overheadRates[0]!;
+      const weekly = scaledFromAnalysisRate(r.weeklyRate);
+      const fiftyTwoWeeksCents = Math.round((weekly * 52) / 10_000);
+      expect(decimalFromCents(fiftyTwoWeeksCents)).not.toBe(r.annualTotal);
+      // The gap is exactly one day's worth of the rate (52 * 7 = 364, one
+      // short of the 365-day coverage window) — not a rounding bug.
+      expect(r.coverageDays - 52 * 7).toBe(1);
+    });
+
+    it('monthlyLedger is the posted accounting truth: it matches the base (non-remainder) monthly figure already amortized into scheduleRows', () => {
+      const result = buildRegistrationPosting(makeInput({ asOf: '2027-01-01' }));
+      const byUnit = new Map<string, typeof result.overheadRates[number]>();
+      for (const r of result.overheadRates) byUnit.set(r.unitNumber, r);
+
+      for (const unitNumber of ['8671', '1431']) {
+        const rate = byUnit.get(unitNumber)!;
+        const irpRows = result.scheduleRows.filter((r) => r.unitNumber === unitNumber && r.categoryId === 'permit.irp');
+        const hvutRows = result.scheduleRows.filter((r) => r.unitNumber === unitNumber && r.categoryId === 'tax.hvut');
+        const combinedMonthlyCents = irpRows.map((r, i) => -centsFromDecimal(r.amount) + -centsFromDecimal(hvutRows[i]!.amount));
+        // monthlyLedger is the floor share of the COMBINED annual total,
+        // amortized 1/12. Because IRP and HVUT are amortized as two
+        // separate even splits (each with its own up-to-one-cent
+        // remainder), a given month's actual combined posting can carry up
+        // to two remainder pennies above this floor — never below it, and
+        // never more than one remainder penny per stream.
+        const monthlyLedgerCents = centsFromDecimal(rate.monthlyLedger);
+        for (const cents of combinedMonthlyCents) {
+          expect(cents - monthlyLedgerCents).toBeGreaterThanOrEqual(0);
+          expect(cents - monthlyLedgerCents).toBeLessThanOrEqual(2);
+        }
+      }
+    });
+
+    it('monthlyLedger * 12 is within a few cents of annualTotal (exact remainder-penny reconciliation happens across the 12 posted rows, not this single summary figure)', () => {
+      const result = buildRegistrationPosting(makeInput({ asOf: '2027-01-01' }));
+      for (const r of result.overheadRates) {
+        const diff = centsFromDecimal(r.annualTotal) - centsFromDecimal(r.monthlyLedger) * 12;
+        expect(diff).toBeGreaterThanOrEqual(0);
+        expect(diff).toBeLessThan(12); // at most one remainder penny per month
+      }
+    });
+
+    it('the overhead rate lands on the truck\'s operator entity, following the recharge (unit 1471, xtrack)', () => {
+      const result = buildRegistrationPosting(makeInput({ asOf: '2027-01-01' }));
+      const rate = result.overheadRates.find((r) => r.unitNumber === '1471')!;
+      expect(rate.entityId).toBe(XTRACK_ENTITY_ID);
+      expect(rate.categoryIds).toEqual(['permit.irp', 'tax.hvut']);
+    });
+
+    it('never posts a daily or weekly ledger entry — only the monthly grain appears in scheduleRows/postedEntries', () => {
+      const result = buildRegistrationPosting(makeInput({ asOf: '2027-01-01' }));
+      // 42 units x 2 categories x 12 months, exactly — no per-day, no per-week rows.
+      expect(result.scheduleRows).toHaveLength(42 * 2 * 12);
+      const months = new Set(result.scheduleRows.map((r) => r.periodMonth));
+      expect(months.size).toBe(12);
     });
   });
 });

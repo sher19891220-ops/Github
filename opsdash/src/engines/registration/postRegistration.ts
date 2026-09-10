@@ -8,7 +8,8 @@
 
 import type { Decimal, IsoDate } from '@/contract/types';
 import { centsFromDecimal, decimalFromCents, evenSplitCents, sumCents } from './money';
-import { addMonths, isMonthClosed, monthRange, periodMonthOf } from './dates';
+import { addMonths, isMonthClosed, lastDayOfPeriodMonth, monthRange, periodMonthOf } from './dates';
+import { computeOverheadRate } from './overheadRate';
 import type {
   AmortizationScheduleRowDraft,
   ChargedTo,
@@ -19,6 +20,7 @@ import type {
   NeedsConfirmationUnit,
   RegistrationPostingInput,
   RegistrationPostingResult,
+  TruckOverheadRate,
   UnitOperatorRow,
   UnitStatusRow,
 } from './types';
@@ -35,16 +37,21 @@ const CURRENCY = 'USD';
  *  key, so it is never looked up in `operatorEntityByKey`. */
 const UNRESOLVED_OPERATOR_KEY = 'UNRESOLVED';
 
-/** Operators that are not ordinary carriers (owner / title-holder on a
- *  paid-off unit). The recharge is still correct in principle — cost
- *  follows the truck — but the orchestrator must surface these for human
- *  confirmation rather than silently treating them like Xtrack or AFG. */
-const NEEDS_CONFIRMATION_OPERATOR_KEYS = new Set(['sher_imam', 'iron_lease']);
+/** The only entities that operate trucks and can therefore ever be a
+ *  recharge target. Iron Lease is an asset-holding company with no IRP
+ *  account, and an owner-held unit is the same shape — title, not
+ *  operation. Neither has operating revenue to absorb a cost, so neither
+ *  may appear here: a title holder is a fact about who OWNS the unit, and
+ *  is a wholly separate question from who OPERATES it (which Zone,
+ *  Xtrack or AFG always does). If the crosswalk ever names a non-carrier
+ *  as `operating_entity`, `resolveUnitOperator` throws rather than
+ *  recharging it or silently reassigning it to the payer. */
+const VALID_RECHARGE_OPERATOR_KEYS = new Set(['zone', 'xtrack', 'afg']);
 
 /** Canonical labels for `reconciliation.costByOperatorKey`, independent of
  *  whatever opaque `entity_id` each key actually resolves to. */
-type OperatorBucket = 'zone' | 'xtrack' | 'afg' | 'sher_imam' | 'iron_lease' | 'unresolved';
-const OPERATOR_BUCKETS: OperatorBucket[] = ['zone', 'xtrack', 'afg', 'sher_imam', 'iron_lease', 'unresolved'];
+type OperatorBucket = 'zone' | 'xtrack' | 'afg' | 'unresolved';
+const OPERATOR_BUCKETS: OperatorBucket[] = ['zone', 'xtrack', 'afg', 'unresolved'];
 
 interface UnitOperatorResolution {
   /** Raw crosswalk key ('zone', 'xtrack', ..., 'UNRESOLVED'), or null when
@@ -119,6 +126,14 @@ function byVinAscending(a: IrpInvoiceUnit, b: IrpInvoiceUnit): number {
  * there is nothing to recharge — no crosswalk supplied, the operator IS the
  * payer, or the operator is genuinely UNRESOLVED (which stays with the
  * payer rather than inventing one, per the operator's explicit decision).
+ *
+ * Throws if the crosswalk names an operator that is not one of
+ * `VALID_RECHARGE_OPERATOR_KEYS` — title (who owns the unit, e.g. Iron
+ * Lease) is a different fact from operation (who runs it, always Zone,
+ * Xtrack or AFG), and a title holder has no operating revenue to absorb a
+ * recharge. This is a hard guard, not a fallback: the caller gets an
+ * exception, never a silent reassignment to the payer and never a silent
+ * recharge to a non-carrier.
  */
 function resolveUnitOperator(
   unit: IrpInvoiceUnit,
@@ -143,6 +158,13 @@ function resolveUnitOperator(
     // zone-operated unit.
     return { operatorKey: row.operatingEntityKey, operatorEntityId: null, needsConfirmation: true };
   }
+  if (!VALID_RECHARGE_OPERATOR_KEYS.has(row.operatingEntityKey)) {
+    throw new Error(
+      `Unit ${unit.unitNumber} (VIN ${unit.vin}): operator "${row.operatingEntityKey}" is not a valid recharge ` +
+        `target. Only zone, xtrack and afg operate trucks — a title holder (e.g. Iron Lease) or an owner-held ` +
+        `unit has no operating revenue to absorb a cost and can never receive a recharge. Refusing to post this.`,
+    );
+  }
   const resolvedEntityId = operatorEntityByKey[row.operatingEntityKey];
   if (!resolvedEntityId) {
     throw new Error(
@@ -150,11 +172,10 @@ function resolveUnitOperator(
         `entity id in operatorEntityByKey — refusing to invent one.`,
     );
   }
-  const needsConfirmation = NEEDS_CONFIRMATION_OPERATOR_KEYS.has(row.operatingEntityKey);
   if (resolvedEntityId === payerEntityId) {
-    return { operatorKey: row.operatingEntityKey, operatorEntityId: null, needsConfirmation };
+    return { operatorKey: row.operatingEntityKey, operatorEntityId: null, needsConfirmation: false };
   }
-  return { operatorKey: row.operatingEntityKey, operatorEntityId: resolvedEntityId, needsConfirmation };
+  return { operatorKey: row.operatingEntityKey, operatorEntityId: resolvedEntityId, needsConfirmation: false };
 }
 
 /** The bearer of a single cost stream (IRP, or HVUT for this unit): the
@@ -305,13 +326,20 @@ export function buildRegistrationPosting(input: RegistrationPostingInput): Regis
   const fleetExpirationMonth = periodMonthOf(header.fleetExpirationYear, header.fleetExpirationMonth);
   const registrationYearStart = addMonths(fleetExpirationMonth, -COVERAGE_MONTHS);
   const months = monthRange(registrationYearStart, COVERAGE_MONTHS);
+  // Real coverage window for the per-truck overhead rate (readiness 6):
+  // the first day of the first covered month through the LAST day of the
+  // last covered month, e.g. 2026-09-01..2027-08-31 — never a hardcoded
+  // 365, so the daily rate is exact for any registration year, leap or not.
+  const coverageStart = months[0] as IsoDate;
+  const coverageEnd = lastDayOfPeriodMonth(months[COVERAGE_MONTHS - 1] as IsoDate);
 
   const scheduleRows: AmortizationScheduleRowDraft[] = [];
   const postedEntries: LedgerEntryDraft[] = [];
   const intercompanyEntries: LedgerEntryDraft[] = [];
   const needsConfirmationUnits: NeedsConfirmationUnit[] = [];
+  const overheadRates: TruckOverheadRate[] = [];
   const costByOperatorKeyCents: Record<OperatorBucket, number> = {
-    zone: 0, xtrack: 0, afg: 0, sher_imam: 0, iron_lease: 0, unresolved: 0,
+    zone: 0, xtrack: 0, afg: 0, unresolved: 0,
   };
 
   for (let i = 0; i < n; i++) {
@@ -348,8 +376,15 @@ export function buildRegistrationPosting(input: RegistrationPostingInput): Regis
         sourceDocumentId: input.hvutSourceDocumentId, paymentDate: input.hvutPaymentDate,
       },
     ];
+    // Captured for the per-truck overhead rate below: IRP is always
+    // company-borne (see `streams` above), so its bearer always exists and
+    // is the truck's actual operator — unlike HVUT, whose bearer can be the
+    // payer even when the truck is recharged elsewhere (driver-borne HVUT
+    // never recharges).
+    let irpBearerEntityId: string | null = null;
     for (const stream of streams) {
       const bearer = bearerFor(stream.chargedTo, unitOperator, entityId);
+      if (stream.categoryId === IRP_CATEGORY) irpBearerEntityId = bearer.entityId;
       costByOperatorKeyCents[bucketFor(unitOperator, bearer)] += stream.fullYearCents;
 
       // The recharge (bullet 2 of the operator's decision): Zone's claim
@@ -445,6 +480,24 @@ export function buildRegistrationPosting(input: RegistrationPostingInput): Regis
         });
       }
     }
+
+    // Per-truck overhead rate (readiness criterion for the operator's daily
+    // /weekly-margin ask): IRP + HVUT for this unit, over the real coverage
+    // window. Computed unconditionally — the annual cost is known in full
+    // from the invoice regardless of whether a recharge crosswalk was
+    // supplied, so this never depends on `operatorAssignments`.
+    overheadRates.push({
+      ...computeOverheadRate({
+        annualCents: irpUnitCents + hvut.cents,
+        coverageStart,
+        coverageEnd,
+      }),
+      truckId,
+      unitNumber: unit.unitNumber,
+      vin: unit.vin,
+      entityId: irpBearerEntityId as string,
+      categoryIds: [IRP_CATEGORY, HVUT_CATEGORY],
+    });
   }
 
   const costByOperatorKey = Object.fromEntries(
@@ -457,6 +510,7 @@ export function buildRegistrationPosting(input: RegistrationPostingInput): Regis
     scheduleRows,
     postedEntries,
     intercompanyEntries,
+    overheadRates,
     reconciliation: {
       irpFeeLineTotal: decimalFromCents(irpInvoiceTotalCents),
       irpInvoiceTotal: invoiceTotal,

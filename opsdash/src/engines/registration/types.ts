@@ -10,6 +10,7 @@
  */
 
 import type { Decimal, IsoDate } from '@/contract/types';
+import type { OverheadRate } from './overheadRate';
 
 /** Mirrors `accounting.charged_to`. */
 export type ChargedTo = 'company' | 'driver' | 'split' | 'unknown';
@@ -87,18 +88,29 @@ export interface UnitStatusRow {
 // The registration entity (whoever's name is on the IRP invoice) is not
 // always the entity that operates the truck and earns from it. See
 // docs/SOURCE-DISCOVERY.md §11e. `operatingEntityKey` is the raw crosswalk
-// label ('zone', 'xtrack', 'afg', 'sher_imam', 'iron_lease', 'UNRESOLVED') —
-// never itself an `entity_id`; mapping a key to a real `entity_id` happens
-// externally (`RegistrationPostingInput.operatorEntityByKey`), the same way
-// `truckByVin` resolves a VIN to a truck id outside this engine.
+// label, taken verbatim — never itself an `entity_id`; mapping a key to a
+// real `entity_id` happens externally (`RegistrationPostingInput.
+// operatorEntityByKey`), the same way `truckByVin` resolves a VIN to a
+// truck id outside this engine.
+//
+// Only 'zone', 'xtrack' and 'afg' operate trucks and can ever be a recharge
+// target — Iron Lease (asset-holding, no IRP account) and an owner-held
+// unit are the same shape: title, not operation, and a title holder has no
+// operating revenue to absorb a cost. The posting engine THROWS if this
+// crosswalk ever names any other operator (it does not silently reassign
+// it to the payer, and does not silently drop it) — see
+// `postRegistration.ts`'s `VALID_RECHARGE_OPERATOR_KEYS` guard. The sole
+// exception is the 'UNRESOLVED' sentinel below, which is handled
+// structurally, not as an operator.
 // ---------------------------------------------------------------------
 
 export interface UnitOperatorRow {
   irpUnit: string;
   vin: string;
-  /** 'zone' | 'xtrack' | 'afg' | 'sher_imam' | 'iron_lease' | 'UNRESOLVED',
-   *  taken verbatim from the crosswalk. Never inferred from any other
-   *  string (unit number, lane text, etc.) — see CLAUDE.md §2. */
+  /** Raw crosswalk label, taken verbatim from the CSV. Never inferred from
+   *  any other string (unit number, lane text, etc.) — see CLAUDE.md §2.
+   *  Only 'zone' | 'xtrack' | 'afg' | 'UNRESOLVED' are valid; the posting
+   *  engine throws on anything else rather than guessing what it means. */
   operatingEntityKey: string;
   /** Date of the settlement-sheet snapshot (or operator statement) this
    *  assignment is drawn from, or null when the source is a one-off
@@ -111,10 +123,9 @@ export interface UnitOperatorRow {
 }
 
 /** A unit whose registration-cost routing needs a human look before the
- *  recharge is trusted at face value — either because the named operator is
- *  not an ordinary carrier (`sher_imam`, `iron_lease`), or because no
- *  operator could be determined at all (`UNRESOLVED`, which stays with the
- *  payer rather than inventing one). Surfaced separately from the row-level
+ *  decision NOT to recharge it is trusted at face value: no operator could
+ *  be determined at all (`UNRESOLVED`, which stays with the payer rather
+ *  than inventing one). Surfaced separately from the row-level
  *  `needsConfirmation` flag so the orchestrator can list them without
  *  re-scanning every ledger row. */
 export interface NeedsConfirmationUnit {
@@ -171,12 +182,16 @@ export interface RegistrationPostingInput {
    *  one) — a unit silently missing from the crosswalk is not allowed to
    *  fall back to "no recharge" by omission. */
   operatorAssignments?: UnitOperatorRow[];
-  /** Maps a crosswalk operator key ('zone', 'xtrack', 'afg', 'sher_imam',
-   *  'iron_lease') to its resolved `entity_id`, resolved externally exactly
-   *  like `truckByVin`. Never consulted for the 'UNRESOLVED' sentinel key,
-   *  which is handled structurally (stays with the payer) rather than
-   *  looked up. A key present in `operatorAssignments` but absent here is
-   *  an error, not a silent default. */
+  /** Maps a crosswalk operator key ('zone', 'xtrack', 'afg' — the only
+   *  valid recharge targets) to its resolved `entity_id`, resolved
+   *  externally exactly like `truckByVin`. Never consulted for the
+   *  'UNRESOLVED' sentinel key, which is handled structurally (stays with
+   *  the payer) rather than looked up. A key present in
+   *  `operatorAssignments` but absent here is an error, not a silent
+   *  default — and a key naming a non-carrier (a title holder or
+   *  owner-held unit, e.g. Iron Lease) is an error regardless of whether an
+   *  entry happens to exist here, per `postRegistration.ts`'s
+   *  `VALID_RECHARGE_OPERATOR_KEYS` guard. */
   operatorEntityByKey?: Record<string, string>;
 }
 
@@ -215,10 +230,13 @@ export interface LedgerEntryDraft {
    *  004's `intercompany_names_counterparty` check; null on every ordinary
    *  cost row. */
   counterpartyEntityId: string | null;
-  /** True when the operating entity behind this row is not an ordinary
-   *  carrier (`sher_imam`, `iron_lease`) or could not be determined at all
-   *  (`UNRESOLVED`) — the recharge (or lack of one) is structurally correct
-   *  but wants a human look before being trusted at face value. */
+  /** True when the operating entity behind this row could not be
+   *  determined at all (`UNRESOLVED`) — the decision not to recharge is
+   *  structurally correct but wants a human look before being trusted at
+   *  face value. A named operator that is not an ordinary carrier (a title
+   *  holder, e.g. Iron Lease, or an owner-held unit) is never reached here:
+   *  `postRegistration.ts` throws on it instead of posting a row that would
+   *  need this flag. */
   needsConfirmation: boolean;
 }
 
@@ -285,11 +303,16 @@ export interface RegistrationPostingReconciliation {
   weightGroup: number;
   unitCount: number;
   /** Combined IRP + HVUT cost, bucketed by where it actually lands
-   *  (`entityId`) after the recharge: 'zone', 'xtrack', 'afg', 'sher_imam',
-   *  'iron_lease', 'unresolved'. Present (all six keys, zero-filled) even
-   *  when `operatorAssignments` is omitted, in which case everything is
-   *  under 'zone'. Sums to `irpAllocatedTotal` + `hvutTotal` exactly. */
-  costByOperatorKey: Record<'zone' | 'xtrack' | 'afg' | 'sher_imam' | 'iron_lease' | 'unresolved', Decimal>;
+   *  (`entityId`) after the recharge: 'zone', 'xtrack', 'afg', 'unresolved'
+   *  — the only entities that can ever operate a truck (or, for
+   *  'unresolved', the sentinel for "no operator determined, stays with
+   *  the payer"). Present (all four keys, zero-filled) even when
+   *  `operatorAssignments` is omitted, in which case everything is under
+   *  'zone'. A non-carrier operator (a title holder, e.g. Iron Lease, or an
+   *  owner-held unit) never reaches this bucket set — the posting engine
+   *  throws on it instead. Sums to `irpAllocatedTotal` + `hvutTotal`
+   *  exactly. */
+  costByOperatorKey: Record<'zone' | 'xtrack' | 'afg' | 'unresolved', Decimal>;
   /** Sum of every `intercompanyEntries` amount — Zone's total intercompany
    *  receivable across every recharged unit and stream. Zero when
    *  `operatorAssignments` is omitted. */
@@ -312,4 +335,31 @@ export interface RegistrationPostingResult {
    *  when `operatorAssignments` is omitted. */
   intercompanyEntries: LedgerEntryDraft[];
   reconciliation: RegistrationPostingReconciliation;
+  /** One row per unit: the exact weekly/daily overhead rate for that truck
+   *  (see `overheadRate.ts`). This is an ANALYSIS output, not a posting —
+   *  `monthlyLedger` on each row is the figure actually amortized into
+   *  `scheduleRows`/`postedEntries`, but `dailyRate`/`weeklyRate` never
+   *  produce a ledger row of their own. Present unconditionally (whether or
+   *  not `operatorAssignments` was supplied), because the annual cost is
+   *  known in full as soon as the invoice is parsed, independent of any
+   *  recharge decision. */
+  overheadRates: TruckOverheadRate[];
+}
+
+/** A single truck's fixed-cost overhead rate. Extends the general
+ *  `OverheadRate` primitive (see `overheadRate.ts`) with the truck/entity
+ *  identity needed to report it — nothing here is registration-specific
+ *  except `categoryIds`' contents, which is exactly what lets a later
+ *  contributor (insurance, permits, ELD, ...) reuse this same shape by
+ *  tagging its own category ids instead of `['permit.irp', 'tax.hvut']`. */
+export interface TruckOverheadRate extends OverheadRate {
+  truckId: string | null;
+  unitNumber: string;
+  vin: string;
+  /** The truck's operator (post-recharge) — the entity a per-truck margin
+   *  decision should attribute this overhead to. */
+  entityId: string;
+  /** Cost streams summed into `annualTotal` for this row, e.g.
+   *  `['permit.irp', 'tax.hvut']`. */
+  categoryIds: string[];
 }
