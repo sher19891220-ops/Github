@@ -76,11 +76,12 @@ describe.skipIf(!haveFixtures)('registration engine — intercompany recharge', 
       expect(operatorAssignments).toHaveLength(42);
       const counts: Record<string, number> = {};
       for (const r of operatorAssignments) counts[r.operatingEntityKey] = (counts[r.operatingEntityKey] ?? 0) + 1;
-      // Iron Lease held title to two of these units (4864, 6379), but Zone
-      // operates both — title and operation are different facts, and this
-      // crosswalk records operation only. Neither Iron Lease nor an
-      // owner-held unit appears here at all.
-      expect(counts).toEqual({ zone: 14, xtrack: 16, afg: 6, UNRESOLVED: 6 });
+      // Iron Lease held title to two of these units (4864, 6379), and
+      // Sher Imam (owner-held) to three more (1365, 1596, 3898) — Zone
+      // operates all five. Title and operation are different facts, and
+      // this crosswalk records operation only. Neither Iron Lease nor an
+      // owner-held unit appears here at all: only zone/xtrack/afg/UNRESOLVED.
+      expect(counts).toEqual({ zone: 17, xtrack: 16, afg: 6, UNRESOLVED: 3 });
     });
 
     it('parses a dated snapshot as an ISO date and a blank as null, never inventing one', () => {
@@ -211,10 +212,10 @@ describe.skipIf(!haveFixtures)('registration engine — intercompany recharge', 
       const result = buildRegistrationPosting(makeInput({ asOf: '2027-01-01' }));
       const c = result.reconciliation.costByOperatorKey;
       expect(c).toEqual({
-        zone: '37869.72',
+        zone: '45159.66',
         xtrack: '35579.72',
         afg: '14029.88',
-        unresolved: '14579.89',
+        unresolved: '7289.95',
       });
       const grandTotalCents = Object.values(c).reduce((acc, v) => acc + centsFromDecimal(v), 0);
       expect(decimalFromCents(grandTotalCents)).toBe('102059.21');
@@ -264,8 +265,9 @@ describe.skipIf(!haveFixtures)('registration engine — intercompany recharge', 
     it('flags only UNRESOLVED units as needsConfirmation, and no others', () => {
       const result = buildRegistrationPosting(makeInput({ asOf: '2027-01-01' }));
       const flagged = result.reconciliation.needsConfirmationUnits;
-      expect(flagged).toHaveLength(6);
+      expect(flagged).toHaveLength(3);
       expect(flagged.every((u) => u.operatorKey === 'UNRESOLVED')).toBe(true);
+      expect(new Set(flagged.map((u) => u.unitNumber))).toEqual(new Set(['4553', '4713', '5413']));
 
       const flaggedUnitNumbers = new Set(flagged.map((u) => u.unitNumber));
       for (const row of [...result.scheduleRows, ...result.postedEntries, ...result.intercompanyEntries]) {
@@ -276,7 +278,7 @@ describe.skipIf(!haveFixtures)('registration engine — intercompany recharge', 
     it('UNRESOLVED units stay with Zone: no recharge, no receivable, but the money is still booked in full', () => {
       const result = buildRegistrationPosting(makeInput({ asOf: '2027-01-01' }));
       const unresolvedUnits = operatorAssignments.filter((r) => r.operatingEntityKey === 'UNRESOLVED').map((r) => r.irpUnit);
-      expect(unresolvedUnits).toHaveLength(6);
+      expect(unresolvedUnits).toHaveLength(3);
       for (const unitNumber of unresolvedUnits) {
         const rows = result.scheduleRows.filter((r) => r.unitNumber === unitNumber);
         expect(rows.every((r) => r.entityId === ZONE_ENTITY_ID)).toBe(true);
@@ -301,7 +303,7 @@ describe.skipIf(!haveFixtures)('registration engine — intercompany recharge', 
     it('zone-operated units never appear in intercompanyEntries', () => {
       const result = buildRegistrationPosting(makeInput({ asOf: '2027-01-01' }));
       const zoneUnits = operatorAssignments.filter((r) => r.operatingEntityKey === 'zone').map((r) => r.irpUnit);
-      expect(zoneUnits).toHaveLength(14);
+      expect(zoneUnits).toHaveLength(17);
       for (const unitNumber of zoneUnits) {
         expect(result.intercompanyEntries.some((e) => e.unitNumber === unitNumber)).toBe(false);
         const rows = result.scheduleRows.filter((r) => r.unitNumber === unitNumber);
@@ -323,6 +325,44 @@ describe.skipIf(!haveFixtures)('registration engine — intercompany recharge', 
         const rows = result.scheduleRows.filter((r) => r.unitNumber === unitNumber);
         expect(rows.every((r) => r.entityId === ZONE_ENTITY_ID && r.paidByEntityId === null)).toBe(true);
         expect(rows.every((r) => r.needsConfirmation === false)).toBe(true);
+        expect(result.intercompanyEntries.some((e) => e.unitNumber === unitNumber)).toBe(false);
+      }
+    });
+
+    it('owner-held (Sher Imam) units 1365/1596/3898, now confirmed operated by Zone, post as ordinary zone units — the guard is reinforced, not contradicted', () => {
+      // The operator resolved three of the six originally-UNRESOLVED units:
+      // Sher Imam holds title, but Zone operates them. This is the same
+      // title-vs-operation distinction as Iron Lease above — the owner
+      // never becomes a recharge target, but a REAL operator (Zone) can now
+      // be recorded for these units instead of leaving them UNRESOLVED.
+      const result = buildRegistrationPosting(makeInput({ asOf: '2027-01-01' }));
+      const ownerHeldUnits = operatorAssignments
+        .filter((r) => r.source.includes('owner-held'))
+        .map((r) => r.irpUnit);
+      expect(ownerHeldUnits.sort()).toEqual(['1365', '1596', '3898']);
+      for (const unitNumber of ownerHeldUnits) {
+        const rows = result.scheduleRows.filter((r) => r.unitNumber === unitNumber);
+        expect(rows.every((r) => r.entityId === ZONE_ENTITY_ID && r.paidByEntityId === null)).toBe(true);
+        expect(rows.every((r) => r.needsConfirmation === false)).toBe(true);
+        expect(result.intercompanyEntries.some((e) => e.unitNumber === unitNumber)).toBe(false);
+      }
+      // And Sher Imam is still never a valid operator key on its own — only
+      // the fact that Zone (a carrier) now operates these units let them
+      // post without the guard's involvement at all.
+      expect(operatorAssignments.some((r) => r.operatingEntityKey === 'sher_imam')).toBe(false);
+    });
+
+    it('the remaining 3 genuinely-unresolved units (4553, 4713, 5413) are unaffected by the Sher Imam resolution', () => {
+      const result = buildRegistrationPosting(makeInput({ asOf: '2027-01-01' }));
+      const stillUnresolved = operatorAssignments
+        .filter((r) => r.operatingEntityKey === 'UNRESOLVED')
+        .map((r) => r.irpUnit)
+        .sort();
+      expect(stillUnresolved).toEqual(['4553', '4713', '5413']);
+      for (const unitNumber of stillUnresolved) {
+        const rows = result.scheduleRows.filter((r) => r.unitNumber === unitNumber);
+        expect(rows.every((r) => r.entityId === ZONE_ENTITY_ID && r.paidByEntityId === null)).toBe(true);
+        expect(rows.every((r) => r.needsConfirmation === true)).toBe(true);
         expect(result.intercompanyEntries.some((e) => e.unitNumber === unitNumber)).toBe(false);
       }
     });
