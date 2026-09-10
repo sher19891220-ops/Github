@@ -287,11 +287,81 @@ of a spreadsheet, which is worth stating plainly rather than discovering later.
 
 ## 12. Open decisions
 
-1. **Is Truck Max USA in scope?** If the CEO dashboard should show group margin
-   across the carriers *and* the shop, entities need an `is_internal` flag and
-   the roll-up needs an elimination step. If the shop is simply a vendor to
-   Zone, it stays a cost line and nothing changes.
+1. ~~Is Truck Max USA in scope?~~ **Answered: no.** Truck Max and Fleet Prime
+   LLC are the same company and it sits **outside the group**. It is therefore
+   an ordinary external vendor: its invoices are a Zone cost line, no
+   `is_internal` flag is needed, and **no inter-company elimination step**
+   belongs in the roll-up. The entity model stays at three carriers.
 2. **Access to `Maintenance History`**, to settle its overlap with the expenses
    sheet.
 3. **Which layer is the maintenance source of record** — the per-truck expense
-   rows, or the shop invoices. Both cannot post.
+   rows, or the shop invoices. Both cannot post. (Unchanged by item 1: an
+   external vendor can still be double-counted if bulk invoices and itemised
+   repairs both post.)
+
+---
+
+## 13. Integrations: what is actually reachable
+
+Checked rather than assumed, because two planned inputs turn out not to exist.
+
+### Samsara — NOT connected, and not available
+
+There is **no Samsara integration in this environment.** The full connector
+catalogue was searched; Samsara is not in it. The nearest match, Fleetio, is a
+different product entirely and is also unconnected.
+
+**Consequence: miles by state must be exported manually.** The IFTA mileage
+input cannot be automated here. It stays a per-quarter `ifta_mileage` document
+drop, exactly as §5 already specifies.
+
+### Telegram — available, but cannot do the retroactive part
+
+A Telegram toolkit exists but has **no active connection**. More importantly,
+the approach itself has a hard limit worth knowing before any of it is built:
+
+**The Telegram Bot API cannot read history.** A bot sees only messages sent
+*after* it joins a chat, retrieved through `getUpdates`, and undelivered
+updates expire after about 24 hours. There is no call that fetches a group's
+past messages.
+
+So the idea splits cleanly in two:
+
+| | Feasible? | Notes |
+| --- | --- | --- |
+| **Going forward** — watch groups for renames and new groups | **Yes** | Group renames arrive as `new_chat_title` service messages. A bot added to each driver group captures every change from that day on. |
+| **Retroactively** — reconstruct past truck/company moves from group history | **No, not with a bot** | Requires a Telegram *user* client (MTProto), which authenticates as a person, not a bot. Different build, different auth, and it reads everything that account can see. |
+
+The signal itself is sound: a group renamed to a different unit number, a new
+group with a known driver on a different truck, or the same truck under a
+different company name are all genuine change events. But a bot started today
+answers "what changes from now on", not "what happened this year" — and the
+history is what the ledger needs to attribute past revenue.
+
+### Transfer notes — searched, not found
+
+The operator reports that moves are noted in driver and unit lists as
+`transferred to <entity> with date`. Every sheet reachable here was searched
+for that wording: the fleet index, the 2026 dispatch sheet, the expenses sheet,
+both fuel sheets, the decal registry, and the Zone driver pay list. **Zero
+matches.** The `Transfer code` column in the expenses sheet is an EFS payment
+reference, unrelated to company moves.
+
+Only **one** driver pay list is shared — Zone's. It carries name, unit, pay
+rate, 1099 status, escrow, LLC name and notes, but **no entity column**. If
+equivalent lists exist for xtrack and AFG, membership of each list would be a
+clean entity signal; neither is currently shared.
+
+### Quick Manage — not visible
+
+No Quick Manage file or export exists in Drive. It is an external system, and
+data entry into it is reportedly under way. Access route unknown.
+
+### Corrected header
+
+The expenses cost table header is fuller than §5 first recorded. Both variants
+appear across sections:
+
+`Extra | Transfer code | ID | $ used | Unit | Issued To | Unit Type | Cost type | Issued Date | Expense side | Details`
+
+Another reason to parse by header rather than by column index.
