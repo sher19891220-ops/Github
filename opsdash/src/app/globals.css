@@ -8,6 +8,12 @@
   --warn: #b45309;
   --bad: #b42318;
   --good: #067647;
+  /* Added for the reconciliation / chargeback screens — keyboard-focused
+     row and "needs a decision" row backgrounds, kept as tokens rather than
+     inline color-mix magic numbers so both themes stay in one place. */
+  --focus-bg: color-mix(in srgb, var(--accent) 10%, transparent);
+  --attention-bg: color-mix(in srgb, var(--warn) 8%, transparent);
+  --select-bg: color-mix(in srgb, var(--accent) 5%, transparent);
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -25,3 +31,12 @@ body {
 /* Money is read in columns and compared down the page; tabular figures stop
    digits from dancing between rows. */
 .num { font-variant-numeric: tabular-nums; text-align: right; }
+
+/* Keyboard-shortcut hints in the chargeback/reconciliation queues. */
+kbd {
+  font: 0.85em ui-monospace, monospace;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.05em 0.4em;
+  background: var(--attention-bg);
+}

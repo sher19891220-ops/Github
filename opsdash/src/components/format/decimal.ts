@@ -70,3 +70,71 @@ export function formatQuantity(value: Decimal | null | undefined, placeholder = 
 export function formatRate(value: string | null | undefined, placeholder = '—'): string {
   return formatDecimalString(value, { placeholder, minFractionDigits: 6 });
 }
+
+/* ------------------------------------------------------------------------
+ * Money arithmetic — added for the reconciliation and chargeback screens,
+ * which (unlike the review table) need to add/subtract/sum money to show
+ * variances and running totals, not just format it. Same rule applies:
+ * every intermediate value is a `bigint` count of cents, never a JS number
+ * with a fractional part. `MONEY_CENTS_RE` caps at 2 fractional digits,
+ * matching `numeric(14,2)` — the only shape money ever takes on the wire.
+ * --------------------------------------------------------------------- */
+
+const MONEY_CENTS_RE = /^(-)?(\d{1,12})(?:\.(\d{1,2}))?$/;
+
+/** Parses a money `Decimal` into an exact integer count of cents. Throws on
+ *  anything that is not shaped like `numeric(14,2)` — a reconciliation
+ *  screen that silently treated a malformed value as zero would hide a
+ *  variance instead of surfacing it. */
+export function moneyToCents(value: Decimal): bigint {
+  const m = MONEY_CENTS_RE.exec(String(value).trim());
+  if (!m) {
+    throw new Error(`Not a valid money decimal string (at most 2 decimal places): ${JSON.stringify(value)}`);
+  }
+  const sign = m[1] === '-' ? -1n : 1n;
+  const whole = BigInt(m[2] ?? '0');
+  const frac = BigInt((m[3] ?? '').padEnd(2, '0'));
+  return sign * (whole * 100n + frac);
+}
+
+/** Formats an exact integer count of cents back into a money `Decimal`. */
+export function centsToMoney(cents: bigint): Decimal {
+  const negative = cents < 0n;
+  const abs = negative ? -cents : cents;
+  const whole = abs / 100n;
+  const frac = abs % 100n;
+  return `${negative && abs !== 0n ? '-' : ''}${whole.toString()}.${frac.toString().padStart(2, '0')}`;
+}
+
+/** Exact `a + b`, both money decimal strings. */
+export function addMoney(a: Decimal, b: Decimal): Decimal {
+  return centsToMoney(moneyToCents(a) + moneyToCents(b));
+}
+
+/** Exact `a - b`, both money decimal strings. */
+export function subtractMoney(a: Decimal, b: Decimal): Decimal {
+  return centsToMoney(moneyToCents(a) - moneyToCents(b));
+}
+
+/** Exact sum of a list of money decimal strings; `"0.00"` for an empty list. */
+export function sumMoney(values: readonly Decimal[]): Decimal {
+  return centsToMoney(values.reduce((acc, v) => acc + moneyToCents(v), 0n));
+}
+
+/** Absolute value of a money decimal string. */
+export function absMoney(a: Decimal): Decimal {
+  const c = moneyToCents(a);
+  return centsToMoney(c < 0n ? -c : c);
+}
+
+/** `-1` if `a < b`, `0` if equal, `1` if `a > b` — exact, no float compare. */
+export function compareMoney(a: Decimal, b: Decimal): -1 | 0 | 1 {
+  const diff = moneyToCents(a) - moneyToCents(b);
+  return diff < 0n ? -1 : diff > 0n ? 1 : 0;
+}
+
+/** True when two money decimal strings represent the same amount, even if
+ *  written differently (`"5"` vs `"5.00"`). */
+export function moneyEquals(a: Decimal, b: Decimal): boolean {
+  return moneyToCents(a) === moneyToCents(b);
+}

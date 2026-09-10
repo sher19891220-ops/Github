@@ -10,7 +10,7 @@
  */
 
 import type { StagingRow } from '@/contract/types';
-import type { CategoryOption, DocumentSummary, NamedOption } from './types';
+import type { CategoryOption, ChargebackRow, DocumentSummary, NamedOption, ReconLine } from './types';
 
 export const ENTITIES: NamedOption[] = [
   { id: 'ent-zone', label: 'Zone OH LLC', isActive: true },
@@ -219,5 +219,200 @@ export const DOCUMENTS: DocumentFixture[] = [
       duplicateOf: null,
     },
     rows: [],
+  },
+];
+
+/* ------------------------------------------------------------------------
+ * Reconciliation fixtures (`data/types.ts` note 6).
+ *
+ * Document side: the same EFS fuel statement as `doc-fuel-0091` above, so
+ * every reconciled row still traces to that document. Ledger side: what is
+ * already recorded for the same period — modelled on the Fuel sheet per
+ * SOURCE-DISCOVERY §3/§4, which is where fuel cost is normally posted from
+ * (connector), independent of the EFS statement (document) the accountant
+ * is checking it against. One exact match, one $4.10 near-match (the task
+ * brief's own example), one line missing from each side — enough variety
+ * to exercise every branch of the matcher without pretending to be a full
+ * statement.
+ * --------------------------------------------------------------------- */
+
+export const RECON_DOCUMENT_ID = 'doc-fuel-0091';
+
+export const RECON_DOCUMENT_LINES: ReconLine[] = [
+  {
+    lineId: 'rd-1',
+    side: 'document',
+    sourceRef: { kind: 'document', documentId: RECON_DOCUMENT_ID, stagingRowId: 'row-f-1', label: 'EFS_statement_2026-01.csv row 1' },
+    truckId: 'trk-50174',
+    driverId: 'drv-1',
+    accrualDate: '2026-01-06',
+    amount: '-693.44',
+    quantity: null,
+    description: 'EFS fuel purchase — Belmont, OH',
+  },
+  {
+    lineId: 'rd-2',
+    side: 'document',
+    sourceRef: { kind: 'document', documentId: RECON_DOCUMENT_ID, stagingRowId: 'row-f-2', label: 'EFS_statement_2026-01.csv row 2' },
+    truckId: 'trk-6169',
+    driverId: 'drv-2',
+    accrualDate: '2026-01-06',
+    amount: '-279.20',
+    quantity: '80.0000',
+    description: 'EFS fuel purchase — Fishkill, NY',
+  },
+  {
+    lineId: 'rd-3',
+    side: 'document',
+    sourceRef: { kind: 'document', documentId: RECON_DOCUMENT_ID, stagingRowId: 'row-f-3', label: 'EFS_statement_2026-01.csv row 3' },
+    truckId: 'trk-15852',
+    driverId: 'drv-3',
+    accrualDate: '2026-01-07',
+    amount: '-410.02',
+    quantity: null,
+    description: 'EFS fuel purchase — unreadable scan region',
+  },
+];
+
+export const RECON_LEDGER_LINES: ReconLine[] = [
+  {
+    lineId: 'rl-1',
+    side: 'ledger',
+    sourceRef: { kind: 'sheet', label: 'Fuel sheet', rowRef: 'Fuel!2026-01-06!50174' },
+    truckId: 'trk-50174',
+    driverId: 'drv-1',
+    accrualDate: '2026-01-06',
+    amount: '-693.44',
+    quantity: null,
+    description: 'Fuel — diesel (already recorded)',
+  },
+  {
+    // The $4.10 near-match the task brief calls out by name: same unit,
+    // same date, amount differs.
+    lineId: 'rl-2',
+    side: 'ledger',
+    sourceRef: { kind: 'sheet', label: 'Fuel sheet', rowRef: 'Fuel!2026-01-06!6169' },
+    truckId: 'trk-6169',
+    driverId: 'drv-2',
+    accrualDate: '2026-01-06',
+    amount: '-275.10',
+    quantity: '78.5000',
+    description: 'Fuel — diesel (already recorded)',
+  },
+  {
+    // No document counterpart at all — a sheet entry with no matching EFS
+    // statement line for this period (e.g. a different card, or a purchase
+    // this statement simply does not cover).
+    lineId: 'rl-3',
+    side: 'ledger',
+    sourceRef: { kind: 'sheet', label: 'Fuel sheet', rowRef: 'Fuel!2026-01-05!9859' },
+    truckId: 'trk-9859',
+    driverId: null,
+    accrualDate: '2026-01-05',
+    amount: '-512.30',
+    quantity: null,
+    description: 'Fuel — diesel (already recorded)',
+  },
+  // rd-3 (trk-15852, 01-07) has no ledger counterpart at all — it is the
+  // document-side unmatched row.
+];
+
+/* ------------------------------------------------------------------------
+ * Chargeback fixtures (`data/types.ts` note 7).
+ *
+ * Modelled on SOURCE-DISCOVERY §5's "Truck and trailer expenses" sheet:
+ * `Expense side` is `company`/`driver` when the sheet has it, `unknown`
+ * when it does not — which is the real defect (713 rows) this screen
+ * exists to clear. Grouped so the densest-first ordering has something
+ * real to demonstrate: three rows share the same driver+vendor and should
+ * clear in one bulk action, the rest are singletons.
+ * --------------------------------------------------------------------- */
+
+export const CHARGEBACK_ROWS: ChargebackRow[] = [
+  {
+    costRowId: 'cb-1',
+    sourceRef: { kind: 'sheet', label: 'Truck and trailer expenses ZONE', rowRef: 'row-1' },
+    truckId: 'trk-6169',
+    driverId: 'drv-2',
+    driverClass: 'lease_to_own',
+    vendor: 'M&Y',
+    description: 'brake job',
+    accrualDate: '2026-01-06',
+    amount: '-1245.00',
+    categoryId: 'maintenance.repair',
+    chargedTo: 'unknown',
+    decision: null,
+  },
+  {
+    costRowId: 'cb-2',
+    sourceRef: { kind: 'sheet', label: 'Truck and trailer expenses ZONE', rowRef: 'row-2' },
+    truckId: 'trk-6169',
+    driverId: 'drv-2',
+    driverClass: 'lease_to_own',
+    vendor: 'M&Y',
+    description: 'oil change',
+    accrualDate: '2026-01-09',
+    amount: '-129.00',
+    categoryId: 'maintenance.repair',
+    chargedTo: 'unknown',
+    decision: null,
+  },
+  {
+    costRowId: 'cb-3',
+    sourceRef: { kind: 'sheet', label: 'Truck and trailer expenses ZONE', rowRef: 'row-3' },
+    truckId: 'trk-6169',
+    driverId: 'drv-2',
+    driverClass: 'lease_to_own',
+    vendor: 'M&Y',
+    description: 'wiper blades',
+    accrualDate: '2026-01-11',
+    amount: '-42.50',
+    categoryId: 'maintenance.repair',
+    chargedTo: 'unknown',
+    decision: null,
+  },
+  {
+    costRowId: 'cb-4',
+    sourceRef: { kind: 'sheet', label: 'Truck and trailer expenses ZONE', rowRef: 'row-4' },
+    truckId: 'trk-15852',
+    driverId: 'drv-3',
+    driverClass: 'owner_operator',
+    vendor: 'EFS',
+    description: '2 tires replaced',
+    accrualDate: '2026-01-08',
+    amount: '-693.44',
+    categoryId: 'maintenance.tires',
+    chargedTo: 'unknown',
+    decision: null,
+  },
+  {
+    costRowId: 'cb-5',
+    sourceRef: { kind: 'sheet', label: 'Truck and trailer expenses ZONE', rowRef: 'row-5' },
+    truckId: 'trk-9859',
+    driverId: null,
+    driverClass: null,
+    vendor: 'Toll violations',
+    description: 'trl 12 towing and storage',
+    accrualDate: '2026-01-10',
+    amount: '-310.00',
+    categoryId: 'toll.violation',
+    chargedTo: 'unknown',
+    decision: null,
+  },
+  {
+    // Already decided — shows the queue is not only "unknown" rows; a
+    // previous decision stays visible with its own provenance (who/when).
+    costRowId: 'cb-6',
+    sourceRef: { kind: 'sheet', label: 'Truck and trailer expenses ZONE', rowRef: 'row-6' },
+    truckId: 'trk-50174',
+    driverId: 'drv-1',
+    driverClass: 'company',
+    vendor: 'EFS',
+    description: 'DOT inspection',
+    accrualDate: '2026-01-04',
+    amount: '-85.00',
+    categoryId: 'maintenance.repair',
+    chargedTo: 'company',
+    decision: { chargedTo: 'company', splitRatio: null, note: null, decidedBy: 'ops@example.com', decidedAt: '2026-01-05T10:00:00Z' },
   },
 ];

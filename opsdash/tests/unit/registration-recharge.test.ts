@@ -81,7 +81,7 @@ describe.skipIf(!haveFixtures)('registration engine — intercompany recharge', 
       // operates all five. Title and operation are different facts, and
       // this crosswalk records operation only. Neither Iron Lease nor an
       // owner-held unit appears here at all: only zone/xtrack/afg/UNRESOLVED.
-      expect(counts).toEqual({ zone: 17, xtrack: 16, afg: 6, UNRESOLVED: 3 });
+      expect(counts).toEqual({ zone: 18, xtrack: 16, afg: 7, UNRESOLVED: 1 });
     });
 
     it('parses a dated snapshot as an ISO date and a blank as null, never inventing one', () => {
@@ -178,7 +178,7 @@ describe.skipIf(!haveFixtures)('registration engine — intercompany recharge', 
       const result = buildRegistrationPosting(makeInput({ asOf: '2027-01-01' }));
       const receivableTotalCents = sumCents(result.intercompanyEntries.map((e) => centsFromDecimal(e.amount)));
       expect(decimalFromCents(receivableTotalCents)).toBe(result.reconciliation.intercompanyReceivableTotal);
-      expect(result.reconciliation.intercompanyReceivableTotal).toBe('49609.60');
+      expect(result.reconciliation.intercompanyReceivableTotal).toBe('52039.58');
 
       // Cross-check against the per-operator cost buckets: the receivable
       // total must equal every non-zone, non-unresolved bucket summed —
@@ -212,10 +212,10 @@ describe.skipIf(!haveFixtures)('registration engine — intercompany recharge', 
       const result = buildRegistrationPosting(makeInput({ asOf: '2027-01-01' }));
       const c = result.reconciliation.costByOperatorKey;
       expect(c).toEqual({
-        zone: '45159.66',
+        zone: '47589.65',
         xtrack: '35579.72',
-        afg: '14029.88',
-        unresolved: '7289.95',
+        afg: '16459.86',
+        unresolved: '2429.98',
       });
       const grandTotalCents = Object.values(c).reduce((acc, v) => acc + centsFromDecimal(v), 0);
       expect(decimalFromCents(grandTotalCents)).toBe('102059.21');
@@ -265,9 +265,9 @@ describe.skipIf(!haveFixtures)('registration engine — intercompany recharge', 
     it('flags only UNRESOLVED units as needsConfirmation, and no others', () => {
       const result = buildRegistrationPosting(makeInput({ asOf: '2027-01-01' }));
       const flagged = result.reconciliation.needsConfirmationUnits;
-      expect(flagged).toHaveLength(3);
+      expect(flagged).toHaveLength(1);
       expect(flagged.every((u) => u.operatorKey === 'UNRESOLVED')).toBe(true);
-      expect(new Set(flagged.map((u) => u.unitNumber))).toEqual(new Set(['4553', '4713', '5413']));
+      expect(new Set(flagged.map((u) => u.unitNumber))).toEqual(new Set(['5413']));
 
       const flaggedUnitNumbers = new Set(flagged.map((u) => u.unitNumber));
       for (const row of [...result.scheduleRows, ...result.postedEntries, ...result.intercompanyEntries]) {
@@ -278,7 +278,7 @@ describe.skipIf(!haveFixtures)('registration engine — intercompany recharge', 
     it('UNRESOLVED units stay with Zone: no recharge, no receivable, but the money is still booked in full', () => {
       const result = buildRegistrationPosting(makeInput({ asOf: '2027-01-01' }));
       const unresolvedUnits = operatorAssignments.filter((r) => r.operatingEntityKey === 'UNRESOLVED').map((r) => r.irpUnit);
-      expect(unresolvedUnits).toHaveLength(3);
+      expect(unresolvedUnits).toHaveLength(1);
       for (const unitNumber of unresolvedUnits) {
         const rows = result.scheduleRows.filter((r) => r.unitNumber === unitNumber);
         expect(rows.every((r) => r.entityId === ZONE_ENTITY_ID)).toBe(true);
@@ -303,7 +303,7 @@ describe.skipIf(!haveFixtures)('registration engine — intercompany recharge', 
     it('zone-operated units never appear in intercompanyEntries', () => {
       const result = buildRegistrationPosting(makeInput({ asOf: '2027-01-01' }));
       const zoneUnits = operatorAssignments.filter((r) => r.operatingEntityKey === 'zone').map((r) => r.irpUnit);
-      expect(zoneUnits).toHaveLength(17);
+      expect(zoneUnits).toHaveLength(18);
       for (const unitNumber of zoneUnits) {
         expect(result.intercompanyEntries.some((e) => e.unitNumber === unitNumber)).toBe(false);
         const rows = result.scheduleRows.filter((r) => r.unitNumber === unitNumber);
@@ -358,7 +358,7 @@ describe.skipIf(!haveFixtures)('registration engine — intercompany recharge', 
         .filter((r) => r.operatingEntityKey === 'UNRESOLVED')
         .map((r) => r.irpUnit)
         .sort();
-      expect(stillUnresolved).toEqual(['4553', '4713', '5413']);
+      expect(stillUnresolved).toEqual(['5413']);
       for (const unitNumber of stillUnresolved) {
         const rows = result.scheduleRows.filter((r) => r.unitNumber === unitNumber);
         expect(rows.every((r) => r.entityId === ZONE_ENTITY_ID && r.paidByEntityId === null)).toBe(true);

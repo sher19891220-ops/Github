@@ -21,6 +21,12 @@ export default function ScreensLayout({ children }: { children: ReactNode }) {
         <Link href="/overhead" style={{ color: 'var(--fg)', fontWeight: 600, textDecoration: 'none' }}>
           Per-truck overhead
         </Link>
+        <Link href="/reconciliation" style={{ color: 'var(--fg)', fontWeight: 600, textDecoration: 'none' }}>
+          Reconciliation
+        </Link>
+        <Link href="/chargeback" style={{ color: 'var(--fg)', fontWeight: 600, textDecoration: 'none' }}>
+          Chargeback
+        </Link>
       </nav>
       <main style={{ padding: '1.5rem' }}>{children}</main>
     </div>
