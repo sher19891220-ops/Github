@@ -1,0 +1,5 @@
+# Worktrees created by subagents running with `isolation: worktree`.
+# Each is a transient checkout of this same repository, created for one agent
+# and removed when it finishes. Committing them would nest the repo inside
+# itself; they are scratch space, never source.
+.claude/worktrees/
