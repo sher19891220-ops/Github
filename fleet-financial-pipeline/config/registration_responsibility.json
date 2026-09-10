@@ -1,0 +1,55 @@
+{
+  "_note": "Operator-supplied 2026-09-10, via chat: who actually BEARS the IRP/HVUT cost registration.py's 48 trucks name, as distinct from which company's P&L happens to carry the truck (that question is still answered by attribute() in registration.py -- this file answers a different one, and neither replaces the other). Applied in registration.py's attribute_by_responsibility().",
+
+  "unit_number_corrections": {
+    "_note": "Two of the 48 registered units do not resolve to any VIN in the fleet registry at all -- confirmed by checking both the registry and the IRP payment list directly (2026-09-10). Both have an exact match one or two digits off, and the operator confirmed both corrections by chat: '5852' should read '15852', '5417' should read '5091'. These are the SAME TRUCK, not a duplicate -- 15852 already has its own separate $33.00 replacement-plate payment in the sheet, so 15852's true total is $2,606.53 + $33.00 = $2,639.53, and 5091 is an owner-operator truck (VIN 3AKJHHDR1MSLX5417 -- the unit number and the VIN's own trailing digits are not the same thing, which is exactly the kind of mismatch this corpus has produced before, e.g. truck 8091/8132). CONFIRMED 2026-09-10 by an independent filing, not merely inferred: Ohio BMV's own IRP Vehicle Status report for ZONE-OH's account (data/raw/permits/irp_status/, ingest/parse_irp_status.py) lists BOTH VINs as currently active, under the exact numbers '5852' and '5417' -- i.e. those are the STATE's own designations for these trucks, and '15852'/'5091' are the internal group unit workbook's alternate numbering for the identical VINs. Every one of the filing's other 40 units matches the workbook with no renumbering at all, which is why these two are corrections and not evidence of a wider numbering split.",
+    "5852": "15852",
+    "5417": "5091"
+  },
+
+  "owner_operator_self_pay": {
+    "_note": "General policy, not a per-unit list: any of the 48 registered units flagged owner_operator=true in ingest/fleet_registry.py's registry() is the owner's own truck, and the owner-operator bears IRP and HVUT on it, not the operating company -- consistent with truck_breakeven.py and owner_operator.py already excluding an OO's own equipment costs from the company's side of the ledger. As of 2026-09-10 this resolves to units 5091 ($1,350.19, ZONE-operated -- operator says more detail is coming 'tomorrow', left as-is under this rule until then) and 8671 ($2,606.53, XTRACK-operated -- confirmed by the operator explicitly, 'he will be responsible for hvut and irp charges and we will deduct it from him' -- also one of the six lease-to-purchase VINs below, so the OO rule takes precedence over the lease-to-purchase one for this truck specifically). 7584 was ALSO an owner-operator truck but has its own bucket, departed_owner_operators, below -- that driver quit long ago and is excluded entirely rather than counted as a currently self-paying OO.",
+    "enabled": true
+  },
+
+  "investor_owned": {
+    "_note": "Operator, 2026-09-10: these trucks belong to the named investor, not to Iron Lease (the asset-holding company) or to whichever operating company's P&L happens to carry them. The investor bears IRP and HVUT on them.",
+    "Sher Imam": {
+      "stated_units": ["3898", "4546", "1365", "1596"],
+      "resolved_units": ["3898", "1365", "1596"],
+      "unresolved_units": ["4546"],
+      "unresolved_note": "Operator, 2026-09-10: 4546 is not registered yet -- registration is expected 'in a couple weeks'. Not a typo like 5852/5417 and not a data gap either: there is genuinely no IRP/HVUT payment for it yet, so it carries $0 today and belongs in this bucket the moment a payment for it appears in a future registration upload."
+    }
+  },
+
+  "departed_owner_operators": {
+    "_note": "Operator, 2026-09-10: 7584 was an owner-operator's truck and that driver quit the company long ago -- 'do not count him.' Same treatment as sold_paid_off_owners below (not the company's cost, and excluded from the running-fleet overhead spread since he is not an active operator to spread it over), kept as its own named bucket rather than folded into owner_operator_self_pay because that rule is for CURRENT owner-operators still running with the group.",
+    "units": ["7584"]
+  },
+
+  "sold_paid_off_owners": {
+    "_note": "Operator, 2026-09-10: truck 4851 (VIN 3AKJHHDV6LSKY4851, financed through Iron Lease LLC, driver Alphonse Jefferson) is 'sold' on the Iron Lease lease-to-own register -- CLAUDE.md's Lease-to-own section already established 'sold = the driver finished paying and took title' ($65,000 of $65,000, unit 4851). Alphonse Jefferson is 'no longer with us' -- not an active driver or owner-operator in this fleet. This is why 4851 was one of the three registration payments matching no VIN in the fleet registry at all (unlike 5852/5417, there is no typo to correct -- the group unit workbook simply never carried this truck once title passed). His registration cost is not the group's to bear, and -- since he is not an active operator either -- it is excluded from the running fleet's overhead entirely, not spread across it.",
+    "Alphonse Jefferson": {"units": ["4851"], "vin": "3AKJHHDV6LSKY4851",
+                            "status": "sold / paid off, no longer affiliated with the company"}
+  },
+
+  "lease_to_purchase_owners": {
+    "_note": "Operator, 2026-09-10: confirmed to deduct -- 'lease to purchase owners' bear their own IRP/HVUT. 8671 is also an owner-operator truck and is counted there instead (the more specific rule; the operator confirmed deducting it 'from Owner Operators', not from this bucket, so it is not double-counted here). The remaining five have no individual owner name in this corpus the way Alphonse Jefferson or Sher Imam do -- grouped under this bucket rather than guessed at by name.",
+    "vins": ["3AKJHHDR0LSLR8671", "3AKJHHDR2NSMY4857", "3AKJHHDR5NSMY1564",
+              "3AKJHHDRXNSMY4718", "3AKJHHDR0NSMY1682", "3AKJHHDR4NSMY5413"],
+    "already_owner_operator": ["8671"],
+    "units": ["4857", "1564", "4718", "1682", "5413"],
+    "stated_driver_rate": {
+      "_note": "Operator, 2026-09-10: 'those driver will be responsible for hvut cost which is 550$ each and irp amount that is 1880$ each unit' -- a STATED flat rate to charge these drivers, not each truck's own actual registration cost. CLAUDE.md already documents that IRP is apportioned per truck on miles and weight and runs $438-$1,430 a truck (3.3x spread) -- a flat $1,880 IRP rate is ABOVE that entire measured range, so this deducts MORE from most of these five drivers than the company actually paid the state for their trucks. Used here as the deduction amount because it is what will actually be charged/recovered, per the operator; the actual per-truck cost is kept alongside it (ltp_rate_comparison in attribute_by_responsibility()'s output) so the gap is visible, not hidden.",
+      "hvut": 550,
+      "irp": 1880,
+      "total": 2430
+    }
+  },
+
+  "remaining_pool_split": {
+    "_note": "Operator, 2026-09-10: 'rest units we spend money for irp and hvut should be equally divided between companies all units' -- every registered truck not covered by an owner-operator, investor, or lease-to-purchase-owner rule above is split EQUALLY across ZONE, XTRACK and AFG (1/3 each), replacing attribute()'s 'whichever company's P&L last carried it' rule for this specific cost. The two are different questions answered from the same data -- attribute() still shows who ran the truck; this shows who now pays for it -- and this file does not delete or override attribute(), it sits beside it.",
+    "method": "equal_three_way",
+    "companies": ["ZONE", "XTRACK", "AFG"]
+  }
+}

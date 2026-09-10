@@ -40,6 +40,7 @@ charge to the cent. Every one of those is a false positive that would have
 "confirmed" a payment that never happened, so the reconciler only ever looks
 inside rows already identified as that vendor's.
 """
+import json
 import sys
 import warnings
 from collections import defaultdict
@@ -53,8 +54,11 @@ import pandas as pd                 # noqa: E402
 
 import fleet_registry as F          # noqa: E402
 import parse_irp as R               # noqa: E402
+import parse_irp_status as S        # noqa: E402
 
 BANK = ROOT / "data/processed/boa_transactions.csv"
+RESPONSIBILITY_CFG = ROOT / "config/registration_responsibility.json"
+IRP_STATUS_FILINGS = [ROOT / "data/raw/permits/irp_status/zone_oh_irp_vehicle_status_2026-09-09.pdf"]
 # The two counterparties registration money actually leaves through. Matching on
 # these first is the whole reconciler -- see the module docstring.
 VENDORS = {"irp": r"OHIODPSIRP|IRP FEE", "hvut": r"USATAXPYMT"}
@@ -63,6 +67,11 @@ WEEKS = 52.0
 # The date the 21 insured units stopped appearing in any P&L. Reused here so
 # "still running" means the same thing in both modules.
 RUNNING_SINCE = "2026-07-06"
+# The running fleet this cost is actually spread over, once owner-operator,
+# investor, lease-to-purchase-owner and sold/paid-off trucks are stripped
+# out -- the same 90-truck split (17 AFG + 32 ZONE + 41 XTRACK) already used
+# throughout this corpus for shared per-truck costs (ELD, Samsara, admin fee).
+RUNNING_FLEET = {"ZONE": 32, "XTRACK": 41, "AFG": 17}
 
 
 def unit_index():
@@ -100,6 +109,147 @@ def attribute(per_truck, idx):
         if best.get("last_week") and best["last_week"] < RUNNING_SINCE:
             stale[u] = (v["total"], best["last_week"], co)
     return dict(out), unresolved, stale
+
+
+def deduplicated_per_truck(payments):
+    """R.per_unit(), corrected for the one sheet defect this corpus already
+    proves is real, not merely suspected: the $2,493.34 IRP row for units
+    1365/1564/1596 is printed TWICE in the source sheet -- 'the row is
+    duplicated, no money was lost' (CLAUDE.md, confirmed against the bank,
+    which shows one debit, not two). `parse_irp.py`'s per_unit() sums every
+    row as printed and inherits the double-count, which is harmless for a
+    report that only ever says the sheet's own total is overstated -- but
+    would silently overcharge a real person (an investor, a driver) for
+    money that was never actually spent if used as-is for who bears the
+    cost. Corrected here, once, before anything downstream reads it."""
+    per_truck = R.per_unit(payments)
+    for _, dup in R.duplicates(payments):
+        each = dup["amount"] / len(dup["units"])
+        for u in dup["units"]:
+            per_truck[u]["total"] -= each
+    return per_truck
+
+
+def attribute_by_responsibility(payments, idx, cfg_path=RESPONSIBILITY_CFG):
+    """Who actually BEARS the IRP/HVUT cost -- a different question from
+    attribute()'s 'whose P&L last carried the truck'. An owner-operator's own
+    truck, a named investor's truck, a lease-to-purchase owner's truck, and a
+    truck already sold to a driver no longer affiliated with the company are
+    none of them a cost the operating company should carry, no matter which
+    company's P&L the truck happens to sit on. See
+    config/registration_responsibility.json for what each bucket rests on.
+
+    Returns (by_bearer, detail) -- detail lists, per unit, which rule fired and
+    what it would have been under attribute()'s company-of-record rule, so a
+    reader can see exactly what moved and why.
+    """
+    per_truck = deduplicated_per_truck(payments)
+    cfg = json.loads(Path(cfg_path).read_text())
+    corrections = cfg["unit_number_corrections"]
+    oo_enabled = cfg["owner_operator_self_pay"]["enabled"]
+    investors = {name: set(v["resolved_units"])
+                 for name, v in cfg["investor_owned"].items() if name != "_note"}
+    sold_owners = {name: set(v["units"]) for name, v in
+                   cfg["sold_paid_off_owners"].items() if name != "_note"}
+    departed_oo = set(cfg["departed_owner_operators"]["units"])
+    ltp_owners = set(cfg["lease_to_purchase_owners"]["units"])
+    ltp_rate = cfg["lease_to_purchase_owners"]["stated_driver_rate"]["total"]
+    companies = cfg["remaining_pool_split"]["companies"]
+    rate_comparison = []
+
+    # Corrected unit -> total, merging into any payment the corrected number
+    # already carries under its own name (15852 has both).
+    corrected = defaultdict(float)
+    origin = defaultdict(list)
+    for u, v in per_truck.items():
+        cu = corrections.get(str(u), str(u))
+        corrected[cu] += v["total"]
+        origin[cu].append(str(u))
+
+    by_bearer = defaultdict(float)
+    detail = []
+    unresolved = {}
+    equal_pool = 0.0
+    equal_pool_units = []
+
+    for cu, amt in corrected.items():
+        # Checked before the registry lookup: a sold/paid-off truck can be
+        # named by the operator directly even when -- like 4851 -- it never
+        # appears in the group unit workbook at all, because title passed to
+        # a driver who is no longer affiliated with the company.
+        if any(cu in units for units in sold_owners.values()):
+            name = next(n for n, units in sold_owners.items() if cu in units)
+            by_bearer[f"SOLD: {name} (paid off, not affiliated)"] += amt
+            detail.append((cu, amt, f"SOLD: {name} (paid off, not affiliated)", origin[cu]))
+            continue
+
+        # Same treatment as sold/paid-off: not affiliated, so not the
+        # company's cost and not spread over the running fleet either.
+        if cu in departed_oo:
+            by_bearer["DEPARTED OWNER-OPERATOR (not affiliated)"] += amt
+            detail.append((cu, amt, "DEPARTED OWNER-OPERATOR (not affiliated)", origin[cu]))
+            continue
+
+        rows = idx.get(cu)
+        if not rows:
+            unresolved[cu] = amt
+            by_bearer["NOT IN THE FLEET REGISTRY"] += amt
+            detail.append((cu, amt, "NOT IN THE FLEET REGISTRY", origin[cu]))
+            continue
+        best = max(rows, key=lambda r: r.get("last_week") or "")
+        pnl_company = best.get("company") or "NO COMPANY ON ANY P&L"
+
+        if oo_enabled and best.get("owner_operator"):
+            bearer = "OWNER-OPERATOR (self-pay)"
+        elif any(cu in units for units in investors.values()):
+            bearer = next(f"INVESTOR: {name}" for name, units in investors.items()
+                          if cu in units)
+        elif cu in ltp_owners:
+            bearer = "LEASE-TO-PURCHASE OWNER (self-pay)"
+            rate_comparison.append((cu, amt, ltp_rate))
+            by_bearer[bearer] += ltp_rate
+            detail.append((cu, ltp_rate, bearer, origin[cu], pnl_company))
+            continue
+        else:
+            equal_pool += amt
+            equal_pool_units.append(cu)
+            detail.append((cu, amt, "EQUAL SPLIT ACROSS ZONE/XTRACK/AFG",
+                          origin[cu], pnl_company))
+            continue
+        by_bearer[bearer] += amt
+        detail.append((cu, amt, bearer, origin[cu], pnl_company))
+
+    share = equal_pool / len(companies) if companies else 0.0
+    for co in companies:
+        by_bearer[co] += share
+
+    return dict(by_bearer), detail, {"pool": equal_pool, "units": equal_pool_units,
+                                      "per_company": share,
+                                      "ltp_rate_comparison": rate_comparison}
+
+
+def check_against_irp_status(idx, payment_units, filings=IRP_STATUS_FILINGS):
+    """Cross the state's own IRP Vehicle Status filing(s) against the internal
+    group workbook and the registration payment list. Returns one dict per
+    filing: the state's unit numbering vs the workbook's (should be empty
+    once unit_number_corrections is applied), any filed VIN the workbook has
+    never heard of (a real gap, not a formatting quirk), and which paid
+    units are NOT active on this specific filing (sold, stopped running, or
+    plausibly registered on a different account this filing does not cover)."""
+    reg_rows, _ = F.registry()
+    payment_units = {str(u) for u in payment_units}
+    out = []
+    for path in filings:
+        if not Path(path).exists():
+            continue
+        rows, header = S.read(path)
+        renumbered, unmatched = S.compare_to_group_workbook(rows, reg_rows)
+        filed_units = {r["unit"] for r in rows}
+        out.append({"header": header, "controls": S.controls(rows, header),
+                    "renumbered": renumbered, "unmatched": unmatched,
+                    "paid_not_on_filing": sorted(payment_units - filed_units,
+                                                  key=lambda x: str(x))})
+    return out
 
 
 def bank_rows():
@@ -218,6 +368,65 @@ def main():
             print(f"    {u:<8}{v:>9,.0f}   last seen {wk or '-'}   {co or '-'}")
         print("  Unlike the insurance, this money does NOT come back. IRP and HVUT")
         print("  are paid for the year; there is no return premium on a plate.")
+
+    by_bearer, resp_detail, pool = attribute_by_responsibility(payments, idx)
+    print(f"\n== WHO BEARS IT, NOT JUST WHO RAN IT ==")
+    print("  A different question from the table above: owner-operators and named")
+    print("  investors bear their own IRP/HVUT regardless of which company's P&L")
+    print("  the truck sits on. See config/registration_responsibility.json.\n")
+    print(f"  {'bearer':<42}{'annual':>12}{'per week':>11}")
+    for b, v in sorted(by_bearer.items(), key=lambda kv: -kv[1]):
+        print(f"  {b:<42}{v:>12,.2f}{v / WEEKS:>11,.2f}")
+    print(f"\n  {len(pool['units'])} units, ${pool['pool']:,.2f}, split equally three "
+          f"ways (${pool['per_company']:,.2f} each) -- every registered truck not an "
+          "owner-operator's, a named investor's, a lease-to-purchase owner's, a "
+          "sold/paid-off unit, or a departed owner-operator no longer affiliated "
+          "with the company.")
+
+    if pool["ltp_rate_comparison"]:
+        print(f"\n  LEASE-TO-PURCHASE: STATED DRIVER RATE VS ACTUAL REGISTRATION COST")
+        print("  Operator, 2026-09-10: these drivers are charged a flat $550 HVUT +")
+        print("  $1,880 IRP = $2,430/unit, not the truck's own actual cost -- IRP is")
+        print("  apportioned per truck on miles and weight (CLAUDE.md: $438-$1,430 a")
+        print("  truck, 3.3x spread), so a flat rate will not equal actual for most units.")
+        print(f"  {'unit':<8}{'actual':>10}{'stated':>10}{'company over/under':>21}")
+        for u, actual, stated in pool["ltp_rate_comparison"]:
+            print(f"  {u:<8}{actual:>10,.2f}{stated:>10,.2f}{actual - stated:>21,.2f}")
+
+    n = sum(RUNNING_FLEET.values())
+    print(f"\n  Spread across the {n}-truck running fleet (not just the 48 with a "
+          f"registration payment): ${pool['pool'] / n:,.2f}/truck/year = "
+          f"${pool['pool'] / n / WEEKS:,.2f}/truck/week = "
+          f"${pool['pool'] / n / 365:,.2f}/truck/day. This REPLACES the earlier "
+          f"${total / len(per_truck):,.2f}/truck/year figure at the top of this report "
+          "for any use that should exclude what owner-operators, investors, "
+          "lease-to-purchase owners and sold trucks now bear themselves.")
+
+    for chk in check_against_irp_status(idx, set(per_truck.keys())):
+        h = chk["header"]
+        print(f"\n== CHECKED AGAINST THE STATE'S OWN IRP FILING ==")
+        print(f"  {h.get('legal_name')}, account {h.get('account')}, "
+              f"{h.get('stated_total')} active units, filed as of the run date.")
+        for f, detail in chk["controls"]:
+            print(f"  CONTROL FAILED: {f} {detail or ''}")
+        if chk["renumbered"]:
+            print(f"  {len(chk['renumbered'])} unit(s) the state numbers differently than "
+                  "the internal group workbook -- both of these were already corrected in "
+                  "config/registration_responsibility.json, now CONFIRMED by a filing "
+                  "rather than inferred from a one-digit-off match:")
+            for state_u, internal_u, co, oo in chk["renumbered"]:
+                print(f"    state={state_u:<8} internal={internal_u}  company={co}  OO={oo}")
+        else:
+            print("  No renumbering left unresolved.")
+        if chk["unmatched"]:
+            print(f"  {len(chk['unmatched'])} filed VIN(s) the group workbook has never "
+                  "heard of -- a real gap, not a formatting quirk:")
+            for row in chk["unmatched"]:
+                print(f"    {row['unit']:<8}{row['vin']}")
+        if chk["paid_not_on_filing"]:
+            print(f"  {len(chk['paid_not_on_filing'])} paid unit(s) NOT active on this "
+                  "filing -- sold, stopped running, or on a different account this filing "
+                  f"does not cover: {', '.join(chk['paid_not_on_filing'])}")
 
     matched, unmatched, extra, dupe_paid = reconcile(payments, red)
     print(f"\n== THE SHEET AGAINST THE BANK ==")

@@ -1097,6 +1097,181 @@ premium on a plate: the $2,607 on unit 2703, last seen in a P&L 2026-02-23, is
 spent. Three registered trucks (4851, 5417, 5852, $6,563) are on no unit list at
 all.
 
+## Who BEARS the registration cost, not just who ran the truck
+
+`analysis/registration.py`'s `attribute_by_responsibility()`, config
+`config/registration_responsibility.json`, operator-supplied 2026-09-10 via
+chat. A different question from `attribute()` above (whose P&L last carried
+the truck): an owner-operator's own truck, a named investor's truck, and a
+lease-to-purchase truck not yet paid off are none of them a cost the operating
+company should carry, no matter which company's P&L the truck sits on. Neither
+function replaces the other -- they sit side by side, answering different
+questions from the same 48-truck payment list.
+
+**TWO OF THE "ON NO UNIT LIST AT ALL" TRUCKS WERE MISTYPED, NOT MISSING.**
+5852 and 5417 -- named above as 2 of the 3 registered trucks unresolvable to
+any VIN -- are one or two digits off a real truck each: 5852 should read
+15852 (ZONE, which already carries its own separate $33.00 replacement-plate
+line, so 15852's true total is $2,639.53), and 5417 should read 5091 (VIN
+3AKJHHDR1MSLX5417 -- the unit number and the VIN's own trailing digits are not
+the same thing, the same kind of mismatch that produced truck 8091/8132
+earlier in this corpus). Operator-confirmed by chat; 4851 remains genuinely
+unresolved.
+
+**OWNER-OPERATORS BEAR THEIR OWN IRP/HVUT.** General policy, not a per-unit
+list -- any of the 48 registered units flagged `owner_operator=true` in
+`ingest/fleet_registry.py`'s registry() is the owner's own truck. Resolves to
+5091 ($1,350.19, ZONE-operated), 7584 ($2,826.40, company unresolved on the
+P&L side -- the OO flag does not depend on that), and 8671 ($2,606.53,
+XTRACK-operated).
+
+**NAMED INVESTORS BEAR THEIR OWN, TOO.** Trucks 3898, 1365 and 1596 belong to
+investor Sher Imam (also named elsewhere in this corpus: the Pedigree
+trailer-tracking invoice, the Truck Max "Sher Imam" payer bucket, and a
+nominal $120/month MANAGER payroll line) -- $5,431.37 combined, none of it
+ZONE's or AFG's to carry even though both those companies' P&Ls show the
+trucks. **A fourth unit the operator named, 4546, could not be resolved** --
+it matches no VIN in the fleet registry and no unit in the registration
+payment list at all, and unlike 5852/5417 it has no exact one-digit-off match
+this corpus can confirm. Left out of the investor bucket rather than guessed
+(a plausible candidate, 4553, AFG, $987.59, is already in the list under its
+own name) -- flagged back to the operator instead.
+
+**LEASE-TO-PURCHASE TRUCKS STAY WITH THE OPERATING COMPANY UNTIL PAID OFF,
+PENDING CONFIRMATION.** Six VINs (3AKJHHDR0LSLR8671, 3AKJHHDR2NSMY4857,
+3AKJHHDR5NSMY1564, 3AKJHHDRXNSMY4718, 3AKJHHDR0NSMY1682,
+3AKJHHDR4NSMY5413 -- units 8671/4857/1564/4718/1682/5413) will belong to their
+lease-to-purchase drivers once paid off. 8671 is ALSO an owner-operator truck
+already (the more specific rule applies, so it is charged to the OO, not held
+pending); the other five ($5,076.60 XTRACK, $1,382.07 AFG, $1,006.92
+unresolved-company) are tagged pending-payoff but, absent a stated effective
+date, still attributed to whichever company operates them today -- a judgment
+call this file does not make silently, flagged back to the operator rather
+than assumed either way.
+
+**EVERYTHING ELSE SPLITS EQUALLY ACROSS THE THREE COMPANIES, NOT BY WHO RAN
+IT.** Operator, 2026-09-10: every registered truck not covered by the three
+rules above -- 35 of the 48 -- has its IRP/HVUT divided ONE-THIRD each to
+ZONE, XTRACK and AFG ($17,813.39 apiece on $53,440.18), replacing
+`attribute()`'s "whichever company's P&L last carried it" rule for this
+specific cost. That rule still runs, unchanged, for the question it actually
+answers.
+
+**WHERE THIS BELONGS: FIXED COST, NOT OVERHEAD -- THE ATTRIBUTION CHANGED,
+THE CLASSIFICATION DID NOT.** Registration was already `cost_structure.py`'s
+own per-truck fixed-cost line (annual, prepaid, does not vary with miles --
+the same shape as insurance) before any of this; nothing here moves it into
+"overhead" (the shared staff/office roster spread across the whole fleet).
+WHO pays a fixed cost and WHETHER a cost is fixed are two different
+questions -- this file only answers the first.
+
+**4851 resolved, and three more named**, 2026-09-10: 4851 is VIN
+`3AKJHHDV6LSKY4851`, financed through Iron Lease LLC, driver Alphonse
+Jefferson, status "sold" -- exactly the lease-to-own outcome the "Lease-to-
+own" section above already established for this driver and unit ($65,000 of
+$65,000 paid). He is no longer affiliated with the company. New bucket,
+`sold_paid_off_owners` in the config: his $2,606.53 is excluded from company
+cost AND from the running-fleet overhead spread (he is not an active
+operator to spread it over). The five other lease-to-purchase VINs (all but
+8671, which stays under the owner-operator rule) are now confirmed deducted
+too -- $7,465.59 (1564, 4718, 1682 XTRACK; 4857 AFG; 5413 company-
+unresolved). **Remaining company-borne pool: $53,440.18**, spread as
+overhead across the 90-truck running fleet (17 AFG + 32 ZONE + 41 XTRACK,
+the same denominator used throughout this corpus): **$593.78/truck/year =
+$11.42/truck/week = $1.63/truck/day** -- this is the number to use in place
+of the original $1,726.60/truck/year wherever the question is what the
+GROUP's own running fleet costs, as distinct from what individual owners and
+investors now pay themselves.
+
+## The state's own IRP filing confirms the two corrections above, and finds three more open questions
+
+`ingest/parse_irp_status.py`, `registration.py`'s `check_against_irp_status()`.
+Ohio BMV's "IRP - Vehicle Status" report (`data/raw/permits/irp_status/`,
+uploaded 2026-09-10) is a FILING -- account 98142, ZONE-OH LLC, 42 units
+currently active, run on demand from the state, not a hand-kept sheet. Per
+this corpus's own evidence hierarchy it outranks the internal group unit
+workbook the way an IFTA return outranks the P&L sheet.
+
+**EVERY ONE OF THE 42 FILED VINS RESOLVES IN THE GROUP WORKBOOK, AND ONLY
+TWO ARE RENUMBERED** -- exactly the two `unit_number_corrections` already
+made from the operator's own correction (5852/5417), now independently
+confirmed rather than merely inferred from a one-digit-off match. No other
+truck in this 42-unit fleet has a numbering mismatch, which is what makes
+these two corrections and not evidence of a wider split.
+
+**SIX PAID UNITS ARE NOT ON THIS CURRENT ACTIVE LIST**: 15852 (the internal-
+workbook twin of 5852, already accounted for), 2703 (already known stopped
+running, last seen in a P&L 2026-02-23), 4851 (sold to Alphonse Jefferson,
+above), **7584** (resolved below -- its owner-operator quit long ago), and
+two still open -- **6867** (ZONE, active in the P&L as recently as
+2026-08-03, no reason yet why it is off ZONE-OH's account), and **9859**
+(XTRACK-run -- plausibly registered on a separate XTRACK IRP account this
+filing does not cover, not yet confirmed). Neither of the two is assumed to
+be dropped from the fleet; they are reported as a filing gap to close, the
+same way the Oregon-return gap is reported rather than priced at zero.
+
+`tests/test_irp_status.py` locks in the parse's own control (matches the
+filing's stated 42-unit total) and the cross-check result; skipped when the
+filing is absent, the same pattern as every other raw-corpus-dependent test.
+
+## Registration responsibility, round two: departed drivers, a stated lease-to-purchase rate, and a real duplicate-row bug
+
+Operator, 2026-09-10, via chat, following up on the responsibility work above.
+
+**7584 IS THE DEPARTED-DRIVER CASE, NOT AN ONGOING SELF-PAY ONE.** "it was
+Owner operators truck and he quit the company long time ago do not count
+him." New bucket, `departed_owner_operators` -- same treatment as
+`sold_paid_off_owners` (4851): excluded from company cost AND from the
+running-fleet overhead spread, since he is not an active operator to spread
+it over. $2,826.40 moves out of `OWNER-OPERATOR (self-pay)` into its own
+line. This also resolves one of the three open questions the IRP-filing
+cross-check above raised (7584 was one of the six paid units missing from
+ZONE-OH's active 42) -- he left, so of course his truck is not on it.
+
+**5091 IS STILL PENDING.** "I will let you know about him tomorrow." Left
+under `owner_operator_self_pay` unchanged until then.
+
+**8671 CONFIRMED, UNCHANGED**: "he will be responsible for hvut and irp
+charges and we will deduct it from him" -- already modeled under the
+owner-operator rule, taking precedence over the lease-to-purchase rule for
+this one truck.
+
+**THE OTHER FIVE LEASE-TO-PURCHASE TRUCKS NOW CARRY A STATED FLAT RATE, NOT
+THEIR ACTUAL COST.** "those driver will be responsible for hvut cost which
+is 550$ each and irp amonut that is 1880$ each unit" -- $2,430/unit,
+`stated_driver_rate` in the config. This is ABOVE the entire measured IRP
+range this corpus has established ($438-$1,430/truck, 3.3x spread) for
+every one of the five (1564, 1682, 4718, 4857, 5413): the company will
+recover $945.83-$1,423.08 MORE per truck than it actually paid the state,
+$5,515.53 combined. Not treated as an error -- it is what the operator says
+will actually be charged -- but reported as a stated-vs-actual gap the same
+way `driver_arrangement_rates.json`'s truck-2703 rent already is, not
+silently assumed to equal cost.
+
+**A REAL DUPLICATE-ROW BUG, FOUND ANSWERING WHY SHER IMAM'S TOTAL LOOKED
+WRONG.** The operator questioned the $5,431.37 investor total against an
+expected $5,639 -- chasing that down surfaced a genuine defect this corpus
+had already documented but never corrected in the code: the $2,493.34 IRP
+payment for units 1365/1564/1596 is printed TWICE in the source sheet ("the
+row is duplicated, no money was lost," confirmed against the bank, which
+shows one debit). `parse_irp.py`'s `per_unit()` sums every row as printed
+and inherited the double-count -- harmless for a report that only ever says
+the sheet's own total is overstated, but it would have silently overcharged
+Sher Imam for money never actually spent. New function,
+`registration.py`'s `deduplicated_per_truck()`, removes exactly the
+duplicated row's share (one instance of $831.11) from each of the three
+trucks before anything downstream reads it. **Corrected Sher Imam total:
+$3,769.15** (was $5,431.37) -- LOWER than both the original figure and the
+operator's expected $5,639, so this does not resolve the operator's
+question; it replaces one unexplained number with a different, better-
+evidenced one and leaves the $5,639 origin still open.
+
+**NONE OF THIS MOVES THE RUNNING-FLEET OVERHEAD FIGURE.** The equal-split
+pool was already $53,440.18 before this round (7584, the LTP trucks, and
+the duplicate-affected trucks were already excluded from it) and is
+unchanged after -- still **$593.78/truck/year = $11.42/truck/week =
+$1.63/truck/day** across the 90-truck running fleet.
+
 ## Cost of a truck-day, and break-even for one truck
 
 `analysis/truck_breakeven.py`. Three measured pieces, no chart of accounts:
