@@ -462,15 +462,37 @@ registered but absent from the list.
 | 4851 | no | sold |
 | 9859 | no | registered on **Xtrack's** IRP account |
 | 6169 | no | registered on **Xtrack's** IRP account |
-| **15852** | **no** | **active, title Iron Lease — no registration found on this invoice** |
+| **15852** | **yes** | registered as `5852` on the invoice — a dropped leading digit, confirmed by VIN and plate |
 | 5417, 5852 | yes | registered here; operator says both are Xtrack, and neither appears in the settlement sheet |
 
-**Only one item is unexplained: 15852.** It is Zone-operated in every weekly
-snapshot, moved 1,684 miles in the second-to-last week, and does not appear on
-this invoice. Apportioned registration for an active interstate unit is not
-optional, so this is either registered on an account not visible here (Xtrack's,
-or Iron Lease's own) or a genuine gap. **Only the operator can distinguish
-those**, and it is recorded rather than assumed either way.
+**Correction — 15852 is registered.** An earlier revision of this section, and
+the answer given to the operator, said it was not. Both were wrong, and the
+error came from comparing unit numbers instead of VINs.
+
+Re-running the comparison on VIN rather than unit number resolves two
+discrepancies that a number-to-number match cannot see:
+
+| Invoice says | Your sheet says | VIN | Plate |
+| --- | --- | --- | --- |
+| `5852` | **`15852`** | `3AKJHHDRXNSNB8619` | PXE0448 |
+| `5417` | **`5091`** | `3AKJHHDR1MSLX5417` | PXF0322 |
+
+Same VIN, same plate, in both cases. The first is a dropped leading digit on the
+registration record. The second is a genuine numbering disagreement: the BMV
+used the VIN tail (`5417`) while the office uses its own number (`5091`).
+
+**Every one of the 42 registered VINs appears in the company sheets.** There are
+no orphans. Corrected totals:
+
+- **Not registered (5):** 2703, 4546, 4851, 6867, 9859 — all explained by the
+  operator (sold, pending, paid off, or on another carrier's account).
+- **Registered but not on the operator's list (1):** the unit the office calls
+  **5091**.
+
+This is the clearest possible argument for §11b's rule. Comparing unit numbers
+produced two false findings — one truck wrongly reported as unregistered, and
+another wrongly reported as an unknown extra. Comparing VINs produced neither.
+**Unit numbers are per-system aliases; only the VIN identifies a truck.**
 
 The wider lesson for the data model: **absence from one IRP invoice is not
 evidence of non-registration.** Each carrier runs its own IRP account, and this
