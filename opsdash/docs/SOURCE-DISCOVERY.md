@@ -395,6 +395,59 @@ for: lease-to-own drivers reimburse their own unit, and the company bears the
 rest. Resolving that split needs the lease-to-own roster — of these 42 units,
 only 11 currently resolve to a driver class from the 2026 dispatch sheet.
 
+## 11d. The settlement sheet is the effective-dated entity history
+
+The lease-to-own settlement workbook is the source §8 was missing. It holds
+**weekly snapshots** (May–Aug 2026 observed), each grouped under `ZONE:`,
+`Xtrack:` and `AFG:`, with per-truck mileage, mileage charge, worked weeks,
+truck rent and EFS/maintenance chargebacks.
+
+Because it snapshots weekly, it is not a mapping — it is a **time series**, and
+therefore a direct source for `truck_entity_history` with real effective dates.
+That closes the gap the transfer remarks could not: those carried a date in 1
+case out of 46.
+
+Tested rather than assumed: of 39 trucks, 11 appear under more than one entity.
+Ordering each truck's appearances by snapshot date, **10 of the 11 form a single
+clean chronological move** (`afg 05.10→06.28, then zone 07.05→08.30`). They are
+transfers, not contradictions. One truck round-trips zone → xtrack → zone and
+needs a human look.
+
+Parsing note: entity blocks end at a totals row, but the column header itself
+contains the word "Total" (`Truck Rent total`), so a naive block-end test
+terminates the block before reading a single row. Data rows carry a numeric
+index in the first cell; that is the reliable boundary.
+
+## 11e. Registration entity ≠ operating entity
+
+The IRP invoice is billed to **ZONE-OH LLC** and covers 42 units. The settlement
+sheet says **24 of those units are operated under Xtrack or AFG**, and the
+operator separately confirmed two more (5417, 5852) as Xtrack.
+
+So the entity that *registers and pays* is not always the entity that *operates
+and earns*. Booking the whole invoice to Zone would overstate Zone's cost and
+understate the other two — silently, and by a wide margin.
+
+This is a business-structure question, not a data defect: title and apportioned
+registration legitimately sit with one entity while another runs the truck. The
+ledger must therefore distinguish **the entity that paid** from **the entity the
+cost is attributed to**, and the correct treatment (Zone bears it, or Zone
+recharges the operating entity) is the operator's call, not an inference.
+
+Until answered, registration costs post to the paying entity with the operating
+entity recorded, so the split can be restated without re-ingesting anything.
+
+## 11f. Correction to the homogeneity claim
+
+§11c said the fleet was uniform in "weight group, type and year". Only the
+weight group is: **42 of 42 at group 80**. Type is 39 TT / 3 TR, year spans
+2020–2023, and make is 41 Freightliner plus 1 Volvo.
+
+The even-split allocation still stands, because apportioned IRP is driven by
+weight and jurisdiction rather than by model year — but the justification is
+narrower than first written, and the posting code asserts weight-group
+uniformity specifically.
+
 ## 12. Open decisions
 
 1. ~~Is Truck Max USA in scope?~~ **Answered: no.** Truck Max and Fleet Prime
