@@ -335,6 +335,66 @@ categories from it.
 §2's prohibition holds. It does mean bank-derived data reaches the ledger by way
 of a spreadsheet, which is worth stating plainly rather than discovering later.
 
+## 11b. VIN is the universal crosswalk — proven
+
+An IRP invoice for a 42-unit fleet settled how identity should be resolved
+across systems, because it exposed a **third** numbering scheme.
+
+| Join attempted | Result |
+| --- | --- |
+| IRP unit number → operational unit number | **10 of 42** |
+| IRP plate → decal registry plate | **0 of 42** |
+| **IRP VIN → company-list VIN** | **42 of 42** |
+
+The IRP unit number is **the last four of the VIN** (37 of 42 confirm it
+directly), not the number the office uses. Plates do not join either, because
+the registry's plate column sits in a differently shaped section and holds
+dates in places.
+
+**Consequence for `source_key_map`: VIN is the primary key for a truck.**
+Operational unit numbers are a per-system alias and must never be joined on
+across systems. Anything registration-related (IRP, IFTA decals, HVUT, title,
+insurance) keys on VIN; anything operational (dispatch, fuel, expenses) keys on
+the unit number, and the two only meet through the crosswalk.
+
+## 11c. Registration and road-tax costs — a worked example
+
+A real IRP renewal, useful because it is the permit engine's first genuine
+input and it reconciles exactly.
+
+| Fee line | Amount |
+| --- | --- |
+| Registration Fee | 4,067.28 |
+| Foreign Jurisdiction Fees | 74,554.18 |
+| BMV Fee | 336.00 |
+| Postage | 1.75 |
+| **Invoice total** | **78,959.21** |
+
+The parts sum to the stated total to the cent. Fleet: **ZONE-OH LLC**, 42 units,
+**every one weight group 80**, expiring 09/2027. HVUT is a flat **$550 per
+unit**, so **$23,100** for the same 42.
+
+Two things follow that the ledger must respect.
+
+**Per-unit IRP is an allocation, not an actual.** The invoice is a fleet-level
+total; no per-unit breakdown exists on it. An even split is $1,879.98 per unit,
+and it is *defensible here only because the fleet is homogeneous* — same weight
+group, type and year. It is still an allocation, so it posts with a memo saying
+so, and `source_kind` stays `document` pointing at the invoice. A per-unit
+figure presented as an actual would breach §2.
+
+**Annual costs must amortize, not land on one day.** IRP runs to a registration
+year and HVUT to the federal tax year. Expensing $1,879.98 + $550 on the payment
+date makes that truck catastrophically unprofitable for a day and free for the
+rest of the year, which would make "profitable vs negative trucks" on the CEO
+dashboard meaningless. These post as a prepaid balance amortized monthly over
+the coverage period, with the payment itself recorded against the invoice.
+
+**HVUT is split by driver class**, which is exactly what `charged_to` exists
+for: lease-to-own drivers reimburse their own unit, and the company bears the
+rest. Resolving that split needs the lease-to-own roster — of these 42 units,
+only 11 currently resolve to a driver class from the 2026 dispatch sheet.
+
 ## 12. Open decisions
 
 1. ~~Is Truck Max USA in scope?~~ **Answered: no.** Truck Max and Fleet Prime
