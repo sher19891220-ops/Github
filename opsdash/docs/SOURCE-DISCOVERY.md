@@ -448,6 +448,42 @@ weight and jurisdiction rather than by model year — but the justification is
 narrower than first written, and the posting code asserts weight-group
 uniformity specifically.
 
+## 11g. Registration coverage — reconciled against the operator
+
+The operator's unit list (46) against the ZONE-OH fleet-001 invoice (42):
+**40 appear on both**, 6 are listed but unregistered on this invoice, and 2 are
+registered but absent from the list.
+
+| Unit | On this invoice | Explanation |
+| --- | --- | --- |
+| 2703 | no | sold lease-to-purchase, out of operations, still paying — registration deliberately not renewed |
+| 6867 | no | paid off, title Iron Lease — deliberately not registered |
+| 4546 | no | registration pending, owner-held |
+| 4851 | no | sold |
+| 9859 | no | registered on **Xtrack's** IRP account |
+| 6169 | no | registered on **Xtrack's** IRP account |
+| **15852** | **no** | **active, title Iron Lease — no registration found on this invoice** |
+| 5417, 5852 | yes | registered here; operator says both are Xtrack, and neither appears in the settlement sheet |
+
+**Only one item is unexplained: 15852.** It is Zone-operated in every weekly
+snapshot, moved 1,684 miles in the second-to-last week, and does not appear on
+this invoice. Apportioned registration for an active interstate unit is not
+optional, so this is either registered on an account not visible here (Xtrack's,
+or Iron Lease's own) or a genuine gap. **Only the operator can distinguish
+those**, and it is recorded rather than assumed either way.
+
+The wider lesson for the data model: **absence from one IRP invoice is not
+evidence of non-registration.** Each carrier runs its own IRP account, and this
+build has sight of exactly one. Registration status therefore belongs on the
+truck as a fact with a named source account, never inferred from an invoice's
+silence.
+
+A fifth and sixth party also appear as title holders: **Iron Lease** on paid-off
+units, and the **owner personally**. Neither is a carrier, so neither has
+operating revenue to absorb a recharge — which is why registration costs
+attributed to them are flagged for confirmation rather than posted as ordinary
+intercompany balances.
+
 ## 12. Open decisions
 
 1. ~~Is Truck Max USA in scope?~~ **Answered: no.** Truck Max and Fleet Prime
