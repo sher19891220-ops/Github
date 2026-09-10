@@ -622,3 +622,36 @@ appear across sections:
 `Extra | Transfer code | ID | $ used | Unit | Issued To | Unit Type | Cost type | Issued Date | Expense side | Details`
 
 Another reason to parse by header rather than by column index.
+
+---
+
+## 11h. Ownership determines who bears registration cost
+
+Registration cost does not always fall on a carrier. Four distinct bearers exist,
+and they are a property of **ownership**, not of operation:
+
+| Bearer | Meaning | Bears IRP/HVUT? |
+| --- | --- | --- |
+| `company` | leased from the asset-holding company to a carrier | **yes**, the carriers |
+| `investor` | owned by an outside investor | no — the investor does |
+| `ltp_owner` | a lease-to-purchase driver who has paid the unit off | no — the owner does |
+| `owner_operator` | an owner-operator's own truck | no — the operator does |
+
+Of the 42 registered units: **32 company-borne, 3 investor, 6 lease-to-purchase
+owners, 1 owner-operator.** The ten non-company units are **$24,299.81** of the
+invoice that is recoverable rather than absorbed — money that would otherwise
+have been buried in carrier overhead.
+
+The asset-holding company holds title to the company-borne units and leases them
+to the three carriers. It has no IRP account and never bears cost; it is a title
+holder, which is why it can never be a recharge target.
+
+Two identity corrections belong here: the unit the registration record calls
+`5852` is the office's `15852`, and the one it calls `5417` is the office's
+`5091`. Both are confirmed by matching VIN and plate — see §11g.
+
+**Consequence for the model:** `cost_bearer` is a separate axis from
+`operating_entity`. A truck can be operated by one carrier, titled to a holding
+company, and paid for by an investor, all at once. Collapsing these into one
+"entity" column is what produced two earlier mistakes — a title holder treated
+as an operator, and an owner-held unit treated as unattributed.
