@@ -12,6 +12,13 @@
  * the database itself rejects aborts the batch. See the final report for why
  * that split was chosen over pre-validating every foreign key.
  *
+ * A second per-row check, `findOwnershipConflict` (truckOwnership.ts), also
+ * rejects rather than posts: a cost charged directly to a driver who is
+ * also that truck's ownership-recorded cost bearer (lease-to-purchase owner
+ * or owner-operator, per SOURCE-DISCOVERY.md §11h) would double-bill them.
+ * This is a flag, not an auto-resolution — the row lands `rejected` with a
+ * reason naming both facts, and a human decides which side is correct.
+ *
  * Idempotency: a row already `committed` or `rejected` from a previous call
  * is never reprocessed, and the ledger insert additionally goes through
  * `ON CONFLICT (staging_row_id) DO NOTHING` against `ux_ledger_staging_once`
