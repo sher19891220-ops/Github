@@ -71,7 +71,7 @@ export interface TruckStatusNow {
  * registration PDF could not be uploaded at all despite its parser working.
  */
 export type DocType =
-  | 'fuel' | 'toll' | 'maintenance' | 'ifta_mileage' | 'revenue'
+  | 'fuel' | 'fuel_card' | 'toll' | 'maintenance' | 'ifta_mileage' | 'revenue'
   | 'registration' | 'factoring' | 'loan_schedule';
 export type StagingStatus = 'parsed' | 'under_review' | 'committed' | 'rejected';
 /**

@@ -7,6 +7,7 @@
 import type { StagingRow } from '@/contract/types';
 import { parseDispatchSheet } from '@/ingest/dispatch';
 import { parseFuelDocument } from '@/ingest/fuel';
+import { parseFuelCardStatement } from '@/ingest/fuelcard';
 import { parseExpensesDocument } from '@/ingest/expenses';
 import { extractDocument, type ExtractionResult } from '@/ingest/extract';
 import { parseIftaMileage } from '@/ingest/ifta/parseMileage';
@@ -33,6 +34,18 @@ export function parseByDocType(docType: string, text: string, documentId: string
       return r.status === 'parsed'
         ? { status: 'parsed', rows: r.rows }
         : { status: 'failed', error: r.parseError ?? 'fuel document failed to parse' };
+    }
+    case 'fuel_card': {
+      // The vendor's own record, and the only source of IFTA gallons this
+      // build has — the Fuel sheet records "full tank" on 97.5% of its
+      // rows (SOURCE-DISCOVERY.md §3). Columns are matched by meaning
+      // rather than position, so one parser covers EFS, Relay and the
+      // rest; a failure names the header it actually read and which roles
+      // it could not fill, so an unfamiliar layout is a diagnosis rather
+      // than a dead end.
+      const r = parseFuelCardStatement(text, documentId);
+      if (r.status === 'failed') return { status: 'failed', error: r.error };
+      return { status: 'parsed', rows: r.rows };
     }
     case 'maintenance':
     case 'toll': {

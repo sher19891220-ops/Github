@@ -302,6 +302,18 @@ how a cost eventually renders as revenue.
    quarter's miles across a week would be an invented number wearing a
    measured one's clothes. A genuinely weekly figure needs daily mileage —
    a Samsara/Motive pull or a daily export.
+6. ~~**IFTA gallons have no parser.**~~ **Resolved for the document path.**
+   `doc_type = 'fuel_card'` parses EFS/Relay/WEX/Comdata statements into
+   staging rows carrying gallons and a purchase state, and
+   `tests/integration/fuelCard.test.ts` proves the whole path closes:
+   dropped, staged, committed, and read back by `getIftaReturn` as tax-paid
+   gallons. What remains open is narrower and worth stating exactly: **no
+   real statement from the operator's own vendors has been parsed yet** —
+   none exists on disk or in their Drive. The parser matches columns by
+   meaning rather than position precisely so an unseen layout is a
+   diagnosis rather than a failure, but the first real statement may still
+   name a column this build does not recognise, and the fix for that is one
+   entry in `src/ingest/fuelcard/columns.ts`.
 5. **IFTA rates are entered by hand, and that is the design.** Rates are
    published quarterly and no document this build ingests carries them.
    `accounting.ifta_rate` requires `source_note` and `entered_by`, so a

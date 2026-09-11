@@ -46,7 +46,8 @@ never an overwrite.
 | What | Upload | Manual | Sheet | API |
 | --- | --- | --- | --- | --- |
 | Revenue / loads | dispatch export ✅ | ✅ | ✅ | TMS later |
-| Fuel | EFS / Relay statement ✅ | ✅ | ✅ | fuel-card API later |
+| Fuel log sheet | the hand-kept list ✅ | ✅ | ✅ | — |
+| **Fuel card statement** | EFS / Relay / WEX / Comdata ✅ | ✅ | ✅ | fuel-card API later |
 | **Maintenance** | shop invoice ✅ | ✅ | ✅ | shop system later |
 | **Factoring** | Triumph statement ✅ | ✅ | ✅ | factor API later |
 | Registration | IRP / HVUT invoice ✅ | ✅ | — | — |
@@ -69,6 +70,24 @@ measurement, not money, so `commitDocument` refuses the whole document with a
 read as "this report was bad" when the report was fine and the destination
 was wrong. The rows stay in staging, attached to their source document, and
 the IFTA engine reads them there.
+
+**The fuel row split into two, because they are two documents.** The
+upload picker offered "Fuel (EFS/Relay statement)" while routing to the
+*Google Sheet* parser — a promise the routing did not keep, so a real
+statement dropped there failed. They carry different facts: the hand-kept
+log knows **where** fuel was bought and, on 97.5% of its rows, not how
+much; the card statement is the vendor's own record and is the only source
+of IFTA gallons this build has.
+
+The statement parser matches columns **by meaning, not by position**
+(`src/ingest/fuelcard/columns.ts`), so one parser covers EFS, Relay, WEX
+and Comdata rather than one per vendor — and when it meets a layout it
+cannot map it reports the header it read and the roles it could not fill.
+Its sharpest rule is that **a fuel card statement is not a diesel
+statement**: DEF, reefer diesel and gasoline all arrive priced per gallon
+on the same invoice, and only diesel is IFTA gallons. Everything else
+posts its money with `quantity: null` — the cost is real, the gallons are
+not IFTA gallons, and the null says so without losing either fact.
 
 **IFTA rates are the one row with no upload path, and that is deliberate.**
 Rates are published quarterly and no document this build ingests carries

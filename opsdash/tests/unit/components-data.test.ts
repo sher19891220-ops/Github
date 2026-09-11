@@ -32,16 +32,30 @@ describe('fetchState — loading / error / loaded-but-empty stay distinct', () =
 });
 
 describe('inferDocType — a best-effort default, never authoritative', () => {
-  it('picks toll/maintenance/fuel from the file name, case-insensitively', () => {
+  it('picks toll/maintenance from the file name, case-insensitively', () => {
     expect(inferDocType('TOLL-violations-jan.csv')).toBe('toll');
     expect(inferDocType('Truck_Maintenance_Q1.xlsx')).toBe('maintenance');
     expect(inferDocType('expenses-2026.pdf')).toBe('maintenance');
-    expect(inferDocType('efs-statement.pdf')).toBe('fuel');
+  });
+
+  it('sends a named card vendor to the statement parser, not the fuel log', () => {
+    // This used to default to 'fuel', which routed a real EFS statement
+    // to the Google Sheet parser. Different documents: the log knows
+    // where fuel was bought, the statement knows how much.
+    expect(inferDocType('efs-statement.pdf')).toBe('fuel_card');
+    expect(inferDocType('Relay_March_2026.csv')).toBe('fuel_card');
+    expect(inferDocType('wex-invoice.pdf')).toBe('fuel_card');
+    // The hand-kept log is still the fallback for anything unrecognised.
+    expect(inferDocType('Fuel 2026.xlsx')).toBe('fuel');
+  });
+
+  it('routes a mileage export to the IFTA parser', () => {
+    expect(inferDocType('IFTA-by-vehicle-Q2.txt')).toBe('ifta_mileage');
   });
 
   it('every option in the picker is a real DocType the contract defines', () => {
     const values = DOC_TYPE_OPTIONS.map((o) => o.value);
-    expect(values).toEqual(['fuel', 'toll', 'maintenance']);
+    expect(values).toEqual(['fuel_card', 'fuel', 'ifta_mileage', 'toll', 'maintenance']);
   });
 });
 

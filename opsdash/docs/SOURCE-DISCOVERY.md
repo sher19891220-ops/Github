@@ -95,6 +95,22 @@ header, never by index.
   and Relay statements are not a preferred source, they are the *only* source,
   and Phase 3 therefore hard-depends on Phase 2. Quantity is emitted as `null`
   — never 0, never inferred.
+
+  **The card-statement parser now exists** (`src/ingest/fuelcard/**`,
+  `doc_type = 'fuel_card'`). It was built without a sample of the operator's
+  own statement — none is on disk and none is in Drive, searched rather than
+  assumed — so columns are matched **by meaning, not by position**, and a
+  statement whose layout it cannot map reports the header it actually read
+  and which roles it could not fill. That is a diagnosis an operator can act
+  on, rather than "parse failed".
+
+  Verified against the two real corpora this build does have (1,582 real
+  address cells from the fuel sheet, 897 real free-text descriptions from the
+  expenses sheet), which caught three bugs synthetic fixtures would not have:
+  the cells `"80 GA"` and `"50 GA"` — eighty and fifty *gallons* — were being
+  read as Georgia; `"diesel anti gel"` was being classified as diesel; and
+  fuel's real three-decimal unit price (`3.799$`, 319 of 399 real cells) was
+  being truncated to two.
 - **Jurisdiction survives, though.** The two-letter state parses out of the
   postal address for **1,469 of 1,499** rows. So this sheet knows *where* fuel
   was bought but not *how much* — useful for corroborating an EFS statement,
