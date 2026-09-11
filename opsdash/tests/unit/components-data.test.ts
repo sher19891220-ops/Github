@@ -2,7 +2,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { isDecimal } from '@/contract/types';
 import { errorMessageFor, errored, isEmptyList, loaded, loading } from '@/components/data/fetchState';
 import { DOC_TYPE_OPTIONS, inferDocType } from '@/components/data/inferDocType';
-import { FINANCIAL_SNAPSHOT, WORK_QUEUE } from '@/components/dashboard/snapshot';
 
 describe('fetchState — loading / error / loaded-but-empty stay distinct', () => {
   it('loading and error are never mistaken for an empty successful load', () => {
@@ -56,33 +55,6 @@ describe('inferDocType — a best-effort default, never authoritative', () => {
   it('every option in the picker is a real DocType the contract defines', () => {
     const values = DOC_TYPE_OPTIONS.map((o) => o.value);
     expect(values).toEqual(['fuel_card', 'fuel', 'ifta_mileage', 'toll', 'maintenance']);
-  });
-});
-
-describe('dashboard snapshot — every money figure is a real decimal string', () => {
-  it('every financial tile amount is a valid decimal, never a JS number', () => {
-    for (const tile of FINANCIAL_SNAPSHOT) {
-      expect(isDecimal(tile.amount)).toBe(true);
-      expect(tile.isLive).toBe(false);
-    }
-  });
-
-  it('every work queue item has a non-empty count and a label', () => {
-    for (const item of WORK_QUEUE) {
-      expect(item.count.length).toBeGreaterThan(0);
-      expect(item.label.length).toBeGreaterThan(0);
-    }
-  });
-
-  it('the not-actionable item (fuel/IFTA) has no link and sorts last, largest first', () => {
-    const fuel = WORK_QUEUE.find((i) => i.id === 'fuel-ifta-unusable');
-    expect(fuel?.href).toBeNull();
-    const sorted = [...WORK_QUEUE].sort((a, b) => b.weight - a.weight);
-    expect(sorted[sorted.length - 1]?.id).toBe('fuel-ifta-unusable');
-    // Every actionable item does link somewhere.
-    for (const item of WORK_QUEUE) {
-      if (item.id !== 'fuel-ifta-unusable') expect(item.href).not.toBeNull();
-    }
   });
 });
 

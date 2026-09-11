@@ -61,6 +61,10 @@ export const postManualEntry = http.postManualEntry;
 export const postCorrection = http.postCorrection;
 export const getTruckStatus = http.getTruckStatus;
 export const postTruckStatus = http.postTruckStatus;
+// The landing screen. Live only: a fabricated headline figure is the
+// worst possible thing to put on the first screen read every morning.
+export const getDashboard = http.getDashboard;
+
 // Live only. An IFTA figure that traces to nothing is the exact thing
 // this engine was built to refuse; a mock one would be that, on screen.
 export const getIftaReturn = http.getIftaReturn;

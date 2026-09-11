@@ -43,6 +43,7 @@
  */
 import { createHash, randomUUID } from 'node:crypto';
 import { query, withTransaction } from '@/db/pool';
+import { parseIftaRateMatrix, type RateMatrixParse } from '@/ingest/iftaRates/parseMatrix';
 import {
   calculateIfta,
   classifyPeriod,
@@ -605,6 +606,65 @@ function assertRate(value: string, field: string): void {
   }
 }
 
+/**
+ * Imports a whole published rate matrix for one quarter.
+ *
+ * The alternative — typing 48 jurisdictions by hand each quarter — is not
+ * a real alternative: it is the step that would not get done, and a
+ * jurisdiction with no rate has its line withheld from the return.
+ *
+ * Every rate still carries the same provenance a typed one does: who
+ * imported it and where it came from. `parseIftaRateMatrix` refuses any
+ * figure outside the plausible band for a US diesel rate before it gets
+ * here — see that module for the wrong-column failure that guard exists
+ * to catch.
+ */
+export interface ImportMatrixResult {
+  imported: number;
+  rejected: RateMatrixParse['rejected'];
+  problems: string[];
+}
+
+export async function importRateMatrix(input: {
+  text: string;
+  year: number;
+  quarter: number;
+  sourceNote: string;
+  enteredBy: string;
+}): Promise<ImportMatrixResult> {
+  if (input.sourceNote.trim() === '') {
+    throw new IftaRequestError(
+      'A rate import needs a source note naming where the matrix came from — it is the whole of these figures\' provenance.',
+    );
+  }
+  if (input.enteredBy.trim() === '') throw new IftaRequestError('enteredBy is required.');
+
+  const parsed = parseIftaRateMatrix(input.text);
+  if (parsed.rates.length === 0) {
+    throw new IftaRequestError(
+      `No usable rates were found. ${parsed.problems.join(' ')}`.trim(),
+    );
+  }
+
+  for (const r of parsed.rates) {
+    await upsertRate({
+      jurisdiction: r.jurisdiction,
+      year: input.year,
+      quarter: input.quarter,
+      ratePerGallon: r.ratePerGallon,
+      surchargePerGallon: r.surchargePerGallon,
+      // A zero rate that is genuinely zero says so, so nobody later reads
+      // it as a placeholder somebody forgot to fill in.
+      sourceNote: r.noFuelTax
+        ? `${input.sourceNote.trim()} — weight-mile jurisdiction, no IFTA fuel tax`
+        : input.sourceNote.trim(),
+      enteredBy: input.enteredBy.trim(),
+    });
+  }
+
+  return { imported: parsed.rates.length, rejected: parsed.rejected, problems: parsed.problems };
+}
+
 /* --------------------------------------------------------------------- */
 /* Saving a return                                                       */
 /* --------------------------------------------------------------------- */
@@ -672,6 +732,12 @@ export async function saveIftaReturn(view: IftaReturnView, savedBy: string): Pro
     .filter((d) => d.excludedReason === null)
     .map((d) => d.documentId);
 
+  const baseRows = await query<{ ifta_base_jurisdiction: string | null }>(
+    `SELECT ifta_base_jurisdiction FROM accounting.entity WHERE entity_id = $1`,
+    [view.entityId],
+  );
+  const baseJurisdiction = baseRows[0]?.ifta_base_jurisdiction ?? null;
+
   await withTransaction(async (q) => {
     await q(
       `INSERT INTO accounting.calc_run
@@ -685,8 +751,9 @@ export async function saveIftaReturn(view: IftaReturnView, savedBy: string): Pro
         `INSERT INTO accounting.ifta_liability
            (calc_run_id, entity_id, truck_id, period_year, period_quarter, jurisdiction,
             total_miles, taxable_miles, taxable_gallons, tax_paid_gallons,
-            rate_per_gallon, surcharge_per_gallon, tax_due, surcharge_due, net_liability, fleet_mpg)
-         VALUES ($1, $2, NULL, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
+            rate_per_gallon, surcharge_per_gallon, tax_due, surcharge_due, net_liability, fleet_mpg,
+            base_jurisdiction)
+         VALUES ($1, $2, NULL, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
         [
           calcRunId,
           view.entityId,
@@ -703,6 +770,7 @@ export async function saveIftaReturn(view: IftaReturnView, savedBy: string): Pro
           line.surchargeDue,
           line.totalDue,
           result.fleetMpg,
+          baseJurisdiction,
         ],
       );
     }

@@ -18,10 +18,25 @@ export default function Home() {
             <Link href="/overhead" style={{ color: 'var(--accent)' }}>Per-truck overhead</Link> — registration cost rates
           </li>
           <li>
-            <Link href="/reconciliation" style={{ color: 'var(--accent)' }}>Reconciliation</Link> — sample data, no live endpoint yet
+            <Link href="/pnl" style={{ color: 'var(--accent)' }}>P&amp;L</Link> — period-flexible, sliceable by company and truck
           </li>
           <li>
-            <Link href="/chargeback" style={{ color: 'var(--accent)' }}>Chargeback</Link> — sample data, no live endpoint yet
+            <Link href="/ifta" style={{ color: 'var(--accent)' }}>IFTA</Link> — the return, the accrual, and the rate table
+          </li>
+          <li>
+            <Link href="/fleet" style={{ color: 'var(--accent)' }}>Fleet status</Link> — where every truck is
+          </li>
+          <li>
+            <Link href="/add" style={{ color: 'var(--accent)' }}>Add a figure</Link> — type one in, with an attestation
+          </li>
+          <li>
+            <Link href="/sheets" style={{ color: 'var(--accent)' }}>Sheets</Link> — registered Google Sheet sources
+          </li>
+          <li>
+            <Link href="/reconciliation" style={{ color: 'var(--accent)' }}>Reconciliation</Link> — match documents against the ledger
+          </li>
+          <li>
+            <Link href="/chargeback" style={{ color: 'var(--accent)' }}>Chargeback</Link> — decide who bears each cost
           </li>
         </ul>
       </nav>

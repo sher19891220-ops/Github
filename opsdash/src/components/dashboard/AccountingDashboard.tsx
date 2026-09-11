@@ -2,12 +2,12 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { getOverheadRates } from '../data/api';
+import { getDashboard, getOverheadRates } from '../data/api';
 import { errorMessageFor, loaded, loading, errored, type FetchState } from '../data/fetchState';
 import type { TruckOverheadRate } from '../data/types';
 import { formatMoney, formatRate, sumMoney } from '../format/decimal';
 import { StatusPill } from '../StatusPill';
-import { FINANCIAL_SNAPSHOT, WORK_QUEUE } from './snapshot';
+import type { DashboardResponse } from '@/db/repo/dashboard';
 
 function StatTile({
   label,
@@ -32,12 +32,48 @@ function StatTile({
   );
 }
 
-/** "Measured, not live" chip — every tile on this page that does not read a
- *  request made just now (a static snapshot from a doc or a test, or a
- *  fixture behind a screen with no live endpoint) wears this, so nobody
- *  mistakes a snapshot for a number that just came off the server. */
-function MeasuredChip() {
-  return <StatusPill label="Measured, not live" tone="muted" />;
+/**
+ * A money tile whose figure came off the database just now.
+ *
+ * `entryCount` is what makes this honest. An empty ledger and a genuinely
+ * zero month both produce `0.00`, and they mean completely different
+ * things — "nothing has been posted" versus "the fleet earned nothing".
+ * So the tile renders the count, not the amount, when nothing is behind
+ * it: an em dash and a plain sentence rather than a confident zero.
+ */
+function LiveMoneyTile({
+  label,
+  figure,
+  sub,
+  tone,
+}: {
+  label: string;
+  figure: { amount: string; entryCount: number };
+  sub?: string;
+  tone?: 'good' | 'bad';
+}) {
+  if (figure.entryCount === 0) {
+    return (
+      <StatTile
+        label={label}
+        value="—"
+        chip={<StatusPill label="Nothing posted" tone="muted" />}
+        sub="No ledger entries in this period. Not zero — nothing has arrived yet."
+      />
+    );
+  }
+  return (
+    <StatTile
+      label={label}
+      value={
+        <span style={tone ? { color: tone === 'bad' ? 'var(--bad)' : 'var(--good)' } : undefined}>
+          {formatMoney(figure.amount)}
+        </span>
+      }
+      chip={<StatusPill label="Live" tone="good" />}
+      sub={sub ? `${sub} · ${figure.entryCount} entries` : `${figure.entryCount} entries`}
+    />
+  );
 }
 
 /**
@@ -47,14 +83,36 @@ function MeasuredChip() {
  * (stat tiles — a single value is not a chart, so no gauges here; see
  * `docs/FLEET-BOARD-SPEC.md` §3).
  *
- * Only the "registration overhead" tiles read a live endpoint
- * (`GET /api/registration/overhead`); everything else on this page is a
- * measured snapshot with no live endpoint behind it yet (see `./snapshot.ts`
- * for exactly where each number comes from) and is labelled as such rather
- * than presented as if it just came off the server.
+ * **Every figure on this page is now live.** It used to be a set of
+ * correctly-labelled static snapshots quoted from tests and docs — honest,
+ * and still the first thing read every morning, which made it the wrong
+ * place for a number nothing behind it could move. `GET /api/dashboard`
+ * reads the ledger, the staging queue, the documents table and the IFTA
+ * rate table at the moment the page is asked for.
+ *
+ * The work queue is now built from counts rather than from a written-down
+ * list, which changes its behaviour in the way that matters: an item
+ * disappears when its count reaches zero. A queue that still shows "713
+ * chargeback decisions" after they have all been made is worse than no
+ * queue at all.
  */
 export function AccountingDashboard() {
   const [overheadState, setOverheadState] = useState<FetchState<TruckOverheadRate[]>>(loading());
+  const [live, setLive] = useState<FetchState<DashboardResponse>>(loading());
+
+  useEffect(() => {
+    let cancelled = false;
+    getDashboard()
+      .then((d) => {
+        if (!cancelled) setLive(loaded(d));
+      })
+      .catch((err) => {
+        if (!cancelled) setLive(errored(errorMessageFor(err, 'Could not load the dashboard.')));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -70,8 +128,6 @@ export function AccountingDashboard() {
     };
   }, []);
 
-  const queue = [...WORK_QUEUE].sort((a, b) => b.weight - a.weight);
-
   const unresolvedRates = overheadState.status === 'loaded' ? overheadState.data.filter((r) => r.truckId == null) : [];
   const unresolvedTotal = unresolvedRates.length > 0 ? sumMoney(unresolvedRates.map((r) => r.annualTotal)) : null;
   const representative = overheadState.status === 'loaded' ? (overheadState.data[0] ?? null) : null;
@@ -82,8 +138,20 @@ export function AccountingDashboard() {
       <p style={{ color: 'var(--muted)' }}>What needs a decision today, and where the money stands.</p>
 
       <h2 style={{ marginTop: '1.5rem' }}>What needs you today</h2>
-      <div>
-        {queue.map((item) => (
+      {live.status === 'loading' && <p style={{ color: 'var(--muted)' }}>Loading…</p>}
+      {live.status === 'error' && (
+        <p role="alert" style={{ color: 'var(--bad)' }}>
+          {live.message}
+        </p>
+      )}
+      {live.status === 'loaded' && live.data.workQueue.length === 0 && (
+        <p style={{ color: 'var(--good)' }}>
+          Nothing waiting. Every staged row is reviewed, every cost row is assigned, and every state driven
+          this quarter has an IFTA rate on file.
+        </p>
+      )}
+      {live.status === 'loaded' &&
+        live.data.workQueue.map((item) => (
           <div key={item.id} className="work-queue-row">
             <span className="work-queue-count">{item.count}</span>
             <span style={{ flex: 1 }}>
@@ -101,13 +169,39 @@ export function AccountingDashboard() {
             )}
           </div>
         ))}
-      </div>
 
       <h2 style={{ marginTop: '2rem' }}>Where the money stands</h2>
+      {live.status === 'loaded' && (
+        <p style={{ color: 'var(--muted)', margin: '0 0 0.75rem' }}>
+          {live.data.from} to {live.data.to}
+        </p>
+      )}
       <div className="stat-grid">
-        {FINANCIAL_SNAPSHOT.map((tile) => (
-          <StatTile key={tile.id} label={tile.label} value={formatMoney(tile.amount)} chip={<MeasuredChip />} sub={tile.note} />
-        ))}
+        {live.status === 'loaded' && (
+          <>
+            <LiveMoneyTile label="Revenue" figure={live.data.revenue} />
+            <LiveMoneyTile label="Company cost" figure={live.data.companyCost} />
+            <LiveMoneyTile
+              label="Margin"
+              figure={{
+                amount: live.data.margin,
+                entryCount: live.data.revenue.entryCount + live.data.companyCost.entryCount,
+              }}
+              tone={live.data.margin.startsWith('-') ? 'bad' : 'good'}
+              sub="Revenue less company cost only"
+            />
+            <LiveMoneyTile
+              label="Intercompany receivable"
+              figure={live.data.intercompanyReceivable}
+              sub="Owed between the group's own entities"
+            />
+            <LiveMoneyTile
+              label="Driver receivable"
+              figure={live.data.driverReceivable}
+              sub="Driver-borne cost owed back — never counted as company cost"
+            />
+          </>
+        )}
 
         {overheadState.status === 'loading' && (
           <StatTile label="Registration cost unresolved" value="…" chip={<StatusPill label="Loading" tone="muted" />} />
