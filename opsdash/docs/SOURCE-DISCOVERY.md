@@ -704,3 +704,65 @@ pages and images, `exceljs` for spreadsheets. Tesseract is a **system**
 dependency, not an npm one — a deployment without it silently loses the ability
 to read scans, so it belongs in the deploy checklist rather than being
 discovered in production.
+
+---
+
+## 15. Equipment financing — and the distinction that dominates it
+
+Two real loan schedules for the asset-holding company. Both reconcile exactly:
+payments equal interest plus principal, principal repaid equals principal
+borrowed, and the payment count matches the stated term. Nothing here is
+inferred.
+
+| | Loan A | Loan B |
+| --- | --- | --- |
+| Principal | 632,985.00 | 453,585.00 |
+| Nominal annual rate | 9.020% | 8.960% |
+| Term | 24 monthly | 36 monthly |
+| Monthly payment | 28,963.77 | 14,443.50 |
+| Total interest | 62,145.48 | 66,381.00 |
+
+Combined: **1,086,570 borrowed, 1,215,096.48 to repay, 128,526.48 of interest,
+43,407.27 leaving the bank every month.**
+
+### Only the interest is a cost
+
+Principal repayment is a balance-sheet movement — debt going down — not an
+expense. Booking the whole payment as cost is the single most expensive
+bookkeeping error available here:
+
+| Year | Paid | Interest (the cost) | Principal (not a cost) |
+| --- | --- | --- | --- |
+| 2026 | 405,032.16 | **60,448.82** (14.9%) | 344,583.34 |
+| 2027 | 520,887.24 | **39,635.45** (7.6%) | 481,251.79 |
+
+Spread across the 32 carrier-borne units, the difference is stark:
+
+| Treatment | Per truck / year | Per truck / day |
+| --- | --- | --- |
+| Interest only — correct | 1,889.03 | **5.18** |
+| Whole payment — wrong | 12,657.25 | 34.68 |
+
+**An overstatement of $29.50 per truck per day** — more than four times the
+entire registration overhead this project measured earlier. A fleet priced off
+the wrong figure would refuse profitable freight.
+
+### Whose profit and loss, though
+
+These loans belong to the **asset-holding company**, which owns the trucks and
+leases them to the carriers. So there are two different costs and they are not
+interchangeable:
+
+- **The holding company's cost** is interest plus depreciation on the equipment.
+- **A carrier's cost** is the lease rent it pays the holding company.
+
+Putting loan interest into a carrier's P&L would be wrong, and adding it to the
+lease rent already charged would double-count the same equipment. The group view
+must eliminate the intercompany lease exactly as it already eliminates the
+registration recharge — the mechanism built in migration 004 applies unchanged.
+
+**Open, and needed before any of this posts:** what the carriers actually pay the
+holding company per truck, and which units these two loans financed. The
+settlement sheet shows truck-rent values of 735, 900 and 514.29 against
+lease-to-purchase drivers, which is a third relationship again — driver to
+carrier, not carrier to holding company.
