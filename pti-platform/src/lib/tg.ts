@@ -1,9 +1,17 @@
 // Telegram Bot API helpers — used by both the webhook and send-report API
 
-const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
+// Sending report messages/photos now uses Observer's own bot token
+// (TELEGRAM_SEND_BOT_TOKEN), not @Pti_check_bot's. @Pti_check_bot has been
+// found kicked from multiple real groups and forbidden from DMing users
+// who never opened a chat with it directly — it simply isn't present
+// where reports need to go. Observer is already a live, active member of
+// every real group this app needs to reach, so delivery goes through it.
+// Falls back to the old token only if the new one isn't configured yet,
+// so this doesn't hard-break before the env var is added.
+const SEND_BOT_TOKEN = process.env.TELEGRAM_SEND_BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN
 
 function apiUrl(method: string) {
-  return `https://api.telegram.org/bot${BOT_TOKEN}/${method}`
+  return `https://api.telegram.org/bot${SEND_BOT_TOKEN}/${method}`
 }
 
 export interface TgResult {
@@ -12,17 +20,16 @@ export interface TgResult {
   raw?: unknown
 }
 
-// Send a plain-text or Markdown message. Unlike before, this now actually
-// checks Telegram's own response — a fetch that "succeeds" at the HTTP
-// level can still carry {ok:false, description:"..."} from Telegram
-// itself (bad chat_id, bot not a member, blocked, etc.), and that was
-// previously being silently discarded.
+// Send a plain-text or Markdown message. Actually checks Telegram's own
+// response — a fetch that "succeeds" at the HTTP level can still carry
+// {ok:false, description:"..."} from Telegram itself (bad chat_id, bot
+// not a member, blocked, etc.), which was previously discarded silently.
 export async function sendMessage(
   chatId: number,
   text: string,
   parseMode: 'Markdown' | 'MarkdownV2' | 'HTML' = 'Markdown',
 ): Promise<TgResult> {
-  if (!BOT_TOKEN) return { ok: false, error: 'TELEGRAM_BOT_TOKEN not set' }
+  if (!SEND_BOT_TOKEN) return { ok: false, error: 'No bot token configured (TELEGRAM_SEND_BOT_TOKEN / TELEGRAM_BOT_TOKEN)' }
   try {
     const res = await fetch(apiUrl('sendMessage'), {
       method: 'POST',
@@ -44,14 +51,12 @@ export async function sendMessage(
   }
 }
 
-// Send a batch of photos as a media group (max 10 per call). Same fix —
-// previously returned the raw unchecked fetch Promise with no error
-// visibility at all.
+// Send a batch of photos as a media group (max 10 per call).
 export async function sendMediaGroup(
   chatId: number,
   photos: { dataUrl: string; caption: string }[],
 ): Promise<TgResult> {
-  if (!BOT_TOKEN) return { ok: false, error: 'TELEGRAM_BOT_TOKEN not set' }
+  if (!SEND_BOT_TOKEN) return { ok: false, error: 'No bot token configured (TELEGRAM_SEND_BOT_TOKEN / TELEGRAM_BOT_TOKEN)' }
   if (photos.length === 0) return { ok: true }
 
   const form = new FormData()
