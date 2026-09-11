@@ -275,3 +275,81 @@ SELECT CASE WHEN SUM(days) = 28 AND SUM(amount) = -186.40
             ELSE 'FAIL: got ' || SUM(days) || ' days, ' || SUM(amount) END AS result
 FROM accounting.amortization_schedule
 WHERE unit_number = '1431' AND period_month = '2027-02-01';
+
+\echo '--- ASSERT 20: a split without a ratio is not a decision -------------'
+INSERT INTO accounting.driver (driver_id, full_name)
+VALUES ('88888888-8888-8888-8888-888888888888','Test Driver') ON CONFLICT DO NOTHING;
+DO $$
+BEGIN
+  INSERT INTO accounting.chargeback_decision
+    (ledger_entry_id, charged_to, driver_id, decided_by)
+  VALUES ('44444444-4444-4444-4444-444444444444','split',
+          '88888888-8888-8888-8888-888888888888','controller@fleet');
+  RAISE EXCEPTION 'FAIL: split with no ratio accepted';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: split without a ratio rejected';
+END $$;
+
+\echo '--- ASSERT 21: charging a driver must name the driver ----------------'
+DO $$
+BEGIN
+  INSERT INTO accounting.chargeback_decision
+    (ledger_entry_id, charged_to, decided_by)
+  VALUES ('44444444-4444-4444-4444-444444444444','driver','controller@fleet');
+  RAISE EXCEPTION 'FAIL: driver charge with no driver accepted';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: driver charge without a driver rejected';
+END $$;
+
+\echo '--- ASSERT 22: a valid split is accepted -----------------------------'
+INSERT INTO accounting.chargeback_decision
+  (ledger_entry_id, charged_to, split_percent, driver_id, decided_by, note)
+VALUES ('44444444-4444-4444-4444-444444444444','split',60.000,
+        '88888888-8888-8888-8888-888888888888','controller@fleet','driver bears 60%');
+\echo 'PASS: split with a percentage accepted'
+
+\echo '--- ASSERT 23: expected-missing must carry a reason ------------------'
+INSERT INTO accounting.reconciliation_run
+  (run_id, source_document_id, period_start, period_end, opened_by)
+VALUES ('aaaaaaaa-0000-0000-0000-00000000aaaa',
+        '22222222-2222-2222-2222-222222222222','2026-01-01','2026-01-31','controller@fleet');
+DO $$
+BEGIN
+  INSERT INTO accounting.reconciliation_match
+    (run_id, ledger_entry_id, status, decided_by, decided_at)
+  VALUES ('aaaaaaaa-0000-0000-0000-00000000aaaa',
+          '44444444-4444-4444-4444-444444444444','expected_missing',
+          'controller@fleet', now());
+  RAISE EXCEPTION 'FAIL: expected_missing with no note accepted';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: expected_missing without a reason rejected';
+END $$;
+
+\echo '--- ASSERT 24: a stated variance must be the real difference ---------'
+DO $$
+BEGIN
+  INSERT INTO accounting.reconciliation_match
+    (run_id, ledger_entry_id, status, document_amount, ledger_amount, variance)
+  VALUES ('aaaaaaaa-0000-0000-0000-00000000aaaa',
+          '55555555-5555-5555-5555-555555555555','auto_matched',
+          100.00, 90.00, 5.00);   -- claims 5.00; the real difference is 10.00
+  RAISE EXCEPTION 'FAIL: a fabricated variance was accepted';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: variance that is not the difference rejected';
+END $$;
+
+\echo '--- ASSERT 25: one document line cannot match twice in a run ---------'
+INSERT INTO accounting.reconciliation_match
+  (run_id, ledger_entry_id, status, document_amount, ledger_amount, variance)
+VALUES ('aaaaaaaa-0000-0000-0000-00000000aaaa',
+        '55555555-5555-5555-5555-555555555555','auto_matched', 100.00, 90.00, 10.00);
+DO $$
+BEGIN
+  INSERT INTO accounting.reconciliation_match
+    (run_id, ledger_entry_id, status, document_amount, ledger_amount, variance)
+  VALUES ('aaaaaaaa-0000-0000-0000-00000000aaaa',
+          '55555555-5555-5555-5555-555555555555','auto_matched', 50.00, 50.00, 0.00);
+  RAISE EXCEPTION 'FAIL: the same ledger entry matched twice in one run';
+EXCEPTION WHEN unique_violation THEN
+  RAISE NOTICE 'PASS: double-matching the same entry rejected';
+END $$;
