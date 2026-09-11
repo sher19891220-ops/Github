@@ -213,7 +213,7 @@ export default function CameraPage() {
         </div>
 
         <button
-          onClick={() => router.push('/inspection/signature')}
+          onClick={() => router.push('/inspection/checklist')}
           className="flex flex-col items-end gap-0.5"
         >
           <span className="text-xs text-blue-400 font-medium">Skip</span>
@@ -426,7 +426,7 @@ export default function CameraPage() {
 
           {allCaptured ? (
             <button
-              onClick={() => router.push('/inspection/signature')}
+              onClick={() => router.push('/inspection/checklist')}
               className="btn-primary flex-1 py-2.5 text-sm"
             >
               <Check className="h-4 w-4" />
@@ -434,7 +434,7 @@ export default function CameraPage() {
             </button>
           ) : (
             <button
-              onClick={() => router.push('/inspection/signature')}
+              onClick={() => router.push('/inspection/checklist')}
               className="flex-1 rounded-xl border border-slate-700 py-2.5 text-sm font-medium text-slate-400"
             >
               Skip ({capturedRequired}/{REQUIRED_COUNT})

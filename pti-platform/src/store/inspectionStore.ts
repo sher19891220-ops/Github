@@ -35,6 +35,7 @@ interface InspectionState {
   removePhoto: (angleKey: AngleKey) => void
   setCurrentAngle: (angle: AngleKey | null) => void
   updateChecklistItem: (id: string, status: ChecklistItem['status'], notes?: string) => void
+  addChecklistItem: (item: ChecklistItem) => void
   updateTireCondition: (position: string, condition: TireCondition) => void
   updateTirePsi: (position: string, psi: string) => void
   setComments: (v: string) => void
@@ -97,6 +98,9 @@ export const useInspectionStore = create<InspectionState>()(
         set((s) => ({ photos: s.photos.filter((p) => p.angle !== angleKey) })),
 
       setCurrentAngle: (angle) => set({ currentAngle: angle }),
+
+      addChecklistItem: (item) =>
+        set((s) => ({ checklist: [...s.checklist, item] })),
 
       updateChecklistItem: (id, status, notes) =>
         set((s) => ({

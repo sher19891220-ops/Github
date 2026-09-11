@@ -87,7 +87,7 @@ export default function SignaturePage() {
       <div className="bg-gradient-to-br from-blue-700 to-blue-900 text-white safe-top">
         <div className="px-4 pt-4 pb-5">
           <div className="flex items-center justify-between mb-1">
-            <button onClick={() => router.push('/inspection/camera')} className="flex items-center gap-1 text-blue-200">
+            <button onClick={() => router.push('/inspection/checklist')} className="flex items-center gap-1 text-blue-200">
               <ChevronLeft className="h-5 w-5" />
               <span className="text-sm">Camera</span>
             </button>
@@ -201,7 +201,7 @@ export default function SignaturePage() {
       {/* Bottom nav */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-4 py-3 flex gap-3">
         <button
-          onClick={() => router.push('/inspection/camera')}
+          onClick={() => router.push('/inspection/checklist')}
           className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl border-2 border-slate-200 text-slate-600 font-semibold"
         >
           <ChevronLeft className="h-5 w-5" />

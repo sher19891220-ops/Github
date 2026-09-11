@@ -61,6 +61,40 @@ export const TRUCK_CHECKLIST: Omit<ChecklistItem, 'status' | 'notes'>[] = [
   { id: 'int-triangles',category: 'Interior', label: 'Emergency Triangles',   mandatory: true },
   { id: 'int-speedlim', category: 'Interior', label: 'Speed Limiter',         mandatory: true },
 
+  // In-Cab Devices
+  { id: 'cab-extng',     category: 'In-Cab Devices', label: 'Fire Extinguisher',      mandatory: true },
+  { id: 'cab-triangles', category: 'In-Cab Devices', label: '3 Emergency Triangles',  mandatory: true },
+
+  // Documents (In-Cab Folder)
+  { id: 'doc2-company',   category: 'Documents (Cab Folder)', label: 'Company Information',                    mandatory: true },
+  { id: 'doc2-regcard',   category: 'Documents (Cab Folder)', label: 'Registration (Cab Card)',                mandatory: true },
+  { id: 'doc2-mc',        category: 'Documents (Cab Folder)', label: 'MC Certificate (Motor Carrier)',         mandatory: true },
+  { id: 'doc2-ifta',      category: 'Documents (Cab Folder)', label: 'IFTA (Intl. Fuel Tax Agreement)',        mandatory: true },
+  { id: 'doc2-insurance', category: 'Documents (Cab Folder)', label: 'Certificate of Insurance',               mandatory: true },
+  { id: 'doc2-annual',    category: 'Documents (Cab Folder)', label: 'Truck & Trailer Annual Inspection',      mandatory: true },
+  { id: 'doc2-lease',     category: 'Documents (Cab Folder)', label: 'Lease Agreement (Lessor / Lessee)',      mandatory: false },
+  { id: 'doc2-kyu',       category: 'Documents (Cab Folder)', label: 'KYU Permit (Kentucky)',                  mandatory: false },
+  { id: 'doc2-nm',        category: 'Documents (Cab Folder)', label: 'NM Permit (New Mexico)',                 mandatory: false },
+  { id: 'doc2-hut',       category: 'Documents (Cab Folder)', label: 'HUT Permit (New York State)',            mandatory: false },
+  { id: 'doc2-oregon',    category: 'Documents (Cab Folder)', label: 'Oregon Permit',                          mandatory: false },
+  { id: 'doc2-pa',        category: 'Documents (Cab Folder)', label: 'PA Insect Inspection Certificate',       mandatory: false },
+  { id: 'doc2-gpsman',    category: 'Documents (Cab Folder)', label: 'GPS / ELD Tab Manual',                   mandatory: true },
+  { id: 'doc2-safety',    category: 'Documents (Cab Folder)', label: 'Driver Safety Policy & Manual',          mandatory: true },
+  { id: 'doc2-efschk',    category: 'Documents (Cab Folder)', label: 'EFS Checks',                             mandatory: false },
+  { id: 'doc2-tripsheet', category: 'Documents (Cab Folder)', label: 'Trip Report Sheets',                     mandatory: false },
+  { id: 'doc2-drugforms', category: 'Documents (Cab Folder)', label: 'Drug Test Forms (Custody & Control)',    mandatory: true },
+  { id: 'doc2-paperlog',  category: 'Documents (Cab Folder)', label: 'Paper Log Book (ELD Malfunction)',       mandatory: true },
+  { id: 'doc2-efscard',   category: 'Documents (Cab Folder)', label: 'EFS Fuel Card',                          mandatory: false },
+  { id: 'doc2-tafscard',  category: 'Documents (Cab Folder)', label: 'TAFS Fuel Card',                         mandatory: false },
+
+  // Externally Displayed Signs & Decals
+  { id: 'dec-carrier',  category: 'Signs & Decals', label: 'Carrier Sign (USDOT / MC / KYU numbers)',      mandatory: true },
+  { id: 'dec-unitnum',  category: 'Signs & Decals', label: 'Unit Number on Both Sides',                    mandatory: true },
+  { id: 'dec-ifta',     category: 'Signs & Decals', label: 'IFTA Decals on Both Sides',                    mandatory: true },
+  { id: 'dec-hut',      category: 'Signs & Decals', label: 'HUT Sticker (New York) Displayed on Front',    mandatory: false },
+  { id: 'dec-gpstab',   category: 'Signs & Decals', label: 'GPS Tab Sticker',                              mandatory: true },
+  { id: 'dec-plate',    category: 'Signs & Decals', label: 'License Plate',                                mandatory: true },
+
   // Exterior
   { id: 'tex-clean',     category: 'Exterior', label: 'Cleanliness',                   mandatory: true },
   { id: 'tex-airleaks',  category: 'Exterior', label: 'No Air Leaks',                  mandatory: true },
