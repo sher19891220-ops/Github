@@ -57,12 +57,17 @@ export function dispatchFixture(truckNumber: string, amount = '500.00'): string 
  */
 const EXPENSE_HEADER_ROW = '| Unit | Issued To | Unit Type | Cost type | Date | $ used | Expense side | Details |';
 
+/** Upload is content-addressed (documents.ts): a fixed literal body would
+ *  make every call across every test run resolve to the same, eventually
+ *  already-committed document. A random salt in the `Details` cell — a
+ *  free-text column no parsing logic reads — keeps every call distinct. */
 export function expensesFixture(
   unitNumber: string,
   amount: string,
   chargedTo: 'company' | 'driver',
   dateMmDdYy: string,
 ): string {
-  const dataRowLine = `| ${unitNumber} | Some Driver | truck | Repair | ${dateMmDdYy} | $${amount} | ${chargedTo} | test fixture |`;
+  const salt = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  const dataRowLine = `| ${unitNumber} | Some Driver | truck | Repair | ${dateMmDdYy} | $${amount} | ${chargedTo} | test fixture ${salt} |`;
   return `${EXPENSE_HEADER_ROW}\n${dataRowLine}\n`;
 }
