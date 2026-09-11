@@ -82,17 +82,14 @@ export async function POST(_req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   const botToken = process.env.TELEGRAM_BOT_TOKEN
   const setupKey = process.env.BOT_SETUP_KEY
-  // One-time secondary secret for this single retirement operation, so it
-  // can be executed without needing to read the existing BOT_SETUP_KEY
-  // value out of Vercel's UI. Remove this constant after use.
-  const ONE_TIME_RETIRE_SECRET = '10sLqiYVQGYD3c2Cjf7M9J6rN43cwwTV'
 
   if (!botToken) return NextResponse.json({ error: 'TELEGRAM_BOT_TOKEN not set' }, { status: 500 })
 
-  const provided = req.nextUrl.searchParams.get('secret')
-  const authorized = (setupKey && provided === setupKey) || provided === ONE_TIME_RETIRE_SECRET
-  if (!authorized) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (setupKey) {
+    const provided = req.nextUrl.searchParams.get('secret')
+    if (provided !== setupKey) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
   }
 
   // 1. Delete the Telegram webhook — the bot stops receiving updates entirely.
