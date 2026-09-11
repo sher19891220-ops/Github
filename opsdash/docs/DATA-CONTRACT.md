@@ -237,9 +237,26 @@ how a cost eventually renders as revenue.
 
 ## 7. Open items
 
-1. **Miles by state has no source.** No sheet carries it. The Samsara IFTA
-   report export, dropped per quarter as an `ifta_mileage` document, is the
-   only identified path. **Phase 3 cannot start until one arrives.**
+1. ~~**Miles by state has no source.**~~ **Resolved.** The operator's
+   telematics produces a per-period IFTA mileage report — carrier, period,
+   one block per vehicle with unit number and VIN, `Seq State Miles` rows,
+   and the report's own totals by state. `src/ingest/ifta/parseMileage.ts`
+   reads it, verified against a real export before its tests were written.
+
+   The document checks itself twice, which is why that parser can be
+   strict: each vehicle block states its own total, and the report states a
+   grand total by state. The second check is the one that matters — it
+   catches a *dropped vehicle block*, which the per-vehicle check cannot
+   see, because every surviving block is still internally consistent and
+   only the grand total knows somebody is missing.
+
+   **One caveat that belongs with the data.** Every real export seen so far
+   carries a **single jurisdiction** — one report all OR, another all NY.
+   The format plainly supports more (rows are numbered under a `Seq State
+   Miles` heading) but a quarter reporting one state is not a complete IFTA
+   return. The parser handles any number of states and reports
+   `jurisdictions`, so a caller can tell a single-state extract from a full
+   quarter rather than filing the first as if it were the second.
 2. **IFTA gallons by state depend on Phase 2.** The Fuel sheet has the purchase
    state (inside a postal address) but records `"full tank"` instead of a
    quantity often enough to be unusable; the fuel summary has real gallons but
