@@ -40,3 +40,64 @@ kbd {
   padding: 0.05em 0.4em;
   background: var(--attention-bg);
 }
+
+/* Landing dashboard — stat tiles, not gauges or donuts: a single value is
+   not a chart, the number IS the chart (docs/FLEET-BOARD-SPEC.md §3). */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+.stat-tile {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.9rem 1rem;
+}
+.stat-tile-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  flex-wrap: wrap;
+  color: var(--muted);
+  font-size: 0.85em;
+  font-weight: 600;
+}
+.stat-tile-value {
+  font-size: 1.6em;
+  font-weight: 700;
+  margin-top: 0.25rem;
+  text-align: left;
+}
+.stat-tile-sub {
+  color: var(--muted);
+  font-size: 0.8em;
+  margin-top: 0.35rem;
+}
+
+/* The dashboard's work queue — a row per item, largest first, each linking
+   to the screen that resolves it (or saying plainly that none does). */
+.work-queue-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--line);
+}
+.work-queue-count {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  min-width: 6em;
+  text-align: right;
+}
+
+/* A screen (or a tile) backed by fixture data rather than a live endpoint —
+   never left to look identical to a live figure. */
+.sample-data-banner {
+  border: 1px solid var(--warn);
+  color: var(--warn);
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.9em;
+}

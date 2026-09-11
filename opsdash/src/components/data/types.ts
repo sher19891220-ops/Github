@@ -61,7 +61,7 @@
  * function in `api.ts` — these types are what both sides agree on today.
  */
 
-import type { Decimal, DocType, DriverClass, IsoDate } from '@/contract/types';
+import type { Decimal, DocType, DriverClass, IsoDate, ParseStatus } from '@/contract/types';
 
 export type {
   StagingRow, PnlLine, LedgerEntry, Decimal, IsoDate, DocType,
@@ -85,6 +85,37 @@ export interface UploadResult {
   documentId: string;
   sha256: string;
   duplicateOf: string | null;
+}
+
+/**
+ * 8. `GET /api/documents/:id` (singular) returns a 5-field shape — see
+ *    `src/db/repo/types.ts`'s `DocumentStatusSummary`, which the migration
+ *    and the live route actually implement — deliberately narrower than the
+ *    9-field `DocumentSummary` the plural list endpoint returns (no
+ *    `fileName`/`uploadedAt`/`sha256`/`duplicateOf`). Redefined here rather
+ *    than imported from `src/db/repo/**`, which is out of this workstream's
+ *    files: the two must still agree structurally, which is what
+ *    `tests/unit/components-data.test.ts` pins down.
+ * 9. `POST /api/documents` requires `docType` on the multipart body (the
+ *    server has no way to infer it from bytes alone) and the actual `File`,
+ *    neither of which the mock's original `{ name, size, type }` stand-in
+ *    carried. `UploadInput` is what `UploadDropzone` now collects before
+ *    confirming an upload — the operator picks (or accepts an inferred
+ *    default for) the document type rather than the UI silently guessing it
+ *    the way the mock used to.
+ */
+export interface DocumentStatus {
+  documentId: string;
+  docType: DocType;
+  parseStatus: ParseStatus;
+  parseError: string | null;
+  rowCount: number;
+}
+
+export interface UploadInput {
+  file: File;
+  docType: DocType;
+  uploadedBy?: string;
 }
 
 /* ------------------------------------------------------------------------

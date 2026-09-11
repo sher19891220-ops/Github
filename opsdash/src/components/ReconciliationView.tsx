@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ReconLine, ReconMatch, ReconciliationSet } from './data/types';
-import { getReconciliation, postReconDecision, type ReconDecisionAction } from './data/api';
+import { dataSource, getReconciliation, postReconDecision, type ReconDecisionAction } from './data/api';
 import { formatMoney, formatQuantity } from './format/decimal';
 import { isCollapsedByDefault, needsAttentionOrder, summarizeRecon } from './reconciliation/logic';
 
@@ -163,6 +163,12 @@ export function ReconciliationView({ documentId }: { documentId: string }) {
 
   return (
     <div>
+      {dataSource.reconciliation === 'mock' && (
+        <div role="note" className="sample-data-banner">
+          Sample data — there is no live reconciliation endpoint yet. Matches below are generated from
+          fixtures to demonstrate the workflow, not from real documents or the real ledger.
+        </div>
+      )}
       <p style={{ color: 'var(--muted)', maxWidth: 720 }}>
         <strong>{reconSet.documentLabel}</strong> vs. <strong>{reconSet.ledgerLabel}</strong>. Same unit, date and
         amount auto-matches and stays collapsed below; anything that does not line up — a variance or a line with no

@@ -30,12 +30,14 @@ import type {
   ChargebackDecision,
   ChargebackRow,
   CommitResult,
+  DocumentStatus,
   DocumentSummary,
   ReconLine,
   ReconMatch,
   ReconciliationSet,
   ReferenceData,
   StagingRowEdit,
+  UploadInput,
   UploadResult,
 } from './types';
 
@@ -68,7 +70,11 @@ export async function listDocuments(): Promise<DocumentSummary[]> {
   return delay([...documents.values()].map((d) => clone(d.summary)));
 }
 
-export async function getDocument(documentId: string): Promise<DocumentSummary | null> {
+/** Declared as `DocumentStatus` (the narrower singular-GET shape) even
+ *  though the fixture happens to carry every `DocumentSummary` field —
+ *  matching what the real client actually returns, not what the mock
+ *  happens to have lying around. */
+export async function getDocument(documentId: string): Promise<DocumentStatus | null> {
   const doc = documents.get(documentId);
   return delay(doc ? clone(doc.summary) : null);
 }
@@ -138,8 +144,12 @@ export async function commitDocument(documentId: string): Promise<CommitResult> 
 
 /** Simulates the multipart upload + async parse. `sha256` here is a stand-in
  *  content hash (file name + size), good enough to demonstrate the duplicate
- *  path without pulling in a hashing dependency this UI doesn't otherwise need. */
-export async function uploadDocument(file: { name: string; size: number; type: string }): Promise<UploadResult> {
+ *  path without pulling in a hashing dependency this UI doesn't otherwise need.
+ *  `docType` is taken from `input` rather than guessed from the file name —
+ *  the real server requires it explicitly (see `types.ts` note 9), and the
+ *  mock should exercise the same contract the live client does. */
+export async function uploadDocument(input: UploadInput): Promise<UploadResult> {
+  const { file, docType } = input;
   const fakeHash = `mock-${file.name}-${file.size}`;
   for (const doc of documents.values()) {
     if (doc.summary.sha256 === fakeHash) {
@@ -148,11 +158,6 @@ export async function uploadDocument(file: { name: string; size: number; type: s
   }
 
   const documentId = `doc-upload-${nextDocSeq++}`;
-  const docType = file.name.toLowerCase().includes('toll')
-    ? 'toll'
-    : file.name.toLowerCase().includes('maint') || file.name.toLowerCase().includes('expense')
-      ? 'maintenance'
-      : 'fuel';
 
   const summary: DocumentSummary = {
     documentId,

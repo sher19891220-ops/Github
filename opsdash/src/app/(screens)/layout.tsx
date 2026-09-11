@@ -12,6 +12,9 @@ export default function ScreensLayout({ children }: { children: ReactNode }) {
           borderBottom: '1px solid var(--line)',
         }}
       >
+        <Link href="/" style={{ color: 'var(--fg)', fontWeight: 600, textDecoration: 'none' }}>
+          Dashboard
+        </Link>
         <Link href="/documents" style={{ color: 'var(--fg)', fontWeight: 600, textDecoration: 'none' }}>
           Documents
         </Link>

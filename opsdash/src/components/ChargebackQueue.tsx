@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import type { ChargebackDecision, ChargebackRow, ChargedTo, SplitRatio } from './data/types';
-import { getChargebackQueue, postBulkChargebackDecision } from './data/api';
+import { dataSource, getChargebackQueue, postBulkChargebackDecision } from './data/api';
 import { invalidDecisionReason, isValidDecision, needsDecision, runningDriverTotals } from './chargeback/logic';
 import { formatMoney } from './format/decimal';
 import { StatusPill } from './StatusPill';
@@ -141,6 +141,12 @@ export function ChargebackQueue() {
 
   return (
     <div>
+      {dataSource.chargeback === 'mock' && (
+        <div role="note" className="sample-data-banner">
+          Sample data — there is no live chargeback endpoint yet. Nothing on this screen is a real
+          balance; it exists to demonstrate the decision workflow only.
+        </div>
+      )}
       <p style={{ color: 'var(--muted)', maxWidth: 760 }}>
         Rows still needing a chargeback decision, densest driver+vendor cluster first — select a group (
         <kbd>g</kbd> at the highlighted row) and apply one decision to all of it. A repair charged back to a

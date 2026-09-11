@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { StagingRow } from '@/contract/types';
 import { commitDocument, getReferenceData, getStagingRows, patchStagingRow } from './data/api';
+import { errorMessageFor } from './data/fetchState';
 import type { CommitResult, ReferenceData, StagingRowEdit } from './data/types';
 import { formatMoney, formatQuantity } from './format/decimal';
 import { blockedReason, formatParsedValue, isBlocked, summarizeCommit, wasEdited } from './review/logic';
@@ -35,33 +36,62 @@ function rowStatusPill(row: StagingRow) {
  * exactly what pressing the button will do before they press it.
  */
 export function ReviewTable({ documentId }: { documentId: string }) {
-  const [rows, setRows] = useState<StagingRow[] | null>(null);
+  // 'loading' / 'error' are distinct from a successful load that happens to
+  // return zero rows — a document that parsed with nothing to review must
+  // never look the same as one this screen could not fetch at all.
+  const [loadState, setLoadState] = useState<'loading' | 'error' | 'ready'>('loading');
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
+  const [rows, setRows] = useState<StagingRow[]>([]);
   const [reference, setReference] = useState<ReferenceData | null>(null);
   const [savingRowId, setSavingRowId] = useState<string | null>(null);
+  const [rowErrors, setRowErrors] = useState<Record<string, string>>({});
   const [commitState, setCommitState] = useState<
     { phase: 'idle' } | { phase: 'committing' } | { phase: 'done'; result: CommitResult } | { phase: 'error'; message: string }
   >({ phase: 'idle' });
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([getStagingRows(documentId), getReferenceData()]).then(([r, ref]) => {
-      if (cancelled) return;
-      setRows(r);
-      setReference(ref);
-    });
+    setLoadState('loading');
+    Promise.all([getStagingRows(documentId), getReferenceData()])
+      .then(([r, ref]) => {
+        if (cancelled) return;
+        setRows(r);
+        setReference(ref);
+        setLoadState('ready');
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setLoadError(errorMessageFor(err, 'Could not load this document for review.'));
+        setLoadState('error');
+      });
     return () => {
       cancelled = true;
     };
-  }, [documentId]);
+  }, [documentId, reloadKey]);
 
-  const summary = useMemo(() => summarizeCommit(rows ?? []), [rows]);
+  const summary = useMemo(() => summarizeCommit(rows), [rows]);
 
   async function saveEdit(rowId: string, edit: Partial<StagingRowEdit>) {
     setSavingRowId(rowId);
-    const updated = await patchStagingRow(rowId, edit);
-    setSavingRowId(null);
-    if (!updated) return;
-    setRows((prev) => (prev ? prev.map((r) => (r.stagingRowId === rowId ? updated : r)) : prev));
+    try {
+      const updated = await patchStagingRow(rowId, edit);
+      if (!updated) {
+        setRowErrors((prev) => ({ ...prev, [rowId]: 'This row could not be found on the server — it may have been removed.' }));
+        return;
+      }
+      setRows((prev) => prev.map((r) => (r.stagingRowId === rowId ? updated : r)));
+      setRowErrors((prev) => {
+        if (!(rowId in prev)) return prev;
+        const next = { ...prev };
+        delete next[rowId];
+        return next;
+      });
+    } catch (err) {
+      setRowErrors((prev) => ({ ...prev, [rowId]: errorMessageFor(err, 'Could not save this edit.') }));
+    } finally {
+      setSavingRowId(null);
+    }
   }
 
   async function handleCommit() {
@@ -73,17 +103,35 @@ export function ReviewTable({ documentId }: { documentId: string }) {
       const result = await commitDocument(documentId);
       setCommitState({ phase: 'done', result });
       setRows((prev) =>
-        prev
-          ? prev.map((r) => (r.status === 'rejected' || r.status === 'committed' ? r : { ...r, status: 'committed' as const }))
-          : prev,
+        prev.map((r) => (r.status === 'rejected' || r.status === 'committed' ? r : { ...r, status: 'committed' as const })),
       );
     } catch (err) {
-      setCommitState({ phase: 'error', message: err instanceof Error ? err.message : 'Commit failed' });
+      // The commit route is transactional: any failure here means nothing
+      // was written to the ledger, not "some rows might have posted". Say
+      // that plainly rather than leaving the operator unsure whether to
+      // press Commit again.
+      const detail = errorMessageFor(err, 'Commit failed.');
+      setCommitState({
+        phase: 'error',
+        message: `${detail} Nothing was committed — commit is all-or-nothing, so it is safe to press Commit again.`,
+      });
     }
   }
 
-  if (rows === null || reference === null) {
+  if (loadState === 'loading') {
     return <p style={{ color: 'var(--muted)' }}>Loading staging rows…</p>;
+  }
+
+  if (loadState === 'error' || reference === null) {
+    return (
+      <div role="alert" style={{ color: 'var(--bad)', border: '1px solid var(--bad)', borderRadius: 8, padding: '0.75rem' }}>
+        <p style={{ margin: 0, fontWeight: 600 }}>Could not load this document for review</p>
+        <p style={{ margin: '0.25rem 0 0' }}>{loadError ?? 'Unknown error.'}</p>
+        <button type="button" onClick={() => setReloadKey((k) => k + 1)} style={{ marginTop: '0.5rem' }}>
+          Retry
+        </button>
+      </div>
+    );
   }
 
   const alreadyCommitted = commitState.phase === 'done' || summary.alreadyCommitted > 0;
@@ -192,6 +240,11 @@ export function ReviewTable({ documentId }: { documentId: string }) {
                   {rowStatusPill(row)}
                   {blocked && (
                     <div style={{ color: 'var(--bad)', fontSize: '0.9em', marginTop: '0.2rem' }}>{reason}</div>
+                  )}
+                  {rowErrors[row.stagingRowId] && (
+                    <div role="alert" style={{ color: 'var(--bad)', fontSize: '0.9em', marginTop: '0.2rem' }}>
+                      {rowErrors[row.stagingRowId]}
+                    </div>
                   )}
                 </td>
                 <td style={td}>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { getOverheadRates } from './data/api';
+import { errorMessageFor, isEmptyList, loaded, loading, errored, type FetchState } from './data/fetchState';
 import type { TruckOverheadRate } from './data/types';
 import { formatMoney, formatRate } from './format/decimal';
 
@@ -14,25 +15,45 @@ import { formatMoney, formatRate } from './format/decimal';
  * actual is exactly what CLAUDE.md §2 forbids.
  */
 export function OverheadTable() {
-  const [rates, setRates] = useState<TruckOverheadRate[] | null>(null);
+  const [state, setState] = useState<FetchState<TruckOverheadRate[]>>(loading());
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
-    getOverheadRates().then((r) => {
-      if (!cancelled) setRates(r);
-    });
+    setState(loading());
+    getOverheadRates()
+      .then((r) => {
+        if (!cancelled) setState(loaded(r));
+      })
+      .catch((err) => {
+        if (!cancelled) setState(errored(errorMessageFor(err, 'Could not load overhead rates.')));
+      });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [reloadKey]);
 
-  if (rates === null) {
+  if (state.status === 'loading') {
     return <p style={{ color: 'var(--muted)' }}>Loading overhead rates…</p>;
   }
 
-  if (rates.length === 0) {
+  if (state.status === 'error') {
+    return (
+      <div role="alert" style={{ color: 'var(--bad)', border: '1px solid var(--bad)', borderRadius: 8, padding: '0.75rem' }}>
+        <p style={{ margin: 0, fontWeight: 600 }}>Could not load overhead rates</p>
+        <p style={{ margin: '0.25rem 0 0' }}>{state.message}</p>
+        <button type="button" onClick={() => setReloadKey((k) => k + 1)} style={{ marginTop: '0.5rem' }}>
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  if (isEmptyList(state)) {
     return <p style={{ color: 'var(--muted)' }}>No registration overhead has been posted yet.</p>;
   }
+
+  const rates = state.data;
 
   return (
     <div>
