@@ -24,6 +24,7 @@ import { randomUUID } from 'node:crypto';
 import { withTransaction } from '@/db/pool';
 import { LEDGER_ENTRY_COLUMNS_SQL, STAGING_ROW_COLUMNS_SQL, mapDbRowToStagingRowRecord } from './mappers';
 import { DocumentNotFoundError, type CommitResult, type StagingRowRecord } from './types';
+import { findOwnershipConflict } from './truckOwnership';
 
 type QueryFn = (text: string, params?: readonly unknown[]) => Promise<unknown[]>;
 
@@ -75,6 +76,29 @@ export async function commitDocument(documentId: string, postedBy: string, opts:
                  reviewed_by = $3, reviewed_at = now()
            WHERE staging_row_id = $1`,
           [row.stagingRowId, reason, postedBy],
+        );
+        continue;
+      }
+
+      // Flag, never auto-resolve: a cost charged to a driver who is also
+      // that truck's ownership-recorded cost bearer (lease-to-purchase or
+      // owner-operator) would double-bill them — once as the charged
+      // driver, once as the owner already bearing that unit's costs. This
+      // row does not post; a human decides which side is right.
+      const conflict = await findOwnershipConflict(q, {
+        truckId: row.truckId,
+        driverId: row.driverId,
+        chargedTo: row.chargedTo,
+        categoryId: row.categoryId,
+      });
+      if (conflict) {
+        await q(
+          `UPDATE accounting.staging_row
+             SET status = 'rejected',
+                 review_notes = CASE WHEN review_notes IS NULL OR review_notes = '' THEN $2 ELSE review_notes || ' ' || $2 END,
+                 reviewed_by = $3, reviewed_at = now()
+           WHERE staging_row_id = $1`,
+          [row.stagingRowId, conflict, postedBy],
         );
         continue;
       }
