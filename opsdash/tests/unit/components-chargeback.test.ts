@@ -15,7 +15,7 @@ function makeRow(overrides: Partial<ChargebackRow> = {}): ChargebackRow {
   return {
     costRowId: 'cost-1',
     sourceRef: { kind: 'sheet', label: 'Truck and trailer expenses ZONE', rowRef: 'row-12' },
-    truckId: 'trk-50174',
+    truckId: 'trk-9001',
     driverId: 'drv-1',
     driverClass: 'lease_to_own',
     vendor: 'M&Y',

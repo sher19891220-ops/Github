@@ -8,6 +8,7 @@
  * Run with `DATABASE_URL=$(npm run -s db:local) npx vitest run tests/integration`.
  */
 import { randomUUID } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { query } from '@/db/pool';
 import { createDocument, getDocumentRows } from '@/db/repo/documents';
@@ -17,11 +18,35 @@ import { listLedgerEntries } from '@/db/repo/ledger';
 import { CATEGORY_MAINTENANCE, ENTITY_XTRACK_ID, ensureBaseFixtures } from './helpers';
 import { dispatchFixture, expensesFixture } from './fixtures';
 
-// A real row from /home/user/opsdash-fixtures/irp_unit_ownership.csv (unit
-// 1564): `cost_bearer=ltp_owner` — a lease-to-purchase driver who has paid
-// the unit off, so they (not the carrier) already bear 100% of its costs.
-// Never a synthetic VIN — CLAUDE.md §2.
-const LTP_OWNER_VIN = '3AKJHHDR5NSMY1564';
+/**
+ * A real VIN from the real ownership crosswalk — one whose `cost_bearer`
+ * is `ltp_owner`, i.e. a driver who has paid the unit off and therefore
+ * already bears 100% of its costs.
+ *
+ * It must be a real VIN, not a synthetic one (CLAUDE.md §2): the conflict
+ * this test exercises is detected by looking the VIN up in that crosswalk,
+ * so a made-up VIN finds nothing and the test passes for the wrong reason
+ * — it did that for one commit until this comment was written.
+ *
+ * So it is READ from the crosswalk at run time rather than written down
+ * here. This repository is public and VINs are fleet data; the file it
+ * comes from is gitignored.
+ */
+function firstLtpOwnerVin(): string {
+  const path = process.env.OPSDASH_IRP_OWNERSHIP_PATH ?? '/home/user/opsdash-fixtures/irp_unit_ownership.csv';
+  const text = readFileSync(path, 'utf8');
+  const lines = text.split(/\r?\n/).filter((l) => l.trim() !== '');
+  const header = lines[0]!.split(',').map((c) => c.trim().toLowerCase());
+  const vinIdx = header.indexOf('vin');
+  const bearerIdx = header.indexOf('cost_bearer');
+  for (const line of lines.slice(1)) {
+    const cells = line.split(',');
+    if ((cells[bearerIdx] ?? '').trim() === 'ltp_owner') return (cells[vinIdx] ?? '').trim();
+  }
+  throw new Error('no ltp_owner row in the ownership crosswalk');
+}
+
+const LTP_OWNER_VIN = firstLtpOwnerVin();
 
 beforeAll(async () => {
   await ensureBaseFixtures();

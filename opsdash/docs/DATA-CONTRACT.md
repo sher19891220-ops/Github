@@ -122,7 +122,7 @@ defects each parser must survive, are in `docs/SOURCE-DISCOVERY.md`.
 Three rules that fall out of the real data:
 
 - **Never resolve identity by string match.** `Issued To` writes the same person
-  as `"496648 NAME"`, `"Name # 6169"` and `"Name #495803"`. Everything goes
+  as `"900101 NAME"`, `"Name # 9002"` and `"Name #900102"`. Everything goes
   through `source_key_map`.
 - **A no-load day is decided by the amount cell, never by the lane text.** A day
   with no parseable amount posts no entry — not a zero one, or average revenue

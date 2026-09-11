@@ -50,10 +50,14 @@ describe('validateVin', () => {
   });
 
   it('recovers the true VIN when only position 9 was misread to an illegal letter — the exact §14 OCR case', () => {
-    // Real, documented OCR failure: SOURCE-DISCOVERY.md §14 — OCR read
-    // "3AKJHHDRINSMY1471" where the truth is "3AKJHHDR9NSMY1471".
-    const ocrGarbled = '3AKJHHDRINSMY1471';
-    const truth = '3AKJHHDR9NSMY1471';
+    // The shape of a real, documented OCR failure (SOURCE-DISCOVERY.md
+    // §14): position 9 came back as "I", which is not a legal VIN
+    // character at all, and the check digit recomputes it. Written
+    // against the public worked example rather than the fleet's own VIN —
+    // this repository is public — and the case is identical, because the
+    // recovery depends only on the check-digit arithmetic.
+    const ocrGarbled = `${HONDA_EXAMPLE.slice(0, 8)}I${HONDA_EXAMPLE.slice(9)}`;
+    const truth = HONDA_EXAMPLE;
     const v = validateVin(ocrGarbled);
     expect(v.corrected).toBe(true);
     expect(v.valid).toBe(true);
@@ -62,8 +66,10 @@ describe('validateVin', () => {
   });
 
   it('recovers position 9 when OCR read "O" instead of "0"', () => {
-    const ocrGarbled = '3AKJHHDRONSMY1682';
-    const truth = '3AKJHHDR0NSMY1682';
+    // A VIN whose check digit really is "0", so the O/0 confusion is the
+    // genuine article rather than a contrived one.
+    const truth = '1HGCM82603A000002';
+    const ocrGarbled = `${truth.slice(0, 8)}O${truth.slice(9)}`;
     const v = validateVin(ocrGarbled);
     expect(v.corrected).toBe(true);
     expect(v.value).toBe(truth);
@@ -94,7 +100,7 @@ describe('validateVin', () => {
   });
 
   it('flags the wrong length rather than truncating or padding', () => {
-    const v = validateVin('3AKJHHDR9NSMY147'); // 16 chars
+    const v = validateVin('1HGBHXXX9XXXX147'); // 16 chars
     expect(v.valid).toBe(false);
     expect(v.needsReview).toBe(true);
     expect(v.reason).toMatch(/17/);

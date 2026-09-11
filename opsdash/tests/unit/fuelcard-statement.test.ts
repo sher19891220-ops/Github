@@ -19,11 +19,11 @@ Account 99887766
 Billing period 03/01/2026 - 03/31/2026
 
 Tran Date,Invoice,Unit,Driver Name,Location Name,State,Product,Qty,Unit Price,Net Amount
-03/14/2026,INV-1001,7004,A DRIVER,PILOT 123 COLUMBUS,OH,ULSD,118.40,3.485,412.66
-03/15/2026,INV-1002,7004,A DRIVER,LOVES 456 FISHKILL,NY,DEF BULK,9.50,4.100,38.95
-03/16/2026,INV-1003,6179,B DRIVER,TA BROOKVILLE,PA,ULSD,140.00,3.600,504.00
-03/17/2026,INV-1004,6179,B DRIVER,TA BROOKVILLE,PA,CASH ADVANCE,,,100.00
-03/18/2026,INV-1005,7161,C DRIVER,PETRO GASTON,IN,REEFER DIESEL,75.00,3.400,255.00
+03/14/2026,INV-1001,9011,A DRIVER,PILOT 123 COLUMBUS,OH,ULSD,118.40,3.485,412.66
+03/15/2026,INV-1002,9011,A DRIVER,LOVES 456 FISHKILL,NY,DEF BULK,9.50,4.100,38.95
+03/16/2026,INV-1003,9012,B DRIVER,TA BROOKVILLE,PA,ULSD,140.00,3.600,504.00
+03/17/2026,INV-1004,9012,B DRIVER,TA BROOKVILLE,PA,CASH ADVANCE,,,100.00
+03/18/2026,INV-1005,9013,C DRIVER,PETRO GASTON,IN,REEFER DIESEL,75.00,3.400,255.00
 GRAND TOTAL,,,,,,,,,1310.61
 `;
 
@@ -193,7 +193,7 @@ describe('what it refuses', () => {
 
   it('accepts a post-date-only statement rather than refusing it', () => {
     const r = parseFuelCardStatement(
-      'Post Date,Unit,Product,Qty,Amount\n03/14/2026,7004,ULSD,118.40,412.66\n03/15/2026,6179,ULSD,90.00,320.00\n',
+      'Post Date,Unit,Product,Qty,Amount\n03/14/2026,9011,ULSD,118.40,412.66\n03/15/2026,9012,ULSD,90.00,320.00\n',
       'doc-5',
     );
     if (r.status !== 'parsed') throw new Error('expected a parse');
@@ -205,7 +205,7 @@ describe('what it refuses', () => {
 
   it('warns when nothing supplies a purchase state', () => {
     const r = parseFuelCardStatement(
-      'Tran Date,Unit,Product,Qty,Amount\n03/14/2026,7004,ULSD,118.40,412.66\n03/15/2026,6179,ULSD,90.00,320.00\n',
+      'Tran Date,Unit,Product,Qty,Amount\n03/14/2026,9011,ULSD,118.40,412.66\n03/15/2026,9012,ULSD,90.00,320.00\n',
       'doc-6',
     );
     if (r.status !== 'parsed') throw new Error('expected a parse');
@@ -218,7 +218,7 @@ describe('what it refuses', () => {
 
   it('withholds unrecognised products from IFTA instead of assuming diesel', () => {
     const r = parseFuelCardStatement(
-      'Tran Date,Unit,State,Product,Qty,Amount\n03/14/2026,7004,OH,PRD-4471,118.40,412.66\n03/15/2026,6179,OH,ULSD,90.00,320.00\n',
+      'Tran Date,Unit,State,Product,Qty,Amount\n03/14/2026,9011,OH,PRD-4471,118.40,412.66\n03/15/2026,9012,OH,ULSD,90.00,320.00\n',
       'doc-7',
     );
     if (r.status !== 'parsed') throw new Error('expected a parse');
@@ -229,7 +229,7 @@ describe('what it refuses', () => {
 
   it('does not invent gallons when the statement has no quantity column', () => {
     const r = parseFuelCardStatement(
-      'Tran Date,Unit,State,Product,Amount\n03/14/2026,7004,OH,ULSD,412.66\n03/15/2026,6179,OH,ULSD,320.00\n',
+      'Tran Date,Unit,State,Product,Amount\n03/14/2026,9011,OH,ULSD,412.66\n03/15/2026,9012,OH,ULSD,320.00\n',
       'doc-8',
     );
     if (r.status !== 'parsed') throw new Error('expected a parse');

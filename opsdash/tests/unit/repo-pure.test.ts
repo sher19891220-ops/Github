@@ -37,7 +37,7 @@ function baseRecord(overrides: Partial<StagingRowRecord> = {}): StagingRowRecord
 
 describe('toWireStagingRow', () => {
   it('strips internal-only columns so the response matches the fixed StagingRow contract exactly', () => {
-    const record = baseRecord({ chargedTo: 'driver', unitType: 'truck', unitNumber: '50174', committedEntryId: 'entry-1' });
+    const record = baseRecord({ chargedTo: 'driver', unitType: 'truck', unitNumber: '9001', committedEntryId: 'entry-1' });
     const wire = toWireStagingRow(record);
     expect(wire).not.toHaveProperty('chargedTo');
     expect(wire).not.toHaveProperty('unitType');

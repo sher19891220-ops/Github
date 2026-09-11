@@ -203,10 +203,10 @@ export async function getOverheadRates(): Promise<TruckOverheadRate[]> {
   const annualCents = irpPerUnitCents + hvutPerUnitCents;
 
   const units: { truckId: string | null; unitNumber: string; vin: string; entityId: string }[] = [
-    { truckId: 'trk-50174', unitNumber: '50174', vin: '1AAAAAAAAAAAAAAA1', entityId: 'ent-zone' },
-    { truckId: 'trk-6169', unitNumber: '6169', vin: '1BBBBBBBBBBBBBBB2', entityId: 'ent-xtrack' },
-    { truckId: 'trk-15852', unitNumber: '15852', vin: '1CCCCCCCCCCCCCCC3', entityId: 'ent-zone' },
-    { truckId: null, unitNumber: '5091', vin: '1DDDDDDDDDDDDDDD4', entityId: 'ent-afg' },
+    { truckId: 'trk-9001', unitNumber: '9001', vin: '1AAAAAAAAAAAAAAA1', entityId: 'ent-zone' },
+    { truckId: 'trk-9002', unitNumber: '9002', vin: '1BBBBBBBBBBBBBBB2', entityId: 'ent-xtrack' },
+    { truckId: 'trk-9003', unitNumber: '9003', vin: '1CCCCCCCCCCCCCCC3', entityId: 'ent-zone' },
+    { truckId: null, unitNumber: '9006', vin: '1DDDDDDDDDDDDDDD4', entityId: 'ent-afg' },
   ];
 
   const rates: TruckOverheadRate[] = units.map((u) => {

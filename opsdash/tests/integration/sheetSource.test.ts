@@ -29,7 +29,7 @@ const HEADER = '| Unit | Issued To | Unit Type | Cost type | Date | $ used | Exp
 /** A distinct body each time: the document path is content-addressed, so
  *  identical text is a deliberate no-op rather than a second sync. */
 function sheet(header = HEADER): string {
-  return `${header}\n| 5852 | Some Driver | truck | Repair | 04.15.26 | $250.00 | company | ${randomUUID()} |\n`;
+  return `${header}\n| 9005 | Some Driver | truck | Repair | 04.15.26 | $250.00 | company | ${randomUUID()} |\n`;
 }
 
 async function register(purpose: Parameters<typeof registerSheetSource>[0]['purpose'] = 'maintenance_cost') {

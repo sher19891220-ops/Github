@@ -39,7 +39,7 @@ export interface ProposedMatch {
 }
 
 /** Leading noise and case differ between a statement and the sheet
- *  ("Unit 5852", "5852 ", "#5852"); the identity does not. */
+ *  ("Unit 9005", "9005 ", "#9005"); the identity does not. */
 export function normalizeUnitKey(value: string | null | undefined): string | null {
   if (value === null || value === undefined) return null;
   const trimmed = value

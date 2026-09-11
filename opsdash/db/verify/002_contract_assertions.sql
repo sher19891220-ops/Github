@@ -225,16 +225,16 @@ VALUES ('99999999-9999-9999-9999-999999999999','11111111-1111-1111-1111-11111111
         '2026-09-09','permit.test',-2429.98,'document',
         '22222222-2222-2222-2222-222222222222','engine');
 
--- Zone holds unit 1431 for the first 14 days of Feb 2027, Xtrack the rest.
+-- Zone holds unit 9008 for the first 14 days of Feb 2027, Xtrack the rest.
 INSERT INTO accounting.amortization_schedule
   (source_document_id, prepaid_entry_id, entity_id, unit_number, category_id,
    period_month, segment_start, segment_end, days, amount)
 VALUES
  ('22222222-2222-2222-2222-222222222222','99999999-9999-9999-9999-999999999999',
-  '11111111-1111-1111-1111-111111111111','1431','permit.test',
+  '11111111-1111-1111-1111-111111111111','9008','permit.test',
   '2027-02-01','2027-02-01','2027-02-14',14,-93.20),
  ('22222222-2222-2222-2222-222222222222','99999999-9999-9999-9999-999999999999',
-  '66666666-6666-6666-6666-666666666666','1431','permit.test',
+  '66666666-6666-6666-6666-666666666666','9008','permit.test',
   '2027-02-01','2027-02-15','2027-02-28',14,-93.20);
 \echo 'PASS: both halves of a transfer month accepted'
 
@@ -247,7 +247,7 @@ BEGIN
      period_month, segment_start, segment_end, days, amount)
   VALUES ('22222222-2222-2222-2222-222222222222',
           '99999999-9999-9999-9999-999999999999',
-          '66666666-6666-6666-6666-666666666666','1431','permit.test',
+          '66666666-6666-6666-6666-666666666666','9008','permit.test',
           '2027-02-01','2027-02-14','2027-02-20',7,-46.60);
   RAISE EXCEPTION 'FAIL: overlapping segments accepted - a day was double-charged';
 EXCEPTION WHEN exclusion_violation THEN
@@ -274,7 +274,7 @@ SELECT CASE WHEN SUM(days) = 28 AND SUM(amount) = -186.40
             THEN 'PASS: Feb segments sum to 28 days and the month total'
             ELSE 'FAIL: got ' || SUM(days) || ' days, ' || SUM(amount) END AS result
 FROM accounting.amortization_schedule
-WHERE unit_number = '1431' AND period_month = '2027-02-01';
+WHERE unit_number = '9008' AND period_month = '2027-02-01';
 
 \echo '--- ASSERT 20: a split without a ratio is not a decision -------------'
 INSERT INTO accounting.driver (driver_id, full_name)

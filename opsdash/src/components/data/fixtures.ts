@@ -19,15 +19,15 @@ export const ENTITIES: NamedOption[] = [
 ];
 
 export const TRUCKS: NamedOption[] = [
-  { id: 'trk-50174', label: '50174', isActive: true },
-  { id: 'trk-6169', label: '6169', isActive: true },
-  { id: 'trk-15852', label: '15852', isActive: true },
-  { id: 'trk-9859', label: '9859', isActive: true },
+  { id: 'trk-9001', label: '9001', isActive: true },
+  { id: 'trk-9002', label: '9002', isActive: true },
+  { id: 'trk-9003', label: '9003', isActive: true },
+  { id: 'trk-9004', label: '9004', isActive: true },
 ];
 
 export const DRIVERS: NamedOption[] = [
-  { id: 'drv-1', label: 'D. Alvarez (#496648)', isActive: true },
-  { id: 'drv-2', label: 'M. Okafor (#6169)', isActive: true },
+  { id: 'drv-1', label: 'Driver One (#900101)', isActive: true },
+  { id: 'drv-2', label: 'Driver Two (#900102)', isActive: true },
   { id: 'drv-3', label: 'R. Petrov', isActive: true },
 ];
 
@@ -65,15 +65,15 @@ export const DOCUMENTS: DocumentFixture[] = [
         rowIndex: 1,
         sourcePage: 1,
         parsedPayload: {
-          unit: '50174',
-          driver: '496648 D ALVAREZ',
+          unit: '9001',
+          driver: '900101 DRIVER ONE',
           location: '66377 Main St, Belmont, OH 43718, United States',
           gallon: 'full tank',
           price: '3.56$',
         },
         reviewedPayload: null,
         entityId: 'ent-zone',
-        truckId: 'trk-50174',
+        truckId: 'trk-9001',
         driverId: 'drv-1',
         accrualDate: '2026-01-06',
         categoryId: 'fuel.diesel',
@@ -92,15 +92,15 @@ export const DOCUMENTS: DocumentFixture[] = [
         rowIndex: 2,
         sourcePage: 1,
         parsedPayload: {
-          unit: '6169',
-          driver: 'M OKAFOR # 6169',
+          unit: '9002',
+          driver: 'DRIVER TWO # 900102',
           location: '210 Route 9, Fishkill, NY 12524, United States',
           gallon: '80g',
           price: '3.49$',
         },
         reviewedPayload: null,
         entityId: null, // unresolved — see SOURCE-DISCOVERY §8; never guessed
-        truckId: 'trk-6169',
+        truckId: 'trk-9002',
         driverId: 'drv-2',
         accrualDate: '2026-01-06',
         categoryId: 'fuel.diesel',
@@ -118,7 +118,7 @@ export const DOCUMENTS: DocumentFixture[] = [
         rowIndex: 3,
         sourcePage: 1,
         parsedPayload: {
-          unit: '15852',
+          unit: '9003',
           driver: 'R PETROV',
           location: 'unreadable scan region',
           gallon: 'full tank',
@@ -126,7 +126,7 @@ export const DOCUMENTS: DocumentFixture[] = [
         },
         reviewedPayload: null,
         entityId: 'ent-zone',
-        truckId: 'trk-15852',
+        truckId: 'trk-9003',
         driverId: 'drv-3',
         accrualDate: '2026-01-07',
         categoryId: null,
@@ -158,7 +158,7 @@ export const DOCUMENTS: DocumentFixture[] = [
         sourcePage: null,
         parsedPayload: {
           workOrder: 'EFS-7712',
-          issuedTo: '496648 D ALVAREZ',
+          issuedTo: '900101 DRIVER ONE',
           unitType: 'trailer',
           costType: '2 tires replaced',
           dateRaw: '01.06.26',
@@ -185,7 +185,7 @@ export const DOCUMENTS: DocumentFixture[] = [
         sourcePage: null,
         parsedPayload: {
           workOrder: 'EFS-7713',
-          issuedTo: 'M OKAFOR #6169',
+          issuedTo: 'DRIVER TWO #900102',
           unitType: 'truck',
           costType: 'brake job',
           dateRaw: '01.06.25',
@@ -193,7 +193,7 @@ export const DOCUMENTS: DocumentFixture[] = [
         },
         reviewedPayload: null,
         entityId: 'ent-xtrack',
-        truckId: 'trk-6169',
+        truckId: 'trk-9002',
         driverId: 'drv-2',
         accrualDate: null, // the mistyped year is deliberately not guessed
         categoryId: 'maintenance.repair',
@@ -243,7 +243,7 @@ export const RECON_DOCUMENT_LINES: ReconLine[] = [
     lineId: 'rd-1',
     side: 'document',
     sourceRef: { kind: 'document', documentId: RECON_DOCUMENT_ID, stagingRowId: 'row-f-1', label: 'EFS_statement_2026-01.csv row 1' },
-    truckId: 'trk-50174',
+    truckId: 'trk-9001',
     driverId: 'drv-1',
     accrualDate: '2026-01-06',
     amount: '-693.44',
@@ -254,7 +254,7 @@ export const RECON_DOCUMENT_LINES: ReconLine[] = [
     lineId: 'rd-2',
     side: 'document',
     sourceRef: { kind: 'document', documentId: RECON_DOCUMENT_ID, stagingRowId: 'row-f-2', label: 'EFS_statement_2026-01.csv row 2' },
-    truckId: 'trk-6169',
+    truckId: 'trk-9002',
     driverId: 'drv-2',
     accrualDate: '2026-01-06',
     amount: '-279.20',
@@ -265,7 +265,7 @@ export const RECON_DOCUMENT_LINES: ReconLine[] = [
     lineId: 'rd-3',
     side: 'document',
     sourceRef: { kind: 'document', documentId: RECON_DOCUMENT_ID, stagingRowId: 'row-f-3', label: 'EFS_statement_2026-01.csv row 3' },
-    truckId: 'trk-15852',
+    truckId: 'trk-9003',
     driverId: 'drv-3',
     accrualDate: '2026-01-07',
     amount: '-410.02',
@@ -278,8 +278,8 @@ export const RECON_LEDGER_LINES: ReconLine[] = [
   {
     lineId: 'rl-1',
     side: 'ledger',
-    sourceRef: { kind: 'sheet', label: 'Fuel sheet', rowRef: 'Fuel!2026-01-06!50174' },
-    truckId: 'trk-50174',
+    sourceRef: { kind: 'sheet', label: 'Fuel sheet', rowRef: 'Fuel!2026-01-06!9001' },
+    truckId: 'trk-9001',
     driverId: 'drv-1',
     accrualDate: '2026-01-06',
     amount: '-693.44',
@@ -291,8 +291,8 @@ export const RECON_LEDGER_LINES: ReconLine[] = [
     // same date, amount differs.
     lineId: 'rl-2',
     side: 'ledger',
-    sourceRef: { kind: 'sheet', label: 'Fuel sheet', rowRef: 'Fuel!2026-01-06!6169' },
-    truckId: 'trk-6169',
+    sourceRef: { kind: 'sheet', label: 'Fuel sheet', rowRef: 'Fuel!2026-01-06!9002' },
+    truckId: 'trk-9002',
     driverId: 'drv-2',
     accrualDate: '2026-01-06',
     amount: '-275.10',
@@ -305,15 +305,15 @@ export const RECON_LEDGER_LINES: ReconLine[] = [
     // this statement simply does not cover).
     lineId: 'rl-3',
     side: 'ledger',
-    sourceRef: { kind: 'sheet', label: 'Fuel sheet', rowRef: 'Fuel!2026-01-05!9859' },
-    truckId: 'trk-9859',
+    sourceRef: { kind: 'sheet', label: 'Fuel sheet', rowRef: 'Fuel!2026-01-05!9004' },
+    truckId: 'trk-9004',
     driverId: null,
     accrualDate: '2026-01-05',
     amount: '-512.30',
     quantity: null,
     description: 'Fuel — diesel (already recorded)',
   },
-  // rd-3 (trk-15852, 01-07) has no ledger counterpart at all — it is the
+  // rd-3 (trk-9003, 01-07) has no ledger counterpart at all — it is the
   // document-side unmatched row.
 ];
 
@@ -332,7 +332,7 @@ export const CHARGEBACK_ROWS: ChargebackRow[] = [
   {
     costRowId: 'cb-1',
     sourceRef: { kind: 'sheet', label: 'Truck and trailer expenses ZONE', rowRef: 'row-1' },
-    truckId: 'trk-6169',
+    truckId: 'trk-9002',
     driverId: 'drv-2',
     driverClass: 'lease_to_own',
     vendor: 'M&Y',
@@ -346,7 +346,7 @@ export const CHARGEBACK_ROWS: ChargebackRow[] = [
   {
     costRowId: 'cb-2',
     sourceRef: { kind: 'sheet', label: 'Truck and trailer expenses ZONE', rowRef: 'row-2' },
-    truckId: 'trk-6169',
+    truckId: 'trk-9002',
     driverId: 'drv-2',
     driverClass: 'lease_to_own',
     vendor: 'M&Y',
@@ -360,7 +360,7 @@ export const CHARGEBACK_ROWS: ChargebackRow[] = [
   {
     costRowId: 'cb-3',
     sourceRef: { kind: 'sheet', label: 'Truck and trailer expenses ZONE', rowRef: 'row-3' },
-    truckId: 'trk-6169',
+    truckId: 'trk-9002',
     driverId: 'drv-2',
     driverClass: 'lease_to_own',
     vendor: 'M&Y',
@@ -374,7 +374,7 @@ export const CHARGEBACK_ROWS: ChargebackRow[] = [
   {
     costRowId: 'cb-4',
     sourceRef: { kind: 'sheet', label: 'Truck and trailer expenses ZONE', rowRef: 'row-4' },
-    truckId: 'trk-15852',
+    truckId: 'trk-9003',
     driverId: 'drv-3',
     driverClass: 'owner_operator',
     vendor: 'EFS',
@@ -388,7 +388,7 @@ export const CHARGEBACK_ROWS: ChargebackRow[] = [
   {
     costRowId: 'cb-5',
     sourceRef: { kind: 'sheet', label: 'Truck and trailer expenses ZONE', rowRef: 'row-5' },
-    truckId: 'trk-9859',
+    truckId: 'trk-9004',
     driverId: null,
     driverClass: null,
     vendor: 'Toll violations',
@@ -404,7 +404,7 @@ export const CHARGEBACK_ROWS: ChargebackRow[] = [
     // previous decision stays visible with its own provenance (who/when).
     costRowId: 'cb-6',
     sourceRef: { kind: 'sheet', label: 'Truck and trailer expenses ZONE', rowRef: 'row-6' },
-    truckId: 'trk-50174',
+    truckId: 'trk-9001',
     driverId: 'drv-1',
     driverClass: 'company',
     vendor: 'EFS',

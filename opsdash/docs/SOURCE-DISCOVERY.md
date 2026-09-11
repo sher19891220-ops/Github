@@ -141,7 +141,7 @@ appear). The cost table's header:
 `Work Order | $ used | Unit | Issued To | Unit Type | Cost type | Date | Expense side | Details`
 
 Real row shape:
-`EFS | <wo> | <wo> | $693.44 | 50174 | <driver> <truck#> | trailer | 2 tires replaced | 01.01.26 | company`
+`EFS | <wo> | <wo> | $693.44 | <unit#> | <driver> <truck#> | trailer | 2 tires replaced | 01.01.26 | company`
 
 Two columns here are worth more than the rest of this document:
 
@@ -162,7 +162,7 @@ Two columns here are worth more than the rest of this document:
    (`01.06.25` in a run of `01.06.26` rows). Year inference from surrounding
    rows is unsafe; surface these for review rather than guessing.
 2. **`Issued To` mixes driver name and truck number in unstable order** —
-   `"496648 <NAME>"`, `"<Name> # 6169"`, `"<Name> #495803"`. Identity resolution
+   `"<id> <NAME>"`, `"<Name> # <id>"`, `"<Name> #<id>"`. Identity resolution
    must go through `source_key_map`, never a string match.
 3. `Unit` is sometimes a truck number, sometimes a trailer number, sometimes
    blank. `Unit Type` disambiguates — when it is filled in.
@@ -438,8 +438,8 @@ index in the first cell; that is the reliable boundary.
 
 The IRP invoice is billed to **ZONE-OH LLC** and covers 42 units. The settlement
 sheet says **24 of those units are operated under Xtrack or AFG**, and the
-operator separately confirmed more as Xtrack. (Two of those, `5417` and `5852`,
-later proved to be numbering artefacts rather than separate trucks — see §11g.)
+operator separately confirmed more as Xtrack. (Two of those later proved to be
+numbering artefacts rather than separate trucks — see §11g.)
 
 So the entity that *registers and pays* is not always the entity that *operates
 and earns*. Booking the whole invoice to Zone would overstate Zone's cost and
@@ -471,40 +471,37 @@ The operator's unit list (46) against the ZONE-OH fleet-001 invoice (42):
 **40 appear on both**, 6 are listed but unregistered on this invoice, and 2 are
 registered but absent from the list.
 
-| Unit | On this invoice | Explanation |
-| --- | --- | --- |
-| 2703 | no | sold lease-to-purchase, out of operations, still paying — registration deliberately not renewed |
-| 6867 | no | paid off, title Iron Lease — deliberately not registered |
-| 4546 | no | registration pending, owner-held |
-| 4851 | no | sold |
-| 9859 | no | registered on **Xtrack's** IRP account |
-| 6169 | no | registered on **Xtrack's** IRP account |
-| **15852** | **yes** | registered as `5852` on the invoice — a dropped leading digit, confirmed by VIN and plate |
-| 5417 | yes | the office numbers this unit `5091`; the BMV used the VIN tail. Same VIN and plate |
+**The unit-by-unit crosswalk is not in this file.** This repository is public
+and unit numbers, VINs and plates are fleet data; the real table lives in
+`tests/fixtures/real/irp-unit-crosswalk.md`, which is gitignored. What belongs
+here is the reasoning, which is what generalises.
 
-**Correction — 15852 is registered.** An earlier revision of this section, and
-the answer given to the operator, said it was not. Both were wrong, and the
-error came from comparing unit numbers instead of VINs.
+Each of the 6 unregistered units has an operator-confirmed explanation, and
+they fall into four kinds: **sold** (whether outright or lease-to-purchase and
+out of operations), **paid off and deliberately not renewed**, **registration
+pending**, and **registered on another carrier's IRP account**. None is a data
+defect; all four are ordinary fleet events that a naive "missing from the
+invoice" report would have raised as errors.
 
-Re-running the comparison on VIN rather than unit number resolves two
-discrepancies that a number-to-number match cannot see:
+**Correction — one unit reported as unregistered actually is registered.** An
+earlier revision of this section, and the answer given to the operator, said it
+was not. Both were wrong, and the error came from comparing unit numbers
+instead of VINs.
 
-| Invoice says | Your sheet says | VIN | Plate |
-| --- | --- | --- | --- |
-| `5852` | **`15852`** | `3AKJHHDRXNSNB8619` | PXE0448 |
-| `5417` | **`5091`** | `3AKJHHDR1MSLX5417` | PXF0322 |
+Re-running the comparison on VIN rather than unit number resolved two
+discrepancies that a number-to-number match cannot see, and they are two
+different failure modes:
 
-Same VIN, same plate, in both cases. The first is a dropped leading digit on the
-registration record. The second is a genuine numbering disagreement: the BMV
-used the VIN tail (`5417`) while the office uses its own number (`5091`).
+- **A dropped leading digit on the registration record.** The invoice carries a
+  4-digit number; the office's number for the same truck is that number with a
+  leading digit. Same VIN, same plate.
+- **A genuine numbering disagreement.** The BMV used the VIN's tail as the unit
+  number; the office uses its own. Same VIN, same plate, two different numbers,
+  neither of them wrong.
 
 **Every one of the 42 registered VINs appears in the company sheets.** There are
-no orphans. Corrected totals:
-
-- **Not registered (5):** 2703, 4546, 4851, 6867, 9859 — all explained by the
-  operator (sold, pending, paid off, or on another carrier's account).
-- **Registered but not on the operator's list (1):** the unit the office calls
-  **5091**.
+no orphans. Corrected totals: **5 not registered**, all explained by the
+operator, and **1 registered but absent from the operator's list**.
 
 This is the clearest possible argument for §11b's rule. Comparing unit numbers
 produced two false findings — one truck wrongly reported as unregistered, and
@@ -663,8 +660,9 @@ to the three carriers. It has no IRP account and never bears cost; it is a title
 holder, which is why it can never be a recharge target.
 
 Two identity corrections belong here: the unit the registration record calls
-`5852` is the office's `15852`, and the one it calls `5417` is the office's
-`5091`. Both are confirmed by matching VIN and plate — see §11g.
+one unit number is the office's same number with a leading digit, and another
+is the VIN's tail where the office uses its own number. Both are confirmed by
+matching VIN and plate — see §11g.
 
 **Consequence for the model:** `cost_bearer` is a separate axis from
 `operating_entity`. A truck can be operated by one carrier, titled to a holding
@@ -694,8 +692,9 @@ review queue, which already exists for exactly this reason.
 
 ### Check digits close most of the gap
 
-A concrete failure: OCR read `3AKJHHDRINSMY1471` where the truth is
-`3AKJHHDR9NSMY1471`. Two facts make that recoverable rather than a guess:
+A concrete failure: OCR read a VIN with `I` where the truth has `9` — the
+two are adjacent glyphs in the scanned font, and `I` is not a legal VIN
+character at all. Two facts make that recoverable rather than a guess:
 
 1. **`I`, `O` and `Q` never appear in a VIN.** Their presence is proof of a
    misread, not a suspicion.

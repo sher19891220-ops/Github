@@ -104,8 +104,17 @@ function buildInput(asOf: string): RegistrationPostingInput {
 }
 
 const FULL_YEAR = { periodStart: '2026-01-01', periodEnd: '2027-12-31' };
-const UNIT_NUMBER = '8671'; // present on the real roster (registration.test.ts asserts this)
-const TRUCK_ID = `truck-${UNIT_NUMBER}`;
+// Any unit off the real roster will do — the property under test is about
+// closed vs. unposted months, not about a particular truck, and naming one
+// would put fleet data in a public repository.
+//
+// Taken from scheduleRows rather than postedEntries: the whole point of
+// these tests is that early `asOf` values post nothing, so postedEntries
+// can be empty while the schedule is always full.
+const UNIT_NUMBER = haveFixtures
+  ? (buildRegistrationPosting(buildInput('2027-01-01')).scheduleRows[0]!.unitNumber as string)
+  : '';
+const TRUCK_ID = 'truck-under-test';
 
 function summarizeUnitAsOf(asOf: string) {
   const result = buildRegistrationPosting(buildInput(asOf));

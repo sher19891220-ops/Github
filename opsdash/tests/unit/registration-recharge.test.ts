@@ -76,11 +76,12 @@ describe.skipIf(!haveFixtures)('registration engine — intercompany recharge', 
       expect(operatorAssignments).toHaveLength(42);
       const counts: Record<string, number> = {};
       for (const r of operatorAssignments) counts[r.operatingEntityKey] = (counts[r.operatingEntityKey] ?? 0) + 1;
-      // Iron Lease held title to two of these units (4864, 6379), and
-      // Sher Imam (owner-held) to three more (1365, 1596, 3898) — Zone
-      // operates all five. Title and operation are different facts, and
-      // this crosswalk records operation only. Neither Iron Lease nor an
-      // owner-held unit appears here at all: only zone/xtrack/afg/UNRESOLVED.
+      // Iron Lease holds title to two of these units, and an owner-held
+      // party to three more — Zone operates all five. Title and operation
+      // are different facts, and this crosswalk records operation only.
+      // Neither Iron Lease nor an owner-held unit appears here at all:
+      // only zone/xtrack/afg/UNRESOLVED. (Which units those are is fleet
+      // data and stays in the gitignored fixture.)
       expect(counts).toEqual({ zone: 18, xtrack: 16, afg: 7, UNRESOLVED: 1 });
     });
 
@@ -106,7 +107,10 @@ describe.skipIf(!haveFixtures)('registration engine — intercompany recharge', 
 
   describe('buildRegistrationPosting — with the real operator crosswalk', () => {
     it('throws if a unit on the roster has no row in the operator crosswalk', () => {
-      const filtered = operatorAssignments.filter((r) => r.irpUnit !== '1365');
+      // Drop whichever unit happens to be first: the test is that a gap
+      // in the crosswalk throws, not that one particular unit does.
+      const dropped = operatorAssignments[0]!.irpUnit;
+      const filtered = operatorAssignments.filter((r) => r.irpUnit !== dropped);
       const input = makeInput({ operatorAssignments: filtered });
       expect(() => buildRegistrationPosting(input)).toThrow(/operator crosswalk/i);
     });
@@ -267,7 +271,13 @@ describe.skipIf(!haveFixtures)('registration engine — intercompany recharge', 
       const flagged = result.reconciliation.needsConfirmationUnits;
       expect(flagged).toHaveLength(1);
       expect(flagged.every((u) => u.operatorKey === 'UNRESOLVED')).toBe(true);
-      expect(new Set(flagged.map((u) => u.unitNumber))).toEqual(new Set(['5413']));
+      // The flagged unit is exactly the one the crosswalk leaves
+      // UNRESOLVED — checked against the crosswalk rather than against a
+      // unit number written down here.
+      const unresolvedInCrosswalk = new Set(
+        operatorAssignments.filter((r) => r.operatingEntityKey === 'UNRESOLVED').map((r) => r.irpUnit),
+      );
+      expect(new Set(flagged.map((u) => u.unitNumber))).toEqual(unresolvedInCrosswalk);
 
       const flaggedUnitNumbers = new Set(flagged.map((u) => u.unitNumber));
       for (const row of [...result.scheduleRows, ...result.postedEntries, ...result.intercompanyEntries]) {
@@ -287,16 +297,27 @@ describe.skipIf(!haveFixtures)('registration engine — intercompany recharge', 
       }
     });
 
-    it('driver-borne HVUT never recharges even when the truck is operated by another entity (unit 1564, xtrack)', () => {
+    it('driver-borne HVUT never recharges even when the truck is operated by another entity', () => {
       const result = buildRegistrationPosting(makeInput({ asOf: '2027-01-01' }));
-      const hvutRows = result.scheduleRows.filter((r) => r.unitNumber === '1564' && r.categoryId === 'tax.hvut');
+
+      // A driver-borne unit that another entity operates — found from the
+      // crosswalk rather than named here, since unit numbers are fleet
+      // data and this repository is public.
+      const xtrackUnits = new Set(
+        operatorAssignments.filter((r) => r.operatingEntityKey === 'xtrack').map((r) => r.irpUnit),
+      );
+      const unit = result.scheduleRows.find(
+        (r) => r.categoryId === 'tax.hvut' && r.chargedTo === 'driver' && xtrackUnits.has(r.unitNumber as string),
+      )!.unitNumber as string;
+
+      const hvutRows = result.scheduleRows.filter((r) => r.unitNumber === unit && r.categoryId === 'tax.hvut');
       expect(hvutRows).toHaveLength(12);
       expect(hvutRows.every((r) => r.chargedTo === 'driver')).toBe(true);
       expect(hvutRows.every((r) => r.entityId === ZONE_ENTITY_ID && r.paidByEntityId === null)).toBe(true);
-      expect(result.intercompanyEntries.some((e) => e.key === 'receivable:tax.hvut:1564')).toBe(false);
+      expect(result.intercompanyEntries.some((e) => e.key === `receivable:tax.hvut:${unit}`)).toBe(false);
 
       // But its IRP allocation DOES recharge to xtrack, since IRP is always company-borne.
-      const irpRows = result.scheduleRows.filter((r) => r.unitNumber === '1564' && r.categoryId === 'permit.irp');
+      const irpRows = result.scheduleRows.filter((r) => r.unitNumber === unit && r.categoryId === 'permit.irp');
       expect(irpRows.every((r) => r.entityId === XTRACK_ENTITY_ID && r.paidByEntityId === ZONE_ENTITY_ID)).toBe(true);
     });
 
@@ -311,7 +332,7 @@ describe.skipIf(!haveFixtures)('registration engine — intercompany recharge', 
       }
     });
 
-    it('title held by Iron Lease does not change the recharge: units 4864 and 6379 are ordinary zone-operated units', () => {
+    it('title held by Iron Lease does not change the recharge: those units post as ordinary zone-operated units', () => {
       // Per the operator's decision: title (who owns) and operation (who
       // runs, and earns from, the truck) are different facts. These two
       // units' `source` column notes Iron Lease holds title, but
@@ -320,7 +341,9 @@ describe.skipIf(!haveFixtures)('registration engine — intercompany recharge', 
       // flag and no receivable.
       const result = buildRegistrationPosting(makeInput({ asOf: '2027-01-01' }));
       const titleHeldUnits = operatorAssignments.filter((r) => r.source.includes('title Iron Lease')).map((r) => r.irpUnit);
-      expect(titleHeldUnits).toEqual(['4864', '6379']);
+      // Counted, not named: which units Iron Lease holds title to is
+      // fleet data, and this repository is public.
+      expect(titleHeldUnits).toHaveLength(2);
       for (const unitNumber of titleHeldUnits) {
         const rows = result.scheduleRows.filter((r) => r.unitNumber === unitNumber);
         expect(rows.every((r) => r.entityId === ZONE_ENTITY_ID && r.paidByEntityId === null)).toBe(true);
@@ -329,36 +352,38 @@ describe.skipIf(!haveFixtures)('registration engine — intercompany recharge', 
       }
     });
 
-    it('owner-held (Sher Imam) units 1365/1596/3898, now confirmed operated by Zone, post as ordinary zone units — the guard is reinforced, not contradicted', () => {
-      // The operator resolved three of the six originally-UNRESOLVED units:
-      // Sher Imam holds title, but Zone operates them. This is the same
+    it('owner-held units, now confirmed operated by Zone, post as ordinary zone units — the guard is reinforced, not contradicted', () => {
+      // The operator resolved three of the six originally-UNRESOLVED
+      // units: a private owner holds title, but Zone operates them. Same
       // title-vs-operation distinction as Iron Lease above — the owner
-      // never becomes a recharge target, but a REAL operator (Zone) can now
-      // be recorded for these units instead of leaving them UNRESOLVED.
+      // never becomes a recharge target, but a REAL operator (Zone) can
+      // now be recorded instead of leaving them UNRESOLVED.
       const result = buildRegistrationPosting(makeInput({ asOf: '2027-01-01' }));
       const ownerHeldUnits = operatorAssignments
         .filter((r) => r.source.includes('owner-held'))
         .map((r) => r.irpUnit);
-      expect(ownerHeldUnits.sort()).toEqual(['1365', '1596', '3898']);
+      expect(ownerHeldUnits).toHaveLength(3);
       for (const unitNumber of ownerHeldUnits) {
         const rows = result.scheduleRows.filter((r) => r.unitNumber === unitNumber);
         expect(rows.every((r) => r.entityId === ZONE_ENTITY_ID && r.paidByEntityId === null)).toBe(true);
         expect(rows.every((r) => r.needsConfirmation === false)).toBe(true);
         expect(result.intercompanyEntries.some((e) => e.unitNumber === unitNumber)).toBe(false);
       }
-      // And Sher Imam is still never a valid operator key on its own — only
-      // the fact that Zone (a carrier) now operates these units let them
-      // post without the guard's involvement at all.
-      expect(operatorAssignments.some((r) => r.operatingEntityKey === 'sher_imam')).toBe(false);
+      // And a private owner is still never a valid operator key on its
+      // own — only the fact that Zone (a carrier) now operates these
+      // units let them post without the guard's involvement at all. The
+      // only operator keys that exist are carriers and UNRESOLVED.
+      const keys = new Set(operatorAssignments.map((r) => r.operatingEntityKey));
+      expect([...keys].every((k) => ['zone', 'xtrack', 'afg', 'UNRESOLVED'].includes(k))).toBe(true);
     });
 
-    it('the remaining 3 genuinely-unresolved units (4553, 4713, 5413) are unaffected by the Sher Imam resolution', () => {
+    it('the genuinely-unresolved units are unaffected by the owner-held resolution', () => {
       const result = buildRegistrationPosting(makeInput({ asOf: '2027-01-01' }));
       const stillUnresolved = operatorAssignments
         .filter((r) => r.operatingEntityKey === 'UNRESOLVED')
         .map((r) => r.irpUnit)
         .sort();
-      expect(stillUnresolved).toEqual(['5413']);
+      expect(stillUnresolved).toHaveLength(1);
       for (const unitNumber of stillUnresolved) {
         const rows = result.scheduleRows.filter((r) => r.unitNumber === unitNumber);
         expect(rows.every((r) => r.entityId === ZONE_ENTITY_ID && r.paidByEntityId === null)).toBe(true);
@@ -385,8 +410,9 @@ describe.skipIf(!haveFixtures)('registration engine — intercompany recharge', 
      *  engine refuses it rather than silently recharging or reassigning
      *  it. */
     function withBadOperator(operatingEntityKey: string): UnitOperatorRow[] {
+      const target = operatorAssignments[0]!.irpUnit;
       return operatorAssignments.map((r) =>
-        r.irpUnit === '1431' ? { ...r, operatingEntityKey } : r,
+        r.irpUnit === target ? { ...r, operatingEntityKey } : r,
       );
     }
 
@@ -480,7 +506,10 @@ describe.skipIf(!haveFixtures)('registration engine — intercompany recharge', 
       const byUnit = new Map<string, typeof result.overheadRates[number]>();
       for (const r of result.overheadRates) byUnit.set(r.unitNumber, r);
 
-      for (const unitNumber of ['8671', '1431']) {
+      // Two arbitrary units off the real roster — the property holds for
+      // every unit, so which two is immaterial and naming them would put
+      // fleet data in a public repository.
+      for (const unitNumber of result.overheadRates.slice(0, 2).map((r) => r.unitNumber)) {
         const rate = byUnit.get(unitNumber)!;
         const irpRows = result.scheduleRows.filter((r) => r.unitNumber === unitNumber && r.categoryId === 'permit.irp');
         const hvutRows = result.scheduleRows.filter((r) => r.unitNumber === unitNumber && r.categoryId === 'tax.hvut');
@@ -508,9 +537,14 @@ describe.skipIf(!haveFixtures)('registration engine — intercompany recharge', 
       }
     });
 
-    it('the overhead rate lands on the truck\'s operator entity, following the recharge (unit 1471, xtrack)', () => {
+    it('the overhead rate lands on the truck\'s operator entity, following the recharge', () => {
       const result = buildRegistrationPosting(makeInput({ asOf: '2027-01-01' }));
-      const rate = result.overheadRates.find((r) => r.unitNumber === '1471')!;
+      // Any xtrack-operated unit — found from the crosswalk rather than
+      // named here.
+      const xtrackUnits = new Set(
+        operatorAssignments.filter((r) => r.operatingEntityKey === 'xtrack').map((r) => r.irpUnit),
+      );
+      const rate = result.overheadRates.find((r) => xtrackUnits.has(r.unitNumber))!;
       expect(rate.entityId).toBe(XTRACK_ENTITY_ID);
       expect(rate.categoryIds).toEqual(['permit.irp', 'tax.hvut']);
     });

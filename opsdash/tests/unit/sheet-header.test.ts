@@ -21,7 +21,7 @@ const DISPATCH = '|Dispatcher|Truck #|Payment|Driver Names|Gross|Miles|RPM';
 
 describe('extractHeader', () => {
   it('reads both export shapes this codebase actually parses', () => {
-    expect(extractHeader(`${EXPENSES}\n| 5852 | D | truck |`)).toEqual([
+    expect(extractHeader(`${EXPENSES}\n| 9005 | D | truck |`)).toEqual([
       'unit', 'issued to', 'unit type', 'cost type', 'date', '$ used', 'expense side', 'details',
     ]);
     expect(extractHeader(`${DISPATCH}\nrow`)).toEqual([

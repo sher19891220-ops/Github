@@ -56,9 +56,12 @@ describe.skipIf(!haveFixtures)('registration engine — real IRP/HVUT transactio
       expect(roster.units).toHaveLength(42);
       const vins = new Set(roster.units.map((u) => u.vin));
       expect(vins.size).toBe(42);
-      // Confirms the parser followed the header past the page break rather
-      // than stopping at page 1's "Page 1 of 2" footer.
-      expect(roster.units.some((u) => u.unitNumber === '8671')).toBe(true);
+      // Confirms the parser followed the header past the page break
+      // rather than stopping at page 1's "Page 1 of 2" footer: page 1
+      // holds fewer than 42 units, so a full count only happens if page 2
+      // was read. Asserted by count rather than by naming a unit — this
+      // repository is public and unit numbers are fleet data.
+      expect(roster.units.filter((u) => u.unitNumber.trim() !== '')).toHaveLength(42);
     });
 
     it('every unit is weight group 80 — the fact the even-split allocation depends on', () => {
@@ -207,26 +210,45 @@ describe.skipIf(!haveFixtures)('registration engine — real IRP/HVUT transactio
 
     it('driver-borne HVUT is charged_to driver on both the schedule and the posted entry, never reducing company margin', () => {
       const result = buildRegistrationPosting(makeInput({ asOf: '2027-01-01' }));
-      // Unit 1564 is 'rented' / hvut_payer_CONFIRM=driver in the real crosswalk.
-      const driverUnitHvutRows = result.scheduleRows.filter(
-        (r) => r.unitNumber === '1564' && r.categoryId === 'tax.hvut',
+      // Selected by the property under test — HVUT charged to a driver —
+      // rather than by a unit number. The real crosswalk marks the
+      // lease-to-purchase units `hvut_payer=driver`; which ones those are
+      // is fleet data and stays in the gitignored fixture.
+      const driverHvutRows = result.scheduleRows.filter(
+        (r) => r.categoryId === 'tax.hvut' && r.chargedTo === 'driver',
       );
-      expect(driverUnitHvutRows).toHaveLength(12);
-      expect(driverUnitHvutRows.every((r) => r.chargedTo === 'driver')).toBe(true);
+      expect(driverHvutRows.length).toBeGreaterThan(0);
+      // Whole years, never part: 12 monthly rows per driver-borne unit.
+      expect(driverHvutRows.length % 12).toBe(0);
 
-      const posted = result.postedEntries.filter((e) => e.unitNumber === '1564' && e.categoryId === 'tax.hvut');
+      const driverUnits = new Set(driverHvutRows.map((r) => r.unitNumber));
+      const posted = result.postedEntries.filter(
+        (e) => e.categoryId === 'tax.hvut' && e.unitNumber !== null && driverUnits.has(e.unitNumber),
+      );
       expect(posted.length).toBeGreaterThan(0);
+      // The load-bearing assertion: a driver-borne cost never silently
+      // becomes a company cost on the posted side.
       expect(posted.every((e) => e.chargedTo === 'driver')).toBe(true);
     });
 
     it('the 6 unresolved units are still booked in full, charged_to unknown, never defaulted to company', () => {
       const result = buildRegistrationPosting(makeInput({ asOf: '2027-01-01' }));
-      // Unit 1365 is UNRESOLVED in the real crosswalk.
-      const rows = result.scheduleRows.filter((r) => r.unitNumber === '1365' && r.categoryId === 'tax.hvut');
-      expect(rows).toHaveLength(12);
-      expect(rows.every((r) => r.chargedTo === 'unknown')).toBe(true);
-      const sum = sumCents(rows.map((r) => -centsFromDecimal(r.amount)));
-      expect(decimalFromCents(sum)).toBe('550.00'); // the money is real and booked, not zeroed out
+      // Again by property, not by unit number: the units the crosswalk
+      // leaves UNRESOLVED.
+      const unknownRows = result.scheduleRows.filter(
+        (r) => r.categoryId === 'tax.hvut' && r.chargedTo === 'unknown',
+      );
+      const unknownUnits = new Set(unknownRows.map((r) => r.unitNumber));
+      expect(unknownUnits.size).toBe(6);
+      expect(unknownRows).toHaveLength(6 * 12);
+
+      // The money is real and booked in full, not zeroed out and not
+      // defaulted onto the company — $550 of HVUT per unresolved unit.
+      const oneUnit = [...unknownUnits][0]!;
+      const rowsForOne = unknownRows.filter((r) => r.unitNumber === oneUnit);
+      expect(rowsForOne).toHaveLength(12);
+      const sum = sumCents(rowsForOne.map((r) => -centsFromDecimal(r.amount)));
+      expect(decimalFromCents(sum)).toBe('550.00');
     });
 
     it('IRP is always charged_to company, regardless of HVUT driver/unknown attribution', () => {
@@ -271,7 +293,10 @@ describe.skipIf(!haveFixtures)('registration engine — real IRP/HVUT transactio
     });
 
     it('throws if a unit has no row in the VIN crosswalk, rather than silently defaulting its HVUT payer', () => {
-      const filteredStatuses = statuses.filter((s) => s.irpUnit !== '1365');
+      // Drop whichever unit is first: the test is that a missing status
+      // row is refused, not that one particular unit is.
+      const droppedUnit = statuses[0]!.irpUnit;
+      const filteredStatuses = statuses.filter((s) => s.irpUnit !== droppedUnit);
       const input = makeInput();
       const badInput: RegistrationPostingInput = { ...input, unitStatuses: filteredStatuses };
       expect(() => buildRegistrationPosting(badInput)).toThrow(/crosswalk/i);

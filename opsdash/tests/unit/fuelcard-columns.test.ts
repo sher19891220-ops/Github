@@ -109,7 +109,7 @@ describe('mapColumns', () => {
 describe('headerScore', () => {
   it('scores a header above a data row that happens to match a pattern', () => {
     const header = ['Tran Date', 'Unit', 'Product', 'Qty', 'Amount'];
-    const data = ['03/14/2026', '7004', 'ULSD', '118.40', '412.66'];
+    const data = ['03/14/2026', '9011', 'ULSD', '118.40', '412.66'];
     expect(headerScore(header)).toBeGreaterThan(headerScore(data));
     expect(headerScore(data)).toBe(0);
   });
@@ -146,7 +146,7 @@ describe('sniffDelimiter', () => {
   });
 
   it('picks comma for a real CSV', () => {
-    const text = ['Date,Unit,Amount', '03/14/2026,7004,412.66', '03/15/2026,6179,388.10'].join('\n');
+    const text = ['Date,Unit,Amount', '03/14/2026,9011,412.66', '03/15/2026,9012,388.10'].join('\n');
     const r = sniffDelimiter(text);
     expect(r?.delimiter).toBe(',');
     expect(r?.columnCount).toBe(3);
@@ -164,7 +164,7 @@ describe('readTable', () => {
       'Billing period 03/01/2026 - 03/31/2026',
       '',
       'Tran Date,Unit,Product,Qty,Amount',
-      '03/14/2026,7004,ULSD,118.40,412.66',
+      '03/14/2026,9011,ULSD,118.40,412.66',
     ].join('\n');
     const table = readTable(text, headerScore);
     expect(table?.headerLineNumber).toBe(5);
@@ -174,7 +174,7 @@ describe('readTable', () => {
   it('keeps a line that does not match the header width rather than dropping it', () => {
     const text = [
       'Tran Date,Unit,Product,Qty,Amount',
-      '03/14/2026,7004,ULSD,118.40,412.66',
+      '03/14/2026,9011,ULSD,118.40,412.66',
       'GRAND TOTAL,412.66',
     ].join('\n');
     const table = readTable(text, headerScore);

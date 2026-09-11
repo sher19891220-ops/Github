@@ -9,8 +9,8 @@ async function buildWorkbook(): Promise<Buffer> {
   const wb = new ExcelJS.Workbook();
   const ws = wb.addWorksheet('Fuel');
   ws.addRow(['Unit', 'Driver', 'Location', 'Gallon', 'Price']);
-  ws.addRow(['1365', 'Jane Doe', '123 Main St, Belmont, OH 43718', 80.5, 3.56]);
-  ws.addRow(['1431', 'John Roe', '9 Elm St, Toledo, OH 43604', 'full tank', '3.42$']);
+  ws.addRow(['9007', 'Jane Doe', '123 Main St, Belmont, OH 43718', 80.5, 3.56]);
+  ws.addRow(['9008', 'John Roe', '9 Elm St, Toledo, OH 43604', 'full tank', '3.42$']);
   const buf = await wb.xlsx.writeBuffer();
   return Buffer.from(buf);
 }
@@ -29,7 +29,7 @@ describe('XLSX round trip (exceljs -> extractXlsx)', () => {
     const bytes = await buildWorkbook();
     const result = await extractXlsx(bytes);
     const rows = result.sheets![0]!.rows;
-    expect(rows[2]).toEqual(['1431', 'John Roe', '9 Elm St, Toledo, OH 43604', 'full tank', '3.42$']);
+    expect(rows[2]).toEqual(['9008', 'John Roe', '9 Elm St, Toledo, OH 43604', 'full tank', '3.42$']);
   });
 
   it('reads back numeric cells at full precision (compared numerically, since XLSX numbers are IEEE754 doubles)', async () => {

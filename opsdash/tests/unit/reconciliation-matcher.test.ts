@@ -25,11 +25,11 @@ function candidate(
 
 describe('normalizeUnitKey', () => {
   it('reads the same unit through the spellings a statement and a sheet use', () => {
-    expect(normalizeUnitKey('5852')).toBe('5852');
-    expect(normalizeUnitKey(' 5852 ')).toBe('5852');
-    expect(normalizeUnitKey('Unit 5852')).toBe('5852');
-    expect(normalizeUnitKey('UNIT #5852')).toBe('5852');
-    expect(normalizeUnitKey('#5852')).toBe('5852');
+    expect(normalizeUnitKey('9005')).toBe('9005');
+    expect(normalizeUnitKey(' 9005 ')).toBe('9005');
+    expect(normalizeUnitKey('Unit 9005')).toBe('9005');
+    expect(normalizeUnitKey('UNIT #9005')).toBe('9005');
+    expect(normalizeUnitKey('#9005')).toBe('9005');
   });
 
   it('does not invent a unit out of nothing', () => {
@@ -46,16 +46,16 @@ describe('normalizeUnitKey', () => {
 describe('proposeMatches', () => {
   it('pairs an exact same-unit, same-day, same-amount line', () => {
     const out = proposeMatches(
-      [candidate('d1', '5852', '2026-03-04', -81244)],
-      [candidate('l1', '5852', '2026-03-04', -81244)],
+      [candidate('d1', '9005', '2026-03-04', -81244)],
+      [candidate('l1', '9005', '2026-03-04', -81244)],
     );
     expect(out).toEqual([{ documentLineId: 'd1', ledgerLineId: 'l1', varianceCents: 0 }]);
   });
 
   it('pairs same unit and day at a different amount, and carries the variance', () => {
     const out = proposeMatches(
-      [candidate('d1', '5852', '2026-03-04', -81244)],
-      [candidate('l1', '5852', '2026-03-04', -80000)],
+      [candidate('d1', '9005', '2026-03-04', -81244)],
+      [candidate('l1', '9005', '2026-03-04', -80000)],
     );
     expect(out).toEqual([{ documentLineId: 'd1', ledgerLineId: 'l1', varianceCents: -1244 }]);
   });
@@ -65,8 +65,8 @@ describe('proposeMatches', () => {
     // l2. If the near pass ran first and greedily took l2 for d1, d2 would
     // be left unmatched and an exact pairing would have been thrown away.
     const out = proposeMatches(
-      [candidate('d1', '5852', '2026-03-04', -50000), candidate('d2', '5852', '2026-03-04', -40000)],
-      [candidate('l1', '5852', '2026-03-04', -30000), candidate('l2', '5852', '2026-03-04', -40000)],
+      [candidate('d1', '9005', '2026-03-04', -50000), candidate('d2', '9005', '2026-03-04', -40000)],
+      [candidate('l1', '9005', '2026-03-04', -30000), candidate('l2', '9005', '2026-03-04', -40000)],
     );
     expect(out).toContainEqual({ documentLineId: 'd2', ledgerLineId: 'l2', varianceCents: 0 });
     expect(out).toContainEqual({ documentLineId: 'd1', ledgerLineId: 'l1', varianceCents: -20000 });
@@ -74,8 +74,8 @@ describe('proposeMatches', () => {
 
   it('picks the nearer amount when two candidates remain', () => {
     const out = proposeMatches(
-      [candidate('d1', '5852', '2026-03-04', -50000)],
-      [candidate('l_far', '5852', '2026-03-04', -10000), candidate('l_near', '5852', '2026-03-04', -49000)],
+      [candidate('d1', '9005', '2026-03-04', -50000)],
+      [candidate('l_far', '9005', '2026-03-04', -10000), candidate('l_near', '9005', '2026-03-04', -49000)],
     );
     expect(out).toContainEqual({ documentLineId: 'd1', ledgerLineId: 'l_near', varianceCents: -1000 });
     expect(out).toContainEqual({ documentLineId: null, ledgerLineId: 'l_far', varianceCents: null });
@@ -83,8 +83,8 @@ describe('proposeMatches', () => {
 
   it('refuses to pair across a different day even at an identical amount', () => {
     const out = proposeMatches(
-      [candidate('d1', '5852', '2026-03-04', -81244)],
-      [candidate('l1', '5852', '2026-03-05', -81244)],
+      [candidate('d1', '9005', '2026-03-04', -81244)],
+      [candidate('l1', '9005', '2026-03-05', -81244)],
     );
     expect(out).toEqual([
       { documentLineId: 'd1', ledgerLineId: null, varianceCents: null },
@@ -94,8 +94,8 @@ describe('proposeMatches', () => {
 
   it('refuses to pair across a different unit even on the same day and amount', () => {
     const out = proposeMatches(
-      [candidate('d1', '5852', '2026-03-04', -81244)],
-      [candidate('l1', '4546', '2026-03-04', -81244)],
+      [candidate('d1', '9005', '2026-03-04', -81244)],
+      [candidate('l1', '9009', '2026-03-04', -81244)],
     );
     expect(out.every((m) => m.documentLineId === null || m.ledgerLineId === null)).toBe(true);
   });
@@ -115,16 +115,16 @@ describe('proposeMatches', () => {
 
   it('never pairs a line with no date', () => {
     const out = proposeMatches(
-      [candidate('d1', '5852', null, -81244)],
-      [candidate('l1', '5852', null, -81244)],
+      [candidate('d1', '9005', null, -81244)],
+      [candidate('l1', '9005', null, -81244)],
     );
     expect(out.every((m) => m.documentLineId === null || m.ledgerLineId === null)).toBe(true);
   });
 
   it('uses each side at most once', () => {
     const out = proposeMatches(
-      [candidate('d1', '5852', '2026-03-04', -10000), candidate('d2', '5852', '2026-03-04', -10000)],
-      [candidate('l1', '5852', '2026-03-04', -10000)],
+      [candidate('d1', '9005', '2026-03-04', -10000), candidate('d2', '9005', '2026-03-04', -10000)],
+      [candidate('l1', '9005', '2026-03-04', -10000)],
     );
     const usedLedger = out.filter((m) => m.ledgerLineId === 'l1');
     expect(usedLedger).toHaveLength(1);
@@ -133,12 +133,12 @@ describe('proposeMatches', () => {
 
   it('returns every line exactly once across the whole result', () => {
     const doc = [
-      candidate('d1', '5852', '2026-03-04', -10000),
-      candidate('d2', '4546', '2026-03-04', -20000),
+      candidate('d1', '9005', '2026-03-04', -10000),
+      candidate('d2', '9009', '2026-03-04', -20000),
       candidate('d3', null, '2026-03-04', -30000),
     ];
     const led = [
-      candidate('l1', '5852', '2026-03-04', -10000),
+      candidate('l1', '9005', '2026-03-04', -10000),
       candidate('l2', '9999', '2026-03-04', -40000),
     ];
     const out = proposeMatches(doc, led);
@@ -158,8 +158,8 @@ function line(side: 'document' | 'ledger', amount: string): ReconLine {
     side,
     sourceRef:
       side === 'document'
-        ? { kind: 'document', documentId: 'doc', stagingRowId: 'sr', label: 'Unit 5852' }
-        : { kind: 'ledger', entryId: 'le', label: 'Unit 5852' },
+        ? { kind: 'document', documentId: 'doc', stagingRowId: 'sr', label: 'Unit 9005' }
+        : { kind: 'ledger', entryId: 'le', label: 'Unit 9005' },
     truckId: null,
     driverId: null,
     accrualDate: '2026-03-04',
