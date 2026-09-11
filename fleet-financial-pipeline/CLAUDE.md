@@ -2094,6 +2094,48 @@ Lease by transfer.
 5151: $906,539 of purchases (Fleet Advantage, EquipLinc) and $332,431 of TBK
 equipment finance. No payroll (Zone runs it), no insurance, no maintenance.
 
+## The $332,431 TBK figure was $28,887 too high, and two real loans stand behind it
+
+Operator-supplied 2026-09-10: two TBK Bank amortization schedules
+(`data/raw/iron_lease/financing/`, `ingest/parse_tbk_loan_schedule.py`,
+`analysis/iron_lease.py`'s `tbk_financing()`) -- the documents behind the
+bank total above, not just another bank read of the same debits.
+
+    loan       principal    rate    term          first payment
+    400722502  $453,585.00  8.960%  36 mo/$14,443.50  05/03/2025
+    400725362  $632,985.00  9.020%  24 mo/$28,963.77  05/15/2026
+
+Both schedules' own rows sum to their own stated grand totals exactly
+(`tests/test_tbk_loan_schedule.py`), and both loans' bank-confirmed payment
+count lands exactly on that schedule's own printed balance for that payment
+number -- an independent record (the bank) landing on a document it never
+saw.
+
+**TWO OF THE ACH DEBITS BOUNCED, WERE RETURNED, AND WERE RE-COLLECTED --
+AND BOTH LOOKED LIKE A SECOND REAL PAYMENT.** 2025-05-05 and 2026-06-03 each
+show a `TBK BANK, SSB DES:ACH ID` debit for $14,443.50, followed the very
+next business day by a `RETURN OF POSTED CHECK / ITEM` deposit for the
+identical amount, followed two days later by a second debit tagged
+`RETRY PYMT`. Same shape as the ADP `RETRY PYMT` cycles and the registration
+sheet's duplicated IRP row already documented elsewhere in this corpus:
+one real payment, not two, unless the return credit is matched against the
+first attempt. The original $332,431 (`data/processed/
+iron_lease_transactions.csv`'s raw sum of every `TBK BANK` debit) does not
+do that match and is **$28,887.00** too high -- exactly two bounced
+payments. **Real amount confirmed paid to TBK, both loans, through the July
+2026 statements: $303,543.81** ($216,652.50 on 400722502, 15 of 36
+payments; $86,891.31 on 400725362, 3 of 24).
+
+**A REAL, UNPRICED FUTURE OBLIGATION**: 21 payments remain on each loan.
+400722502 owes $303,313.50 more ($23,917.61 of it interest) against a
+$279,395.89 balance; 400725362 owes $608,239.17 more ($48,265.20 of it
+interest) against a $559,973.97 balance. **$911,552.67 of contractual future
+cash, $72,182.81 of it interest, sits on neither Iron Lease's own books in
+this corpus nor any operating company's cost model** -- the same shape as
+the registration and insurance gaps already documented, except this one is
+debt service, not a fixed operating cost, and it does not stop if a truck
+is idle.
+
 **Two mileage rates run at once**, $0.10 and $0.12, sometimes as two lines on
 one invoice — they are different truck groups, not a rate change. A single
 blended rate is wrong for every company.

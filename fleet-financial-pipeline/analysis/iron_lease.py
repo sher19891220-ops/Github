@@ -40,6 +40,9 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "ingest"))
 sys.path.insert(0, str(ROOT / "analysis"))
 from parse_iron_lease_invoices import load as load_invoices, controls as invoice_controls
+import parse_tbk_loan_schedule as TBK
+
+IRON_LEASE_TXN = ROOT / "data/processed/iron_lease_transactions.csv"
 
 CHARGE = ("rent", "mileage")
 CREDIT = ("efs_credit", "repair_credit")
@@ -141,6 +144,85 @@ def cash_test(invoices, txn, tol=1.0, window=30):
             "round_thousand_value": round_dep.amount.sum()}
 
 
+def tbk_bank_rows(txn_path=IRON_LEASE_TXN):
+    """Account 5151's own TBK loan debits and their return-item reversals,
+    the two row shapes that matter for this specific reconciliation."""
+    t = pd.read_csv(txn_path)
+    t["txn_date"] = pd.to_datetime(t.txn_date)
+    debits = t[t.description.str.contains("TBK BANK", na=False) & (t.amount < 0)].copy()
+    debits["amount"] = -debits["amount"]
+    returns = t[t.description.str.contains("RETURN OF POSTED", case=False, na=False)].copy()
+    return debits.sort_values("txn_date"), returns.sort_values("txn_date")
+
+
+def tbk_financing(txn_path=IRON_LEASE_TXN, window_days=3):
+    """Reconciles the two TBK equipment-finance loans against account 5151's
+    own bank feed, and corrects a real overstatement in what this pipeline
+    had been calling 'the TBK equipment-finance total': two of the recurring
+    ACH debits bounced and were returned the next business day, then
+    re-collected under a 'RETRY PYMT' memo two days later. Both look like
+    real, distinct payments if the return credit is not matched against them
+    -- CLAUDE.md's $332,431 figure was computed exactly that way, and is
+    $28,887.00 (two payments) too high as a result.
+
+    Returns each loan's own controls, its bank-confirmed real payment count
+    and cash paid, the bounced-and-returned debits found, and each loan's
+    interest/principal/remaining-balance position as of its last confirmed
+    payment -- a real, contractual future obligation this pipeline has not
+    priced anywhere else.
+    """
+    loans = TBK.load_all()
+    debits, returns = tbk_bank_rows(txn_path)
+
+    # A debit is a bounce if a RETURN OF POSTED CHECK for the same amount
+    # posts within `window_days` after it -- the retry that follows it a
+    # day or two later is the one real payment for that cycle.
+    bounced_idx = set()
+    for _, d in debits.iterrows():
+        hit = returns[((returns.amount - d.amount).abs() < 0.01)
+                      & (returns.txn_date >= d.txn_date)
+                      & (returns.txn_date <= d.txn_date + pd.Timedelta(days=window_days))]
+        if len(hit):
+            bounced_idx.add(d.name)
+    real = debits.drop(index=bounced_idx)
+    bounced = debits.loc[sorted(bounced_idx)]
+
+    out = []
+    for loan in loans:
+        fails = TBK.controls(loan)
+        suffix = loan["loan_id"][-4:]
+        matches = real[real.description.str.contains(suffix, regex=False)]
+        n_real = len(matches)
+        cash_paid = round(matches.amount.sum(), 2)
+        rows_to_date = loan["rows"][:n_real]
+        interest_paid = round(sum(r["interest"] for r in rows_to_date), 2)
+        principal_paid = round(sum(r["principal"] for r in rows_to_date), 2)
+        remaining_balance = (rows_to_date[-1]["balance"] if rows_to_date
+                             else loan["principal"])
+        remaining_rows = loan["rows"][n_real:]
+        out.append({
+            "loan_id": loan["loan_id"], "principal": loan["principal"],
+            "annual_rate_pct": loan["annual_rate_pct"],
+            "controls_pass": not fails, "control_failures": fails,
+            "payments_confirmed": n_real, "payments_total": loan["n_payments"],
+            "cash_paid_confirmed": cash_paid,
+            "interest_paid_confirmed": interest_paid,
+            "principal_paid_confirmed": principal_paid,
+            "remaining_balance": remaining_balance,
+            "remaining_payments": len(remaining_rows),
+            "remaining_cash_obligation": round(
+                sum(r["payment"] for r in remaining_rows), 2),
+            "remaining_interest": round(
+                sum(r["interest"] for r in remaining_rows), 2),
+        })
+
+    raw_debit_total = round(debits.amount.sum(), 2)
+    real_total = round(real.amount.sum(), 2)
+    return {"loans": out, "bounced": bounced, "raw_debit_total": raw_debit_total,
+            "real_total": real_total,
+            "overstatement": round(raw_debit_total - real_total, 2)}
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -186,6 +268,30 @@ def main():
         print("\n== IS ANY OF IT CASH? ==")
         for k, v in cash_test(inv, pd.read_csv(a.txn)).items():
             print(f"  {k:<28}{v:>14,.0f}")
+
+    if IRON_LEASE_TXN.exists() and TBK.load_all():
+        print("\n== TBK EQUIPMENT FINANCE, LOAN BY LOAN ==")
+        r = tbk_financing()
+        print(f"  Two loans, {r['real_total']:,.2f} confirmed paid to the bank so far "
+              f"(the earlier ${r['raw_debit_total']:,.2f} figure this corpus quoted was "
+              f"${r['overstatement']:,.2f} too high -- {len(r['bounced'])} debit(s) "
+              "bounced and were returned the next business day, then re-collected days "
+              "later under a RETRY PYMT memo; both looked like a second real payment "
+              "unless matched against the return.)\n")
+        for loan in r["loans"]:
+            print(f"  Loan {loan['loan_id']}: ${loan['principal']:,.2f} at "
+                  f"{loan['annual_rate_pct']}%, controls "
+                  f"{'pass' if loan['controls_pass'] else 'FAIL'}")
+            print(f"    confirmed: {loan['payments_confirmed']}/{loan['payments_total']} "
+                  f"payments, ${loan['cash_paid_confirmed']:,.2f} paid "
+                  f"(${loan['interest_paid_confirmed']:,.2f} interest, "
+                  f"${loan['principal_paid_confirmed']:,.2f} principal)")
+            print(f"    remaining: {loan['remaining_payments']} payments, "
+                  f"${loan['remaining_balance']:,.2f} balance, "
+                  f"${loan['remaining_cash_obligation']:,.2f} future cash "
+                  f"(${loan['remaining_interest']:,.2f} of it interest) -- "
+                  "a contractual future obligation not priced anywhere else "
+                  "in this pipeline.")
 
 
 if __name__ == "__main__":

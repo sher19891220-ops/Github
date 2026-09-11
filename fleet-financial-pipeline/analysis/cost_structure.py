@@ -147,6 +147,30 @@ def registration_per_truck_week(company):
             "per_truck_week": by_co[company] / trucks / WEEKS_PER_YEAR}
 
 
+@functools.lru_cache(maxsize=None)
+def registration_corrected_per_truck_week():
+    """The same $/truck-week question, answered with `registration.py`'s
+    responsibility attribution (2026-09-10) instead of the plain
+    who-last-ran-it split registration_per_truck_week() uses. Owner-
+    operators, named investors, lease-to-purchase owners and sold/departed
+    drivers now bear their own IRP/HVUT; what is left is split equally
+    across ZONE/XTRACK/AFG (operator instruction) and spread evenly across
+    the 90-truck RUNNING fleet (not just the 48 trucks a registration
+    payment happens to name) -- a single group-wide rate, not a
+    per-company one, because the equal-company-split step already removed
+    the per-company skew the OLD figure carried from folding each
+    company's own owner-operator trucks into its own average.
+    """
+    payments, red, ref = IRP.read()
+    fails, _ = IRP.controls(payments, red, ref)
+    if fails:
+        return None
+    idx = REG.unit_index()
+    _, _, pool = REG.attribute_by_responsibility(payments, idx)
+    fleet = sum(REG.RUNNING_FLEET.values())
+    return pool["pool"] / fleet / WEEKS_PER_YEAR
+
+
 def _company_of(unit, idx):
     rows = idx.get(str(unit))
     if not rows:
@@ -160,6 +184,7 @@ def structure(company, weeks=13):
     fuel = fuel_tax_per_mile(company)
     ore = oregon_per_mile(company, fuel)
     reg = registration_per_truck_week(company)
+    reg_corrected = registration_corrected_per_truck_week()
 
     fixed = {
         "truck rent, base": m["rent_base_per_week"],
@@ -178,10 +203,12 @@ def structure(company, weeks=13):
 
     return {
         "company": company, "m": m, "fuel": fuel, "oregon": ore, "reg": reg,
+        "reg_corrected": reg_corrected,
         "fixed": fixed, "outside_fixed": outside_fixed,
         "variable": variable, "outside_variable": outside_variable,
         "fixed_total": sum(fixed.values()),
         "outside_fixed_total": sum(v for v in outside_fixed.values() if v),
+        "fixed_total_corrected": sum(fixed.values()) + (reg_corrected or 0),
         "variable_total": sum(variable.values()),
         "outside_variable_total": sum(v for v in outside_variable.values() if v),
         "overhead_pct_of_gross": m["overhead_pct_of_gross"],
@@ -259,6 +286,17 @@ def main():
     print("    assumes the unlisted trucks cost the same; the bank says $9,648 of")
     print("    registration debits are on no line of the file, so it is a floor.")
 
+    print("\n  REGISTRATION, CORRECTED FOR WHO ACTUALLY BEARS IT (2026-09-10)")
+    print("    Owner-operators, named investors, lease-to-purchase owners and")
+    print("    sold/departed drivers now bear their own IRP/HVUT -- see")
+    print("    config/registration_responsibility.json. What is left is split")
+    print("    equally across the three companies and spread over the 90-truck")
+    print("    running fleet, ONE rate for every truck, not a per-company one:")
+    row("  registration, corrected", lambda s: s["reg_corrected"])
+    row("TRUE FIXED, CORRECTED REGISTRATION",
+        lambda s: s["fixed_total_corrected"])
+    row("  per truck-DAY, corrected", lambda s: s["fixed_total_corrected"] / 7)
+
     print("\n  VARIABLE -- scales with distance, $/loaded mile")
     for k in ss["ZONE"]["variable"]:
         row(k, lambda s, k=k: s["variable"][k] or None, ",.4f")
@@ -289,6 +327,10 @@ def main():
     row("  the sheet alone would say", lambda s: B.breakeven_miles(s["m"], s["m"]["rpm"]))
     row("understated by, miles a week",
         lambda s: true_breakeven(s, s["m"]["rpm"]) - B.breakeven_miles(s["m"], s["m"]["rpm"]))
+    row("  break-even, corrected registration",
+        lambda s: true_breakeven_corrected(s, s["m"]["rpm"]))
+    row("  break-even miles per day, corrected",
+        lambda s: true_breakeven_corrected(s, s["m"]["rpm"]) / 7)
 
     print(f"\n{'=' * 79}")
     print("GROUP TOTAL, PER WEEK")
@@ -424,6 +466,15 @@ def true_breakeven(s, rpm):
         s["variable_total"] + s["outside_variable_total"])
     fixed = s["fixed_total"] + s["outside_fixed_total"]
     return fixed / kept if kept > 0 else float("inf")
+
+
+def true_breakeven_corrected(s, rpm):
+    """Same as true_breakeven(), but with registration_corrected_per_truck_
+    week()'s responsibility-based rate in place of the plain who-last-ran-it
+    one -- see registration_corrected_per_truck_week()'s docstring."""
+    kept = rpm * (1 - s["overhead_pct_of_gross"]) - (
+        s["variable_total"] + s["outside_variable_total"])
+    return s["fixed_total_corrected"] / kept if kept > 0 else float("inf")
 
 
 if __name__ == "__main__":

@@ -129,3 +129,30 @@ def test_the_explain_walkthrough_reproduces_every_headline(ss):
             m["overhead_fixed"] / m["trucks"], abs=0.01), c
         assert s["outside_fixed"]["IRP plates + HVUT"] == pytest.approx(
             r["annual"] / r["trucks"] / C.WEEKS_PER_YEAR, abs=0.01), c
+
+
+def test_corrected_registration_is_one_rate_for_every_company(ss):
+    """registration_corrected_per_truck_week() answers who-actually-bears-it,
+    2026-09-10 -- a single group-wide rate (the equal-company-split pool
+    spread over the whole running fleet), not a per-company average the way
+    the plain registration figure is. All three companies must see the
+    identical corrected rate."""
+    rates = {c: s["reg_corrected"] for c, s in ss.items()}
+    assert len(set(rates.values())) == 1
+    assert next(iter(rates.values())) > 0
+
+
+def test_corrected_fixed_total_is_lower_than_the_uncorrected_one(ss):
+    """Every company's own registered-truck average folds in owner-operator
+    and investor trucks that no longer belong in a company's own cost --
+    the corrected figure, which excludes them, must not exceed the original
+    for any company (it can equal it only in the impossible case of an
+    identical rate)."""
+    for c, s in ss.items():
+        assert s["fixed_total_corrected"] <= s["fixed_total"] + s["outside_fixed_total"] + 0.01, c
+
+
+def test_corrected_breakeven_never_exceeds_the_original(ss):
+    for c, s in ss.items():
+        rpm = s["m"]["rpm"]
+        assert C.true_breakeven_corrected(s, rpm) <= C.true_breakeven(s, rpm) + 0.01, c
