@@ -210,8 +210,15 @@ export const TRUCK_ANGLES: AngleConfig[] = [
 
 // Daily PTI needs proof of a walk-around, not a full photo survey:
 // four corners plus tires and extras.
+// All 8 templated truck angles, plus tires and extras — same photo
+// coverage as the Full Inspection, minus only the cab interior (which
+// has no outline template and isn't part of the daily walk-around).
 export const TRUCK_DAILY_ANGLES: AngleConfig[] = TRUCK_ANGLES.filter((a) =>
-  ['front', 'left-panel', 'back', 'right-panel', 'tire-fl', 'tire-fr', 'tire-bl', 'tire-br', 'extras'].includes(a.key)
+  [
+    'front', 'front-right-corner', 'front-left-corner', 'left-panel',
+    'back', 'back-left-corner', 'back-right-corner', 'right-panel',
+    'tire-fl', 'tire-fr', 'tire-bl', 'tire-br', 'extras',
+  ].includes(a.key)
 ).map((a, i) => ({ ...a, order: i + 1 }))
 
 // Pick the right angle set for the inspection type. All four trailer
