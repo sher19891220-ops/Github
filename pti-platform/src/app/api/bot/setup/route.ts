@@ -62,12 +62,32 @@ export async function POST(_req: NextRequest) {
   const masked = `${botToken.slice(0, 10)}...${botToken.slice(-4)}`
 
   const webhookEndpoint: string = info?.result?.url ?? ''
+
+  // Separately report which bot lib/tg.ts is ACTUALLY using to send
+  // reports — this is TELEGRAM_SEND_BOT_TOKEN if set, otherwise it falls
+  // back to TELEGRAM_BOT_TOKEN (the same @Pti_check_bot token above).
+  // This tells us definitively whether the env var has been added yet,
+  // rather than guessing from send failures alone.
+  const sendToken = process.env.TELEGRAM_SEND_BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN
+  const usingFallback = !process.env.TELEGRAM_SEND_BOT_TOKEN
+  let sendBotIdentity: { bot_id?: number; bot_username?: string; source: string } = { source: 'none' }
+  if (sendToken) {
+    const sendMeRes = await fetch(`https://api.telegram.org/bot${sendToken}/getMe`, { cache: 'no-store' })
+    const sendMe = await sendMeRes.json()
+    sendBotIdentity = {
+      bot_id: sendMe?.result?.id,
+      bot_username: sendMe?.result?.username,
+      source: usingFallback ? 'FALLBACK: TELEGRAM_SEND_BOT_TOKEN not set, using TELEGRAM_BOT_TOKEN (@Pti_check_bot)' : 'TELEGRAM_SEND_BOT_TOKEN',
+    }
+  }
+
   return NextResponse.json({
     token_masked: masked,
     bot_id: me?.result?.id,
     bot_username: me?.result?.username,
     webhook_endpoint: webhookEndpoint,
     webhook_raw: info,
+    report_sending_currently_uses: sendBotIdentity,
   })
 }
 
