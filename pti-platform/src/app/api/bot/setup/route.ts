@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getRegisteredGroups, unregisterGroup } from '@/lib/kv'
 
 // GET /api/bot/setup
 // Registers this app as the Telegram webhook for @Pti_check_bot.
@@ -67,5 +68,55 @@ export async function POST(_req: NextRequest) {
     bot_username: me?.result?.username,
     webhook_endpoint: webhookEndpoint,
     webhook_raw: info,
+  })
+}
+
+
+// DELETE /api/bot/setup?secret=BOT_SETUP_KEY
+// Fully retires @Pti_check_bot: removes its Telegram webhook (so it stops
+// responding to messages entirely) and clears every group it had
+// auto-registered for PTI reports, so no stale registration can ever act
+// as a silent fallback target for a report. Only @gr_observer_bot should
+// handle inspections after this — this bot is intentionally shut down,
+// not just paused.
+export async function DELETE(req: NextRequest) {
+  const botToken = process.env.TELEGRAM_BOT_TOKEN
+  const setupKey = process.env.BOT_SETUP_KEY
+
+  if (!botToken) return NextResponse.json({ error: 'TELEGRAM_BOT_TOKEN not set' }, { status: 500 })
+
+  if (setupKey) {
+    const provided = req.nextUrl.searchParams.get('secret')
+    if (provided !== setupKey) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+  }
+
+  // 1. Delete the Telegram webhook — the bot stops receiving updates entirely.
+  const deleteRes = await fetch(
+    `https://api.telegram.org/bot${botToken}/deleteWebhook`,
+    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ drop_pending_updates: true }), cache: 'no-store' },
+  )
+  const deleteData = await deleteRes.json()
+
+  // 2. Confirm the webhook is actually gone (don't just trust the delete call).
+  const infoRes = await fetch(`https://api.telegram.org/bot${botToken}/getWebhookInfo`, { cache: 'no-store' })
+  const infoData = await infoRes.json()
+  const webhookNowEmpty = !infoData?.result?.url
+
+  // 3. Clear every group this bot had registered, so nothing lingers as a
+  //    fallback broadcast target.
+  const groupsBefore = await getRegisteredGroups()
+  for (const g of groupsBefore) {
+    await unregisterGroup(g.chatId)
+  }
+  const groupsAfter = await getRegisteredGroups()
+
+  return NextResponse.json({
+    ok: webhookNowEmpty && groupsAfter.length === 0,
+    webhook_deleted: deleteData,
+    webhook_now_empty: webhookNowEmpty,
+    groups_cleared: groupsBefore.map((g) => ({ chatId: g.chatId, title: g.title })),
+    groups_remaining: groupsAfter.length,
   })
 }
