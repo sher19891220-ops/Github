@@ -14,11 +14,20 @@
   --focus-bg: color-mix(in srgb, var(--accent) 10%, transparent);
   --attention-bg: color-mix(in srgb, var(--warn) 8%, transparent);
   --select-bg: color-mix(in srgb, var(--accent) 5%, transparent);
+  /* Fleet-status classes. Six states plus "unknown" is at the edge of what
+     colour can carry, so these always ship as chip + label and the colour
+     is the secondary cue. Two more tokens exist because --warn and --bad
+     alone would have made shop/home and broken-down/out-of-service
+     indistinguishable — which the fleet board spec explicitly assigned
+     separate colours to avoid. */
+  --status-shop: #ec835a;
+  --status-oos: #7a2430;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #12141a; --fg: #e9ecf1; --muted: #98a1b0; --line: #262b35;
     --accent: #6ea8ff; --warn: #f0a35e; --bad: #f97066; --good: #47c88a;
+    --status-shop: #f0a06a; --status-oos: #c46d78;
   }
 }
 * { box-sizing: border-box; }

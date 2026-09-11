@@ -53,6 +53,14 @@ export const getOverheadRates = USE_MOCK ? mock.getOverheadRates : http.getOverh
 // Live only: there is no mock P&L, and inventing one would put a plausible
 // margin on screen that traces to nothing.
 export const getPnl = http.getPnl;
+
+// Live only. There is no mock for these: a fabricated manual entry or a
+// fabricated truck status would be exactly the invented data the rest of
+// this build refuses to render.
+export const postManualEntry = http.postManualEntry;
+export const postCorrection = http.postCorrection;
+export const getTruckStatus = http.getTruckStatus;
+export const postTruckStatus = http.postTruckStatus;
 export type { PnlQuery } from './httpApi';
 
 export const getReconciliation = USE_MOCK ? mock.getReconciliation : http.getReconciliation;

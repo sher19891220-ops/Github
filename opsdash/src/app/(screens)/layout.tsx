@@ -37,6 +37,12 @@ export default function ScreensLayout({ children }: { children: ReactNode }) {
         <Link href="/review" style={navLink}>
           Review queue
         </Link>
+        <Link href="/add" style={navLink}>
+          Add a figure
+        </Link>
+        <Link href="/fleet" style={navLink}>
+          Fleet status
+        </Link>
         <Link href="/pnl" style={navLink}>
           P&amp;L
         </Link>

@@ -8,7 +8,12 @@
  * `fetchJson` itself never inspects the payload beyond `JSON.parse`.
  */
 import type { PnlResponse } from '@/db/repo/pnl';
+import type { ManualEntryInput } from '@/db/repo/manualEntry';
+import type { SetStatusInput } from '@/db/repo/truckStatus';
 import type {
+  LedgerEntry,
+  ManualAttestation,
+  TruckStatusNow,
   ChargebackDecision,
   ChargebackRow,
   ReconMatch,
@@ -266,6 +271,54 @@ export async function getPnl(q: PnlQuery): Promise<PnlResponse> {
   if (q.entityId) params.set('entityId', q.entityId);
   if (q.truckId) params.set('truckId', q.truckId);
   return fetchJson<PnlResponse>(`/api/pnl?${params.toString()}`);
+}
+
+/* ------------------------------------------------------------------------
+ * Manual entry — the second intake path.
+ * --------------------------------------------------------------------- */
+
+export async function postManualEntry(
+  input: ManualEntryInput,
+): Promise<{ entry: LedgerEntry; attestation: ManualAttestation }> {
+  return fetchJson('/api/manual', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(input),
+  });
+}
+
+/** Not an edit: the server posts a reversing entry plus a replacement, and
+ *  all three stay on the books. */
+export async function postCorrection(
+  entryId: string,
+  input: { amount: string; memo?: string | null; correctedBy: string; basis: string },
+): Promise<{ reversal: LedgerEntry; replacement: LedgerEntry }> {
+  return fetchJson(`/api/entries/${encodeURIComponent(entryId)}/correct`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(input),
+  });
+}
+
+/* ------------------------------------------------------------------------
+ * Truck status — the fleet board's source.
+ * --------------------------------------------------------------------- */
+
+export async function getTruckStatus(): Promise<{
+  statuses: TruckStatusNow[];
+  counts: Record<string, number>;
+}> {
+  return fetchJson('/api/truck-status');
+}
+
+export async function postTruckStatus(
+  input: SetStatusInput,
+): Promise<{ previous: string | null; current: string; effectiveFrom: string }> {
+  return fetchJson('/api/truck-status', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(input),
+  });
 }
 
 export type { Decimal };
