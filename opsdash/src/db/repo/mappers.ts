@@ -54,6 +54,7 @@ export const LEDGER_ENTRY_COLUMNS_SQL = `
   connector_pull_id,
   calc_run_id,
   reverses_entry_id,
+  attestation_id,
   memo,
   posted_by,
   to_char(posted_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') AS posted_at
@@ -138,6 +139,7 @@ interface LedgerEntryDbRow {
   connector_pull_id: string | null;
   calc_run_id: string | null;
   reverses_entry_id: string | null;
+  attestation_id: string | null;
   memo: string | null;
   posted_by: string;
   posted_at: string;
@@ -152,6 +154,10 @@ function buildProvenance(r: LedgerEntryDbRow): Provenance {
       return { kind: 'connector', connectorPullId: r.connector_pull_id as string };
     case 'derived':
       return { kind: 'derived', calcRunId: r.calc_run_id as string };
+    case 'manual':
+      // Same guarantee as the others: provenance_matches_kind will not let
+      // a 'manual' row exist without an attestation to point at.
+      return { kind: 'manual', attestationId: r.attestation_id as string };
     case 'adjustment':
       return { kind: 'adjustment', reversesEntryId: r.reverses_entry_id as string };
     default:

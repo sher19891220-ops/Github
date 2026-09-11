@@ -181,6 +181,10 @@ export type Provenance =
   | { kind: 'document'; sourceDocumentId: string; stagingRowId: string | null }
   | { kind: 'connector'; connectorPullId: string }
   | { kind: 'derived'; calcRunId: string }
+  /** A person typed this. The evidence is their named attestation on a
+   *  stated basis, which is weaker than a document and must render as
+   *  weaker rather than passing for the same thing. */
+  | { kind: 'manual'; attestationId: string }
   | { kind: 'adjustment'; reversesEntryId: string };
 
 export interface LedgerEntry {
