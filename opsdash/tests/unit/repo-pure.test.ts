@@ -56,10 +56,35 @@ describe('toWireStagingRow', () => {
 });
 
 describe('parseByDocType', () => {
-  it('fails clearly for a doc_type with no implemented parser (ifta_mileage)', () => {
+  it('routes "ifta_mileage" to the mileage parser', () => {
+    // This used to assert "no parser implemented". DATA-CONTRACT.md §7's
+    // blocking open item — miles by state have no source — is closed.
+    const result = parseByDocType(
+      'ifta_mileage',
+      [
+        'DEMO CARRIER LLC',
+        'IFTA by Vehicles: 1',
+        '2026-04-01 - 2026-06-30',
+        'Vehicle: 1001 (1AAAAAAAAAAAAAAA1)',
+        'Seq State Miles',
+        '1 OH 1,200.50',
+        'Total 1,200.50',
+      ].join('\n'),
+      'doc-1',
+    );
+    expect(result.status).toBe('parsed');
+    if (result.status === 'parsed') {
+      expect(result.rows).toHaveLength(1);
+      expect(result.rows[0]).toMatchObject({ jurisdiction: 'OH', quantity: '1200.50', amount: null });
+    }
+  });
+
+  it('fails an ifta_mileage document that carries no vehicle mileage', () => {
+    // An empty parse is a failed parse, not a document with zero miles —
+    // zero miles in a quarter is a claim, and no parser should make it.
     const result = parseByDocType('ifta_mileage', 'anything', 'doc-1');
     expect(result.status).toBe('failed');
-    if (result.status === 'failed') expect(result.error).toMatch(/ifta_mileage/);
+    if (result.status === 'failed') expect(result.error).toMatch(/no vehicle mileage/);
   });
 
   it('fails clearly for an unrecognized doc_type rather than guessing a parser', () => {

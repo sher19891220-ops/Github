@@ -701,3 +701,75 @@ SELECT CASE WHEN count(*) = 0
             ELSE 'FAIL: a status was invented for it' END AS result
 FROM accounting.v_truck_status_current
 WHERE truck_id = 'dddddddd-0000-0000-0000-00000000a0f2';
+
+-- =====================================================================
+-- Migration 011 — the IFTA return has somewhere honest to land.
+--
+-- The engine refuses to net a surcharge. These assert the *table* refuses
+-- it too, so a future writer that skips the engine cannot store what the
+-- engine would not produce.
+-- =====================================================================
+
+\echo '--- ASSERT 54: a surcharge can never be a credit ------------------'
+INSERT INTO accounting.entity (entity_id, code, legal_name)
+VALUES ('eeeeeeee-0000-0000-0000-00000000e001','IFTA-TEST','IFTA TEST LLC')
+ON CONFLICT DO NOTHING;
+INSERT INTO accounting.calc_run
+  (calc_run_id, engine, engine_version, period_start, period_end, inputs_hash, status)
+VALUES ('eeeeeeee-0000-0000-0000-00000000c001','ifta','test','2026-04-01','2026-06-30',
+        repeat('a',64),'succeeded');
+DO $$
+BEGIN
+  INSERT INTO accounting.ifta_liability
+    (calc_run_id, entity_id, period_year, period_quarter, jurisdiction,
+     total_miles, taxable_miles, taxable_gallons, tax_paid_gallons,
+     rate_per_gallon, surcharge_per_gallon, tax_due, surcharge_due, net_liability)
+  VALUES ('eeeeeeee-0000-0000-0000-00000000c001','eeeeeeee-0000-0000-0000-00000000e001',
+          2026, 2, 'IN', 1000.00, 1000.00, 200.0000, 500.0000,
+          0.34000, 0.55000, -102.00, -275.00, -377.00);
+  RAISE EXCEPTION 'FAIL: a netted surcharge was stored as a credit';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: surcharge stored as a credit rejected';
+END $$;
+
+\echo '--- ASSERT 55: taxable miles cannot exceed miles driven -----------'
+DO $$
+BEGIN
+  INSERT INTO accounting.ifta_liability
+    (calc_run_id, entity_id, period_year, period_quarter, jurisdiction,
+     total_miles, taxable_miles, taxable_gallons, tax_paid_gallons,
+     rate_per_gallon, surcharge_per_gallon, tax_due, surcharge_due, net_liability)
+  VALUES ('eeeeeeee-0000-0000-0000-00000000c001','eeeeeeee-0000-0000-0000-00000000e001',
+          2026, 2, 'OH', 1000.00, 1200.00, 240.0000, 0.0000,
+          0.38500, 0.00000, 92.40, 0.00, 92.40);
+  RAISE EXCEPTION 'FAIL: more miles were taxed than were driven';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: taxable miles above total miles rejected';
+END $$;
+
+\echo '--- ASSERT 56: a correct IFTA line stores, surcharge kept apart ---'
+INSERT INTO accounting.ifta_liability
+  (calc_run_id, entity_id, period_year, period_quarter, jurisdiction,
+   total_miles, taxable_miles, taxable_gallons, tax_paid_gallons,
+   rate_per_gallon, surcharge_per_gallon, tax_due, surcharge_due, net_liability, fleet_mpg)
+VALUES ('eeeeeeee-0000-0000-0000-00000000c001','eeeeeeee-0000-0000-0000-00000000e001',
+        2026, 2, 'IN', 5000.00, 5000.00, 1000.0000, 500.0000,
+        0.34000, 0.55000, 170.00, 550.00, 720.00, 5.0000);
+SELECT CASE WHEN tax_due = 170.00 AND surcharge_due = 550.00 AND net_liability = 720.00
+            THEN 'PASS: base tax and surcharge stored separately, not collapsed'
+            ELSE 'FAIL: the surcharge was folded into the base tax' END AS result
+FROM accounting.ifta_liability
+WHERE calc_run_id = 'eeeeeeee-0000-0000-0000-00000000c001' AND jurisdiction = 'IN';
+
+\echo '--- ASSERT 57: a saved return names the documents it read ---------'
+INSERT INTO accounting.source_document
+  (document_id, doc_type, file_name, mime_type, byte_size, sha256, storage_key, uploaded_by)
+VALUES ('eeeeeeee-0000-0000-0000-00000000d001','ifta_mileage','miles.txt','text/plain',
+        10, repeat('b',64),'k/miles.txt','test');
+INSERT INTO accounting.ifta_run_source (calc_run_id, document_id, role)
+VALUES ('eeeeeeee-0000-0000-0000-00000000c001','eeeeeeee-0000-0000-0000-00000000d001','mileage');
+SELECT CASE WHEN count(*) = 1
+            THEN 'PASS: the return is linked to the mileage report it came from'
+            ELSE 'FAIL: a saved return traces to nothing' END AS result
+FROM accounting.ifta_run_source
+WHERE calc_run_id = 'eeeeeeee-0000-0000-0000-00000000c001';

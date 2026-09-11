@@ -187,9 +187,10 @@ Total 1,241.96
   });
 
   it('keeps a unit number that is not a number', () => {
-    // One real unit is "KB9859". A parser that assumed digits would drop it.
-    const lettered = SINGLE_STATE.replace('Vehicle: 1001', 'Vehicle: KB9859');
-    expect(parseIftaMileage(lettered).vehicles[0]!.unitNumber).toBe('KB9859');
+    // Some real units carry a letter prefix. A parser that assumed digits
+    // would drop them.
+    const lettered = SINGLE_STATE.replace('Vehicle: 1001', 'Vehicle: XY0000');
+    expect(parseIftaMileage(lettered).vehicles[0]!.unitNumber).toBe('XY0000');
   });
 
   it('does not depend on blank lines between sections', () => {

@@ -157,6 +157,11 @@ POST   /api/reconciliation/:documentId/matches/:matchId  -> { set, summary }
 GET    /api/chargeback                ?status&entityId&from&to -> { rows: ChargebackRow[] }
 POST   /api/chargeback                body { costRowIds, decision } -> { rows: ChargebackRow[] }
 GET    /api/pnl                       ?from&to&grain&scope&entityId&truckId -> PnlResponse
+GET    /api/ifta                      ?from&to&entityId&mpgDecimalPlaces -> IftaReturnView
+POST   /api/ifta                      body { from, to, entityId, savedBy } -> { calcRunId, lineCount, view }
+GET    /api/ifta/rates                ?year&quarter -> { year, quarter, rates }
+POST   /api/ifta/rates                body { jurisdiction, year, quarter, ratePerGallon,
+                                             surchargePerGallon?, sourceNote, enteredBy } -> { rates }
 ```
 
 ```ts
@@ -196,6 +201,25 @@ needs around it: listing documents, the option lists every picker requires, and
 a route serving the overhead rates the engine already computes. The UI
 workstream flagged them rather than inventing local shapes, which is the
 behaviour the contract-first rule exists to produce.
+
+### §6 amendment — `GET /api/ifta` answers 200 when an input is missing
+
+A period with no mileage report, no fuel, or no rates returns **200** with
+`result: null`, a `blocked` sentence saying which input is absent, and
+`sourceProblems` naming what to upload or type. It is not a 4xx: the system
+is working correctly and waiting on data, and rendering that as "something
+went wrong" teaches an accountant to distrust a screen that is being honest.
+
+`400` is reserved for a request with no answer at all — a malformed date, or
+a period spanning two calendar quarters, which have different rate tables
+and therefore no single return. `POST /api/ifta` uses **422** for its
+refusals (an accrual, a group-wide figure, a return short a rate): the
+request is well-formed and the state of the data is what forbids it.
+
+`IftaReturnView.problems` arrive in two lists on purpose. `sourceProblems`
+are about the *inputs* and every one is fixable by a person. The engine's
+`result.problems` are about the *return*. Merging them would hide which
+half is actionable.
 
 ### §6 amendment — the P&L response is not a flat line list
 
@@ -262,6 +286,28 @@ how a cost eventually renders as revenue.
    quantity often enough to be unusable; the fuel summary has real gallons but
    no state. EFS/Relay statements are therefore the authoritative source, which
    makes Phase 3 dependent on Phase 2 rather than parallel to it.
+
+   The engine and its screen do not wait on this. `getIftaReturn` reads
+   gallons from posted fuel ledger entries (`quantity` + `jurisdiction`, the
+   two columns migration 001 put there for exactly this) and **counts the
+   rows that carry neither**, reporting them as a named source problem with
+   their dollar value. A purchase with no state earns no credit, so the
+   amount owed comes out *too high* — an error in the safe direction, and
+   one the screen states rather than absorbing.
+4. **A daily or weekly IFTA figure is limited by the mileage source, not the
+   engine.** The engine computes any period and labels a non-quarter an
+   `accrual`. The mileage report states a period and a total and **no miles
+   per day**, so a report is used whole or not at all: one that overlaps the
+   requested period only partly is excluded and named. Apportioning a
+   quarter's miles across a week would be an invented number wearing a
+   measured one's clothes. A genuinely weekly figure needs daily mileage —
+   a Samsara/Motive pull or a daily export.
+5. **IFTA rates are entered by hand, and that is the design.** Rates are
+   published quarterly and no document this build ingests carries them.
+   `accounting.ifta_rate` requires `source_note` and `entered_by`, so a
+   rate's provenance is a named person naming where they read it — the same
+   standard the manual-ledger path holds. A jurisdiction with no rate is
+   **withheld from the total and named**, never taxed at zero.
 3. **Entity coverage.** Whether `xtrack` and `afg` have their own dispatch and
    expense sheets, or live inside Zone's with entity in free text.
 

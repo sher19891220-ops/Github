@@ -5,7 +5,7 @@
  * src/db/repo/commit.ts for the atomicity and idempotency guarantees.
  */
 import { NextResponse } from 'next/server';
-import { commitDocument } from '@/db/repo/commit';
+import { commitDocument, NonPostingDocumentError } from '@/db/repo/commit';
 import { DocumentNotFoundError } from '@/db/repo/types';
 
 export async function POST(request: Request, context: { params: Promise<{ id: string }> }): Promise<Response> {
@@ -28,6 +28,12 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
   } catch (err) {
     if (err instanceof DocumentNotFoundError) {
       return NextResponse.json({ error: err.message }, { status: 404 });
+    }
+    // 422: the request is well-formed and the document exists — it is the
+    // wrong kind of document to post. Distinguished from 500 so the screen
+    // can explain rather than showing a server error for a correct refusal.
+    if (err instanceof NonPostingDocumentError) {
+      return NextResponse.json({ error: err.message }, { status: 422 });
     }
     // Any other failure means the transaction rolled back — nothing was
     // committed and nothing was left half-marked. Surface it rather than

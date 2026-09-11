@@ -138,3 +138,19 @@ export type {
 /** See file doc note 4. */
 
 
+
+/** `GET /api/ifta/rates` — the rate table for one quarter. Every rate
+ *  carries who entered it and where they read it, because no document
+ *  supplies a rate and a person is therefore its whole provenance. */
+export interface IftaRatesResponse {
+  year: number;
+  quarter: number;
+  rates: Array<{
+    jurisdiction: string;
+    ratePerGallon: string;
+    surchargePerGallon: string;
+    sourceNote: string;
+    enteredBy: string;
+    enteredAt: string;
+  }>;
+}

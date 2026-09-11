@@ -11,6 +11,7 @@ import type { PnlResponse } from '@/db/repo/pnl';
 import type { ManualEntryInput } from '@/db/repo/manualEntry';
 import type { SetStatusInput } from '@/db/repo/truckStatus';
 import type { RegisterInput, SheetSourceRecord, SyncResult } from '@/db/repo/sheetSource';
+import type { IftaReturnView } from '@/db/repo/ifta';
 import type {
   LedgerEntry,
   ManualAttestation,
@@ -32,6 +33,7 @@ import type {
   StagingRowEdit,
   UploadInput,
   UploadResult,
+  IftaRatesResponse,
 } from './types';
 
 /**
@@ -363,6 +365,55 @@ export async function postRebaseline(
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ rawText, confirmedBy }),
+  });
+}
+
+/* ------------------------------------------------------------------------
+ * IFTA — the fifth screen's data, and the one whose GET deliberately
+ * returns 200 with a `blocked` reason rather than an error status when an
+ * input has not arrived. A missing fuel file is not a failed request.
+ * --------------------------------------------------------------------- */
+
+export async function getIftaReturn(q: {
+  from: string;
+  to: string;
+  entityId?: string;
+}): Promise<IftaReturnView> {
+  const params = new URLSearchParams({ from: q.from, to: q.to });
+  if (q.entityId) params.set('entityId', q.entityId);
+  return fetchJson<IftaReturnView>(`/api/ifta?${params.toString()}`);
+}
+
+export async function saveIftaReturn(input: {
+  from: string;
+  to: string;
+  entityId: string;
+  savedBy: string;
+}): Promise<{ calcRunId: string; lineCount: number }> {
+  return fetchJson('/api/ifta', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(input),
+  });
+}
+
+export async function getIftaRates(year: number, quarter: number): Promise<IftaRatesResponse> {
+  return fetchJson<IftaRatesResponse>(`/api/ifta/rates?year=${year}&quarter=${quarter}`);
+}
+
+export async function postIftaRate(input: {
+  jurisdiction: string;
+  year: number;
+  quarter: number;
+  ratePerGallon: string;
+  surchargePerGallon?: string;
+  sourceNote: string;
+  enteredBy: string;
+}): Promise<IftaRatesResponse> {
+  return fetchJson('/api/ifta/rates', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(input),
   });
 }
 

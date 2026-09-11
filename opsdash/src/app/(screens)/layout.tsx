@@ -49,6 +49,9 @@ export default function ScreensLayout({ children }: { children: ReactNode }) {
         <Link href="/pnl" style={navLink}>
           P&amp;L
         </Link>
+        <Link href="/ifta" style={navLink}>
+          IFTA
+        </Link>
         <Link href="/overhead" style={navLink}>
           Per-truck overhead
         </Link>

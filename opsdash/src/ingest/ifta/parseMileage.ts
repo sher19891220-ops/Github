@@ -6,18 +6,22 @@
  * start until one arrives."* It has arrived. The operator's telematics
  * produces a per-period PDF in this shape:
  *
- *     XTRACK LLC 2830 Gypsum Circle Naperville IL 60564
- *     IFTA by Vehicles: 60
+ *     <CARRIER LEGAL NAME> <street address, same line>
+ *     IFTA by Vehicles: 2
  *     2026-04-01 - 2026-06-30
- *     Vehicle: 7004 (1FUJHHDR1NLNC0044)
+ *     Vehicle: 1001 (1AAAAAAAAAAAAAAA1)
  *     Seq State Miles
  *     1 NY 3,758.04
  *     Total 3,758.04
  *     ... one block per vehicle ...
  *     Total Distance by State
  *     Seq State Miles
- *     1 NY 118,145.67
- *     Total 118,145.67
+ *     1 NY 5,000.00
+ *     Total 5,000.00
+ *
+ * (Shape only. This repository is public, so the carrier, its address, real
+ * VINs, unit numbers and fleet mileage are not written down here — see
+ * `tests/fixtures/real/`, which is gitignored, for the genuine article.)
  *
  * **The document checks itself twice**, which is unusually good fortune and
  * the reason this parser can be strict. Each vehicle block states its own
@@ -43,8 +47,8 @@ export interface IftaStateMiles {
 }
 
 export interface IftaVehicle {
-  /** The unit number as the office writes it. Not always numeric — one
-   *  real unit is "KB9859". */
+  /** The unit number as the office writes it. Not always numeric — some
+   *  real units carry a letter prefix. */
   unitNumber: string;
   vin: string;
   states: IftaStateMiles[];

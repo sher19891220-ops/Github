@@ -61,6 +61,13 @@ export const postManualEntry = http.postManualEntry;
 export const postCorrection = http.postCorrection;
 export const getTruckStatus = http.getTruckStatus;
 export const postTruckStatus = http.postTruckStatus;
+// Live only. An IFTA figure that traces to nothing is the exact thing
+// this engine was built to refuse; a mock one would be that, on screen.
+export const getIftaReturn = http.getIftaReturn;
+export const saveIftaReturn = http.saveIftaReturn;
+export const getIftaRates = http.getIftaRates;
+export const postIftaRate = http.postIftaRate;
+
 export const getSheetSources = http.getSheetSources;
 export const postSheetSource = http.postSheetSource;
 export const postSheetSync = http.postSheetSync;

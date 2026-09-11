@@ -9,6 +9,8 @@ import { parseDispatchSheet } from '@/ingest/dispatch';
 import { parseFuelDocument } from '@/ingest/fuel';
 import { parseExpensesDocument } from '@/ingest/expenses';
 import { extractDocument, type ExtractionResult } from '@/ingest/extract';
+import { parseIftaMileage } from '@/ingest/ifta/parseMileage';
+import { iftaMileageToStagingRows } from '@/ingest/ifta/toStagingRows';
 
 export type ParseOutcome =
   | { status: 'parsed'; rows: StagingRow[] }
@@ -39,10 +41,24 @@ export function parseByDocType(docType: string, text: string, documentId: string
         ? { status: 'parsed', rows: r.rows }
         : { status: 'failed', error: r.parseError ?? 'expenses document failed to parse' };
     }
-    case 'ifta_mileage':
-      // DATA-CONTRACT.md §7 open item 1: no parser exists yet because no
-      // source has been confirmed. Fail loudly rather than guess.
-      return { status: 'failed', error: 'no parser implemented for ifta_mileage documents yet (see docs/DATA-CONTRACT.md §7).' };
+    case 'ifta_mileage': {
+      // DATA-CONTRACT.md §7 open item 1 — "miles by state has no source" —
+      // is closed: the operator's telematics produces a per-period report
+      // in a shape that checks itself twice, and `parseIftaMileage` reads
+      // it. See src/ingest/ifta/parseMileage.ts.
+      const report = parseIftaMileage(text);
+      const rows = iftaMileageToStagingRows(report, documentId);
+      if (rows.length === 0) {
+        return {
+          status: 'failed',
+          error:
+            report.problems.length > 0
+              ? `no vehicle mileage could be read: ${report.problems.join(' ')}`
+              : 'no vehicle mileage rows found in this document.',
+        };
+      }
+      return { status: 'parsed', rows };
+    }
     default:
       return { status: 'failed', error: `no parser implemented for doc_type "${docType}".` };
   }

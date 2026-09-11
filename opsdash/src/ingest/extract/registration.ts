@@ -7,7 +7,7 @@
  *
  * Each data row (after `pdftotext -layout`, or after OCR) looks like:
  *
- *   1365        003456354 3AKJHHDRXNSMY1365       A        80    TT   2022  FRHT   PXF8697
+ *   1001        000000000 1AAAAAAAAAAAAAAA1       A        80    TT   2022  FRHT   AAA0000
  *
  * i.e. `UNIT USDOT VIN STATUS WEIGHT-GROUP TYPE YEAR MAKE PLATE`, spacing
  * only roughly preserved (worse after OCR — including one real case where a

@@ -35,6 +35,17 @@ import { findOwnershipConflict } from './truckOwnership';
 
 type QueryFn = (text: string, params?: readonly unknown[]) => Promise<unknown[]>;
 
+/** Document types whose rows are never ledger entries. See the guard in
+ *  `commitDocument` for why this is a refusal rather than a filter. */
+const NON_POSTING_DOC_TYPES = new Set(['ifta_mileage']);
+
+export class NonPostingDocumentError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'NonPostingDocumentError';
+  }
+}
+
 const REQUIRED_FIELDS: ReadonlyArray<{ key: keyof StagingRowRecord; label: string }> = [
   { key: 'entityId', label: 'entityId' },
   { key: 'accrualDate', label: 'accrualDate' },
@@ -58,8 +69,26 @@ export interface CommitOptions {
 
 export async function commitDocument(documentId: string, postedBy: string, opts: CommitOptions = {}): Promise<CommitResult> {
   return withTransaction(async (q: QueryFn) => {
-    const docRows = await q(`SELECT document_id FROM accounting.source_document WHERE document_id = $1 FOR UPDATE`, [documentId]);
+    const docRows = await q(
+      `SELECT document_id, doc_type FROM accounting.source_document WHERE document_id = $1 FOR UPDATE`,
+      [documentId],
+    );
     if (docRows.length === 0) throw new DocumentNotFoundError(documentId);
+
+    // Some document types produce measurements, not money. An IFTA mileage
+    // report is the first: its rows carry miles and a jurisdiction and no
+    // amount, because none exists. Left to run, the required-field check
+    // below would mark every row `rejected: missing amount` — which reads
+    // as "this report was bad" when the report was fine and the
+    // destination was wrong. The IFTA engine reads these rows from staging
+    // instead; they trace to the same source document either way.
+    const docType = (docRows[0] as { doc_type: string }).doc_type;
+    if (NON_POSTING_DOC_TYPES.has(docType)) {
+      throw new NonPostingDocumentError(
+        `A "${docType}" document records measurements, not money, so there is nothing to post to the ledger. ` +
+          'Its rows stay in staging, where the IFTA calculation reads them.',
+      );
+    }
 
     const pendingRaw = await q(
       `SELECT ${STAGING_ROW_COLUMNS_SQL} FROM accounting.staging_row

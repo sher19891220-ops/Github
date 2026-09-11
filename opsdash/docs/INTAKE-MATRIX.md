@@ -54,10 +54,29 @@ never an overwrite.
 | **IFTA mileage** | Samsara / Motive / ELD export ✅ | ✅ | ✅ | Samsara API — **needs a token** |
 | **Truck status** | — | ✅ mark on the fleet board | registry only | Samsara / Motive — **needs a token** |
 | Intercompany | — | ✅ | registry only | — |
+| **IFTA rates** | — | ✅ **the source of record** | — | — |
 
 ✅ = built and tested. "Registry only" means the sheet can be registered but
 nothing parses that shape yet, and the screen says so rather than offering a
 sync that would write nothing and look like an empty sheet.
+
+**IFTA mileage** moved from "needs a parser" to ✅: the telematics report
+parses on upload (`parseByDocType` → `parseIftaMileage`), and its rows stage
+with a jurisdiction and a mileage quantity and **no amount**. That makes
+`ifta_mileage` the first *non-posting* document type — miles are a
+measurement, not money, so `commitDocument` refuses the whole document with a
+422 rather than rejecting every row for a missing amount, which would have
+read as "this report was bad" when the report was fine and the destination
+was wrong. The rows stay in staging, attached to their source document, and
+the IFTA engine reads them there.
+
+**IFTA rates are the one row with no upload path, and that is deliberate.**
+Rates are published quarterly and no document this build ingests carries
+them, so the manual column is not a fallback here — it is the source of
+record. `accounting.ifta_rate` requires `source_note` and `entered_by`: a
+rate's provenance is a named person naming where they read it. A
+jurisdiction with miles and no rate is withheld from the return and named,
+never taxed at zero.
 
 Everything in the Manual column is one form driven by presets, and
 everything in the Sheet column is one guarded sync — which is why this is
