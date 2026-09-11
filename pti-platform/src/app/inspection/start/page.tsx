@@ -78,22 +78,32 @@ function InspectionStartContent() {
           </div>
 
           {/* Inspection type toggle */}
-          <div className="flex rounded-xl overflow-hidden border border-white/20">
+          <div className="space-y-2">
+            <div className="flex rounded-xl overflow-hidden border border-white/20">
+              <button
+                onClick={() => setInspType('PICKUP')}
+                className={`flex-1 py-5 text-lg font-black tracking-wide transition-colors ${
+                  inspType === 'PICKUP' ? 'bg-green-500 text-white' : 'bg-white/10 text-blue-200'
+                }`}
+              >
+                ▲ PICKUP
+              </button>
+              <button
+                onClick={() => setInspType('DROP_OFF')}
+                className={`flex-1 py-5 text-lg font-black tracking-wide transition-colors ${
+                  inspType === 'DROP_OFF' ? 'bg-orange-500 text-white' : 'bg-white/10 text-blue-200'
+                }`}
+              >
+                ▼ DROP-OFF
+              </button>
+            </div>
             <button
-              onClick={() => setInspType('PICKUP')}
-              className={`flex-1 py-5 text-lg font-black tracking-wide transition-colors ${
-                inspType === 'PICKUP' ? 'bg-green-500 text-white' : 'bg-white/10 text-blue-200'
+              onClick={() => setInspType('TRUCK')}
+              className={`w-full rounded-xl border border-white/20 py-5 text-lg font-black tracking-wide transition-colors ${
+                inspType === 'TRUCK' ? 'bg-blue-500 text-white' : 'bg-white/10 text-blue-200'
               }`}
             >
-              ▲ PICKUP
-            </button>
-            <button
-              onClick={() => setInspType('DROP_OFF')}
-              className={`flex-1 py-5 text-lg font-black tracking-wide transition-colors ${
-                inspType === 'DROP_OFF' ? 'bg-orange-500 text-white' : 'bg-white/10 text-blue-200'
-              }`}
-            >
-              ▼ DROP-OFF
+              🚛 TRUCK INSPECTION
             </button>
           </div>
         </div>
@@ -102,10 +112,12 @@ function InspectionStartContent() {
       <div className="px-4 py-4 space-y-4">
         {/* Trailer unit number */}
         <div className="card">
-          <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-3">Trailer Unit #</h3>
+          <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-3">
+            {inspType === 'TRUCK' ? 'Truck Unit #' : 'Trailer Unit #'}
+          </h3>
           <input
             type="text"
-            placeholder="Enter trailer number"
+            placeholder={inspType === 'TRUCK' ? 'Enter truck number' : 'Enter trailer number'}
             value={unitNumber}
             onChange={(e) => setUnitNumber(e.target.value)}
             className="input-field text-2xl font-black"
@@ -132,7 +144,7 @@ function InspectionStartContent() {
           onClick={handleBegin}
           className="btn-primary w-full py-5 text-lg font-black disabled:opacity-40"
         >
-          Begin {inspType === 'PICKUP' ? 'Pickup' : 'Drop-off'} Inspection →
+          Begin {inspType === 'PICKUP' ? 'Pickup' : inspType === 'TRUCK' ? 'Truck' : 'Drop-off'} Inspection →
         </button>
       </div>
     </div>

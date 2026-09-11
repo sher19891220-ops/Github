@@ -4,11 +4,11 @@ import type {
   InspectionType, Driver, Vehicle, GPSCoordinates,
   CapturedPhoto, ChecklistItem, DamageMarker, AngleKey, TireInspection, TireCondition
 } from '@/lib/types'
-import { buildChecklist, TIRE_POSITIONS } from '@/lib/checklist'
+import { buildChecklist, getTirePositions } from '@/lib/checklist'
 import { generateId, generateSessionToken } from '@/lib/utils'
 
-function buildTires(): TireInspection[] {
-  return TIRE_POSITIONS.map((position) => ({ position, condition: null, psi: '' }))
+function buildTires(type?: string): TireInspection[] {
+  return getTirePositions(type).map((position) => ({ position, condition: null, psi: '' }))
 }
 
 interface InspectionState {
@@ -72,8 +72,8 @@ export const useInspectionStore = create<InspectionState>()(
           inspectionType: type,
           driver,
           vehicle,
-          checklist: buildChecklist(),
-          tireInspections: buildTires(),
+          checklist: buildChecklist(type),
+          tireInspections: buildTires(type),
           photos: [],
           damageMarkers: [],
           signatureDataUrl: null,

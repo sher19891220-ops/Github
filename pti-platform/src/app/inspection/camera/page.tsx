@@ -3,17 +3,16 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Check, RotateCcw, ChevronLeft, ChevronRight, AlertCircle, X } from 'lucide-react'
 import { useInspectionStore } from '@/store/inspectionStore'
-import { INSPECTION_ANGLES } from '@/lib/angles'
+import { INSPECTION_ANGLES, getAngles } from '@/lib/angles'
 import { cn } from '@/lib/utils'
 import type { AngleKey, CapturedPhoto } from '@/lib/types'
 
 // Positions 1–13 are required; extras (position 14) is optional/append-only
-const MAIN_ANGLES = INSPECTION_ANGLES.filter((a) => a.key !== 'extras')
-const REQUIRED_COUNT = MAIN_ANGLES.length
+// Angle set is chosen per inspection type inside the component below.
 
 export default function CameraPage() {
   const router = useRouter()
-  const { photos, addPhoto, removePhoto, gps, setGPS, setLocationStr } = useInspectionStore()
+  const { photos, addPhoto, removePhoto, gps, setGPS, setLocationStr, inspectionType } = useInspectionStore()
   const [activeIndex, setActiveIndex] = useState(0)
   const [cameraReady, setCameraReady] = useState(false)
   const [cameraError, setCameraError] = useState<string | null>(null)
@@ -25,8 +24,12 @@ export default function CameraPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
 
-  const totalSlots = INSPECTION_ANGLES.length // 14 (13 required + extras)
-  const currentAngleConfig = INSPECTION_ANGLES[activeIndex]
+  // TRUCK inspections use the tractor angle set; trailer types use the default.
+  const ANGLES = getAngles(inspectionType ?? undefined)
+  const MAIN_ANGLES = ANGLES.filter((a) => a.key !== 'extras')
+  const REQUIRED_COUNT = MAIN_ANGLES.length
+  const totalSlots = ANGLES.length
+  const currentAngleConfig = ANGLES[activeIndex]
   const activeAngle: AngleKey = currentAngleConfig.key
   const isExtras = activeAngle === 'extras'
   const isTireAngle = activeAngle.startsWith('tire-')
