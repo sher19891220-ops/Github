@@ -45,19 +45,57 @@ never an overwrite.
 
 | What | Upload | Manual | Sheet | API |
 | --- | --- | --- | --- | --- |
-| Revenue / loads | dispatch export | per-load entry | dispatch sheet ✅ | TMS later |
-| Fuel | EFS / Relay statement ✅ | per-purchase entry | fuel sheet ✅ | fuel-card API later |
-| **Maintenance** | shop invoice ✅ | per-repair entry | maintenance sheet | shop system later |
-| **Factoring** | Triumph statement | per-invoice status | factoring sheet | factor API later |
-| Registration | IRP / HVUT invoice ✅ | per-unit entry | — | — |
-| Tolls | toll statement ✅ | per-crossing entry | expenses sheet ✅ | transponder API later |
-| **IFTA mileage** | **Samsara / Motive / ELD export** | per-state entry | mileage sheet | Samsara API |
-| **Truck status** | — | mark in the UI | status sheet | Samsara / Motive |
-| Intercompany | — | per-transfer entry | — | — |
+| Revenue / loads | dispatch export ✅ | ✅ | ✅ | TMS later |
+| Fuel | EFS / Relay statement ✅ | ✅ | ✅ | fuel-card API later |
+| **Maintenance** | shop invoice ✅ | ✅ | ✅ | shop system later |
+| **Factoring** | Triumph statement ✅ | ✅ | ✅ | factor API later |
+| Registration | IRP / HVUT invoice ✅ | ✅ | — | — |
+| Tolls | toll statement ✅ | ✅ | ✅ | transponder API later |
+| **IFTA mileage** | Samsara / Motive / ELD export ✅ | ✅ | ✅ | Samsara API — **needs a token** |
+| **Truck status** | — | ✅ mark on the fleet board | registry only | Samsara / Motive — **needs a token** |
+| Intercompany | — | ✅ | registry only | — |
 
-✅ = built and tested today. Everything else is the same two components
-(`upload` and `manual`) pointed at a different doc type or category, plus a
-sheet purpose, which is why this is configuration rather than nine builds.
+✅ = built and tested. "Registry only" means the sheet can be registered but
+nothing parses that shape yet, and the screen says so rather than offering a
+sync that would write nothing and look like an empty sheet.
+
+Everything in the Manual column is one form driven by presets, and
+everything in the Sheet column is one guarded sync — which is why this is
+configuration rather than nine builds.
+
+## 2b. The sheet path: one guard, not one importer per sheet
+
+A sheet is registered once in `accounting.sheet_source`, its column layout
+is recorded on the first sync, and **every sync after that is refused if the
+columns moved.**
+
+That table and its `header_checksum` column have existed since migration
+002, carrying the whole argument in a comment — *"a column gets inserted...
+lets a sync fail loudly on a layout change instead of silently reading the
+wrong column as an amount"* — and nothing used it. It was a column and a
+comment, not a behaviour: a column inserted on a Tuesday would have shifted
+every amount one place left and the sync would have reported success.
+
+Three properties it is built with:
+
+- **Refused, not warned.** A warning on a batch job is a line in a log
+  nobody reads, and by then the rows are in staging.
+- **The error names what changed** — added, removed, or moved. "Header
+  checksum mismatch" tells an accountant nothing they can act on, and the
+  person reading it is usually the person who inserted the column.
+- **A pure reorder is called out separately**, because it is the most
+  dangerous case and the least visible: every column is still present, so
+  nothing looks wrong, and every value now lands in the wrong field.
+
+The guard is escapable — columns legitimately change — but only
+deliberately, by a named person, through a separate re-baseline action that
+writes who accepted it into the source's notes. A guard that can be stepped
+over silently is not a guard.
+
+**Nothing in the app fetches from Google Drive.** There is no Drive client
+in its dependencies, so the export is pasted or supplied by whatever fetched
+it. That boundary is worth keeping visible: deciding whether text is safe to
+ingest is separable from, and more important than, fetching it.
 
 ## 3. Truck status — the fleet board's missing source
 

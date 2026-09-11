@@ -61,6 +61,10 @@ export const postManualEntry = http.postManualEntry;
 export const postCorrection = http.postCorrection;
 export const getTruckStatus = http.getTruckStatus;
 export const postTruckStatus = http.postTruckStatus;
+export const getSheetSources = http.getSheetSources;
+export const postSheetSource = http.postSheetSource;
+export const postSheetSync = http.postSheetSync;
+export const postRebaseline = http.postRebaseline;
 export type { PnlQuery } from './httpApi';
 
 export const getReconciliation = USE_MOCK ? mock.getReconciliation : http.getReconciliation;

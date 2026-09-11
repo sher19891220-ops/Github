@@ -40,6 +40,9 @@ export default function ScreensLayout({ children }: { children: ReactNode }) {
         <Link href="/add" style={navLink}>
           Add a figure
         </Link>
+        <Link href="/sheets" style={navLink}>
+          Sheets
+        </Link>
         <Link href="/fleet" style={navLink}>
           Fleet status
         </Link>

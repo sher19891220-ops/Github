@@ -10,6 +10,7 @@
 import type { PnlResponse } from '@/db/repo/pnl';
 import type { ManualEntryInput } from '@/db/repo/manualEntry';
 import type { SetStatusInput } from '@/db/repo/truckStatus';
+import type { RegisterInput, SheetSourceRecord, SyncResult } from '@/db/repo/sheetSource';
 import type {
   LedgerEntry,
   ManualAttestation,
@@ -318,6 +319,50 @@ export async function postTruckStatus(
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify(input),
+  });
+}
+
+/* ------------------------------------------------------------------------
+ * Sheet sources — the third intake path.
+ *
+ * A 409 from the sync route means the sheet's columns moved. `fetchJson`
+ * turns it into an ApiError carrying the server's sentence, which names
+ * what changed; the screen keys its re-baseline affordance off that.
+ * --------------------------------------------------------------------- */
+
+export async function getSheetSources(): Promise<{ sources: SheetSourceRecord[] }> {
+  return fetchJson('/api/sheet-sources');
+}
+
+export async function postSheetSource(input: RegisterInput): Promise<{ source: SheetSourceRecord }> {
+  return fetchJson('/api/sheet-sources', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(input),
+  });
+}
+
+export async function postSheetSync(
+  sheetSourceId: string,
+  rawText: string,
+  uploadedBy?: string,
+): Promise<SyncResult> {
+  return fetchJson(`/api/sheet-sources/${encodeURIComponent(sheetSourceId)}/sync`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ rawText, uploadedBy }),
+  });
+}
+
+export async function postRebaseline(
+  sheetSourceId: string,
+  rawText: string,
+  confirmedBy: string,
+): Promise<{ source: SheetSourceRecord }> {
+  return fetchJson(`/api/sheet-sources/${encodeURIComponent(sheetSourceId)}/rebaseline`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ rawText, confirmedBy }),
   });
 }
 
