@@ -69,6 +69,20 @@ export type CostBasis =
 export type RateKind = 'stated' | 'measured';
 export type Grain = 'day' | 'week' | 'month' | 'quarter' | 'year';
 
+/**
+ * What kind of account a category is — `accounting.category.account_nature`.
+ *
+ * `balance_sheet` rows are money moving between an asset and a liability,
+ * not money spent: a prepaid registration payment whose real cost is
+ * recognized monthly, a loan principal repayment (only the interest is a
+ * cost), a receivable. They are excluded from a P&L at every grain.
+ *
+ * `intercompany` legs are real on one entity's books and eliminated in a
+ * group roll-up — a transfer between two group entities proves a
+ * relationship, never a reason.
+ */
+export type AccountNature = 'pnl' | 'balance_sheet' | 'intercompany';
+
 export type CategoryGroup =
   | 'revenue' | 'fuel' | 'toll' | 'maintenance' | 'permit'
   | 'ifta' | 'insurance' | 'driver_pay' | 'lease' | 'other_cost';

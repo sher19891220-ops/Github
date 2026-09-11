@@ -11,6 +11,7 @@ function revenueEntry(entryId: string, accrualDate: string, amount: string): Sum
     accrualDate,
     categoryId: 'revenue.dispatch',
     categoryGroup: 'revenue',
+    accountNature: 'pnl',
     amount,
     chargedTo: 'company',
     allocationBasis: 'actual',

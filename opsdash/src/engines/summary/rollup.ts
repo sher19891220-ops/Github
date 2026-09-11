@@ -13,7 +13,7 @@ import type { CategoryGroup, Decimal } from '@/contract/types';
 import type { AllocationBasis } from '@/engines/registration';
 import { centsFromDecimal, decimalFromCents, sumCents } from '@/engines/registration';
 import { resolveBearing } from './bearing';
-import { isBalanceSheetCategory, isIntercompanyCategory, stripIntercompany } from './categoryRules';
+import { isBalanceSheetEntry, isIntercompanyEntry, stripIntercompany } from './categoryRules';
 import { daysInPeriod, isWithinPeriod, periodsCovering } from './periods';
 import type {
   AllocatedAmount,
@@ -111,7 +111,7 @@ export function buildPnlBucket(entries: readonly SummaryLedgerEntry[], period: P
   let entryCount = 0;
 
   for (const e of entries) {
-    if (isBalanceSheetCategory(e.categoryId)) {
+    if (isBalanceSheetEntry(e)) {
       // Rule 5 / SOURCE-DISCOVERY §11c / §15: a balance-sheet movement
       // (a prepaid asset payment, a loan principal repayment) is never a
       // P&L line, at any grain. Counted here so the stripped dollar amount
@@ -211,7 +211,7 @@ export function summarizeEntity(
   const whole = buildPnlBucket(inEntity, period);
 
   const intercompanyCents = sumCents(
-    inEntity.filter((e) => isIntercompanyCategory(e.categoryId)).map((e) => centsFromDecimal(e.amount)),
+    inEntity.filter(isIntercompanyEntry).map((e) => centsFromDecimal(e.amount)),
   );
 
   return {

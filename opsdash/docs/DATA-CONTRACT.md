@@ -4,7 +4,7 @@
 Sheets; aiops is out of scope. Three open items in §7 gate Phase 3.
 **Authority:** this document + `db/migrations/001_accounting_core.sql`. Where they
 disagree, the migration wins — it is the artifact that has actually been executed.
-**Verified:** migrations apply clean on PostgreSQL 16; all 35 assertions in
+**Verified:** migrations apply clean on PostgreSQL 16; all 45 assertions in
 `db/verify/002_contract_assertions.sql` pass. Run `npm run db:verify`.
 
 ---
@@ -309,6 +309,43 @@ This is where the registration engine's stated per-unit charge and its actual
 per-unit cost both belong, and it is how the flat per-driver admin fee gets
 checked against the itemised cost of the services it claims to cover instead of
 being assumed to break even.
+
+### 9.4b What kind of account a category is
+
+Migration 009 adds `category.account_nature` — `pnl`, `balance_sheet` or
+`intercompany`.
+
+This closes a gap the P&L engine had been papering over. `category` carried a
+group and a sign, and neither answers whether a row is an expense or money
+moving between an asset and a liability. Two categories that already existed
+are not expenses at all: `prepaid.registration` (the IRP/HVUT invoice is
+booked once, in full, as a prepaid asset precisely so the real cost reaches
+the P&L through twelve monthly recognitions — counting the payment too makes
+a truck catastrophically unprofitable for one day and free for the rest of
+the year) and loan principal (only interest is a cost; whole payments
+overstate by roughly $29.50 per truck per day on this fleet).
+
+Lacking a column, the engine keyed on the category *name* — a regex for the
+word "principal". That works until somebody names a genuine expense category
+with that word in it, at which point a real cost vanishes from every P&L at
+every grain and nothing says why.
+
+**The name rule did not disappear; it moved.** It is now a CHECK on
+`category`, applied once when a category is defined rather than to every
+ledger row forever: a category id naming a principal repayment, a prepaid
+asset, a receivable or a payable cannot declare itself `pnl`. A second CHECK
+stops revenue being reclassified off the P&L at all. The engine reads the
+flag and nothing else.
+
+`src/db/repo/summaryEntries.ts` is the query that feeds the engine, and it
+exists because the general ledger reader does not select what a P&L needs:
+`charged_to` (whether a cost is the company's or the driver's),
+`allocation_basis`, `unit_type` (whether a trailer repair corrupts a truck's
+profitability), the intercompany columns, and the `category` join carrying
+`category_group` and `account_nature`. Each omission changes a number rather
+than leaving a field blank. It also resolves the split ratio from the
+chargeback decision currently standing, because `ledger_entry.charged_to`
+records *that* a cost was split and never in what proportion.
 
 ### 9.5 Rules with no schema change, recorded so they are not re-derived
 

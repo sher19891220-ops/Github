@@ -14,13 +14,14 @@
  * **Known gap** (see the final report): `mapDbRowToLedgerEntry`
  * (`src/db/repo/mappers.ts`, not this engine's file to change) does not
  * currently select or map any of these columns either — the same gap
- * `src/db/repo/types.ts` already documents for `StagingRow`. Whoever wires
- * a real `accounting.ledger_entry` query to this engine must select them
- * explicitly (plus join `accounting.category` for `category_group`); this
- * engine cannot and does not go fetch them itself, because it does no I/O.
+ * `src/db/repo/types.ts` already documents for `StagingRow`. `loadSummaryEntries`
+ * (`src/db/repo/summaryEntries.ts`) is the query that selects every one of
+ * them, including the `accounting.category` join for `category_group` and
+ * `account_nature`; this engine cannot and does not go fetch them itself,
+ * because it does no I/O.
  */
 
-import type { CategoryGroup, Decimal, IsoDate } from '@/contract/types';
+import type { AccountNature, CategoryGroup, Decimal, IsoDate } from '@/contract/types';
 import type { AllocationBasis, ChargedTo, UnitType } from '@/engines/registration';
 
 /**
@@ -42,6 +43,16 @@ export interface SummaryLedgerEntry {
    *  never infers a group from a category id string (categories are
    *  maintained data, not a code enum; see migration 001 §2's comment). */
   categoryGroup: CategoryGroup;
+  /**
+   * Whether this row is a P&L line, a balance-sheet movement or an
+   * intercompany leg — `accounting.category.account_nature`, migration
+   * 009. Resolved by the same join as `categoryGroup` and required for the
+   * same reason: this engine used to guess it from the category *name*,
+   * which silently deleted any genuine expense whose id happened to
+   * contain the word "principal". A row that cannot say what kind of
+   * account it came from has no business being rolled up.
+   */
+  accountNature: AccountNature;
   /** Signed decimal string, ledger convention: + inflow, - outflow. */
   amount: Decimal;
   chargedTo: ChargedTo;

@@ -517,3 +517,61 @@ BEGIN
 EXCEPTION WHEN unique_violation THEN
   RAISE NOTICE 'PASS: a second live row on the same line still rejected';
 END $$;
+
+-- =====================================================================
+-- Migration 009 — account nature
+-- =====================================================================
+
+\echo '--- ASSERT 38: a principal repayment cannot claim to be a P&L line --'
+DO $$
+BEGIN
+  INSERT INTO accounting.category (category_id, category_group, display_name, sign)
+  VALUES ('lease.principal', 'lease', 'Equipment loan principal', -1);
+  RAISE EXCEPTION 'FAIL: a principal category defaulted onto the P&L';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: principal category rejected as a P&L line';
+END $$;
+
+\echo '--- ASSERT 39: the same category is accepted once it says what it is -'
+INSERT INTO accounting.category
+  (category_id, category_group, display_name, sign, account_nature)
+VALUES ('lease.principal', 'lease', 'Equipment loan principal', -1, 'balance_sheet');
+\echo 'PASS: principal category accepted as a balance-sheet movement'
+
+\echo '--- ASSERT 40: interest IS a cost, and stays on the P&L --------------'
+INSERT INTO accounting.category (category_id, category_group, display_name, sign)
+VALUES ('lease.interest', 'lease', 'Equipment loan interest', -1);
+SELECT CASE WHEN account_nature = 'pnl'
+            THEN 'PASS: interest is a P&L line'
+            ELSE 'FAIL: interest classified as ' || account_nature::text END AS result
+FROM accounting.category WHERE category_id = 'lease.interest';
+
+\echo '--- ASSERT 41: a prepaid or receivable id cannot be a P&L line -------'
+DO $$
+BEGIN
+  INSERT INTO accounting.category (category_id, category_group, display_name, sign)
+  VALUES ('prepaid.insurance', 'insurance', 'Prepaid insurance', -1);
+  RAISE EXCEPTION 'FAIL: a prepaid asset defaulted onto the P&L';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: prepaid category rejected as a P&L line';
+END $$;
+
+\echo '--- ASSERT 42: revenue can never be a balance-sheet movement ---------'
+DO $$
+BEGIN
+  UPDATE accounting.category
+     SET account_nature = 'balance_sheet'
+   WHERE category_id = 'revenue.linehaul';
+  RAISE EXCEPTION 'FAIL: revenue was reclassified off the P&L';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: revenue cannot be moved off the P&L';
+END $$;
+
+\echo '--- ASSERT 43: the categories that shipped wrong were corrected ------'
+SELECT CASE WHEN count(*) = 0
+            THEN 'PASS: every seeded non-P&L category is classified'
+            ELSE 'FAIL: ' || count(*)::text || ' still marked pnl' END AS result
+FROM accounting.category
+WHERE account_nature = 'pnl'
+  AND category_id IN ('prepaid.registration', 'receivable.driver',
+                      'receivable.intercompany', 'payable.intercompany');

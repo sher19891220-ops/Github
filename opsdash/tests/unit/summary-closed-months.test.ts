@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import type { CategoryGroup } from '@/contract/types';
+import type { AccountNature, CategoryGroup } from '@/contract/types';
 import {
   buildRegistrationPosting,
   centsFromDecimal,
@@ -52,6 +52,16 @@ const CATEGORY_GROUP_BY_ID: Record<string, CategoryGroup> = {
   'tax.hvut': 'permit',
 };
 
+/** Mirrors migration 009's `account_nature` seed, the same way
+ *  `CATEGORY_GROUP_BY_ID` above mirrors the 003/004 category seed. A real
+ *  caller reads both off the same `accounting.category` join. */
+const ACCOUNT_NATURE_BY_ID: Record<string, AccountNature> = {
+  'prepaid.registration': 'balance_sheet',
+  'receivable.driver': 'balance_sheet',
+  'receivable.intercompany': 'intercompany',
+  'payable.intercompany': 'intercompany',
+};
+
 function toSummaryEntry(draft: LedgerEntryDraft): SummaryLedgerEntry {
   const categoryGroup = CATEGORY_GROUP_BY_ID[draft.categoryId];
   if (!categoryGroup) throw new Error(`test adapter has no categoryGroup mapping for ${draft.categoryId}`);
@@ -62,6 +72,7 @@ function toSummaryEntry(draft: LedgerEntryDraft): SummaryLedgerEntry {
     accrualDate: draft.accrualDate,
     categoryId: draft.categoryId,
     categoryGroup,
+    accountNature: ACCOUNT_NATURE_BY_ID[draft.categoryId] ?? 'pnl',
     amount: draft.amount,
     chargedTo: draft.chargedTo,
     allocationBasis: draft.allocationBasis,

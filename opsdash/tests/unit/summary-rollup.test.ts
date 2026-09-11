@@ -22,6 +22,7 @@ function entry(overrides: Partial<SummaryLedgerEntry> & Pick<SummaryLedgerEntry,
     accrualDate: '2026-06-15',
     categoryId: 'fuel.diesel',
     categoryGroup: 'fuel',
+    accountNature: 'pnl',
     chargedTo: 'company',
     allocationBasis: 'actual',
     unitType: 'truck',
@@ -110,7 +111,8 @@ describe('buildPnlBucket', () => {
 
   it('a balance-sheet category (prepaid asset) is excluded from every total and reported separately', () => {
     const entries: SummaryLedgerEntry[] = [
-      entry({ entryId: 'prepaid-1', categoryId: 'prepaid.registration', categoryGroup: 'other_cost', amount: '-78959.21' }),
+      entry({ entryId: 'prepaid-1', categoryId: 'prepaid.registration', categoryGroup: 'other_cost',
+              accountNature: 'balance_sheet', amount: '-78959.21' }),
       entry({ entryId: 'irp-month-1', categoryId: 'permit.irp', categoryGroup: 'permit', amount: '-156.67' }),
     ];
     const bucket = buildPnlBucket(entries, JUNE);
@@ -125,7 +127,8 @@ describe('buildPnlBucket', () => {
     // (SOURCE-DISCOVERY §15 calls this explicitly open) — this is the
     // defensive net for whenever one lands, e.g. "lease.principal".
     const entries: SummaryLedgerEntry[] = [
-      entry({ entryId: 'loan-1', categoryId: 'lease.principal', categoryGroup: 'lease', amount: '-2413.69' }),
+      entry({ entryId: 'loan-1', categoryId: 'lease.principal', categoryGroup: 'lease',
+              accountNature: 'balance_sheet', amount: '-2413.69' }),
       entry({ entryId: 'loan-2', categoryId: 'lease.interest', categoryGroup: 'lease', amount: '-159.08' }),
     ];
     const bucket = buildPnlBucket(entries, JUNE);

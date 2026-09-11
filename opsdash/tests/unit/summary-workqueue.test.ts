@@ -9,6 +9,7 @@ function entry(overrides: Partial<SummaryLedgerEntry> & Pick<SummaryLedgerEntry,
     accrualDate: '2026-06-15',
     categoryId: 'maintenance.repair',
     categoryGroup: 'maintenance',
+    accountNature: 'pnl',
     chargedTo: 'company',
     allocationBasis: 'actual',
     unitType: 'unknown',
@@ -61,7 +62,8 @@ describe('buildWorkQueueSummary', () => {
 
   it('surfaces a stripped principal-pattern row as its own diagnostic, never silent', () => {
     const summary = buildWorkQueueSummary([
-      entry({ entryId: 'a', amount: '-2413.69', categoryId: 'lease.principal', categoryGroup: 'lease' }),
+      entry({ entryId: 'a', amount: '-2413.69', categoryId: 'lease.principal', categoryGroup: 'lease',
+             accountNature: 'balance_sheet' }),
     ]);
     expect(summary.excludedPrincipalCount).toBe(1);
     expect(summary.excludedPrincipalAmount).toBe('2413.69');

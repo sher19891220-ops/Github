@@ -9,7 +9,7 @@
 import type { CategoryGroup } from '@/contract/types';
 import { centsFromDecimal, decimalFromCents } from '@/engines/registration';
 import { resolveBearing } from './bearing';
-import { isPrincipalCategory } from './categoryRules';
+import { isBalanceSheetEntry } from './categoryRules';
 import type { SummaryLedgerEntry, WorkQueueSummary } from './types';
 
 /** Category groups where a cost row ordinarily names a specific unit —
@@ -36,7 +36,7 @@ export function buildWorkQueueSummary(entries: readonly SummaryLedgerEntry[]): W
   for (const e of entries) {
     const cents = centsFromDecimal(e.amount);
 
-    if (isPrincipalCategory(e.categoryId)) {
+    if (isBalanceSheetEntry(e)) {
       principalCount += 1;
       principalCents += absCents(cents);
     }

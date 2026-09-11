@@ -11,13 +11,11 @@ export {
 export { resolveBearing } from './bearing';
 export type { Bearing } from './bearing';
 export {
-  BALANCE_SHEET_CATEGORY_IDS,
-  INTERCOMPANY_CATEGORY_IDS,
-  isBalanceSheetCategory,
-  isIntercompanyCategory,
-  isPrincipalCategory,
+  isBalanceSheetEntry,
+  isIntercompanyEntry,
   stripIntercompany,
 } from './categoryRules';
+export type { HasAccountNature } from './categoryRules';
 export { addDaysIso, daysInPeriod, isWithinPeriod, periodFor, periodsCovering } from './periods';
 export { buildWorkQueueSummary } from './workQueue';
 export type {

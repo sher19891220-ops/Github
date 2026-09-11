@@ -32,6 +32,7 @@ function revenue(entryId: string, accrualDate: string, amount: string): SummaryL
     accrualDate,
     categoryId: 'revenue.dispatch',
     categoryGroup: 'revenue',
+    accountNature: 'pnl',
     amount,
     chargedTo: 'company',
     allocationBasis: 'actual',
