@@ -5,11 +5,16 @@
  * src/db/repo/commit.ts for the atomicity and idempotency guarantees.
  */
 import { NextResponse } from 'next/server';
+import { badIdMessage, isUuid } from '@/lib/ids';
 import { commitDocument, NonPostingDocumentError } from '@/db/repo/commit';
 import { DocumentNotFoundError } from '@/db/repo/types';
 
 export async function POST(request: Request, context: { params: Promise<{ id: string }> }): Promise<Response> {
   const { id } = await context.params;
+
+  if (!isUuid(id)) {
+    return NextResponse.json({ error: badIdMessage('documentId') }, { status: 400 });
+  }
 
   let postedBy = 'unknown';
   try {

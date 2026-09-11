@@ -13,6 +13,7 @@ import type { SetStatusInput } from '@/db/repo/truckStatus';
 import type { RegisterInput, SheetSourceRecord, SyncResult } from '@/db/repo/sheetSource';
 import type { IftaReturnView } from '@/db/repo/ifta';
 import type { DashboardResponse } from '@/db/repo/dashboard';
+import type { CeoResponse } from '@/db/repo/ceo';
 import type {
   LedgerEntry,
   ManualAttestation,
@@ -424,6 +425,14 @@ export async function getDashboard(q: { from?: string; to?: string } = {}): Prom
   if (q.to) params.set('to', q.to);
   const qs = params.toString();
   return fetchJson<DashboardResponse>(`/api/dashboard${qs ? `?${qs}` : ''}`);
+}
+
+export async function getCeoView(q: { from?: string; to?: string } = {}): Promise<CeoResponse> {
+  const params = new URLSearchParams();
+  if (q.from) params.set('from', q.from);
+  if (q.to) params.set('to', q.to);
+  const qs = params.toString();
+  return fetchJson<CeoResponse>(`/api/ceo${qs ? `?${qs}` : ''}`);
 }
 
 export type { Decimal };

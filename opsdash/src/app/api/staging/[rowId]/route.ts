@@ -14,6 +14,7 @@
  * match `Partial<StagingRowEdit>` exactly.
  */
 import { NextResponse } from 'next/server';
+import { badIdMessage, isUuid } from '@/lib/ids';
 import { z } from 'zod';
 import { updateStagingRow } from '@/db/repo/stagingRows';
 
@@ -33,6 +34,10 @@ const stagingRowEditSchema = z
 
 export async function PATCH(request: Request, context: { params: Promise<{ rowId: string }> }): Promise<Response> {
   const { rowId } = await context.params;
+
+  if (!isUuid(rowId)) {
+    return NextResponse.json({ error: badIdMessage('rowId') }, { status: 400 });
+  }
 
   let body: unknown;
   try {

@@ -46,6 +46,9 @@ export default function ScreensLayout({ children }: { children: ReactNode }) {
         <Link href="/fleet" style={navLink}>
           Fleet status
         </Link>
+        <Link href="/ceo" style={navLink}>
+          Group
+        </Link>
         <Link href="/pnl" style={navLink}>
           P&amp;L
         </Link>

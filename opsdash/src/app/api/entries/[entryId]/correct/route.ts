@@ -7,6 +7,7 @@
  * that has simply always been this.
  */
 import { NextResponse } from 'next/server';
+import { badIdMessage, isUuid } from '@/lib/ids';
 import { EntryNotFoundError, ManualEntryError, correctEntry } from '@/db/repo/manualEntry';
 
 export async function POST(
@@ -14,6 +15,10 @@ export async function POST(
   { params }: { params: Promise<{ entryId: string }> },
 ): Promise<Response> {
   const { entryId } = await params;
+
+  if (!isUuid(entryId)) {
+    return NextResponse.json({ error: badIdMessage('entryId') }, { status: 400 });
+  }
 
   let body: Record<string, unknown>;
   try {

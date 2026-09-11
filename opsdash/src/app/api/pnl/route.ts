@@ -44,9 +44,37 @@ export async function GET(request: Request): Promise<Response> {
     );
   }
 
-  const scopeRaw = p.get('scope') ?? 'group';
+  const entityId = p.get('entityId');
+  const truckId = p.get('truckId');
+
+  /**
+   * Scope is INFERRED from the filters when it is not stated, and a stated
+   * scope that contradicts them is refused.
+   *
+   * Before this, `?entityId=X` with no `scope` returned the whole group's
+   * figures with `entityId: X` echoed back in the response — the caller
+   * asked for one company's P&L and got the group's, labelled as theirs.
+   * The UI always sends `scope`, so it never surfaced there; the API is
+   * still the API. A wrong number carrying the right label is the exact
+   * failure this build exists to prevent, so the two ways it could happen
+   * are both closed: silence is inferred, contradiction is an error.
+   */
+  const explicitScope = p.get('scope');
+  const inferredScope: PnlScope = truckId ? 'truck' : entityId ? 'entity' : 'group';
+  const scopeRaw = explicitScope ?? inferredScope;
+
   if (!SCOPES.includes(scopeRaw as PnlScope)) {
     return NextResponse.json({ error: `scope must be one of ${SCOPES.join(', ')}` }, { status: 400 });
+  }
+  if (explicitScope !== null && explicitScope !== inferredScope) {
+    return NextResponse.json(
+      {
+        error:
+          `scope=${explicitScope} contradicts the filters supplied (${truckId ? 'truckId' : entityId ? 'entityId' : 'none'}). ` +
+          'Refused rather than answering one of the two: a P&L returned at a different scope than the caller asked for is a wrong number carrying the right label.',
+      },
+      { status: 400 },
+    );
   }
 
   try {
@@ -55,8 +83,8 @@ export async function GET(request: Request): Promise<Response> {
       to,
       ...(grainRaw !== null ? { grain: grainRaw as Grain } : {}),
       scope: scopeRaw as PnlScope,
-      entityId: p.get('entityId') ?? undefined,
-      truckId: p.get('truckId') ?? undefined,
+      entityId: entityId ?? undefined,
+      truckId: truckId ?? undefined,
     });
     return NextResponse.json(result);
   } catch (err) {

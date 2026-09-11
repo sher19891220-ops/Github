@@ -109,13 +109,32 @@ describe('API routes, end to end against a real database', () => {
   });
 
   it('PATCH /api/staging/:rowId 422s on a JSON-number amount (schema rejects it before the repo layer)', async () => {
-    const patchReq = new Request('http://localhost/api/staging/some-row', {
+    // A real-shaped id, so the body actually gets validated. This test
+    // used to pass an id of "some-row" and started returning 400 when the
+    // routes gained a UUID guard — it was asserting 422 while never
+    // reaching the code that returns it.
+    const rowId = '00000000-0000-4000-8000-0000000000ff';
+    const patchReq = new Request(`http://localhost/api/staging/${rowId}`, {
       method: 'PATCH',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ amount: 812.44 }),
     });
-    const res = await patchStaging(patchReq, { params: Promise.resolve({ rowId: 'some-row' }) });
+    const res = await patchStaging(patchReq, { params: Promise.resolve({ rowId }) });
     expect(res.status).toBe(422);
+  });
+
+  it('PATCH /api/staging/:rowId 400s on an id that is not a UUID', async () => {
+    // Unguarded this reached Postgres, raised "invalid input syntax for
+    // type uuid", and left as a 500 — the status that means the server is
+    // broken, for a request that is merely malformed.
+    const patchReq = new Request('http://localhost/api/staging/some-row', {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ amount: '812.44' }),
+    });
+    const res = await patchStaging(patchReq, { params: Promise.resolve({ rowId: 'some-row' }) });
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toMatch(/must be a UUID/);
   });
 
   it('GET /api/documents (list) returns the richer contract DocumentSummary shape', async () => {

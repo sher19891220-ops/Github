@@ -9,6 +9,7 @@
  * screen whose whole purpose is to show the work.
  */
 import { NextResponse } from 'next/server';
+import { badIdMessage, isUuid } from '@/lib/ids';
 import { DocumentNotReconcilableError, getReconciliation } from '@/db/repo/reconciliation';
 
 export async function GET(
@@ -16,6 +17,10 @@ export async function GET(
   { params }: { params: Promise<{ documentId: string }> },
 ): Promise<Response> {
   const { documentId } = await params;
+
+  if (!isUuid(documentId)) {
+    return NextResponse.json({ error: badIdMessage('documentId') }, { status: 400 });
+  }
   const openedBy = new URL(request.url).searchParams.get('openedBy') ?? 'system';
 
   try {

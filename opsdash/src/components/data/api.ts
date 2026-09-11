@@ -65,6 +65,10 @@ export const postTruckStatus = http.postTruckStatus;
 // worst possible thing to put on the first screen read every morning.
 export const getDashboard = http.getDashboard;
 
+// The CEO roll-up. Live only, and its forecast is a separate field from
+// its actuals all the way to the screen.
+export const getCeoView = http.getCeoView;
+
 // Live only. An IFTA figure that traces to nothing is the exact thing
 // this engine was built to refuse; a mock one would be that, on screen.
 export const getIftaReturn = http.getIftaReturn;
