@@ -575,3 +575,129 @@ FROM accounting.category
 WHERE account_nature = 'pnl'
   AND category_id IN ('prepaid.registration', 'receivable.driver',
                       'receivable.intercompany', 'payable.intercompany');
+
+-- =====================================================================
+-- Migration 010 — manual entry and truck status
+-- =====================================================================
+
+\echo '--- ASSERT 44: a typed figure cannot skip provenance either -------'
+DO $$
+BEGIN
+  INSERT INTO accounting.ledger_entry
+    (entity_id, accrual_date, category_id, amount, source_kind, posted_by)
+  VALUES ('11111111-1111-1111-1111-111111111111','2026-04-01','fuel.diesel',
+          -250.00,'manual','controller@fleet');   -- claims manual, attests nothing
+  RAISE EXCEPTION 'FAIL: a manual entry with no attestation was accepted';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: manual entry without an attestation rejected';
+END $$;
+
+\echo '--- ASSERT 45: an attestation must name a person and a basis ------'
+DO $$
+BEGIN
+  INSERT INTO accounting.manual_attestation (asserted_by, basis)
+  VALUES ('controller@fleet', '   ');
+  RAISE EXCEPTION 'FAIL: an attestation with a blank basis was accepted';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: attestation without a stated basis rejected';
+END $$;
+
+\echo '--- ASSERT 46: a properly attested manual figure posts ------------'
+INSERT INTO accounting.manual_attestation (attestation_id, asserted_by, basis)
+VALUES ('dddddddd-0000-0000-0000-0000000000d1','controller@fleet',
+        'Shop quoted this by phone; invoice has not arrived yet.');
+INSERT INTO accounting.ledger_entry
+  (entry_id, entity_id, accrual_date, category_id, amount, source_kind,
+   attestation_id, posted_by)
+VALUES ('dddddddd-0000-0000-0000-0000000000e1','11111111-1111-1111-1111-111111111111',
+        '2026-04-01','fuel.diesel', -250.00,'manual',
+        'dddddddd-0000-0000-0000-0000000000d1','controller@fleet');
+\echo 'PASS: attested manual entry accepted'
+
+\echo '--- ASSERT 47: a manual entry cannot also claim a document --------'
+DO $$
+BEGIN
+  INSERT INTO accounting.ledger_entry
+    (entity_id, accrual_date, category_id, amount, source_kind,
+     attestation_id, source_document_id, posted_by)
+  VALUES ('11111111-1111-1111-1111-111111111111','2026-04-02','fuel.diesel',
+          -100.00,'manual','dddddddd-0000-0000-0000-0000000000d1',
+          '22222222-2222-2222-2222-222222222222','controller@fleet');
+  RAISE EXCEPTION 'FAIL: a manual entry borrowed a document as evidence';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: manual entry cannot borrow document provenance';
+END $$;
+
+\echo '--- ASSERT 48: a parsed entry cannot borrow an attestation --------'
+DO $$
+BEGIN
+  INSERT INTO accounting.ledger_entry
+    (entity_id, accrual_date, category_id, amount, source_kind,
+     source_document_id, attestation_id, posted_by)
+  VALUES ('11111111-1111-1111-1111-111111111111','2026-04-03','fuel.diesel',
+          -100.00,'document','22222222-2222-2222-2222-222222222222',
+          'dddddddd-0000-0000-0000-0000000000d1','controller@fleet');
+  RAISE EXCEPTION 'FAIL: a document entry carried an attestation too';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: document entry cannot carry an attestation';
+END $$;
+
+\echo '--- ASSERT 49: a manual figure is distinguishable after the fact --'
+SELECT CASE WHEN count(*) = 1
+            THEN 'PASS: manual entries are separable from parsed ones'
+            ELSE 'FAIL: found ' || count(*)::text END AS result
+FROM accounting.ledger_entry WHERE source_kind = 'manual';
+
+\echo '--- ASSERT 50: a later document supersedes without erasing --------'
+UPDATE accounting.manual_attestation
+   SET superseded_by_document_id = '22222222-2222-2222-2222-222222222222',
+       superseded_at = now()
+ WHERE attestation_id = 'dddddddd-0000-0000-0000-0000000000d1';
+SELECT CASE WHEN basis LIKE 'Shop quoted%' AND superseded_at IS NOT NULL
+            THEN 'PASS: what we believed, and what replaced it, both on file'
+            ELSE 'FAIL: supersede lost the original basis' END AS result
+FROM accounting.manual_attestation
+WHERE attestation_id = 'dddddddd-0000-0000-0000-0000000000d1';
+
+\echo '--- ASSERT 51: a truck cannot be in two states at once ------------'
+INSERT INTO accounting.truck (truck_id, unit_number)
+VALUES ('dddddddd-0000-0000-0000-00000000a0f1','STATUS-TEST-1');
+INSERT INTO accounting.manual_attestation (attestation_id, asserted_by, basis)
+VALUES ('dddddddd-0000-0000-0000-0000000000d2','dispatch@fleet','Driver called in.');
+INSERT INTO accounting.truck_status_history
+  (truck_id, status, effective_from, effective_to, source, attestation_id)
+VALUES ('dddddddd-0000-0000-0000-00000000a0f1','shop',
+        '2026-04-01 08:00+00','2026-04-05 17:00+00','manual',
+        'dddddddd-0000-0000-0000-0000000000d2');
+DO $$
+BEGIN
+  INSERT INTO accounting.truck_status_history
+    (truck_id, status, effective_from, effective_to, source, attestation_id)
+  VALUES ('dddddddd-0000-0000-0000-00000000a0f1','assigned',
+          '2026-04-03 08:00+00','2026-04-08 17:00+00','manual',
+          'dddddddd-0000-0000-0000-0000000000d2');
+  RAISE EXCEPTION 'FAIL: a truck was assigned and in the shop at once';
+EXCEPTION WHEN exclusion_violation THEN
+  RAISE NOTICE 'PASS: overlapping truck status rejected';
+END $$;
+
+\echo '--- ASSERT 52: a status must say where it came from ---------------'
+DO $$
+BEGIN
+  INSERT INTO accounting.truck_status_history
+    (truck_id, status, effective_from, source)
+  VALUES ('dddddddd-0000-0000-0000-00000000a0f1','open',
+          '2026-05-01 08:00+00','manual');   -- manual, attests nothing
+  RAISE EXCEPTION 'FAIL: an unattributed manual status was accepted';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: manual status without an attestation rejected';
+END $$;
+
+\echo '--- ASSERT 53: "no status on file" is not "available" -------------'
+INSERT INTO accounting.truck (truck_id, unit_number)
+VALUES ('dddddddd-0000-0000-0000-00000000a0f2','STATUS-TEST-2');
+SELECT CASE WHEN count(*) = 0
+            THEN 'PASS: a truck with no status is absent, not defaulted to open'
+            ELSE 'FAIL: a status was invented for it' END AS result
+FROM accounting.v_truck_status_current
+WHERE truck_id = 'dddddddd-0000-0000-0000-00000000a0f2';

@@ -13,7 +13,57 @@ export type Decimal = string;
 /** ISO calendar date, YYYY-MM-DD. */
 export type IsoDate = string;
 
-export type SourceKind = 'document' | 'connector' | 'derived' | 'adjustment';
+/**
+ * How a number got here.
+ *
+ * `manual` is not a loophole in the provenance rule, it is the rule
+ * applied honestly to a case the others could not express: a person typed
+ * this, and the evidence is their named attestation on a stated basis
+ * rather than a file. That is weaker evidence than a parsed invoice, and
+ * every screen showing a manual figure says so instead of letting it pass
+ * for the same thing.
+ */
+export type SourceKind = 'document' | 'connector' | 'derived' | 'manual' | 'adjustment';
+
+/** The four ways a figure can enter the system — every source supports all
+ *  four, and a row remembers which one it came in through. */
+export type IntakeMethod = 'upload' | 'manual' | 'sheet' | 'api';
+
+/** Provenance for a typed figure. Weaker than a document, stored as a
+ *  different thing so it can be rendered as weaker. */
+export interface ManualAttestation {
+  attestationId: string;
+  /** A person who can be asked about this later. Never a service account. */
+  assertedBy: string;
+  assertedAt: string;
+  /** What they are going on — "shop quoted by phone", "driver texted the
+   *  odometer". Required: a figure with no stated basis is a guess with a
+   *  name attached. */
+  basis: string;
+  /** Set when a real document later proves the same fact. The attestation
+   *  survives, because "we believed X, then the invoice said Y" is exactly
+   *  what a reconciliation needs. */
+  supersededByDocumentId: string | null;
+  supersededAt: string | null;
+}
+
+/** What a truck is doing. The fleet board's missing source. */
+export type TruckStatus =
+  | 'assigned' | 'open' | 'shop' | 'broken_down' | 'home' | 'out_of_service';
+
+/** Where a status came from. Telematics, a sheet, or a person. */
+export type StatusSource = 'samsara' | 'motive' | 'manual' | 'sheet';
+
+export interface TruckStatusNow {
+  truckId: string;
+  status: TruckStatus;
+  effectiveFrom: string;
+  source: StatusSource;
+  note: string | null;
+  /** Hours in the current state — what the board's "Ready 24+" and
+   *  "Home 48+" timers are built from. */
+  hoursInStatus: number;
+}
 /**
  * Mirrors `accounting.doc_type`. This list had drifted behind the database —
  * `ifta_mileage` and `revenue` landed in migration 002 and never reached here,
