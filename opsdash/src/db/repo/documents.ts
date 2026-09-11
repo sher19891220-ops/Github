@@ -3,11 +3,24 @@
  *
  * Upload is content-addressed: re-dropping the same bytes is a no-op
  * (`duplicateOf` in the result), which is what makes the ingest workflow
- * safe to retry. Parsing happens synchronously at upload time via
- * `parseByDocType`, so `GET /api/documents/:id` reflects a final
- * `parse_status` rather than a `pending` one the caller has to poll for
- * text-decodable content (binary content is stored but not parsed — see
- * parseByDocType.ts).
+ * safe to retry.
+ *
+ * Parsing forks on content shape, never on a stringify-first shortcut:
+ *  - Text-decodable content (CSV/TSV/plain text) parses synchronously at
+ *    upload time via `parseByDocType`, so `GET /api/documents/:id` reflects
+ *    a final `parse_status` immediately — this is cheap, in-process work.
+ *  - Everything else (PDF/XLSX/image) goes through `parseBinaryDocument`
+ *    on the *original bytes*, never a UTF-8 stringification of them (a
+ *    PDF's/XLSX's byte stream is not valid UTF-8; decoding it first and
+ *    handing the parser mangled text would be worse than an honest
+ *    failure — see parseByDocType.ts's `isTextDecodable` doc comment).
+ *    This path can involve OCR, which is CPU-heavy enough that a single
+ *    scanned page has measured in minutes under load (SOURCE-DISCOVERY.md
+ *    §14). It must not block the upload request: `createDocument` returns
+ *    as soon as the row is stored (`parse_status` starts at its DB default
+ *    of `'pending'`), and extraction finishes out-of-band, updating
+ *    `parse_status` to `'parsed'`/`'failed'` when it completes. The client
+ *    polls `GET /api/documents/:id` to observe that transition.
  */
 import { createHash, randomUUID } from 'node:crypto';
 import type { DocumentSummary as ContractDocumentSummary, StagingRow } from '@/contract/types';
@@ -15,7 +28,7 @@ import { query, withTransaction } from '@/db/pool';
 import { putBlob } from './blobStore';
 import { insertStagingRows } from './insertStagingRows';
 import { LEDGER_ENTRY_COLUMNS_SQL, STAGING_ROW_COLUMNS_SQL, mapDbRowToStagingRowRecord, toWireStagingRow } from './mappers';
-import { isTextDecodable, parseByDocType } from './parseByDocType';
+import { isTextDecodable, parseBinaryDocument, parseByDocType } from './parseByDocType';
 import type { DocumentStatusSummary } from './types';
 
 export interface CreateDocumentInput {
@@ -95,6 +108,13 @@ export async function createDocument(input: CreateDocumentInput): Promise<Create
   return { documentId, sha256, duplicateOf: null };
 }
 
+/**
+ * Routes on content shape and, for the binary family, does not block the
+ * caller. `createDocument`'s `await` here only ever waits on the
+ * text-decodable branch (fast, synchronous parsing); the binary branch
+ * kicks off its work and returns immediately, letting `parse_status` sit at
+ * `'pending'` until the background extraction finishes.
+ */
 async function parseAndStage(
   documentId: string,
   docType: string,
@@ -102,27 +122,58 @@ async function parseAndStage(
   fileName: string,
   bytes: Buffer,
 ): Promise<void> {
-  if (!isTextDecodable(mimeType, fileName)) {
+  if (isTextDecodable(mimeType, fileName)) {
+    const text = bytes.toString('utf8');
+    const outcome = parseByDocType(docType, text, documentId);
+
+    if (outcome.status === 'failed') {
+      await setDocumentParseResult(documentId, 'failed', outcome.error);
+      return;
+    }
+
+    await withTransaction(async (q) => {
+      await insertStagingRows(q, outcome.rows);
+    });
+    await setDocumentParseResult(documentId, 'parsed', null);
+    return;
+  }
+
+  // Binary family (PDF/XLSX/image): never stringify the bytes first (see
+  // this file's header comment). Fire-and-forget on purpose — extraction
+  // can be OCR-bound and must not hold the HTTP response open. Any error
+  // here (including one `parseBinaryDocument` itself didn't anticipate)
+  // still lands on the document as an honest `parse_status = 'failed'`
+  // rather than leaving it stuck at `'pending'` forever.
+  void runBinaryParseInBackground(documentId, docType, fileName, mimeType, bytes);
+}
+
+async function runBinaryParseInBackground(
+  documentId: string,
+  docType: string,
+  fileName: string,
+  mimeType: string,
+  bytes: Buffer,
+): Promise<void> {
+  try {
+    const outcome = await parseBinaryDocument(docType, bytes, fileName, mimeType, documentId);
+    if (outcome.status === 'failed') {
+      await setDocumentParseResult(documentId, 'failed', outcome.error);
+      return;
+    }
+    // Extraction output never auto-commits: parseBinaryDocument already
+    // marks structurally-invalid fields `under_review` (see its doc
+    // comment); this only ever stages, exactly like the text path above.
+    await withTransaction(async (q) => {
+      await insertStagingRows(q, outcome.rows);
+    });
+    await setDocumentParseResult(documentId, 'parsed', null);
+  } catch (err) {
     await setDocumentParseResult(
       documentId,
       'failed',
-      `no text-extraction step exists for mime type "${mimeType}"; upload the sheet/document as text/CSV, or add an extraction step before parsing.`,
+      `unexpected error extracting "${fileName}": ${(err as Error).message}`,
     );
-    return;
   }
-
-  const text = bytes.toString('utf8');
-  const outcome = parseByDocType(docType, text, documentId);
-
-  if (outcome.status === 'failed') {
-    await setDocumentParseResult(documentId, 'failed', outcome.error);
-    return;
-  }
-
-  await withTransaction(async (q) => {
-    await insertStagingRows(q, outcome.rows);
-  });
-  await setDocumentParseResult(documentId, 'parsed', null);
 }
 
 export async function setDocumentParseResult(

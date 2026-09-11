@@ -51,17 +51,13 @@ export function parseByDocType(docType: string, text: string, documentId: string
 /** True for content this build can decode as the pipe-table text every
  *  sheet-shaped parser above expects (`parseByDocType`'s `text` argument).
  *
- *  This is deliberately unchanged by the addition of `src/ingest/extract/**`
- *  below. `createDocument` (documents.ts, out of this file's ownership)
- *  currently does `bytes.toString('utf8')` unconditionally before calling
- *  `parseByDocType`, gated only by this function — flipping this to `true`
- *  for PDF/XLSX mime types would NOT wire up real extraction; it would hand
- *  `parseByDocType` a UTF-8-mangled string built from binary bytes (a PDF's
- *  or XLSX's actual byte stream is not valid UTF-8), which is strictly worse
- *  than today's honest `parse_status = 'failed'`. Real binary extraction
- *  needs the *original bytes*, which is exactly what `parseBinaryDocument`
- *  below takes — wiring it in is a `documents.ts` change (passing bytes
- *  instead of a pre-stringified `text`), outside this file's ownership. */
+ *  `documents.ts` gates on this to choose a branch: `true` stringifies the
+ *  bytes and calls `parseByDocType` above; `false` routes the *original*
+ *  bytes to `parseBinaryDocument` below instead. Never flip this to `true`
+ *  for PDF/XLSX mime types as a shortcut — a PDF's or XLSX's actual byte
+ *  stream is not valid UTF-8, and handing `parseByDocType` a UTF-8-mangled
+ *  string built from binary bytes would be worse than an honest
+ *  `parse_status = 'failed'`. */
 export function isTextDecodable(mimeType: string, fileName: string): boolean {
   if (mimeType.startsWith('text/')) return true;
   if (mimeType === 'application/csv') return true;
@@ -73,10 +69,8 @@ export function isTextDecodable(mimeType: string, fileName: string): boolean {
  * need real extraction (PDF/XLSX/scanned images) rather than a
  * pre-decoded text table — see `src/ingest/extract/**`.
  *
- * Not yet called from the upload path: `documents.ts` (out of this file's
- * ownership per this task's scope) always stringifies bytes before this
- * point today. This function is the routing this build is ready to switch
- * to once that caller passes raw bytes instead.
+ * Called from the upload path (`documents.ts`) for every non-text-decodable
+ * upload, on the original bytes — never a stringified copy of them.
  *
  * `registration` is the one document family wired up end to end here (the
  * IRP "Vehicle Status" fleet report — SOURCE-DISCOVERY.md §11b-§14): each
@@ -85,6 +79,14 @@ export function isTextDecodable(mimeType: string, fileName: string): boolean {
  * failed or only partially passed structural validation. Nothing here
  * writes to `ledger_entry` — this only ever produces staging rows, same as
  * every other parser in this file.
+ *
+ * NOTE for whoever adds the next binary-capable doc type: `accounting.
+ * doc_type` (db/migrations/001 + 002) currently only has 'fuel', 'toll',
+ * 'maintenance', 'ifta_mileage' and 'revenue' — 'registration' is not yet a
+ * legal value there, so `POST /api/documents` cannot create a
+ * `source_document` row typed 'registration' until a migration adds it.
+ * This function is correct and reachable the moment that lands; it is not
+ * blocked by anything in this file or in `documents.ts`.
  */
 export async function parseBinaryDocument(
   docType: string,
