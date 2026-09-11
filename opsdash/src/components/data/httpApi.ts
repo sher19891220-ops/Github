@@ -7,6 +7,7 @@
  * Nothing in this file calls `Number()` or `parseFloat` on a money field;
  * `fetchJson` itself never inspects the payload beyond `JSON.parse`.
  */
+import type { PnlResponse } from '@/db/repo/pnl';
 import type {
   ChargebackDecision,
   ChargebackRow,
@@ -235,6 +236,36 @@ export async function postBulkChargebackDecision(
     body: JSON.stringify({ costRowIds, decision }),
   });
   return body.rows;
+}
+
+/* ------------------------------------------------------------------------
+ * P&L.
+ *
+ * Returns the rollup engine's own result shapes rather than the flat
+ * `PnlLine[]` DATA-CONTRACT.md §6 originally specified — see the route's
+ * doc comment for why flattening would have hidden the driver-borne
+ * receivable, the allocated-vs-measured distinction and the stripped
+ * balance-sheet rows. `workQueue` travels with the totals because it is
+ * computed over the same rows in the same period.
+ * --------------------------------------------------------------------- */
+
+export interface PnlQuery {
+  from: string;
+  to: string;
+  /** Omit for one bucket covering the whole range; give it for a series. */
+  grain?: 'day' | 'week' | 'month' | 'quarter' | 'year';
+  scope?: 'group' | 'entity' | 'truck';
+  entityId?: string;
+  truckId?: string;
+}
+
+export async function getPnl(q: PnlQuery): Promise<PnlResponse> {
+  const params = new URLSearchParams({ from: q.from, to: q.to });
+  if (q.grain) params.set('grain', q.grain);
+  if (q.scope) params.set('scope', q.scope);
+  if (q.entityId) params.set('entityId', q.entityId);
+  if (q.truckId) params.set('truckId', q.truckId);
+  return fetchJson<PnlResponse>(`/api/pnl?${params.toString()}`);
 }
 
 export type { Decimal };

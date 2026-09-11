@@ -50,6 +50,11 @@ export const uploadDocument = USE_MOCK ? mock.uploadDocument : http.uploadDocume
 export const getReferenceData = USE_MOCK ? mock.getReferenceData : http.getReferenceData;
 export const getOverheadRates = USE_MOCK ? mock.getOverheadRates : http.getOverheadRates;
 
+// Live only: there is no mock P&L, and inventing one would put a plausible
+// margin on screen that traces to nothing.
+export const getPnl = http.getPnl;
+export type { PnlQuery } from './httpApi';
+
 export const getReconciliation = USE_MOCK ? mock.getReconciliation : http.getReconciliation;
 export const postReconDecision = USE_MOCK ? mock.postReconDecision : http.postReconDecision;
 export const getChargebackQueue = USE_MOCK ? mock.getChargebackQueue : http.getChargebackQueue;

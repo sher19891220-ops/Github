@@ -152,7 +152,11 @@ GET    /api/ledger                    ?entity&truck&driver&from&to&category -> {
 GET    /api/documents                 -> { documents: DocumentSummary[] }
 GET    /api/reference                 -> ReferenceData   (picker option lists)
 GET    /api/registration/overhead     -> { rates: TruckOverheadRate[] }
-GET    /api/pnl                       ?grain&from&to&entity&truck&driver&driverClass -> { lines: PnlLine[] }
+GET    /api/reconciliation/:documentId            -> { set, summary }
+POST   /api/reconciliation/:documentId/matches/:matchId  -> { set, summary }
+GET    /api/chargeback                ?status&entityId&from&to -> { rows: ChargebackRow[] }
+POST   /api/chargeback                body { costRowIds, decision } -> { rows: ChargebackRow[] }
+GET    /api/pnl                       ?from&to&grain&scope&entityId&truckId -> PnlResponse
 ```
 
 ```ts
@@ -192,6 +196,32 @@ needs around it: listing documents, the option lists every picker requires, and
 a route serving the overhead rates the engine already computes. The UI
 workstream flagged them rather than inventing local shapes, which is the
 behaviour the contract-first rule exists to produce.
+
+### §6 amendment — the P&L response is not a flat line list
+
+`GET /api/pnl` was specified above as `{ lines: PnlLine[] }`: one row per
+period × dimension × category group. Building it showed that shape cannot
+carry three things CLAUDE.md §2 requires to stay visible:
+
+- the **driver-borne receivable** kept apart from company cost, rather than
+  netted into it;
+- an **allocated** figure marked as allocated rather than measured;
+- the **balance-sheet rows stripped out** of the total, with their amount
+  still reported somewhere.
+
+Flattened away, a margin looks like a complete answer when it is a lower
+bound. So the route returns the rollup engine's own result shapes —
+`GroupPnlResult` / `EntityPnlResult` / `TruckPnlResult`, all extending
+`PnlBucket` — plus a `workQueue` summary computed over **the same rows in
+the same period**, so the totals and the caveats can never describe
+different data. `PnlLine` stays in `src/contract/types.ts` for a caller that
+genuinely wants a flat table, and no endpoint emits it today.
+
+`from` and `to` are required, and `grain` is optional: omitted gives one
+bucket covering the whole range, given it gives a series with every bucket
+clamped to the range. A weekly series for a calendar year therefore cannot
+reach into the neighbouring years — which it did, and which is why the
+clamp exists (see §9.4c).
 
 `StagingRowEdit`, `DocumentSummary`, `ParseStatus`, `NamedOption`,
 `CategoryOption` and `ReferenceData` are defined in `src/contract/types.ts`.
@@ -346,6 +376,26 @@ profitability), the intercompany columns, and the `category` join carrying
 than leaving a field blank. It also resolves the split ratio from the
 chargeback decision currently standing, because `ledger_entry.charged_to`
 records *that* a cost was split and never in what proportion.
+
+### 9.4c A period series covers exactly the days it was asked for
+
+A P&L series was built from whole periods containing the range's ends, so
+the first and last bucket could reach outside the range. On clean calendar
+months that is invisible. On a ragged range it silently added the days
+either side, and an ISO week belongs to whichever year its Monday falls in
+— so a weekly series for calendar 2026 actually covered 2025-12-29 through
+2027-01-03.
+
+Measured on that bug, for a truck with $5,000 booked 30 Dec 2025, $1,000 in
+June 2026 and $7,000 on 2 Jan 2027: **the weekly series summed to $13,000
+while the year period reported $1,000.** Both render as "2026 revenue".
+
+`periodsCovering` now clamps every bucket to the requested range. A whole
+month stays whole when the range aligns; a partial first or last bucket
+reports the days it actually covers, so a screen can see it is partial. The
+per-day rate divides by those clamped days. The invariant — the parts sum to
+the whole — is a property test across all five grains, not one worked
+example at one grain.
 
 ### 9.5 Rules with no schema change, recorded so they are not re-derived
 
