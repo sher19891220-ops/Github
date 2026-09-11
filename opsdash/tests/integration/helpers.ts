@@ -62,3 +62,26 @@ async function seed(): Promise<void> {
 export function uniqueText(label: string): string {
   return `${label} :: ${randomUUID()}\n`;
 }
+
+/**
+ * Polls `check()` until it returns something other than `'pending'`, or
+ * throws once `timeoutMs` elapses. Exists because the binary-extraction
+ * upload path (documents.ts) deliberately does not block the caller —
+ * `parse_status` starts at `'pending'` and flips to `'parsed'`/`'failed'`
+ * out of band, so a test proving that behavior has to observe the
+ * transition rather than assert on an immediate return value.
+ */
+export async function waitForParseStatus(
+  check: () => Promise<string | null | undefined>,
+  timeoutMs = 20_000,
+): Promise<string> {
+  const start = Date.now();
+  for (;;) {
+    const status = await check();
+    if (status && status !== 'pending') return status;
+    if (Date.now() - start > timeoutMs) {
+      throw new Error(`parse_status still "${status}" after ${timeoutMs}ms — background extraction never finished.`);
+    }
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+}

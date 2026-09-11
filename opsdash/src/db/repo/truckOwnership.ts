@@ -133,7 +133,8 @@ export async function findOwnershipConflict(q: QueryFn, input: OwnershipConflict
   if (!expectedClass) return null;
 
   const priorRows = (await q(
-    `SELECT 1 FROM accounting.ledger_entry WHERE truck_id = $1 AND driver_id = $2 AND driver_class = $3 LIMIT 1`,
+    `SELECT 1 FROM accounting.ledger_entry
+     WHERE truck_id = $1 AND driver_id = $2 AND driver_class = $3::accounting.driver_class LIMIT 1`,
     [input.truckId, input.driverId, expectedClass],
   )) as unknown[];
   if (priorRows.length === 0) return null;

@@ -43,3 +43,26 @@ function dataRow(truckNumber: string, amount: string): string {
 export function dispatchFixture(truckNumber: string, amount = '500.00'): string {
   return `${HEADER_ROW}\n${dataRow(truckNumber, amount)}\n`;
 }
+
+/**
+ * A single-row "Truck and trailer expenses" fixture (variant A header —
+ * SOURCE-DISCOVERY.md §5/"Corrected header" — no `Transfer code` column),
+ * built to the exact column layout `src/ingest/expenses/parseExpenses.ts`'s
+ * `detectExpenseHeader` requires. `chargedTo` is written straight into the
+ * real "Expense side" column so the real parser (not a test shortcut)
+ * produces `parsedPayload.chargedTo`, exactly as `charged_to` gets set in
+ * production — that field has no slot in `StagingRowEdit` (DATA-CONTRACT.md
+ * §6 contract gap noted in insertStagingRows.ts), so it can only ever come
+ * from the parser reading it off a real-shaped row.
+ */
+const EXPENSE_HEADER_ROW = '| Unit | Issued To | Unit Type | Cost type | Date | $ used | Expense side | Details |';
+
+export function expensesFixture(
+  unitNumber: string,
+  amount: string,
+  chargedTo: 'company' | 'driver',
+  dateMmDdYy: string,
+): string {
+  const dataRowLine = `| ${unitNumber} | Some Driver | truck | Repair | ${dateMmDdYy} | $${amount} | ${chargedTo} | test fixture |`;
+  return `${EXPENSE_HEADER_ROW}\n${dataRowLine}\n`;
+}
