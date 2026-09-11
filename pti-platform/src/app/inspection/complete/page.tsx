@@ -27,7 +27,7 @@ export default function CompletePage() {
 
   const driver     = store.driver
   const vehicle    = store.vehicle
-  const inspType   = store.inspectionType === 'PICKUP' ? 'PICKUP' : store.inspectionType === 'DROP_OFF' ? 'DROP-OFF' : null
+  const inspType   = store.inspectionType?.includes('PICKUP') ? 'PICKUP' : store.inspectionType?.includes('DROPOFF') ? 'DROP-OFF' : null
   const now        = new Date()
   const dateStr    = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
   const timeStr    = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })

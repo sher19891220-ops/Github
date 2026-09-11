@@ -114,8 +114,8 @@ export default function SignaturePage() {
             <span>
               Trailer <span className="font-bold">{store.vehicle?.unitNumber ?? '—'}</span>
               {' · '}
-              <span className={`font-bold ${store.inspectionType === 'PICKUP' ? 'text-green-600' : 'text-orange-500'}`}>
-                {store.inspectionType === 'PICKUP' ? '▲ PICKUP' : '▼ DROP-OFF'}
+              <span className={`font-bold ${store.inspectionType?.includes('PICKUP') ? 'text-green-600' : 'text-orange-500'}`}>
+                {store.inspectionType?.includes('PICKUP') ? '▲ PICKUP' : '▼ DROP-OFF'}
               </span>
             </span>
           </div>

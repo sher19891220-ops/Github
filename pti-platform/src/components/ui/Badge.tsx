@@ -2,9 +2,10 @@ import { cn } from '@/lib/utils'
 import type { InspectionType, InspectionStatus } from '@/lib/types'
 
 export function InspectionTypeBadge({ type }: { type: InspectionType }) {
+  const isPickup = type.includes('PICKUP')
   return (
-    <span className={type === 'PICKUP' ? 'badge-pickup' : 'badge-dropoff'}>
-      {type === 'PICKUP' ? '▲ Pickup' : '▼ Drop-off'}
+    <span className={isPickup ? 'badge-pickup' : 'badge-dropoff'}>
+      {isPickup ? '▲ Pickup' : '▼ Drop-off'}
     </span>
   )
 }

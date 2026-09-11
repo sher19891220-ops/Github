@@ -11,14 +11,14 @@ import type { InspectionSummary } from '@/lib/types'
 export default function HistoryPage() {
   const router = useRouter()
   const [search, setSearch] = useState('')
-  const [filter, setFilter] = useState<'ALL' | 'PICKUP' | 'DROP_OFF'>('ALL')
+  const [filter, setFilter] = useState<'ALL' | 'PICKUP' | 'DROPOFF'>('ALL')
 
   const filtered = MOCK_INSPECTIONS.filter((ins) => {
     const matchSearch =
       !search ||
       ins.unitNumber.toLowerCase().includes(search.toLowerCase()) ||
       ins.driverName.toLowerCase().includes(search.toLowerCase())
-    const matchFilter = filter === 'ALL' || ins.type === filter
+    const matchFilter = filter === 'ALL' || ins.type.includes(filter)
     return matchSearch && matchFilter
   })
 
@@ -39,7 +39,7 @@ export default function HistoryPage() {
           />
         </div>
         <div className="flex gap-2">
-          {(['ALL', 'PICKUP', 'DROP_OFF'] as const).map((f) => (
+          {(['ALL', 'PICKUP', 'DROPOFF'] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}

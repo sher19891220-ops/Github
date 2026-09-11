@@ -18,34 +18,34 @@ export const MOCK_VEHICLES: Vehicle[] = [
 
 export const MOCK_INSPECTIONS: InspectionSummary[] = [
   {
-    id: 'ins1', sessionToken: 'tkn-a1b2', type: 'PICKUP', status: 'SUBMITTED',
+    id: 'ins1', sessionToken: 'tkn-a1b2', type: 'TRAILER_PICKUP_DRY_VAN', status: 'SUBMITTED',
     driverName: 'Patrick Martinez', unitNumber: 'ZN-401', company: 'Zone LLC',
     createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
     submittedAt: new Date(Date.now() - 1.5 * 60 * 60 * 1000).toISOString(),
     failCount: 0, photoCount: 8, hasPdf: true,
   },
   {
-    id: 'ins2', sessionToken: 'tkn-c3d4', type: 'DROP_OFF', status: 'SUBMITTED',
+    id: 'ins2', sessionToken: 'tkn-c3d4', type: 'TRAILER_DROPOFF_DRY_VAN', status: 'SUBMITTED',
     driverName: 'James Wilson', unitNumber: 'ZN-407', company: 'Zone LLC',
     createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
     submittedAt: new Date(Date.now() - 3.5 * 60 * 60 * 1000).toISOString(),
     failCount: 1, photoCount: 8, hasPdf: true,
   },
   {
-    id: 'ins3', sessionToken: 'tkn-e5f6', type: 'PICKUP', status: 'IN_PROGRESS',
+    id: 'ins3', sessionToken: 'tkn-e5f6', type: 'TRAILER_PICKUP_DRY_VAN', status: 'IN_PROGRESS',
     driverName: 'Maria Rodriguez', unitNumber: 'XT-112', company: 'Xtrack LLC',
     createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
     failCount: 0, photoCount: 3, hasPdf: false,
   },
   {
-    id: 'ins4', sessionToken: 'tkn-g7h8', type: 'DROP_OFF', status: 'REVIEWED',
+    id: 'ins4', sessionToken: 'tkn-g7h8', type: 'TRAILER_DROPOFF_DRY_VAN', status: 'REVIEWED',
     driverName: 'David Chen', unitNumber: 'AG-055', company: 'AFG Transportco',
     createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
     submittedAt: new Date(Date.now() - 7 * 60 * 60 * 1000).toISOString(),
     failCount: 2, photoCount: 8, hasPdf: true,
   },
   {
-    id: 'ins5', sessionToken: 'tkn-i9j0', type: 'PICKUP', status: 'SUBMITTED',
+    id: 'ins5', sessionToken: 'tkn-i9j0', type: 'TRAILER_PICKUP_DRY_VAN', status: 'SUBMITTED',
     driverName: 'Sarah Johnson', unitNumber: 'XT-118', company: 'Xtrack LLC',
     createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
     submittedAt: new Date(Date.now() - 5.5 * 60 * 60 * 1000).toISOString(),

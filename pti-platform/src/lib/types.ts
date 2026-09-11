@@ -1,4 +1,16 @@
-export type InspectionType = 'PICKUP' | 'DROP_OFF' | 'TRUCK' | 'TRUCK_DAILY'
+export type InspectionType =
+  | 'TRUCK_PICKUP_DAILY'    | 'TRUCK_PICKUP_FULL'
+  | 'TRUCK_DROPOFF_DAILY'   | 'TRUCK_DROPOFF_FULL'
+  | 'TRAILER_PICKUP_DRY_VAN'   | 'TRAILER_PICKUP_REEFER'
+  | 'TRAILER_PICKUP_FLATBED'   | 'TRAILER_PICKUP_STEPDECK'
+  | 'TRAILER_DROPOFF_DRY_VAN'  | 'TRAILER_DROPOFF_REEFER'
+  | 'TRAILER_DROPOFF_FLATBED'  | 'TRAILER_DROPOFF_STEPDECK'
+
+export type VehicleKind = 'TRUCK' | 'TRAILER'
+export type Movement = 'PICKUP' | 'DROPOFF'
+export type TruckMode = 'DAILY' | 'FULL'
+export type TrailerType = 'DRY_VAN' | 'REEFER' | 'FLATBED' | 'STEPDECK'
+
 export type InspectionStatus = 'PENDING' | 'IN_PROGRESS' | 'SUBMITTED' | 'REVIEWED'
 export type ItemStatus = 'PASS' | 'FAIL' | 'NA' | 'PENDING'
 export type TireCondition = 'GOOD' | 'FAIR' | 'NEEDS_ATTENTION'

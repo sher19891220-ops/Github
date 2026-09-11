@@ -77,10 +77,24 @@ export default function ChecklistPage() {
     setAddingTo(null)
   }
 
-  const title =
-    inspectionType === 'TRUCK' ? 'Full Truck Inspection' :
-    inspectionType === 'TRUCK_DAILY' ? 'Daily PTI' :
-    inspectionType === 'PICKUP' ? 'Pickup Inspection' : 'Drop-off Inspection'
+  const TRAILER_TYPE_LABELS: Record<string, string> = {
+    DRY_VAN: 'Dry Van', REEFER: 'Reefer', FLATBED: 'Flatbed', STEPDECK: 'Stepdeck',
+  }
+
+  const title = (() => {
+    const t = inspectionType || ''
+    const movement = t.includes('PICKUP') ? 'Pickup' : 'Drop-off'
+    if (t.startsWith('TRUCK')) {
+      const mode = t.endsWith('DAILY') ? 'Daily PTI' : 'Full Inspection'
+      return `Truck ${movement} — ${mode}`
+    }
+    if (t.startsWith('TRAILER')) {
+      const trailerKey = Object.keys(TRAILER_TYPE_LABELS).find((k) => t.includes(k))
+      const trailerLabel = trailerKey ? TRAILER_TYPE_LABELS[trailerKey] : 'Trailer'
+      return `${trailerLabel} ${movement} Inspection`
+    }
+    return 'Inspection'
+  })()
 
   return (
     <div className="min-h-screen bg-slate-100 pb-28">

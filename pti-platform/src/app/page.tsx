@@ -68,7 +68,7 @@ export default function HomePage() {
       <div className="px-4 -mt-1">
         <div className="grid grid-cols-2 gap-3 mt-4">
           <button
-            onClick={() => startInspection('PICKUP')}
+            onClick={() => startInspection('TRAILER_PICKUP_DRY_VAN')}
             className="flex flex-col items-center gap-2 rounded-2xl bg-green-600 p-5 text-white shadow-lg shadow-green-600/30 transition-transform active:scale-95"
           >
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/20">
@@ -79,7 +79,7 @@ export default function HomePage() {
           </button>
 
           <button
-            onClick={() => startInspection('DROP_OFF')}
+            onClick={() => startInspection('TRAILER_DROPOFF_DRY_VAN')}
             className="flex flex-col items-center gap-2 rounded-2xl bg-orange-500 p-5 text-white shadow-lg shadow-orange-500/30 transition-transform active:scale-95"
           >
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/20">
@@ -116,10 +116,10 @@ export default function HomePage() {
             <div key={ins.id} className="card flex items-center gap-3">
               <div
                 className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl text-white text-sm font-bold ${
-                  ins.type === 'PICKUP' ? 'bg-green-500' : 'bg-orange-500'
+                  ins.type.includes('PICKUP') ? 'bg-green-500' : 'bg-orange-500'
                 }`}
               >
-                {ins.type === 'PICKUP' ? '▲' : '▼'}
+                {ins.type.includes('PICKUP') ? '▲' : '▼'}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">

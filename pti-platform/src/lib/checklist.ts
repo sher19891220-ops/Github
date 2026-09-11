@@ -1,29 +1,111 @@
 import type { ChecklistItem } from './types'
 
-export const DEFAULT_CHECKLIST: Omit<ChecklistItem, 'status' | 'notes'>[] = [
+// ─────────────────────────────────────────────────────────────
+// DRY VAN CHECKLIST (the original default trailer checklist)
+// ─────────────────────────────────────────────────────────────
+
+export const DRY_VAN_CHECKLIST: Omit<ChecklistItem, 'status' | 'notes'>[] = [
   // Trailer Exterior
-  { id: 'ext-doors',   category: 'Trailer Exterior', label: 'Rear Doors & Seals',               mandatory: true },
-  { id: 'ext-roof',    category: 'Trailer Exterior', label: 'Roof & Sides (No Damage)',          mandatory: true },
-  { id: 'ext-frame',   category: 'Trailer Exterior', label: 'Frame & Undercarriage',             mandatory: true },
-  { id: 'ext-floor',   category: 'Trailer Exterior', label: 'Floor Condition (No Soft Spots)',   mandatory: true },
-  { id: 'ext-landing',  category: 'Trailer Exterior', label: 'Landing Gear (Retracted & Secure)', mandatory: true },
-  { id: 'ext-plate',   category: 'Trailer Exterior', label: 'License Plate (Visible & Secure)',   mandatory: true },
+  { id: 'ext-doors',    category: 'Trailer Exterior', label: 'Rear Doors & Seals',                mandatory: true },
+  { id: 'ext-roof',     category: 'Trailer Exterior', label: 'Roof & Sides (No Damage)',           mandatory: true },
+  { id: 'ext-frame',    category: 'Trailer Exterior', label: 'Frame & Undercarriage',              mandatory: true },
+  { id: 'ext-floor',    category: 'Trailer Exterior', label: 'Floor Condition (No Soft Spots)',    mandatory: true },
+  { id: 'ext-landing',  category: 'Trailer Exterior', label: 'Landing Gear (Retracted & Secure)',  mandatory: true },
+  { id: 'ext-plate',    category: 'Trailer Exterior', label: 'License Plate (Visible & Secure)',   mandatory: true },
   { id: 'ext-mudflaps', category: 'Trailer Exterior', label: 'Mud Flaps (Installed & Intact)',     mandatory: true },
 
   // Lights & Reflectors
   { id: 'lt-tail',       category: 'Lights & Reflectors', label: 'Tail Lights',                  mandatory: true },
   { id: 'lt-brake',      category: 'Lights & Reflectors', label: 'Brake Lights',                 mandatory: true },
   { id: 'lt-turn',       category: 'Lights & Reflectors', label: 'Turn Signals (Left & Right)',  mandatory: true },
-  { id: 'lt-clearance',  category: 'Lights & Reflectors', label: 'Clearance / Marker Lights',   mandatory: true },
-  { id: 'lt-reflectors', category: 'Lights & Reflectors', label: 'Reflectors (All Sides)',       mandatory: true },
-  { id: 'lt-abs',        category: 'Lights & Reflectors', label: 'ABS Light (Off When Running)', mandatory: true },
+  { id: 'lt-clearance',  category: 'Lights & Reflectors', label: 'Clearance / Marker Lights',    mandatory: true },
+  { id: 'lt-reflectors', category: 'Lights & Reflectors', label: 'Reflectors (All Sides)',        mandatory: true },
+  { id: 'lt-abs',        category: 'Lights & Reflectors', label: 'ABS Light (Off When Running)',  mandatory: true },
+]
 
+// Backward-compat alias — DEFAULT_CHECKLIST is the same list as DRY_VAN_CHECKLIST.
+export const DEFAULT_CHECKLIST = DRY_VAN_CHECKLIST
+
+// ─────────────────────────────────────────────────────────────
+// REEFER CHECKLIST — dry van base + refrigeration-specific items.
+// A reefer's whole job depends on things a dry van doesn't have:
+// the unit itself, an airtight box, and a working air path.
+// ─────────────────────────────────────────────────────────────
+
+export const REEFER_CHECKLIST: Omit<ChecklistItem, 'status' | 'notes'>[] = [
+  // Trailer Exterior
+  { id: 'rf-doors',    category: 'Trailer Exterior', label: 'Rear Doors & Seals',               mandatory: true },
+  { id: 'rf-frame',    category: 'Trailer Exterior', label: 'Frame & Undercarriage',             mandatory: true },
+  { id: 'rf-floor',    category: 'Trailer Exterior', label: 'Floor Condition (No Soft Spots)',   mandatory: true },
+  { id: 'rf-landing',  category: 'Trailer Exterior', label: 'Landing Gear (Retracted & Secure)', mandatory: true },
+  { id: 'rf-plate',    category: 'Trailer Exterior', label: 'License Plate (Visible & Secure)',  mandatory: true },
+  { id: 'rf-mudflaps', category: 'Trailer Exterior', label: 'Mud Flaps (Installed & Intact)',    mandatory: true },
+
+  // Refrigeration Unit
+  { id: 'rf-fuel',     category: 'Refrigeration Unit', label: 'Reefer Unit Fuel Level',              mandatory: true },
+  { id: 'rf-settemp',  category: 'Refrigeration Unit', label: 'Set Temperature Correct for Load',    mandatory: true },
+  { id: 'rf-hours',    category: 'Refrigeration Unit', label: 'Unit Operating Hours / Runtime',       mandatory: true },
+  { id: 'rf-startup',  category: 'Refrigeration Unit', label: 'Unit Starts & Runs Without Fault Code', mandatory: true },
+  { id: 'rf-defrost',  category: 'Refrigeration Unit', label: 'Defrost Cycle Functioning',            mandatory: false },
+
+  // Insulation & Air Path — a puncture or blocked airflow ruins the load
+  { id: 'rf-walls',    category: 'Insulation & Air Path', label: 'Insulation / Walls — No Punctures',   mandatory: true },
+  { id: 'rf-airchute', category: 'Insulation & Air Path', label: 'Air Chute / Air Delivery Intact',      mandatory: true },
+  { id: 'rf-bulkhead', category: 'Insulation & Air Path', label: 'Return Air Bulkhead in Place',         mandatory: true },
+  { id: 'rf-doorseal', category: 'Insulation & Air Path', label: 'Door Seals Airtight (No Gaps)',        mandatory: true },
+
+  // Lights & Reflectors
+  { id: 'rf-taillt',    category: 'Lights & Reflectors', label: 'Tail Lights',                 mandatory: true },
+  { id: 'rf-brakelt',   category: 'Lights & Reflectors', label: 'Brake Lights',                mandatory: true },
+  { id: 'rf-turnlt',    category: 'Lights & Reflectors', label: 'Turn Signals (Left & Right)', mandatory: true },
+  { id: 'rf-clearlt',   category: 'Lights & Reflectors', label: 'Clearance / Marker Lights',   mandatory: true },
+  { id: 'rf-reflect',   category: 'Lights & Reflectors', label: 'Reflectors (All Sides)',      mandatory: true },
 ]
 
 // ─────────────────────────────────────────────────────────────
-// TRUCK INSPECTION CHECKLIST
-// The full tractor inspection: documents, interior, exterior.
-// Distinct from the trailer PICKUP/DROP_OFF checklist above.
+// FLATBED CHECKLIST — no walls, roof, or doors. The checklist is
+// entirely about securement: deck, tie-downs, tarps, chains, straps.
+// ─────────────────────────────────────────────────────────────
+
+export const FLATBED_CHECKLIST: Omit<ChecklistItem, 'status' | 'notes'>[] = [
+  // Deck & Structure
+  { id: 'fb-deck',      category: 'Deck & Structure', label: 'Deck Condition (No Cracks / Splinters)', mandatory: true },
+  { id: 'fb-headboard', category: 'Deck & Structure', label: 'Headboard — No Damage, Secure',           mandatory: true },
+  { id: 'fb-frame',     category: 'Deck & Structure', label: 'Frame & Undercarriage',                   mandatory: true },
+  { id: 'fb-landing',   category: 'Deck & Structure', label: 'Landing Gear (Retracted & Secure)',       mandatory: true },
+  { id: 'fb-plate',     category: 'Deck & Structure', label: 'License Plate (Visible & Secure)',        mandatory: true },
+  { id: 'fb-mudflaps',  category: 'Deck & Structure', label: 'Mud Flaps (Installed & Intact)',          mandatory: true },
+
+  // Securement Equipment
+  { id: 'fb-stakepkt',  category: 'Securement Equipment', label: 'Stake Pockets Functional',        mandatory: true },
+  { id: 'fb-tierail',   category: 'Securement Equipment', label: 'Tie-Down Rail / D-Rings Secure',  mandatory: true },
+  { id: 'fb-tarps',     category: 'Securement Equipment', label: 'Tarps Present & Good Condition',  mandatory: false },
+  { id: 'fb-chains',    category: 'Securement Equipment', label: 'Chains — Counted & Inspected',    mandatory: true },
+  { id: 'fb-binders',   category: 'Securement Equipment', label: 'Load Binders Functional',         mandatory: true },
+  { id: 'fb-straps',    category: 'Securement Equipment', label: 'Straps — Counted & Good Condition', mandatory: true },
+  { id: 'fb-edgeprot',  category: 'Securement Equipment', label: 'Edge Protectors Available',       mandatory: false },
+
+  // Lights & Reflectors
+  { id: 'fb-taillt',   category: 'Lights & Reflectors', label: 'Tail Lights',                 mandatory: true },
+  { id: 'fb-brakelt',  category: 'Lights & Reflectors', label: 'Brake Lights',                mandatory: true },
+  { id: 'fb-turnlt',   category: 'Lights & Reflectors', label: 'Turn Signals (Left & Right)', mandatory: true },
+  { id: 'fb-clearlt',  category: 'Lights & Reflectors', label: 'Clearance / Marker Lights',   mandatory: true },
+  { id: 'fb-reflect',  category: 'Lights & Reflectors', label: 'Reflectors (All Sides)',      mandatory: true },
+]
+
+// ─────────────────────────────────────────────────────────────
+// STEPDECK CHECKLIST — flatbed items plus the deck-step transition.
+// ─────────────────────────────────────────────────────────────
+
+export const STEPDECK_CHECKLIST: Omit<ChecklistItem, 'status' | 'notes'>[] = [
+  ...FLATBED_CHECKLIST,
+  { id: 'sd-ramp',      category: 'Deck & Structure', label: 'Upper/Lower Deck Transition Ramp',  mandatory: true },
+  { id: 'sd-clearance', category: 'Deck & Structure', label: 'Lower Deck Ground Clearance',       mandatory: true },
+  { id: 'sd-beaver',    category: 'Securement Equipment', label: 'Beavertail Ramps (If Equipped)', mandatory: false },
+]
+
+// ─────────────────────────────────────────────────────────────
+// TRUCK INSPECTION CHECKLIST (Full)
 // ─────────────────────────────────────────────────────────────
 
 export const TRUCK_CHECKLIST: Omit<ChecklistItem, 'status' | 'notes'>[] = [
@@ -87,13 +169,17 @@ export const TRUCK_CHECKLIST: Omit<ChecklistItem, 'status' | 'notes'>[] = [
   { id: 'doc2-efscard',   category: 'Documents (Cab Folder)', label: 'EFS Fuel Card',                          mandatory: false },
   { id: 'doc2-tafscard',  category: 'Documents (Cab Folder)', label: 'TAFS Fuel Card',                         mandatory: false },
 
-  // Externally Displayed Signs & Decals
-  { id: 'dec-carrier',  category: 'Signs & Decals', label: 'Carrier Sign (USDOT / MC / KYU numbers)',      mandatory: true },
-  { id: 'dec-unitnum',  category: 'Signs & Decals', label: 'Unit Number on Both Sides',                    mandatory: true },
-  { id: 'dec-ifta',     category: 'Signs & Decals', label: 'IFTA Decals on Both Sides',                    mandatory: true },
-  { id: 'dec-hut',      category: 'Signs & Decals', label: 'HUT Sticker (New York) Displayed on Front',    mandatory: false },
-  { id: 'dec-gpstab',   category: 'Signs & Decals', label: 'GPS Tab Sticker',                              mandatory: true },
-  { id: 'dec-plate',    category: 'Signs & Decals', label: 'License Plate',                                mandatory: true },
+  // Externally Displayed Signs & Decals — deliberately no hard-coded
+  // USDOT/MC/KYU numbers here: those vary by which of Zone LLC, Xtrack
+  // LLC, or AFG Transportco a given truck belongs to, and this list is
+  // shared across all three. A driver checks that THEIR company's numbers
+  // are correctly displayed, not a specific number baked into the app.
+  { id: 'dec-carrier',  category: 'Signs & Decals', label: 'Carrier Sign (Company Name + USDOT / MC Numbers)', mandatory: true },
+  { id: 'dec-unitnum',  category: 'Signs & Decals', label: 'Unit Number on Both Sides',                        mandatory: true },
+  { id: 'dec-ifta',     category: 'Signs & Decals', label: 'IFTA Decals on Both Sides',                        mandatory: true },
+  { id: 'dec-hut',      category: 'Signs & Decals', label: 'HUT Sticker (New York) Displayed on Front',        mandatory: false },
+  { id: 'dec-gpstab',   category: 'Signs & Decals', label: 'GPS Tab Sticker',                                  mandatory: true },
+  { id: 'dec-plate',    category: 'Signs & Decals', label: 'License Plate',                                    mandatory: true },
 
   // Exterior
   { id: 'tex-clean',     category: 'Exterior', label: 'Cleanliness',                   mandatory: true },
@@ -119,6 +205,38 @@ export const TRUCK_CHECKLIST: Omit<ChecklistItem, 'status' | 'notes'>[] = [
   { id: 'tex-jumper',    category: 'Exterior', label: 'Jumper Cables',                 mandatory: false },
 ]
 
+// ─────────────────────────────────────────────────────────────
+// DAILY PTI CHECKLIST (truck) — everyday, safety-critical only.
+// ─────────────────────────────────────────────────────────────
+
+export const TRUCK_DAILY_CHECKLIST: Omit<ChecklistItem, 'status' | 'notes'>[] = [
+  { id: 'd-headlights', category: 'Lights',  label: 'Headlights (High & Low Beam)', mandatory: true },
+  { id: 'd-brakelts',   category: 'Lights',  label: 'Brake Lights',                 mandatory: true },
+  { id: 'd-turnsig',    category: 'Lights',  label: 'Turn Signals (Left & Right)',  mandatory: true },
+  { id: 'd-marker',     category: 'Lights',  label: 'Marker & Clearance Lights',    mandatory: true },
+
+  { id: 'd-steertire',  category: 'Tires & Wheels', label: 'Steer Tires (Tread & Pressure)',   mandatory: true },
+  { id: 'd-drivetire',  category: 'Tires & Wheels', label: 'Drive Tires (Tread & Pressure)',   mandatory: true },
+  { id: 'd-lugnuts',    category: 'Tires & Wheels', label: 'Lug Nuts Tight / No Rust Streaks', mandatory: true },
+
+  { id: 'd-oilleak',    category: 'Leaks', label: 'No Oil Leaks',     mandatory: true },
+  { id: 'd-coolleak',   category: 'Leaks', label: 'No Coolant Leaks', mandatory: true },
+  { id: 'd-fuelleak',   category: 'Leaks', label: 'No Fuel Leaks',    mandatory: true },
+  { id: 'd-airleak',    category: 'Leaks', label: 'No Air Leaks',     mandatory: true },
+
+  { id: 'd-airpress',   category: 'Brakes & Air', label: 'Air Pressure Builds Normally', mandatory: true },
+  { id: 'd-brakes',     category: 'Brakes & Air', label: 'Brakes Working',               mandatory: true },
+  { id: 'd-airlines',   category: 'Brakes & Air', label: 'Air Lines Secure (No Chafing)', mandatory: true },
+
+  { id: 'd-extng',      category: 'Safety Equipment', label: 'Fire Extinguisher (Charged & Secure)', mandatory: true },
+  { id: 'd-triangles',  category: 'Safety Equipment', label: 'Emergency Triangles',                  mandatory: true },
+
+  { id: 'd-wipers',     category: 'Cab', label: 'Wipers & Washer Fluid',    mandatory: true },
+  { id: 'd-horn',       category: 'Cab', label: 'Horn',                    mandatory: true },
+  { id: 'd-mirrors',    category: 'Cab', label: 'Mirrors Clean & Adjusted', mandatory: true },
+  { id: 'd-dashwarn',   category: 'Cab', label: 'No Dash Warning Lights',  mandatory: true },
+]
+
 export const TIRE_POSITIONS = [
   'Axle 1 — Left Outer',
   'Axle 1 — Left Inner',
@@ -130,7 +248,6 @@ export const TIRE_POSITIONS = [
   'Axle 2 — Right Outer',
 ]
 
-// Truck inspections check the tractor's own tires, not trailer axles.
 export const TRUCK_TIRE_POSITIONS = [
   'Steer — Left',
   'Steer — Right',
@@ -144,53 +261,30 @@ export const TRUCK_TIRE_POSITIONS = [
   'Drive Axle 2 — Right Outer',
 ]
 
-
 // ─────────────────────────────────────────────────────────────
-// DAILY PTI CHECKLIST (truck)
-// The everyday pre-trip check — safety-critical items only.
-// Kept deliberately short so drivers actually complete it before
-// every shift. The full 51-item inspection is TRUCK_CHECKLIST.
+// Composite-type resolution
+// InspectionType is a single string like 'TRAILER_PICKUP_REEFER' or
+// 'TRUCK_DROPOFF_DAILY'. These helpers parse it rather than needing
+// four separate fields threaded through every consuming page.
 // ─────────────────────────────────────────────────────────────
-
-export const TRUCK_DAILY_CHECKLIST: Omit<ChecklistItem, 'status' | 'notes'>[] = [
-  // Lights
-  { id: 'd-headlights', category: 'Lights',  label: 'Headlights (High & Low Beam)', mandatory: true },
-  { id: 'd-brakelts',   category: 'Lights',  label: 'Brake Lights',                 mandatory: true },
-  { id: 'd-turnsig',    category: 'Lights',  label: 'Turn Signals (Left & Right)',  mandatory: true },
-  { id: 'd-marker',     category: 'Lights',  label: 'Marker & Clearance Lights',    mandatory: true },
-
-  // Tires & Wheels
-  { id: 'd-steertire',  category: 'Tires & Wheels', label: 'Steer Tires (Tread & Pressure)', mandatory: true },
-  { id: 'd-drivetire',  category: 'Tires & Wheels', label: 'Drive Tires (Tread & Pressure)', mandatory: true },
-  { id: 'd-lugnuts',    category: 'Tires & Wheels', label: 'Lug Nuts Tight / No Rust Streaks', mandatory: true },
-
-  // Leaks
-  { id: 'd-oilleak',    category: 'Leaks', label: 'No Oil Leaks',            mandatory: true },
-  { id: 'd-coolleak',   category: 'Leaks', label: 'No Coolant Leaks',        mandatory: true },
-  { id: 'd-fuelleak',   category: 'Leaks', label: 'No Fuel Leaks',           mandatory: true },
-  { id: 'd-airleak',    category: 'Leaks', label: 'No Air Leaks',            mandatory: true },
-
-  // Brakes & Air System
-  { id: 'd-airpress',   category: 'Brakes & Air', label: 'Air Pressure Builds Normally', mandatory: true },
-  { id: 'd-brakes',     category: 'Brakes & Air', label: 'Brakes Working',               mandatory: true },
-  { id: 'd-airlines',   category: 'Brakes & Air', label: 'Air Lines Secure (No Chafing)', mandatory: true },
-
-  // Safety Equipment
-  { id: 'd-extng',      category: 'Safety Equipment', label: 'Fire Extinguisher (Charged & Secure)', mandatory: true },
-  { id: 'd-triangles',  category: 'Safety Equipment', label: 'Emergency Triangles',                  mandatory: true },
-
-  // Cab
-  { id: 'd-wipers',     category: 'Cab', label: 'Wipers & Washer Fluid', mandatory: true },
-  { id: 'd-horn',       category: 'Cab', label: 'Horn',                  mandatory: true },
-  { id: 'd-mirrors',    category: 'Cab', label: 'Mirrors Clean & Adjusted', mandatory: true },
-  { id: 'd-dashwarn',   category: 'Cab', label: 'No Dash Warning Lights', mandatory: true },
-]
 
 export function buildChecklist(type?: string): ChecklistItem[] {
-  const source =
-    type === 'TRUCK' ? TRUCK_CHECKLIST :
-    type === 'TRUCK_DAILY' ? TRUCK_DAILY_CHECKLIST :
-    DEFAULT_CHECKLIST
+  let source: Omit<ChecklistItem, 'status' | 'notes'>[]
+
+  if (!type) {
+    source = DRY_VAN_CHECKLIST
+  } else if (type.startsWith('TRUCK')) {
+    source = type.endsWith('DAILY') ? TRUCK_DAILY_CHECKLIST : TRUCK_CHECKLIST
+  } else if (type.includes('REEFER')) {
+    source = REEFER_CHECKLIST
+  } else if (type.includes('FLATBED')) {
+    source = FLATBED_CHECKLIST
+  } else if (type.includes('STEPDECK')) {
+    source = STEPDECK_CHECKLIST
+  } else {
+    source = DRY_VAN_CHECKLIST // DRY_VAN and any unrecognized trailer type
+  }
+
   return source.map((item) => ({
     ...item,
     status: 'PENDING' as const,
@@ -199,7 +293,7 @@ export function buildChecklist(type?: string): ChecklistItem[] {
 }
 
 export function getTirePositions(type?: string): string[] {
-  return (type === 'TRUCK' || type === 'TRUCK_DAILY') ? TRUCK_TIRE_POSITIONS : TIRE_POSITIONS
+  return type?.startsWith('TRUCK') ? TRUCK_TIRE_POSITIONS : TIRE_POSITIONS
 }
 
 export function getChecklistCategories(items: ChecklistItem[]): string[] {
@@ -213,5 +307,3 @@ export function getFailCount(items: ChecklistItem[]): number {
 export function isChecklistComplete(items: ChecklistItem[]): boolean {
   return items.filter((i) => i.mandatory).every((i) => i.status !== 'PENDING')
 }
-
-// Truck inspection support: TRUCK type, 51-item checklist, tractor photo angles.

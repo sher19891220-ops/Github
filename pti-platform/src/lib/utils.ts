@@ -30,11 +30,11 @@ export function timeAgo(iso: string): string {
 }
 
 export function inspectionTypeLabel(type: InspectionType): string {
-  return type === 'PICKUP' ? 'Pickup' : 'Drop-off'
+  return type.includes('PICKUP') ? 'Pickup' : 'Drop-off'
 }
 
 export function inspectionTypeColor(type: InspectionType): string {
-  return type === 'PICKUP' ? 'pickup' : 'dropoff'
+  return type.includes('PICKUP') ? 'pickup' : 'dropoff'
 }
 
 export function statusLabel(status: ItemStatus): string {

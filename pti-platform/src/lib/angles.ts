@@ -214,9 +214,13 @@ export const TRUCK_DAILY_ANGLES: AngleConfig[] = TRUCK_ANGLES.filter((a) =>
   ['front', 'left-panel', 'back', 'right-panel', 'tire-fl', 'tire-fr', 'tire-bl', 'tire-br', 'extras'].includes(a.key)
 ).map((a, i) => ({ ...a, order: i + 1 }))
 
-// Pick the right angle set for the inspection type.
+// Pick the right angle set for the inspection type. All four trailer
+// types currently share the same trailer photo set (INSPECTION_ANGLES) —
+// only the CHECKLIST differs by trailer type, not the camera angles.
 export function getAngles(type?: string): AngleConfig[] {
-  if (type === 'TRUCK') return TRUCK_ANGLES
-  if (type === 'TRUCK_DAILY') return TRUCK_DAILY_ANGLES
+  if (!type) return INSPECTION_ANGLES
+  if (type.startsWith('TRUCK')) {
+    return type.endsWith('DAILY') ? TRUCK_DAILY_ANGLES : TRUCK_ANGLES
+  }
   return INSPECTION_ANGLES
 }

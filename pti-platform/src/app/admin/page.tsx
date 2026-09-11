@@ -100,9 +100,9 @@ function OverviewTab() {
           {MOCK_INSPECTIONS.map((ins) => (
             <div key={ins.id} className="flex items-center gap-3">
               <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-white text-xs font-bold ${
-                ins.type === 'PICKUP' ? 'bg-green-500' : 'bg-orange-500'
+                ins.type.includes('PICKUP') ? 'bg-green-500' : 'bg-orange-500'
               }`}>
-                {ins.type === 'PICKUP' ? '▲' : '▼'}
+                {ins.type.includes('PICKUP') ? '▲' : '▼'}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-slate-800 truncate">{ins.driverName} · {ins.unitNumber}</p>
