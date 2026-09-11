@@ -38,7 +38,11 @@ export interface DashboardResponse {
   to: string;
   revenue: LiveFigure;
   companyCost: LiveFigure;
-  margin: Decimal;
+  /** Revenue less company cost — **null when either side has no entries**.
+   *  See `getDashboard` for why that is not the same as zero. */
+  margin: Decimal | null;
+  /** Set when margin is null: which side is missing, in words. */
+  marginBlocked: string | null;
   /** Owed between the group's own entities. Netted to one side: a
    *  receivable and its matching payable are the same money seen twice. */
   intercompanyReceivable: LiveFigure;
@@ -104,6 +108,32 @@ export async function getDashboard(from: string, to: string): Promise<DashboardR
 
   const rev = figure(revenue);
   const cst = figure(cost);
+
+  /**
+   * Margin is withheld when either side has no entries, and this is the
+   * most important rule on the page.
+   *
+   * Found by the first end-to-end run on real files. A year of real
+   * dispatch revenue posted — $2.3M — while every cost row sat in staging,
+   * because the expenses sheet carries no entity or category and the fuel
+   * sheet carries no date or amount. Revenue plus nothing is revenue, so
+   * the margin tile rendered $2,336,117.36: a number that is arithmetically
+   * correct, catastrophically wrong, and indistinguishable from a real
+   * margin at a glance.
+   *
+   * The cost tile already said "nothing posted" beside it. That was not
+   * enough, and it was never going to be: nobody reads the tile that says
+   * nothing when the tile next to it says two million.
+   */
+  const marginBlocked =
+    rev.entryCount === 0 && cst.entryCount === 0
+      ? 'Nothing has been posted in this period.'
+      : cst.entryCount === 0
+        ? 'No cost has been posted in this period, so revenue less cost would just be revenue. Margin is withheld rather than shown equal to revenue.'
+        : rev.entryCount === 0
+          ? 'No revenue has been posted in this period, so this would show cost as a loss with nothing earned against it.'
+          : null;
+
   const marginCents = centsOf(rev.amount) + centsOf(cst.amount); // cost is already negative
   const workQueue = await getWorkQueue(to);
 
@@ -112,7 +142,8 @@ export async function getDashboard(from: string, to: string): Promise<DashboardR
     to,
     revenue: rev,
     companyCost: cst,
-    margin: moneyOf(marginCents),
+    margin: marginBlocked === null ? moneyOf(marginCents) : null,
+    marginBlocked,
     intercompanyReceivable: figure(intercompany),
     driverReceivable: figure(driverBorne),
     workQueue,

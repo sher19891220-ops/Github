@@ -14,7 +14,7 @@ type QueryFn = (text: string, params?: readonly unknown[]) => Promise<unknown[]>
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export type EntityResolution =
-  | { entityId: string; resolvedFrom: 'direct' | 'source_key_map' }
+  | { entityId: string; resolvedFrom: 'direct' | 'source_key_map' | 'truck_roster' }
   | { entityId: null; resolvedFrom: 'unresolved' };
 
 /**
@@ -43,5 +43,46 @@ export async function resolveEntityId(
   );
   const row = rows[0] as { canonical_id: string } | undefined;
   if (row) return { entityId: row.canonical_id, resolvedFrom: 'source_key_map' };
+  return { entityId: null, resolvedFrom: 'unresolved' };
+}
+
+/**
+ * Resolves an entity from the truck that earned the money, when the sheet
+ * did not say which company it was.
+ *
+ * Measured on the operator's real dispatch export: 1,386 revenue rows, and
+ * only **64** carry a free-text company marker. The other 1,322 were
+ * rejected at commit for a missing entity — 95% of a year's revenue unable
+ * to reach the ledger, which makes every P&L built on it meaningless.
+ *
+ * All 1,322 carry a truck number, and all 82 distinct truck numbers appear
+ * in the operator's own truck-to-entity roster. So the entity is not
+ * missing, it is written down somewhere else.
+ *
+ * This goes through `source_key_map` like every other identity lookup —
+ * never a string match against `entity.code` — under its own source
+ * system, so a truck-derived attribution stays distinguishable from one
+ * the sheet actually stated. The caller marks rows resolved this way for
+ * review rather than committing them silently: the roster's own column is
+ * named `entity_CONFIRM_THIS`, and posting a year of revenue on somebody
+ * else's unconfirmed guess is exactly the silent estimate this build
+ * refuses.
+ */
+export const TRUCK_ROSTER_SOURCE = 'truck_roster';
+
+export async function resolveEntityFromTruck(
+  q: QueryFn,
+  unitNumber: string | null,
+): Promise<EntityResolution> {
+  const unit = unitNumber?.trim();
+  if (!unit) return { entityId: null, resolvedFrom: 'unresolved' };
+
+  const rows = await q(
+    `SELECT canonical_id FROM accounting.source_key_map
+      WHERE canonical_kind = 'entity' AND source_system = $1 AND source_key = $2`,
+    [TRUCK_ROSTER_SOURCE, unit],
+  );
+  const row = rows[0] as { canonical_id: string } | undefined;
+  if (row) return { entityId: row.canonical_id, resolvedFrom: 'truck_roster' };
   return { entityId: null, resolvedFrom: 'unresolved' };
 }

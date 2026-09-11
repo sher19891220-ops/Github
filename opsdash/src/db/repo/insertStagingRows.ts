@@ -16,7 +16,7 @@
  * it in a transaction alongside document bookkeeping (sheetSync.ts does).
  */
 import type { StagingRow } from '@/contract/types';
-import { resolveEntityId } from './entityResolution';
+import { resolveEntityFromTruck, resolveEntityId } from './entityResolution';
 import type { ChargedTo, UnitType } from './types';
 
 type QueryFn = (text: string, params?: readonly unknown[]) => Promise<unknown[]>;
@@ -39,6 +39,10 @@ function readUnitNumber(payload: Record<string, unknown>): string | null {
   if (typeof fromIssuedTo === 'string' && fromIssuedTo.trim() !== '') return fromIssuedTo;
   const fromUnitRaw = payload.unitRaw;
   if (typeof fromUnitRaw === 'string' && fromUnitRaw.trim() !== '') return fromUnitRaw;
+  // The dispatch parser names it differently: its rows are keyed by the
+  // truck that ran the load.
+  const fromTruck = payload.truckNumber;
+  if (typeof fromTruck === 'string' && fromTruck.trim() !== '') return fromTruck;
   return null;
 }
 
@@ -57,10 +61,34 @@ export async function insertStagingRows(
   const entitySourceSystem = options.entitySourceSystem ?? 'dispatch';
 
   for (const row of rows) {
-    const resolved = await resolveEntityId(q, row.entityId, entitySourceSystem);
+    const payloadForUnit = row.parsedPayload;
+    const unitForEntity = readUnitNumber(payloadForUnit);
+
+    let resolved = await resolveEntityId(q, row.entityId, entitySourceSystem);
 
     let status = row.status;
     let reviewNotes = row.reviewNotes;
+
+    // The sheet did not say which company earned this. The truck that ran
+    // it might — see `resolveEntityFromTruck` for why this matters: on the
+    // real dispatch export 1,322 of 1,386 revenue rows have no marker, and
+    // every one of them names a truck.
+    if (resolved.entityId === null && unitForEntity !== null) {
+      const viaTruck = await resolveEntityFromTruck(q, unitForEntity);
+      if (viaTruck.entityId !== null) {
+        resolved = viaTruck;
+        // Attributed, not asserted. The roster is the operator's own
+        // working crosswalk and its column is named `entity_CONFIRM_THIS`;
+        // posting a year of revenue on an unconfirmed guess would be the
+        // silent estimate this build exists to refuse. The row carries the
+        // entity AND the reason, and waits for a person.
+        const note =
+          `Company not stated on this row; attributed to the entity the truck roster gives for unit ${unitForEntity}. Confirm before this posts.`;
+        status = 'under_review';
+        reviewNotes = reviewNotes ? `${reviewNotes} ${note}` : note;
+      }
+    }
+
     if (row.entityId !== null && resolved.resolvedFrom === 'unresolved') {
       // A marker was present but source_key_map has no mapping for it yet.
       // Never default to a guessed entity (SOURCE-DISCOVERY.md §8) — surface
@@ -73,7 +101,7 @@ export async function insertStagingRows(
     const payload = row.parsedPayload;
     const chargedTo = readChargedTo(payload);
     const unitType = readUnitType(payload);
-    const unitNumber = readUnitNumber(payload);
+    const unitNumber = unitForEntity;
 
     await q(
       `INSERT INTO accounting.staging_row

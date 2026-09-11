@@ -44,7 +44,7 @@ const Q3 = { from: `${YEAR}-07-01`, to: `${YEAR}-09-30` };
 /** The carrier line must start with the entity's legal name for the repo
  *  to attribute the report — exactly as the real telematics prints it,
  *  legal name then street address. */
-const CARRIER = 'Zone OH LLC (test fixture) 100 Example Road Springfield IL 60000';
+const CARRIER = 'Test Fixture Carrier One 100 Example Road Springfield IL 60000';
 
 /**
  * Content-stable: the same period always produces the same bytes, so

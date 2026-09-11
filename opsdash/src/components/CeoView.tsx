@@ -36,8 +36,16 @@ const textCell: CSSProperties = { padding: '0.4rem 0.6rem', textAlign: 'left' };
 const firstCol: CSSProperties = { paddingLeft: 0 };
 const lastCol: CSSProperties = { paddingRight: 0 };
 
-function marginColour(value: string): string {
+function marginColour(value: string | null): string {
+  if (value === null) return 'var(--muted)';
   return value.startsWith('-') ? 'var(--bad)' : 'var(--good)';
+}
+
+/** A withheld margin renders as an em dash with its reason, never as a
+ *  number. See `marginOf` in db/repo/ceo.ts for what it is protecting
+ *  against — revenue printed as margin, to the cent. */
+function marginText(value: string | null): string {
+  return value === null ? '—' : formatMoney(value);
 }
 
 export function CeoView() {
@@ -115,16 +123,21 @@ function GroupTiles({ data }: { data: CeoResponse }) {
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.5rem' }}>
       {[
-        { label: 'Group revenue', value: data.group.revenue, tone: undefined },
-        { label: 'Group company cost', value: data.group.companyCost, tone: undefined },
-        { label: 'Group margin', value: data.group.margin, tone: marginColour(data.group.margin) },
+        { label: 'Group revenue', value: formatMoney(data.group.revenue), tone: undefined, note: `${data.group.entryCount} entries · actual` },
+        { label: 'Group company cost', value: formatMoney(data.group.companyCost), tone: undefined, note: `${data.group.entryCount} entries · actual` },
+        {
+          label: 'Group margin',
+          value: marginText(data.group.margin),
+          tone: marginColour(data.group.margin),
+          note: data.group.marginBlocked ?? `${data.group.entryCount} entries · actual`,
+        },
       ].map((t) => (
         <div key={t.label} style={{ border: '1px solid var(--line)', borderRadius: 8, padding: '0.75rem 0.9rem', flex: '1 1 12rem', minWidth: 0 }}>
           <div style={{ color: 'var(--muted)', fontSize: '0.8rem' }}>{t.label}</div>
           <div style={{ fontSize: 'clamp(1.05rem, 4vw, 1.45rem)', fontWeight: 700, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap', overflowX: 'auto', color: t.tone ?? 'var(--fg)' }}>
-            {formatMoney(t.value)}
+            {t.value}
           </div>
-          <div style={{ color: 'var(--muted)', fontSize: '0.75rem' }}>{data.group.entryCount} entries · actual</div>
+          <div style={{ color: 'var(--muted)', fontSize: '0.75rem' }}>{t.note}</div>
         </div>
       ))}
     </div>
@@ -153,7 +166,7 @@ function EntityTable({ data }: { data: CeoResponse }) {
                 <td style={cell}>{e.entryCount === 0 ? '—' : formatMoney(e.revenue)}</td>
                 <td style={cell}>{e.entryCount === 0 ? '—' : formatMoney(e.companyCost)}</td>
                 <td style={{ ...cell, fontWeight: 700, color: e.entryCount === 0 ? 'var(--muted)' : marginColour(e.margin) }}>
-                  {e.entryCount === 0 ? '—' : formatMoney(e.margin)}
+                  {e.entryCount === 0 ? '—' : marginText(e.margin)}
                 </td>
                 <td style={{ ...cell, ...lastCol, color: 'var(--muted)' }}>{e.entryCount}</td>
               </tr>
@@ -297,7 +310,7 @@ function TruckTable({ data }: { data: CeoResponse }) {
   if (data.trucks.length === 0) {
     return <p style={{ color: 'var(--muted)' }}>No truck has ledger activity in this period.</p>;
   }
-  const losing = data.trucks.filter((t) => t.margin.startsWith('-'));
+  const losing = data.trucks.filter((t) => t.margin !== null && t.margin.startsWith('-'));
   return (
     <section>
       <h2 style={{ fontSize: '1rem', margin: '0 0 0.35rem' }}>By truck — worst first</h2>
@@ -323,7 +336,7 @@ function TruckTable({ data }: { data: CeoResponse }) {
                 <td style={cell}>{formatMoney(t.revenue)}</td>
                 <td style={cell}>{formatMoney(t.companyCost)}</td>
                 <td style={{ ...cell, ...lastCol, fontWeight: 700, color: marginColour(t.margin) }}>
-                  {formatMoney(t.margin)}
+                  {marginText(t.margin)}
                 </td>
               </tr>
             ))}

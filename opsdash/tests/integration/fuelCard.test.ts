@@ -40,7 +40,7 @@ GRAND TOTAL,,,,,,,,13447.00
  *  which is its own tested behaviour. A minimal mileage report for the
  *  same quarter lets this file assert on what the engine actually
  *  received, which is the only place the DEF rule can really be checked. */
-const MILEAGE = `Zone OH LLC (test fixture) 100 Example Road Springfield IL 60000
+const MILEAGE = `Test Fixture Carrier One 100 Example Road Springfield IL 60000
 
 IFTA by Vehicles: 1
 

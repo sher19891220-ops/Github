@@ -181,15 +181,26 @@ export function AccountingDashboard() {
           <>
             <LiveMoneyTile label="Revenue" figure={live.data.revenue} />
             <LiveMoneyTile label="Company cost" figure={live.data.companyCost} />
-            <LiveMoneyTile
-              label="Margin"
-              figure={{
-                amount: live.data.margin,
-                entryCount: live.data.revenue.entryCount + live.data.companyCost.entryCount,
-              }}
-              tone={live.data.margin.startsWith('-') ? 'bad' : 'good'}
-              sub="Revenue less company cost only"
-            />
+            {live.data.margin === null ? (
+              // Withheld, with the reason. A margin equal to revenue is
+              // the single most misleading figure this page can show.
+              <StatTile
+                label="Margin"
+                value="—"
+                chip={<StatusPill label="Withheld" tone="warn" />}
+                sub={live.data.marginBlocked}
+              />
+            ) : (
+              <LiveMoneyTile
+                label="Margin"
+                figure={{
+                  amount: live.data.margin,
+                  entryCount: live.data.revenue.entryCount + live.data.companyCost.entryCount,
+                }}
+                tone={live.data.margin.startsWith('-') ? 'bad' : 'good'}
+                sub="Revenue less company cost only"
+              />
+            )}
             <LiveMoneyTile
               label="Intercompany receivable"
               figure={live.data.intercompanyReceivable}

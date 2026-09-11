@@ -22,7 +22,10 @@ export interface EntityPosition {
   legalName: string;
   revenue: Decimal;
   companyCost: Decimal;
-  margin: Decimal;
+  /** Null when there is revenue but no cost, or cost but no revenue. See
+   *  `marginOf` — a margin equal to revenue is the most misleading figure
+   *  either dashboard can show. */
+  margin: Decimal | null;
   entryCount: number;
 }
 
@@ -32,7 +35,7 @@ export interface TruckPosition {
   entityCode: string | null;
   revenue: Decimal;
   companyCost: Decimal;
-  margin: Decimal;
+  margin: Decimal | null;
   entryCount: number;
 }
 
@@ -40,13 +43,56 @@ export interface CeoResponse {
   from: string;
   to: string;
   entities: EntityPosition[];
-  group: { revenue: Decimal; companyCost: Decimal; margin: Decimal; entryCount: number };
+  group: {
+    revenue: Decimal;
+    companyCost: Decimal;
+    margin: Decimal | null;
+    marginBlocked: string | null;
+    entryCount: number;
+  };
   /** Worst margin first. Trucks with no ledger activity are absent, not
    *  listed at zero — a truck nobody posted anything for has no margin,
    *  which is different from breaking even. */
   trucks: TruckPosition[];
   forecast: ForecastResult;
   problems: string[];
+}
+
+/**
+ * Revenue less cost — or null, when one side of the subtraction has no
+ * entries behind it at all.
+ *
+ * The first end-to-end run on real files is why this exists. A year of
+ * real dispatch revenue posted while every cost row sat in staging, and
+ * this view's headline read "Group margin $2,336,117.36" — which was
+ * revenue, exactly, to the cent. Arithmetically correct and the worst
+ * number on the page.
+ *
+ * Withholding it is not a display nicety. Revenue-as-margin is the figure
+ * most likely to be quoted in a meeting, and it is indistinguishable from
+ * a real margin unless something refuses to print it.
+ */
+function marginOf(revenueCents: bigint, costCents: bigint, revenueRows: number, costRows: number): {
+  margin: Decimal | null;
+  blocked: string | null;
+} {
+  if (revenueRows === 0 && costRows === 0) {
+    return { margin: null, blocked: 'Nothing has been posted in this period.' };
+  }
+  if (costRows === 0) {
+    return {
+      margin: null,
+      blocked:
+        'No cost has been posted in this period, so revenue less cost would just be revenue. Withheld rather than shown equal to revenue.',
+    };
+  }
+  if (revenueRows === 0) {
+    return {
+      margin: null,
+      blocked: 'No revenue has been posted in this period, so this would show cost as a loss with nothing earned against it.',
+    };
+  }
+  return { margin: money(revenueCents + costCents), blocked: null };
 }
 
 const MONEY_SUM = `COALESCE(sum(CASE WHEN c.category_group = 'revenue' THEN l.amount ELSE 0 END), 0)::numeric(14,2)::text`;
@@ -57,10 +103,12 @@ export async function getCeoView(from: string, to: string): Promise<CeoResponse>
 
   const entityRows = await query<{
     entity_id: string; code: string; legal_name: string;
-    revenue: string; cost: string; n: string;
+    revenue: string; cost: string; n: string; rev_n: string; cost_n: string;
   }>(
     `SELECT e.entity_id, e.code, e.legal_name,
-            ${MONEY_SUM} AS revenue, ${COST_SUM} AS cost, count(l.entry_id) AS n
+            ${MONEY_SUM} AS revenue, ${COST_SUM} AS cost, count(l.entry_id) AS n,
+            count(l.entry_id) FILTER (WHERE c.category_group = 'revenue') AS rev_n,
+            count(l.entry_id) FILTER (WHERE c.category_group <> 'revenue' AND c.account_nature = 'pnl' AND l.charged_to = 'company') AS cost_n
        FROM accounting.entity e
        LEFT JOIN accounting.ledger_entry l
               ON l.entity_id = e.entity_id AND l.accrual_date BETWEEN $1::date AND $2::date
@@ -77,7 +125,7 @@ export async function getCeoView(from: string, to: string): Promise<CeoResponse>
     legalName: r.legal_name,
     revenue: r.revenue,
     companyCost: r.cost,
-    margin: money(cents(r.revenue) + cents(r.cost)),
+    margin: marginOf(cents(r.revenue), cents(r.cost), Number(r.rev_n), Number(r.cost_n)).margin,
     entryCount: Number(r.n),
   }));
 
@@ -85,19 +133,28 @@ export async function getCeoView(from: string, to: string): Promise<CeoResponse>
   // ought to agree are two queries that can disagree, and a group total
   // that does not equal its own parts is the fastest way to lose a
   // reader's trust in every other figure on the page.
+  const groupRevenueCents = entities.reduce((a, e) => a + cents(e.revenue), 0n);
+  const groupCostCents = entities.reduce((a, e) => a + cents(e.companyCost), 0n);
+  const groupRevRows = entityRows.reduce((a, r) => a + Number(r.rev_n), 0);
+  const groupCostRows = entityRows.reduce((a, r) => a + Number(r.cost_n), 0);
+  const groupMargin = marginOf(groupRevenueCents, groupCostCents, groupRevRows, groupCostRows);
+
   const group = {
-    revenue: money(entities.reduce((a, e) => a + cents(e.revenue), 0n)),
-    companyCost: money(entities.reduce((a, e) => a + cents(e.companyCost), 0n)),
-    margin: money(entities.reduce((a, e) => a + cents(e.margin), 0n)),
+    revenue: money(groupRevenueCents),
+    companyCost: money(groupCostCents),
+    margin: groupMargin.margin,
+    marginBlocked: groupMargin.blocked,
     entryCount: entities.reduce((a, e) => a + e.entryCount, 0),
   };
 
   const truckRows = await query<{
     truck_id: string; unit_number: string; code: string | null;
-    revenue: string; cost: string; n: string;
+    revenue: string; cost: string; n: string; rev_n: string; cost_n: string;
   }>(
     `SELECT t.truck_id, t.unit_number, max(e.code) AS code,
-            ${MONEY_SUM} AS revenue, ${COST_SUM} AS cost, count(l.entry_id) AS n
+            ${MONEY_SUM} AS revenue, ${COST_SUM} AS cost, count(l.entry_id) AS n,
+            count(l.entry_id) FILTER (WHERE c.category_group = 'revenue') AS rev_n,
+            count(l.entry_id) FILTER (WHERE c.category_group <> 'revenue' AND c.account_nature = 'pnl' AND l.charged_to = 'company') AS cost_n
        FROM accounting.truck t
        JOIN accounting.ledger_entry l
               ON l.truck_id = t.truck_id AND l.accrual_date BETWEEN $1::date AND $2::date
@@ -114,7 +171,7 @@ export async function getCeoView(from: string, to: string): Promise<CeoResponse>
     entityCode: r.code,
     revenue: r.revenue,
     companyCost: r.cost,
-    margin: money(cents(r.revenue) + cents(r.cost)),
+    margin: marginOf(cents(r.revenue), cents(r.cost), Number(r.rev_n), Number(r.cost_n)).margin,
     entryCount: Number(r.n),
   }));
 

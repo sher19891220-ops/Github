@@ -69,6 +69,39 @@ describe('getDashboard', () => {
     const d = await getDashboard(WINDOW.from, WINDOW.to);
     expect(d.companyCost.amount).toBe('-4000.00');
     expect(d.margin).toBe('11000.00');
+    expect(d.marginBlocked).toBeNull();
+  });
+
+  it('withholds margin when revenue posted but no cost did', async () => {
+    /**
+     * Found by the first end-to-end run on real files, and the most
+     * important assertion on this screen.
+     *
+     * A year of real dispatch revenue posted — $2.3M — while every cost
+     * row sat in staging, because the expenses sheet carries no entity or
+     * category and the fuel sheet carries no date or amount. Revenue plus
+     * nothing is revenue, so the margin tile showed the revenue figure: a
+     * number that is arithmetically correct, catastrophically wrong, and
+     * indistinguishable from a real margin at a glance.
+     *
+     * The cost tile already said "nothing posted" right beside it. That
+     * was not enough, and was never going to be — nobody reads the tile
+     * saying nothing when the one next to it says two million.
+     */
+    await post(`${YEAR + 3}-04-01`, CATEGORY_REVENUE, '2336117.36', 'company');
+    const d = await getDashboard(`${YEAR + 3}-01-01`, `${YEAR + 3}-12-31`);
+    expect(d.revenue.amount).toBe('2336117.36');
+    expect(d.companyCost.entryCount).toBe(0);
+    expect(d.margin).toBeNull();
+    expect(d.marginBlocked).toMatch(/shown equal to revenue/);
+  });
+
+  it('withholds margin the other way round too', async () => {
+    await post(`${YEAR + 4}-04-01`, CATEGORY_FUEL, '-5000.00', 'company');
+    const d = await getDashboard(`${YEAR + 4}-01-01`, `${YEAR + 4}-12-31`);
+    expect(d.revenue.entryCount).toBe(0);
+    expect(d.margin).toBeNull();
+    expect(d.marginBlocked).toMatch(/No revenue has been posted/);
   });
 
   it('puts the unassigned cost in the work queue, where someone can act on it', async () => {
@@ -101,7 +134,9 @@ describe('an empty period', () => {
     for (const f of [d.revenue, d.companyCost, d.intercompanyReceivable, d.driverReceivable]) {
       expect(f.amount).toMatch(/^-?\d+\.\d{2}$/);
     }
-    expect(d.margin).toMatch(/^-?\d+\.\d{2}$/);
+    // Margin is null here rather than "0.00": nothing posted on either
+    // side, so there is no margin to state.
+    expect(d.margin).toBeNull();
   });
 
   it('reports zero entries rather than a confident zero amount', async () => {

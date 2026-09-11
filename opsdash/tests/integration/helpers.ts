@@ -1,4 +1,14 @@
 /**
+ * Codes carry a `-TEST` suffix and the legal names share no prefix with
+ * the real ones. Both matter: `entity_code_key` is unique, and
+ * `db/repo/ifta.ts` resolves a carrier by testing whether a legal name is
+ * a PREFIX of the printed letterhead — so "Zone OH LLC" and "Zone OH LLC
+ * (test fixture)" both match the same document and the shorter wins.
+ *
+ * That second one is worth keeping in mind beyond the tests: two real
+ * entities where one legal name prefixes another would collide the same
+ * way.
+ *
  * Shared fixtures for the integration suite, run against a real Postgres
  * (`npm run db:local`). Every test file calls `ensureBaseFixtures()` and
  * then works with its own uniquely-generated content — no global TRUNCATE —
@@ -29,9 +39,9 @@ export function ensureBaseFixtures(): Promise<void> {
 async function seed(): Promise<void> {
   await query(
     `INSERT INTO accounting.entity (entity_id, code, legal_name) VALUES
-       ($1, 'ZONE', 'Zone OH LLC (test fixture)'),
-       ($2, 'XTRACK', 'Xtrack LLC (test fixture)'),
-       ($3, 'AFG', 'AFG (test fixture)')
+       ($1, 'ZONE-TEST', 'Test Fixture Carrier One'),
+       ($2, 'XTRACK-TEST', 'Test Fixture Carrier Two'),
+       ($3, 'AFG-TEST', 'Test Fixture Carrier Three')
      ON CONFLICT (entity_id) DO NOTHING`,
     [ENTITY_ZONE_ID, ENTITY_XTRACK_ID, ENTITY_AFG_ID],
   );
@@ -45,8 +55,19 @@ async function seed(): Promise<void> {
     [CATEGORY_REVENUE, CATEGORY_FUEL, CATEGORY_MAINTENANCE],
   );
 
-  // Lets the dispatch parser's raw entity markers (XTRACK/AFG/ZONE) resolve
-  // through source_key_map exactly the way insertStagingRows.ts requires.
+  // Lets the dispatch parser's raw entity markers (XTRACK/AFG/ZONE)
+  // resolve through source_key_map exactly the way insertStagingRows.ts
+  // requires.
+  //
+  // These use the SAME `dispatch` vocabulary production uses, because the
+  // path under test is production's. That means this suite must run
+  // against its own database: `source_key_map` is unique on
+  // (source_system, source_key, kind), so a database that also holds real
+  // reference data has one mapping for "XTRACK" and whichever was
+  // inserted first wins. Running the suite against a seeded production
+  // database is how that was discovered, and the fix is separate
+  // databases — not a test-only vocabulary, which would stop the tests
+  // exercising the real resolution path.
   await query(
     `INSERT INTO accounting.source_key_map (canonical_kind, canonical_id, source_system, source_key) VALUES
        ('entity', $1, 'dispatch', 'ZONE'),

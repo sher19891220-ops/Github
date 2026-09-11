@@ -30,7 +30,23 @@ of which must pass:
 npm run db:verify
 ```
 
-## 3. Create the accounts
+## 3. Create the reference data
+
+Entities and a chart of accounts. Nothing works before this: the first
+upload has no company to attribute revenue to and no category to file a
+cost under, and neither failure says "you have not set up yet".
+
+```bash
+npx tsx scripts/seed-reference.ts
+npx tsx scripts/load-truck-roster.ts tests/fixtures/real/truck-entity-roster.csv
+```
+
+The second one matters more than it looks. The dispatch sheet names the
+company on about 5% of its rows; the truck is on all of them. Without the
+roster loaded, 1,322 of 1,386 real revenue rows are rejected at commit for
+a missing entity — 95% of a year's revenue unable to reach the ledger.
+
+## 4. Create the accounts
 
 ```bash
 export DATABASE_URL='<the connection string>'
@@ -55,7 +71,7 @@ npx tsx scripts/provision-users.ts accounting
 That also bumps the account's session epoch, which signs out every session
 it currently has.
 
-## 4. Load the IFTA rates
+## 5. Load the IFTA rates
 
 Empty until somebody loads them, and a jurisdiction with no rate has its
 line withheld from the return.
@@ -69,6 +85,16 @@ The rate panel on `/ifta` takes the published matrix pasted straight from
 highest rate is under $0.50 per gallon, because that means the wrong
 column was copied — the matrix prints US$/gallon beside CAN$/litre, and
 that mistake has already happened once during this build.
+
+## The integration suite needs its own database
+
+`npm test` seeds its own entities and `source_key_map` entries under the
+same `dispatch` vocabulary production uses, because the path under test is
+production's path. `source_key_map` is unique on (source_system,
+source_key, kind), so against a database holding real reference data
+whichever was inserted first wins and the other's rows resolve to the
+wrong company. Point `DATABASE_URL` at a scratch database when running
+tests, never at the live one.
 
 ## What fails closed, and why
 
