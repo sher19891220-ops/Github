@@ -208,7 +208,15 @@ export const TRUCK_ANGLES: AngleConfig[] = [
   },
 ]
 
+// Daily PTI needs proof of a walk-around, not a full photo survey:
+// four corners plus tires and extras.
+export const TRUCK_DAILY_ANGLES: AngleConfig[] = TRUCK_ANGLES.filter((a) =>
+  ['front', 'left-panel', 'back', 'right-panel', 'tire-fl', 'tire-fr', 'tire-bl', 'tire-br', 'extras'].includes(a.key)
+).map((a, i) => ({ ...a, order: i + 1 }))
+
 // Pick the right angle set for the inspection type.
 export function getAngles(type?: string): AngleConfig[] {
-  return type === 'TRUCK' ? TRUCK_ANGLES : INSPECTION_ANGLES
+  if (type === 'TRUCK') return TRUCK_ANGLES
+  if (type === 'TRUCK_DAILY') return TRUCK_DAILY_ANGLES
+  return INSPECTION_ANGLES
 }

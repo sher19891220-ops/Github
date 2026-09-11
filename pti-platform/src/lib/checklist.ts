@@ -110,8 +110,53 @@ export const TRUCK_TIRE_POSITIONS = [
   'Drive Axle 2 — Right Outer',
 ]
 
+
+// ─────────────────────────────────────────────────────────────
+// DAILY PTI CHECKLIST (truck)
+// The everyday pre-trip check — safety-critical items only.
+// Kept deliberately short so drivers actually complete it before
+// every shift. The full 51-item inspection is TRUCK_CHECKLIST.
+// ─────────────────────────────────────────────────────────────
+
+export const TRUCK_DAILY_CHECKLIST: Omit<ChecklistItem, 'status' | 'notes'>[] = [
+  // Lights
+  { id: 'd-headlights', category: 'Lights',  label: 'Headlights (High & Low Beam)', mandatory: true },
+  { id: 'd-brakelts',   category: 'Lights',  label: 'Brake Lights',                 mandatory: true },
+  { id: 'd-turnsig',    category: 'Lights',  label: 'Turn Signals (Left & Right)',  mandatory: true },
+  { id: 'd-marker',     category: 'Lights',  label: 'Marker & Clearance Lights',    mandatory: true },
+
+  // Tires & Wheels
+  { id: 'd-steertire',  category: 'Tires & Wheels', label: 'Steer Tires (Tread & Pressure)', mandatory: true },
+  { id: 'd-drivetire',  category: 'Tires & Wheels', label: 'Drive Tires (Tread & Pressure)', mandatory: true },
+  { id: 'd-lugnuts',    category: 'Tires & Wheels', label: 'Lug Nuts Tight / No Rust Streaks', mandatory: true },
+
+  // Leaks
+  { id: 'd-oilleak',    category: 'Leaks', label: 'No Oil Leaks',            mandatory: true },
+  { id: 'd-coolleak',   category: 'Leaks', label: 'No Coolant Leaks',        mandatory: true },
+  { id: 'd-fuelleak',   category: 'Leaks', label: 'No Fuel Leaks',           mandatory: true },
+  { id: 'd-airleak',    category: 'Leaks', label: 'No Air Leaks',            mandatory: true },
+
+  // Brakes & Air System
+  { id: 'd-airpress',   category: 'Brakes & Air', label: 'Air Pressure Builds Normally', mandatory: true },
+  { id: 'd-brakes',     category: 'Brakes & Air', label: 'Brakes Working',               mandatory: true },
+  { id: 'd-airlines',   category: 'Brakes & Air', label: 'Air Lines Secure (No Chafing)', mandatory: true },
+
+  // Safety Equipment
+  { id: 'd-extng',      category: 'Safety Equipment', label: 'Fire Extinguisher (Charged & Secure)', mandatory: true },
+  { id: 'd-triangles',  category: 'Safety Equipment', label: 'Emergency Triangles',                  mandatory: true },
+
+  // Cab
+  { id: 'd-wipers',     category: 'Cab', label: 'Wipers & Washer Fluid', mandatory: true },
+  { id: 'd-horn',       category: 'Cab', label: 'Horn',                  mandatory: true },
+  { id: 'd-mirrors',    category: 'Cab', label: 'Mirrors Clean & Adjusted', mandatory: true },
+  { id: 'd-dashwarn',   category: 'Cab', label: 'No Dash Warning Lights', mandatory: true },
+]
+
 export function buildChecklist(type?: string): ChecklistItem[] {
-  const source = type === 'TRUCK' ? TRUCK_CHECKLIST : DEFAULT_CHECKLIST
+  const source =
+    type === 'TRUCK' ? TRUCK_CHECKLIST :
+    type === 'TRUCK_DAILY' ? TRUCK_DAILY_CHECKLIST :
+    DEFAULT_CHECKLIST
   return source.map((item) => ({
     ...item,
     status: 'PENDING' as const,
@@ -120,7 +165,7 @@ export function buildChecklist(type?: string): ChecklistItem[] {
 }
 
 export function getTirePositions(type?: string): string[] {
-  return type === 'TRUCK' ? TRUCK_TIRE_POSITIONS : TIRE_POSITIONS
+  return (type === 'TRUCK' || type === 'TRUCK_DAILY') ? TRUCK_TIRE_POSITIONS : TIRE_POSITIONS
 }
 
 export function getChecklistCategories(items: ChecklistItem[]): string[] {
