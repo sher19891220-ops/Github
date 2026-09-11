@@ -119,131 +119,21 @@ export interface UploadInput {
 }
 
 /* ------------------------------------------------------------------------
- * Reconciliation (see file doc note 6).
+ * Reconciliation and chargeback.
+ *
+ * Notes 6 and 7 above describe these as this screen's minimum ask, flagged
+ * rather than invented as settled. They have since been settled: the
+ * endpoints exist, and the types moved into `@/contract/types` unchanged in
+ * shape. They are re-exported here rather than redefined so the two sides
+ * cannot drift — the same treatment `ParseStatus` and `DocumentSummary`
+ * already get above.
  * --------------------------------------------------------------------- */
 
-/** One line to be matched, from either side of a reconciliation. Deliberately
- *  generic over what produced it (`sourceRef`) — a reconciliation is always
- *  "this document" vs. "what is already recorded", and what is already
- *  recorded may be posted `ledger_entry` rows or a not-yet-posted sheet the
- *  operator wants to check the document against before anything commits. */
-export interface ReconLine {
-  lineId: string;
-  side: 'document' | 'ledger';
-  /** Where this line traces to — every row must be explicable on screen. */
-  sourceRef:
-    | { kind: 'document'; documentId: string; stagingRowId: string | null; label: string }
-    | { kind: 'ledger'; entryId: string; label: string }
-    | { kind: 'sheet'; label: string; rowRef: string };
-  truckId: string | null;
-  driverId: string | null;
-  accrualDate: IsoDate | null;
-  /** Signed, same convention as `LedgerEntry.amount`. */
-  amount: Decimal;
-  quantity: Decimal | null;
-  description: string | null;
-}
-
-export type ReconMatchStatus =
-  /** Same amount, date and unit — unambiguous, shown collapsed by default. */
-  | 'auto_matched'
-  /** Same unit and date, amount differs — the case that needs a human. */
-  | 'near_match'
-  /** A human looked at an auto/near match and confirmed it. */
-  | 'confirmed'
-  /** A human looked at a match (auto or near) and rejected it; both lines
-   *  fall back to unmatched. */
-  | 'rejected'
-  /** No candidate on the other side, and a human has recorded why that is
-   *  expected rather than a real variance. */
-  | 'expected_missing'
-  /** No candidate on the other side, not yet looked at. */
-  | 'unmatched';
-
-/** One row of the match view: a pairing (both `documentLine` and `ledgerLine`
- *  set) or a singleton (exactly one set) — never both null. */
-export interface ReconMatch {
-  matchId: string;
-  status: ReconMatchStatus;
-  documentLine: ReconLine | null;
-  ledgerLine: ReconLine | null;
-  /** `documentLine.amount - ledgerLine.amount` for a pairing; null for a
-   *  singleton or an exact auto-match (always "0.00" there, so omitted). */
-  amountVariance: Decimal | null;
-  note: string | null;
-  decidedBy: string | null;
-  decidedAt: string | null;
-}
-
-export interface ReconSummary {
-  autoMatched: number;
-  nearMatch: number;
-  confirmed: number;
-  unmatchedDocument: number;
-  unmatchedLedger: number;
-  expectedMissing: number;
-  rejected: number;
-  /** Net of everything not cancelled out by an accepted pairing — see
-   *  `reconciliation/logic.ts` `summarizeRecon` for exactly what is and is
-   *  not included. */
-  netVariance: Decimal;
-}
-
-export interface ReconciliationSet {
-  reconciliationId: string;
-  documentId: string;
-  documentLabel: string;
-  ledgerLabel: string;
-  matches: ReconMatch[];
-}
-
-/* ------------------------------------------------------------------------
- * Chargeback (see file doc note 7).
- * --------------------------------------------------------------------- */
-
-export type ChargedTo = 'company' | 'driver' | 'split' | 'unknown';
-
-/** A `split` decision is not a decision without a ratio — this is what
- *  makes that true in the type system, not just in a validator. */
-export interface SplitRatio {
-  kind: 'amount' | 'percentage';
-  /** The driver's share. For `kind: 'amount'`, a money decimal string (the
-   *  company bears the remainder of the row's absolute amount). For
-   *  `kind: 'percentage'`, a decimal string in `[0, 100]`. */
-  driverShare: Decimal;
-}
-
-export interface ChargebackDecision {
-  chargedTo: ChargedTo;
-  /** Required when, and only when, `chargedTo === 'split'`. */
-  splitRatio: SplitRatio | null;
-  note: string | null;
-  decidedBy: string;
-  decidedAt: string;
-}
-
-/** One cost row still needing (or already given) a chargeback decision.
- *  Carries everything SOURCE-DISCOVERY §5/§11h says a human needs to decide
- *  without leaving the screen. */
-export interface ChargebackRow {
-  costRowId: string;
-  sourceRef:
-    | { kind: 'document'; documentId: string; stagingRowId: string | null; label: string }
-    | { kind: 'sheet'; label: string; rowRef: string };
-  truckId: string | null;
-  driverId: string | null;
-  driverClass: DriverClass | null;
-  vendor: string | null;
-  description: string | null;
-  accrualDate: IsoDate | null;
-  /** Signed; a cost row is negative. */
-  amount: Decimal;
-  categoryId: string | null;
-  /** What the sheet/parser produced, per SOURCE-DISCOVERY §5 — `'unknown'`
-   *  for the 713 rows nobody has decided yet. */
-  chargedTo: ChargedTo;
-  decision: ChargebackDecision | null;
-}
+export type {
+  ReconSourceRef, ReconLine, ReconMatchStatus, ReconMatch, ReconSummary,
+  ReconciliationSet, ReconDecisionStatus,
+  ChargedTo, SplitRatio, ChargebackDecision, ChargebackRow,
+} from '@/contract/types';
 
 /** See file doc note 4. */
 

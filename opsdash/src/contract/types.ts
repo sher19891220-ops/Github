@@ -225,3 +225,143 @@ export interface ReferenceData {
   drivers: NamedOption[];
   categories: CategoryOption[];
 }
+
+/* ------------------------------------------------------------------------
+ * Reconciliation.
+ *
+ * Promoted from the UI workstream's local types after the endpoints were
+ * built, so the two sides cannot drift. Four things that workstream
+ * correctly declined to decide alone, now decided:
+ *
+ *  - The ledger side of a reconciliation is posted `ledger_entry` rows for
+ *    the run's period. `accounting.reconciliation_match` references a
+ *    staging row and a ledger entry and nothing else, so that is what the
+ *    schema can actually store. `sourceRef.kind === 'sheet'` remains in the
+ *    type because a sheet-side reconciliation is a real future case, but no
+ *    endpoint emits it today.
+ *  - `near_match` is derived, not stored: `auto_matched` with a non-zero
+ *    variance. "The matcher paired these and no human has looked" is true
+ *    of an exact and an inexact pairing alike; the variance is the thing
+ *    that separates them, and it is already a column.
+ * --------------------------------------------------------------------- */
+
+/** Where a reconciliation line traces to. Every row on the screen must be
+ *  explicable without leaving it. */
+export type ReconSourceRef =
+  | { kind: 'document'; documentId: string; stagingRowId: string | null; label: string }
+  | { kind: 'ledger'; entryId: string; label: string }
+  | { kind: 'sheet'; label: string; rowRef: string };
+
+export interface ReconLine {
+  lineId: string;
+  side: 'document' | 'ledger';
+  sourceRef: ReconSourceRef;
+  truckId: string | null;
+  driverId: string | null;
+  accrualDate: IsoDate | null;
+  /** Signed, same convention as `LedgerEntry.amount`. */
+  amount: Decimal;
+  quantity: Decimal | null;
+  description: string | null;
+}
+
+export type ReconMatchStatus =
+  /** Same amount, date and unit — unambiguous, shown collapsed by default. */
+  | 'auto_matched'
+  /** Same unit and date, amount differs — the case that needs a human. */
+  | 'near_match'
+  /** A human looked at an auto/near match and confirmed it. */
+  | 'confirmed'
+  /** A human rejected the pairing; both lines fall back to unmatched. */
+  | 'rejected'
+  /** No partner, and a human has recorded why that is expected. The
+   *  database refuses this status without a reason. */
+  | 'expected_missing'
+  /** No partner, not yet looked at. */
+  | 'unmatched';
+
+/** A pairing (both lines set) or a singleton (exactly one) — never neither. */
+export interface ReconMatch {
+  matchId: string;
+  status: ReconMatchStatus;
+  documentLine: ReconLine | null;
+  ledgerLine: ReconLine | null;
+  /** `document - ledger` for a pairing; null for a singleton. */
+  amountVariance: Decimal | null;
+  note: string | null;
+  decidedBy: string | null;
+  decidedAt: string | null;
+}
+
+export interface ReconSummary {
+  autoMatched: number;
+  nearMatch: number;
+  confirmed: number;
+  unmatchedDocument: number;
+  unmatchedLedger: number;
+  expectedMissing: number;
+  rejected: number;
+  /** Everything a person still has to account for: the variance on open
+   *  pairings plus every unmatched line on either side. Confirmed pairings
+   *  and expected-missing lines are settled and drop out. */
+  netVariance: Decimal;
+}
+
+export interface ReconciliationSet {
+  reconciliationId: string;
+  documentId: string;
+  documentLabel: string;
+  ledgerLabel: string;
+  matches: ReconMatch[];
+}
+
+/** The statuses a person can actually set. `auto_matched` and `near_match`
+ *  are the matcher's output, not a human decision. */
+export type ReconDecisionStatus = 'confirmed' | 'rejected' | 'expected_missing';
+
+/* ------------------------------------------------------------------------
+ * Chargeback.
+ * --------------------------------------------------------------------- */
+
+export type ChargedTo = 'company' | 'driver' | 'split' | 'unknown';
+
+/** A `split` is not a decision without a ratio — this is what makes that
+ *  true in the type system as well as in the database. */
+export interface SplitRatio {
+  kind: 'amount' | 'percentage';
+  /** The driver's share. A money decimal for `amount` (the company bears
+   *  the remainder of the row's absolute amount); a decimal in (0, 100)
+   *  for `percentage`. */
+  driverShare: Decimal;
+}
+
+export interface ChargebackDecision {
+  chargedTo: ChargedTo;
+  /** Required when, and only when, `chargedTo === 'split'`. */
+  splitRatio: SplitRatio | null;
+  note: string | null;
+  decidedBy: string;
+  decidedAt: string;
+}
+
+/** One cost row needing, or already given, a chargeback decision.
+ *  `costRowId` is a `staging_row_id`. */
+export interface ChargebackRow {
+  costRowId: string;
+  sourceRef:
+    | { kind: 'document'; documentId: string; stagingRowId: string | null; label: string }
+    | { kind: 'sheet'; label: string; rowRef: string };
+  truckId: string | null;
+  driverId: string | null;
+  driverClass: DriverClass | null;
+  vendor: string | null;
+  description: string | null;
+  accrualDate: IsoDate | null;
+  /** Signed; a cost row is negative. */
+  amount: Decimal;
+  categoryId: string | null;
+  /** What the parser produced. Null and `'unknown'` both mean undecided. */
+  chargedTo: ChargedTo;
+  /** The decision currently standing, i.e. the one nothing supersedes. */
+  decision: ChargebackDecision | null;
+}

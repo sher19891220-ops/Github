@@ -474,3 +474,46 @@ SELECT CASE WHEN gap = 123.4200
             ELSE 'FAIL: gap = ' || gap::text END AS result
 FROM accounting.v_rate_gap
 WHERE rate_key = 'admin.per_driver_week';
+
+\echo '--- ASSERT 34: a document cannot have two reconciliations open -------'
+DO $$
+BEGIN
+  INSERT INTO accounting.reconciliation_run
+    (source_document_id, period_start, period_end, opened_by)
+  VALUES ('22222222-2222-2222-2222-222222222222','2026-02-01','2026-02-28','other@fleet');
+  RAISE EXCEPTION 'FAIL: a second open run on the same document accepted';
+EXCEPTION WHEN unique_violation THEN
+  RAISE NOTICE 'PASS: second open reconciliation on one document rejected';
+END $$;
+
+\echo '--- ASSERT 35: closing the first lets a later one open ---------------'
+UPDATE accounting.reconciliation_run
+   SET closed_at = now()
+ WHERE run_id = 'aaaaaaaa-0000-0000-0000-00000000aaaa';
+INSERT INTO accounting.reconciliation_run
+  (source_document_id, period_start, period_end, opened_by)
+VALUES ('22222222-2222-2222-2222-222222222222','2026-02-01','2026-02-28','other@fleet');
+\echo 'PASS: a second run opens once the first is closed'
+
+\echo '--- ASSERT 36: a rejected pairing frees both lines to stand alone ----'
+UPDATE accounting.reconciliation_match
+   SET status = 'rejected', decided_by = 'controller@fleet', decided_at = now()
+ WHERE run_id = 'aaaaaaaa-0000-0000-0000-00000000aaaa'
+   AND ledger_entry_id = '55555555-5555-5555-5555-555555555555';
+INSERT INTO accounting.reconciliation_match
+  (run_id, ledger_entry_id, status, ledger_amount)
+VALUES ('aaaaaaaa-0000-0000-0000-00000000aaaa',
+        '55555555-5555-5555-5555-555555555555','unmatched', 90.00);
+\echo 'PASS: the freed line takes a standalone row'
+
+\echo '--- ASSERT 37: but two live pairings on one line are still refused ---'
+DO $$
+BEGIN
+  INSERT INTO accounting.reconciliation_match
+    (run_id, ledger_entry_id, status, ledger_amount)
+  VALUES ('aaaaaaaa-0000-0000-0000-00000000aaaa',
+          '55555555-5555-5555-5555-555555555555','auto_matched', 90.00);
+  RAISE EXCEPTION 'FAIL: a second live row on the same line accepted';
+EXCEPTION WHEN unique_violation THEN
+  RAISE NOTICE 'PASS: a second live row on the same line still rejected';
+END $$;

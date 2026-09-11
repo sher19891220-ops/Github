@@ -7,7 +7,14 @@
  * Nothing in this file calls `Number()` or `parseFloat` on a money field;
  * `fetchJson` itself never inspects the payload beyond `JSON.parse`.
  */
-import type { StagingRow } from '@/contract/types';
+import type {
+  ChargebackDecision,
+  ChargebackRow,
+  ReconMatch,
+  ReconSummary,
+  ReconciliationSet,
+  StagingRow,
+} from '@/contract/types';
 import type { TruckOverheadRate } from '@/engines/registration/types';
 import type {
   CommitResult,
@@ -145,6 +152,89 @@ export async function getReferenceData(): Promise<ReferenceData> {
 export async function getOverheadRates(): Promise<TruckOverheadRate[]> {
   const body = await fetchJson<{ rates: TruckOverheadRate[] }>('/api/registration/overhead');
   return body.rates;
+}
+
+/* ------------------------------------------------------------------------
+ * Reconciliation.
+ *
+ * A GET here opens the run if the document has none — idempotent, and the
+ * server's business, not this module's. `near_match` arrives as a string
+ * like any other status; it is derived server-side from a stored
+ * `auto_matched` plus a non-zero variance and there is nothing to compute
+ * on this side.
+ * --------------------------------------------------------------------- */
+
+export async function getReconciliation(documentId: string): Promise<ReconciliationSet | null> {
+  try {
+    const body = await fetchJson<{ set: ReconciliationSet; summary: ReconSummary }>(
+      `/api/reconciliation/${encodeURIComponent(documentId)}`,
+    );
+    return body.set;
+  } catch (err) {
+    // 404: no such document. 422: the document exists but carries nothing
+    // reconcilable yet. Both are "nothing to show", not "something broke".
+    if (err instanceof ApiError && (err.status === 404 || err.status === 422)) return null;
+    throw err;
+  }
+}
+
+export type ReconDecisionAction =
+  | { type: 'confirm' }
+  | { type: 'reject' }
+  | { type: 'expected_missing'; note: string };
+
+/** Returns the whole set, because rejecting a pairing splits it into two
+ *  singletons and a one-row response would leave the screen disagreeing
+ *  with the database. */
+export async function postReconDecision(
+  documentId: string,
+  matchId: string,
+  action: ReconDecisionAction,
+  decidedBy: string,
+): Promise<ReconMatch[]> {
+  const body = await fetchJson<{ set: ReconciliationSet; summary: ReconSummary }>(
+    `/api/reconciliation/${encodeURIComponent(documentId)}/matches/${encodeURIComponent(matchId)}`,
+    {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ action, decidedBy }),
+    },
+  );
+  return body.set.matches;
+}
+
+/* ------------------------------------------------------------------------
+ * Chargeback.
+ * --------------------------------------------------------------------- */
+
+export async function getChargebackQueue(): Promise<ChargebackRow[]> {
+  const body = await fetchJson<{ rows: ChargebackRow[] }>('/api/chargeback?status=open');
+  return body.rows;
+}
+
+export async function postChargebackDecision(
+  costRowId: string,
+  decision: ChargebackDecision,
+): Promise<ChargebackRow> {
+  const rows = await postBulkChargebackDecision([costRowId], decision);
+  const row = rows[0];
+  if (!row) throw new ApiError(`The server accepted the decision but returned no row for ${costRowId}.`, null);
+  return row;
+}
+
+/** Applies one decision to exactly the named rows. The server makes that
+ *  guarantee; this function's only job is not to weaken it by sending ids
+ *  the caller did not pass. */
+export async function postBulkChargebackDecision(
+  costRowIds: string[],
+  decision: ChargebackDecision,
+): Promise<ChargebackRow[]> {
+  const body = await fetchJson<{ rows: ChargebackRow[] }>('/api/chargeback', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ costRowIds, decision }),
+  });
+  return body.rows;
 }
 
 export type { Decimal };
