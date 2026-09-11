@@ -86,7 +86,11 @@ export default function CompletePage() {
           const res = await fetch('/api/analyze-photos', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ dataUrl: photo.dataUrl, angleLabel: photo.angleLabel }),
+            body: JSON.stringify({
+              dataUrl: photo.dataUrl,
+              angleLabel: photo.angleLabel,
+              inspectionType: store.inspectionType,
+            }),
           })
           const data = await res.json()
           setAnalyses((prev) => {
