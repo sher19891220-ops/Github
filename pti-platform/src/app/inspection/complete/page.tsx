@@ -20,6 +20,7 @@ export default function CompletePage() {
   const store = useInspectionStore()
   const [shareMsg, setShareMsg] = useState('')
   const [reportStatus, setReportStatus] = useState<'sending' | 'sent' | 'failed' | 'no-group' | 'idle'>('idle')
+  const [sendErrorDetail, setSendErrorDetail] = useState<string>('')
   const [analyses, setAnalyses] = useState<PhotoAnalysis[]>([])
   const [analysisStatus, setAnalysisStatus] = useState<'idle' | 'running' | 'done'>('idle')
   const sentRef = useRef(false)
@@ -174,7 +175,9 @@ export default function CompletePage() {
 
       setReportStatus('sent')
     } catch (err) {
-      console.error('Telegram report error:', err)
+      const msg = err instanceof Error ? err.message : String(err)
+      console.error('Telegram report error:', msg)
+      setSendErrorDetail(msg)
       setReportStatus('failed')
     }
   }
@@ -483,7 +486,7 @@ ${photosHtml}${sigHtml}
                     {reportStatus === 'sent'
                       ? 'Summary and all photos delivered to your dispatch group via @gr_observer_bot.'
                       : reportStatus === 'failed'
-                      ? 'Could not reach Telegram. Use Download PDF or Share to save the report manually.'
+                      ? `Could not reach Telegram${sendErrorDetail ? `: ${sendErrorDetail}` : ''}. Use Download PDF or Share to save the report manually.`
                       : reportStatus === 'no-group'
                       ? "This inspection wasn't started from a bot link, so there's no group to send it to. Start with /pti in Telegram next time — use Download PDF or Share to save this one."
                       : 'Sending summary and photos to your dispatch group via @gr_observer_bot.'}

@@ -25,19 +25,52 @@ export async function POST(req: NextRequest) {
     }
 
     if (body.action === 'text') {
-      await Promise.allSettled(chatIds.map((id) => sendMessage(id, body.text ?? '')))
-      return NextResponse.json({ ok: true, sentTo: chatIds.length })
+      const results = await Promise.all(chatIds.map((id) => sendMessage(id, body.text ?? '')))
+      const failures = results
+        .map((r, i) => ({ chatId: chatIds[i], ...r }))
+        .filter((r) => !r.ok)
+
+      if (failures.length > 0) {
+        console.error('send-report text failures:', JSON.stringify(failures))
+      }
+
+      // Only claim success if EVERY target actually accepted the message —
+      // previously this returned {ok:true} unconditionally regardless of
+      // what Telegram actually reported back.
+      return NextResponse.json({
+        ok: failures.length === 0,
+        sentTo: results.length - failures.length,
+        failed: failures.length > 0 ? failures.map((f) => ({ chatId: f.chatId, error: f.error })) : undefined,
+      }, { status: failures.length === results.length ? 502 : 200 })
     }
 
     if (body.action === 'photos') {
       const photos: { dataUrl: string; caption: string }[] = body.photos ?? []
       if (photos.length === 0) return NextResponse.json({ ok: true })
 
+      const allFailures: { chatId: number; error?: string }[] = []
+      let batchesAttempted = 0
+      let batchesOk = 0
+
       for (let i = 0; i < photos.length; i += 10) {
         const batch = photos.slice(i, i + 10)
-        await Promise.allSettled(chatIds.map((id) => sendMediaGroup(id, batch)))
+        const results = await Promise.all(chatIds.map((id) => sendMediaGroup(id, batch)))
+        batchesAttempted += results.length
+        results.forEach((r, idx) => {
+          if (r.ok) batchesOk++
+          else allFailures.push({ chatId: chatIds[idx], error: r.error })
+        })
       }
-      return NextResponse.json({ ok: true, sentTo: chatIds.length })
+
+      if (allFailures.length > 0) {
+        console.error('send-report photo failures:', JSON.stringify(allFailures))
+      }
+
+      return NextResponse.json({
+        ok: allFailures.length === 0,
+        sentTo: batchesOk,
+        failed: allFailures.length > 0 ? allFailures : undefined,
+      }, { status: allFailures.length === batchesAttempted ? 502 : 200 })
     }
 
     return NextResponse.json({ ok: false, error: 'Unknown action' }, { status: 400 })
