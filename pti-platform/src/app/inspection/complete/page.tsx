@@ -19,7 +19,7 @@ export default function CompletePage() {
   const router = useRouter()
   const store = useInspectionStore()
   const [shareMsg, setShareMsg] = useState('')
-  const [reportStatus, setReportStatus] = useState<'sending' | 'sent' | 'failed' | 'idle'>('idle')
+  const [reportStatus, setReportStatus] = useState<'sending' | 'sent' | 'failed' | 'no-group' | 'idle'>('idle')
   const [analyses, setAnalyses] = useState<PhotoAnalysis[]>([])
   const [analysisStatus, setAnalysisStatus] = useState<'idle' | 'running' | 'done'>('idle')
   const sentRef = useRef(false)
@@ -117,6 +117,17 @@ export default function CompletePage() {
 
   async function sendTelegramReport() {
     if (!store.driver || !store.vehicle) return
+
+    // Drivers always arrive via an Observer-generated Telegram link, which
+    // always includes the source group. No sourceChatId means this was
+    // opened directly (a bookmark, typed URL, testing) — there's
+    // intentionally no broadcast fallback for that anymore, so surface it
+    // plainly instead of attempting a send that can only fail.
+    if (!store.sourceChatId) {
+      setReportStatus('no-group')
+      return
+    }
+
     setReportStatus('sending')
     try {
       const chatId = store.sourceChatId ?? undefined
@@ -441,21 +452,25 @@ ${photosHtml}${sigHtml}
           <div className={`card border ${
             reportStatus === 'sent' ? 'border-green-200 bg-green-50' :
             reportStatus === 'failed' ? 'border-red-200 bg-red-50' :
+            reportStatus === 'no-group' ? 'border-amber-200 bg-amber-50' :
             'border-blue-100 bg-blue-50'
           }`}>
             <div className="flex items-center gap-2 mb-2">
               {reportStatus === 'sending' && <Loader2 className="h-5 w-5 text-blue-500 animate-spin flex-shrink-0" />}
               {reportStatus === 'sent' && <MessageCircle className="h-5 w-5 text-green-600 flex-shrink-0" />}
               {reportStatus === 'failed' && <AlertTriangle className="h-5 w-5 text-red-500 flex-shrink-0" />}
+              {reportStatus === 'no-group' && <AlertTriangle className="h-5 w-5 text-amber-500 flex-shrink-0" />}
               {reportStatus === 'idle' && <Info className="h-5 w-5 text-blue-600 flex-shrink-0" />}
               <h3 className={`font-semibold ${
                 reportStatus === 'sent' ? 'text-green-800' :
                 reportStatus === 'failed' ? 'text-red-700' :
+                reportStatus === 'no-group' ? 'text-amber-800' :
                 'text-blue-800'
               }`}>
                 {reportStatus === 'sending' && 'Sending report to Telegram…'}
                 {reportStatus === 'sent' && 'Report sent to Telegram!'}
                 {reportStatus === 'failed' && 'Telegram send failed'}
+                {reportStatus === 'no-group' && 'Not opened from a Telegram link'}
                 {reportStatus === 'idle' && 'Report'}
               </h3>
             </div>
@@ -466,10 +481,12 @@ ${photosHtml}${sigHtml}
                   <div className="font-semibold">Telegram Group</div>
                   <div className="text-slate-600 text-xs mt-0.5">
                     {reportStatus === 'sent'
-                      ? 'Summary and all photos delivered to your dispatch group via @Pti_check_bot.'
+                      ? 'Summary and all photos delivered to your dispatch group via @gr_observer_bot.'
                       : reportStatus === 'failed'
                       ? 'Could not reach Telegram. Use Download PDF or Share to save the report manually.'
-                      : 'Sending summary and photos to your dispatch group via @Pti_check_bot.'}
+                      : reportStatus === 'no-group'
+                      ? "This inspection wasn't started from a bot link, so there's no group to send it to. Start with /pti in Telegram next time — use Download PDF or Share to save this one."
+                      : 'Sending summary and photos to your dispatch group via @gr_observer_bot.'}
                   </div>
                 </div>
               </div>
