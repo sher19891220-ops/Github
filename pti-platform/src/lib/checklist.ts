@@ -134,3 +134,5 @@ export function getFailCount(items: ChecklistItem[]): number {
 export function isChecklistComplete(items: ChecklistItem[]): boolean {
   return items.filter((i) => i.mandatory).every((i) => i.status !== 'PENDING')
 }
+
+// Truck inspection support: TRUCK type, 51-item checklist, tractor photo angles.
