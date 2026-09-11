@@ -14,9 +14,59 @@ export type Decimal = string;
 export type IsoDate = string;
 
 export type SourceKind = 'document' | 'connector' | 'derived' | 'adjustment';
-export type DocType = 'fuel' | 'toll' | 'maintenance';
+/**
+ * Mirrors `accounting.doc_type`. This list had drifted behind the database —
+ * `ifta_mileage` and `revenue` landed in migration 002 and never reached here,
+ * and `registration` was missing from the enum itself, which is why a
+ * registration PDF could not be uploaded at all despite its parser working.
+ */
+export type DocType =
+  | 'fuel' | 'toll' | 'maintenance' | 'ifta_mileage' | 'revenue'
+  | 'registration' | 'factoring' | 'loan_schedule';
 export type StagingStatus = 'parsed' | 'under_review' | 'committed' | 'rejected';
-export type DriverClass = 'lease_to_own' | 'company' | 'owner_operator' | 'unassigned';
+/**
+ * The arrangement a truck runs under. Four, not three: lease-to-walk-away is
+ * a fixed weekly rate plus a per-mile charge where the driver never acquires
+ * the truck — neither lease-to-own (no equity accrues) nor owner-operator
+ * (the group still holds title and carries the equipment).
+ *
+ * These populations are NOT comparable on any cost line the arrangement
+ * itself determines. On an owner-operator truck the company's margin is the
+ * company charge plus the fuel-discount margin and nothing else; fuel and
+ * rent sit in the driver's deductions, not the company's cost side.
+ */
+export type DriverClass =
+  | 'lease_to_own' | 'company' | 'owner_operator' | 'ltwa' | 'unassigned';
+
+/**
+ * Where a booked invoice actually got to. Booked gross is not collected cash,
+ * and this is not a binary: `funded` means the factor advanced against the
+ * invoice and the debtor has NOT paid, so a different party carries the risk
+ * today. Never sum `funded` and `paid` as though both were settled.
+ *
+ * Absence of a status is unknown, never `paid` and never zero.
+ */
+export type CollectionStatus =
+  | 'unsubmitted' | 'submitted' | 'funded' | 'paid'
+  | 'short_paid' | 'denied' | 'recoursed' | 'rejected';
+
+/**
+ * How a cost behaves when the truck runs more, or stops. Conflating the three
+ * is the most common way to produce a wrong break-even number.
+ */
+export type CostShape = 'fixed' | 'variable_per_mile' | 'variable_pct_of_gross';
+
+/**
+ * What a rate is measured against. Insurance alone is priced on five of these
+ * within one policy set, which is why a single blended "insurance per truck"
+ * misprices exactly the trucks it matters most for — the idle ones.
+ */
+export type CostBasis =
+  | 'per_unit' | 'per_value' | 'per_gross_dollar'
+  | 'per_mile' | 'per_enrollee' | 'per_period';
+
+/** A contractual rate and a measured one are different facts. Keep both. */
+export type RateKind = 'stated' | 'measured';
 export type Grain = 'day' | 'week' | 'month' | 'quarter' | 'year';
 
 export type CategoryGroup =

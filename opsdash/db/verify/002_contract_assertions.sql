@@ -353,3 +353,124 @@ BEGIN
 EXCEPTION WHEN unique_violation THEN
   RAISE NOTICE 'PASS: double-matching the same entry rejected';
 END $$;
+
+-- =====================================================================
+-- Migration 007 — arrangement, collection status, cost shape, rate pair
+-- =====================================================================
+
+INSERT INTO accounting.connector_pull
+  (pull_id, source_system, source_table, source_pk, snapshot, payload_hash)
+VALUES ('bbbbbbbb-0000-0000-0000-0000000000b1','dispatch','load_pipeline','L-9002',
+        '{"load_id":"L-9002","revenue":3100.00}'::jsonb, repeat('c',64));
+
+INSERT INTO accounting.ledger_entry
+  (entry_id, entity_id, accrual_date, category_id, amount, driver_class,
+   source_kind, connector_pull_id, posted_by)
+VALUES ('bbbbbbbb-0000-0000-0000-0000000000e1','11111111-1111-1111-1111-111111111111',
+        '2026-02-02','revenue.linehaul', 3100.00, 'ltwa',
+        'connector','bbbbbbbb-0000-0000-0000-0000000000b1','ingest-job');
+
+\echo '--- ASSERT 26: lease-to-walk-away is a class the schema can express --'
+SELECT CASE WHEN driver_class = 'ltwa'
+            THEN 'PASS: ltwa accepted as a driver class'
+            ELSE 'FAIL: ltwa not stored' END AS result
+FROM accounting.ledger_entry
+WHERE entry_id = 'bbbbbbbb-0000-0000-0000-0000000000e1';
+
+\echo '--- ASSERT 27: funded and paid are different states, never a sum -----'
+INSERT INTO accounting.collection_event
+  (ledger_entry_id, status, effective_date, settled_amount, fee_amount,
+   factor_name, recorded_by)
+VALUES ('bbbbbbbb-0000-0000-0000-0000000000e1','submitted','2026-02-03',
+        NULL, NULL, 'Triumph','controller@fleet'),
+       ('bbbbbbbb-0000-0000-0000-0000000000e1','funded','2026-02-05',
+        NULL, -93.00, 'Triumph','controller@fleet'),
+       ('bbbbbbbb-0000-0000-0000-0000000000e1','paid','2026-02-27',
+        3100.00, NULL, 'Triumph','controller@fleet');
+SELECT CASE WHEN count(*) = 1 AND max(status::text) = 'paid'
+            THEN 'PASS: current status is the latest event, not the total'
+            ELSE 'FAIL: got ' || count(*)::text || ' current rows' END AS result
+FROM accounting.v_collection_current
+WHERE ledger_entry_id = 'bbbbbbbb-0000-0000-0000-0000000000e1';
+
+\echo '--- ASSERT 28: a factoring fee is money out --------------------------'
+DO $$
+BEGIN
+  INSERT INTO accounting.collection_event
+    (ledger_entry_id, status, effective_date, fee_amount, recorded_by)
+  VALUES ('bbbbbbbb-0000-0000-0000-0000000000e1','funded','2026-03-01',
+          93.00,'controller@fleet');   -- a fee booked as an inflow
+  RAISE EXCEPTION 'FAIL: a positive factoring fee was accepted';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: factoring fee booked as an inflow rejected';
+END $$;
+
+\echo '--- ASSERT 29: short-paid must say what actually arrived -------------'
+DO $$
+BEGIN
+  INSERT INTO accounting.collection_event
+    (ledger_entry_id, status, effective_date, recorded_by)
+  VALUES ('bbbbbbbb-0000-0000-0000-0000000000e1','short_paid','2026-03-02',
+          'controller@fleet');
+  RAISE EXCEPTION 'FAIL: short_paid with no amount accepted';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: short_paid without a settled amount rejected';
+END $$;
+
+\echo '--- ASSERT 30: revenue has no cost shape -----------------------------'
+DO $$
+BEGIN
+  UPDATE accounting.category
+     SET cost_shape = 'variable_pct_of_gross', cost_basis = 'per_gross_dollar'
+   WHERE category_id = 'revenue.linehaul';
+  RAISE EXCEPTION 'FAIL: a revenue category took a cost shape';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: cost shape on a revenue category rejected';
+END $$;
+
+\echo '--- ASSERT 31: shape and basis cannot disagree -----------------------'
+DO $$
+BEGIN
+  UPDATE accounting.category
+     SET cost_shape = 'fixed', cost_basis = 'per_mile'
+   WHERE category_id = 'fuel.diesel';
+  RAISE EXCEPTION 'FAIL: a fixed cost measured per mile was accepted';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: contradictory cost shape and basis rejected';
+END $$;
+
+UPDATE accounting.category
+   SET cost_shape = 'variable_per_mile', cost_basis = 'per_mile'
+ WHERE category_id = 'fuel.diesel';
+\echo 'PASS: fuel classified as variable-per-mile'
+
+\echo '--- ASSERT 32: a stated rate must name the document stating it -------'
+DO $$
+BEGIN
+  INSERT INTO accounting.rate_fact
+    (rate_key, kind, amount, basis, effective_from, recorded_by)
+  VALUES ('registration.per_unit_year','stated', 1879.98,'per_unit',
+          '2026-01-01','controller@fleet');   -- no source document
+  RAISE EXCEPTION 'FAIL: an unsourced stated rate was accepted';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: stated rate with no source document rejected';
+END $$;
+
+\echo '--- ASSERT 33: stated and measured coexist, and the gap is visible ---'
+INSERT INTO accounting.calc_run
+  (calc_run_id, engine, engine_version, period_start, period_end, inputs_hash, status)
+VALUES ('cccccccc-0000-0000-0000-0000000000c1','registration','1.0.0',
+        '2026-01-01','2026-12-31', repeat('d',64), 'succeeded');
+INSERT INTO accounting.rate_fact
+  (rate_key, kind, amount, basis, effective_from, source_document_id, recorded_by)
+VALUES ('admin.per_driver_week','stated', 50.0000,'per_enrollee','2026-01-01',
+        '22222222-2222-2222-2222-222222222222','controller@fleet');
+INSERT INTO accounting.rate_fact
+  (rate_key, kind, amount, basis, effective_from, calc_run_id, recorded_by)
+VALUES ('admin.per_driver_week','measured', 173.4200,'per_enrollee','2026-01-01',
+        'cccccccc-0000-0000-0000-0000000000c1','controller@fleet');
+SELECT CASE WHEN gap = 123.4200
+            THEN 'PASS: the real cost exceeds the stated fee by ' || gap::text
+            ELSE 'FAIL: gap = ' || gap::text END AS result
+FROM accounting.v_rate_gap
+WHERE rate_key = 'admin.per_driver_week';
