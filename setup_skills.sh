@@ -48,6 +48,7 @@ PLUGINS=(
   "hookify"              # set up automated hook behaviors
   "github"               # GitHub integration
   "linear"               # Linear task management (TMS, freight)
+  "serena"               # semantic LSP code intelligence (IDE-level navigation for agents)
 )
 
 for p in "${PLUGINS[@]}"; do

@@ -169,6 +169,7 @@ Run `bash ~/Github/setup_skills.sh` once on any machine to install:
 | **hookify** plugin | Create hooks from conversation patterns | All projects |
 | **github** plugin | GitHub integration | All projects |
 | **linear** plugin | Linear task management | TMS, freight, driver ops |
+| **serena** plugin | Semantic LSP code intelligence — go-to-definition, find-references, rename across the whole project | All coding projects (Axel, TMS, etc.) |
 
 ### Wiki vault setup (first time)
 
