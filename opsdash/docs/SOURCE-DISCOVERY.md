@@ -269,12 +269,43 @@ Entity attribution is **no longer a hard blocker, but it is not solved either**.
 The roster covers 74% of revenue; the free-text markers covered 4.5%. The
 remaining ~26% still needs the operator's roster, and the roster's own accuracy
 is unverified against the trucks that were marked inconsistently week to week.
+After rebuilding on the precedence below, **10.6% of 2026 revenue remains
+unattributed across 13 units** — down from 19 unassigned units, and now every
+one of them carries a named reason rather than "no evidence".
 
 Order of precedence for resolution, best first:
 1. The operator's confirmed roster (authoritative, effective-dated).
-2. This embedded `Company Type` roster (74% of revenue).
-3. The fuel summary's driver → entity blocks (61%, zero ambiguity).
-4. Free-text markers in the dispatch driver name (4.5%, unreliable).
+2. This embedded `Company Type` roster — **declared, not inferred**.
+3. The fuel summary's own unit → entity table.
+4. The fuel summary's driver → entity blocks (a name match, not a unit match).
+5. Free-text markers in the dispatch driver name (unreliable).
+
+### The weaker sources, measured against the declared roster
+
+Tiers 3 and 4 were not taken on trust. Each was scored on the units where the
+declared roster gives an unambiguous answer, so the comparison is like for like:
+
+| Source | Agreement with the declared roster |
+| --- | --- |
+| Fuel summary **unit** table | 28 of 39 — **72%** |
+| Fuel summary **driver-name** match | 37 of 43 — **86%** |
+
+Both are too weak to override a declaration, and the unit table — despite keying
+on the unit number directly, which looked like the stronger of the two — is the
+worse of the pair. It is a fuel-discount grouping, not a registration fact.
+
+The staged roster was rebuilt on this order. Of 82 revenue-bearing trucks:
+**50 now rest on the declaration**, 12 on the unit table, 7 on the driver-name
+match, and **13 stay unassigned** — 4 where the declared roster lists the unit
+under two companies with different drivers, 4 where it marks the unit inactive
+though the unit still earns, and 5 with no evidence in any source. Each carries
+the specific question to put to the operator rather than a blank.
+
+An earlier revision of the staged roster had 63 trucks assigned, but **52 of
+those 63 came from the driver-name match** — the second-weakest tier — and only
+7 from a dispatch marker. Trading 6 assignments for 50 declared ones is the
+right direction even though the assigned count barely moved: the point is not
+how many cells are filled, it is what fills them.
 
 None of this belongs in a parser. Resolution happens in the review/commit layer
 through `source_key_map`, so that a figure can always be traced to *which*
