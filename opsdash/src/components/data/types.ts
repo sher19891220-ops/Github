@@ -78,6 +78,9 @@ export type { TruckOverheadRate } from '@/engines/registration/types';
 export interface CommitResult {
   committed: number;
   rejected: number;
+  /** Rows a review flag held back: not posted, not rejected, still in the
+   *  queue. Distinct from `rejected`, which the commit refused outright. */
+  held: number;
   entryIds: string[];
 }
 

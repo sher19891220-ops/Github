@@ -90,9 +90,26 @@ export async function commitDocument(documentId: string, postedBy: string, opts:
       );
     }
 
+    // `under_review` means a person must look before this posts, so it is
+    // NOT selected here. It used to be, and any such row with its required
+    // fields filled posted anyway — which silently defeated every review
+    // flag the parsers raise. The real sheet makes that concrete: a
+    // drag-filled date of 02.18.32 and a section whose header the export
+    // dropped both carry an entity, an amount and a category, so both would
+    // have posted despite being held.
+    //
+    // Held rows are counted and left alone: not posted, not rejected. A
+    // reviewer clears the flag, and the next commit picks them up.
+    const heldRows = await q(
+      `SELECT count(*)::int AS n FROM accounting.staging_row
+        WHERE document_id = $1 AND status = 'under_review'`,
+      [documentId],
+    );
+    const held = (heldRows[0] as { n: number } | undefined)?.n ?? 0;
+
     const pendingRaw = await q(
       `SELECT ${STAGING_ROW_COLUMNS_SQL} FROM accounting.staging_row
-       WHERE document_id = $1 AND status IN ('parsed','under_review')
+       WHERE document_id = $1 AND status = 'parsed'
        ORDER BY row_index
        FOR UPDATE`,
       [documentId],
@@ -217,7 +234,7 @@ export async function commitDocument(documentId: string, postedBy: string, opts:
     );
     const entryIds = entryRows.map((r) => (r as { entry_id: string }).entry_id);
 
-    return { committed, rejected, entryIds };
+    return { committed, rejected, held, entryIds };
   });
 }
 

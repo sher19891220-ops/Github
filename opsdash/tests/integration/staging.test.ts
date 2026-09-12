@@ -33,7 +33,10 @@ describe('updateStagingRow', () => {
     if (!result.ok) throw new Error('expected ok');
 
     expect(result.row.jurisdiction).toBe('OH');
-    expect(result.row.status).toBe('under_review');
+    // An edit clears the review flag: `under_review` means a machine flagged
+    // the row and nobody has looked, and this edit is somebody looking. The
+    // audit trail lives in reviewedPayload/reviewedBy, asserted just below.
+    expect(result.row.status).toBe('parsed');
     expect(result.row.parsedPayload).toEqual(originalParsedPayload);
     expect(result.row.reviewedPayload).toMatchObject({ jurisdiction: 'OH' });
     // The edit did not invent values for fields it never touched.

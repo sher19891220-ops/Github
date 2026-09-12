@@ -32,10 +32,31 @@ function toIso(year: number, month: number, day: number): IsoDate {
  *
  * What this DOES flag, because it is detectable from the string alone:
  * a missing date, a date that doesn't fit the MM.DD.YY shape at all (a
- * four-digit year, a doubled separator), or one that fits the shape but
- * names a calendar date that does not exist (`11.31.2023`).
+ * four-digit year, a doubled separator), one that fits the shape but names a
+ * calendar date that does not exist (`11.31.2023`), or one that has not
+ * happened yet.
+ *
+ * That last one is the same mistyped-year defect, in the one direction where
+ * the single value gives it away. The real sheet has a run of eight
+ * interior-detailing rows at the same price dated `02.18.25` through
+ * `02.18.32` — a drag-fill that incremented the year instead of the day. A
+ * wrong year in the past is indistinguishable from a real date and is taken
+ * literally; a wrong year in the future is not, because a cost cannot have
+ * been incurred after today. Flagging it needs no reference to neighbouring
+ * rows, so it does not become the year-inference CLAUDE.md forbids.
+ *
+ * It is flagged for review, never dropped. A genuinely post-dated document
+ * (a scheduled payment, a prepaid renewal) is a real thing; it just is not
+ * an accrued cost, and a person decides which it is.
  */
-export function parseExpenseDate(raw: string): ParsedExpenseDate {
+export function parseExpenseDate(raw: string, today: Date = new Date()): ParsedExpenseDate {
+  const asOf = today.toISOString().slice(0, 10);
+  /** Keeps the flag but preserves whatever reason the shape already earned. */
+  const withFutureCheck = (r: ParsedExpenseDate): ParsedExpenseDate =>
+    r.iso !== null && r.iso > asOf
+      ? { ...r, flagged: true, reason: r.reason === null ? 'future_date' : `${r.reason}+future_date` }
+      : r;
+
   const trimmed = raw.trim();
   if (!trimmed) {
     return { iso: null, raw, flagged: true, reason: 'missing_date' };
@@ -49,7 +70,7 @@ export function parseExpenseDate(raw: string): ParsedExpenseDate {
     if (!isValidCalendarDate(year, month, day)) {
       return { iso: null, raw, flagged: true, reason: 'invalid_calendar_date' };
     }
-    return { iso: toIso(year, month, day), raw, flagged: false, reason: null };
+    return withFutureCheck({ iso: toIso(year, month, day), raw, flagged: false, reason: null });
   }
 
   // Lenient fallback for real-world typos: a doubled separator
@@ -66,7 +87,12 @@ export function parseExpenseDate(raw: string): ParsedExpenseDate {
     if (!isValidCalendarDate(year, month, day)) {
       return { iso: null, raw, flagged: true, reason: 'invalid_calendar_date' };
     }
-    return { iso: toIso(year, month, day), raw, flagged: true, reason: 'nonstandard_date_format' };
+    return withFutureCheck({
+      iso: toIso(year, month, day),
+      raw,
+      flagged: true,
+      reason: 'nonstandard_date_format',
+    });
   }
 
   return { iso: null, raw, flagged: true, reason: 'unparseable_date' };

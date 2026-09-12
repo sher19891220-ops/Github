@@ -45,6 +45,9 @@ export interface DocumentStatusSummary {
 export interface CommitResult {
   committed: number;
   rejected: number;
+  /** Rows left in `under_review`: a person flagged them, so the commit does
+   *  not post them and does not reject them either. They wait. */
+  held: number;
   entryIds: string[];
 }
 

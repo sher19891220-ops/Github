@@ -102,8 +102,13 @@ export function ReviewTable({ documentId }: { documentId: string }) {
     try {
       const result = await commitDocument(documentId);
       setCommitState({ phase: 'done', result });
+      // Only `parsed` rows post. An `under_review` row is held — not posted
+      // and not rejected — so painting it committed here would tell the
+      // operator their flagged rows went to the ledger when they are still
+      // sitting in the queue. `rejected` is set by the server on the rows it
+      // refused, so it is left alone too.
       setRows((prev) =>
-        prev.map((r) => (r.status === 'rejected' || r.status === 'committed' ? r : { ...r, status: 'committed' as const })),
+        prev.map((r) => (r.status === 'parsed' ? { ...r, status: 'committed' as const } : r)),
       );
     } catch (err) {
       // The commit route is transactional: any failure here means nothing
@@ -195,7 +200,11 @@ export function ReviewTable({ documentId }: { documentId: string }) {
       {commitState.phase === 'done' && (
         <p role="status" style={{ color: 'var(--good)' }}>
           Committed {commitState.result.committed} row{commitState.result.committed === 1 ? '' : 's'}
-          {commitState.result.rejected > 0 ? `, excluded ${commitState.result.rejected}` : ''}.
+          {commitState.result.rejected > 0 ? `, rejected ${commitState.result.rejected}` : ''}
+          {commitState.result.held > 0
+            ? `, held ${commitState.result.held} for review (still here, nothing lost)`
+            : ''}
+          .
           {commitState.result.entryIds.length > 0 && (
             <> Ledger entries: {commitState.result.entryIds.join(', ')}.</>
           )}

@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { isDecimal, isIsoDate } from '@/contract/types';
 import { parseExpensesDocument, sniffExpensesDocument } from '@/ingest/expenses';
+import { parseExpenseDate } from '@/ingest/expenses/dates';
 
 // Real, live-sheet export. Never a synthetic fixture — see CLAUDE.md §2 and
 // docs/SOURCE-DISCOVERY.md, which are quoted from this exact file.
@@ -119,6 +120,77 @@ describe.skipIf(!haveFixture)('parseExpensesDocument — real expenses.txt', () 
       expect(row.driverId).toBeNull();
       expect(row.truckId).toBeNull();
       expect(row.entityId).toBeNull();
+    }
+  });
+});
+
+/**
+ * Two defects the real sheet carries that a header-driven parser misses.
+ * Both were found by replaying the live export, not by reading the code.
+ */
+describe('parseExpenseDate — a cost cannot be incurred in the future', () => {
+  const AS_OF = new Date('2026-09-12T00:00:00Z');
+
+  it('takes a well-formed past date literally and does not flag it', () => {
+    const got = parseExpenseDate('02.18.25', AS_OF);
+    expect(got).toEqual({ iso: '2025-02-18', raw: '02.18.25', flagged: false, reason: null });
+  });
+
+  it('flags a drag-filled year that lands in the future', () => {
+    // The live sheet has eight consecutive interior-detailing rows at the same
+    // price dated 02.18.25 through 02.18.32 — Excel incremented the year
+    // instead of the day. The past ones are indistinguishable from real dates;
+    // these are not, and six of them were posting before this guard.
+    for (const raw of ['02.18.27', '02.18.30', '02.18.32']) {
+      const got = parseExpenseDate(raw, AS_OF);
+      expect(got.flagged).toBe(true);
+      expect(got.reason).toBe('future_date');
+      // Flagged for review, never silently dropped or rewritten.
+      expect(got.iso).not.toBeNull();
+    }
+  });
+
+  it('keeps the shape complaint when a date is both nonstandard and future', () => {
+    const got = parseExpenseDate('02.18.2030', AS_OF);
+    expect(got.flagged).toBe(true);
+    expect(got.reason).toBe('nonstandard_date_format+future_date');
+  });
+
+  it('does not flag today itself', () => {
+    expect(parseExpenseDate('09.12.26', AS_OF).flagged).toBe(false);
+  });
+});
+
+describe.skipIf(!haveFixture)('a cost section whose header the export blanked out', () => {
+  const text = haveFixture ? readFileSync(FIXTURE_PATH, 'utf8') : '';
+
+  it('adopts it from the row shape rather than discarding hundreds of cost rows', () => {
+    const result = parseExpensesDocument(text, 'doc-expenses-headerless');
+    // The live export has a 420-row block of variant-B cost rows — Penske and
+    // Ryder tolls, parking violations, a Samsara subscription — whose header
+    // survived only as a stray "Date" in one cell.
+    expect(result.stats.headerlessSectionsAdopted).toBeGreaterThan(0);
+    expect(result.rows.length).toBeGreaterThan(1700);
+  });
+
+  it('holds every inferred-schema row for review, however clean it looks', () => {
+    const result = parseExpensesDocument(text, 'doc-expenses-headerless-2');
+    const inferred = result.rows.filter((r) =>
+      (r.reviewNotes ?? '').includes('schema:inferred_from_row_shape'),
+    );
+    expect(inferred.length).toBeGreaterThan(0);
+    for (const row of inferred) expect(row.status).toBe('under_review');
+  });
+
+  it('still refuses the settlement table pasted into the same tab', () => {
+    // It also carries money at index 3 and a date at index 8, so only the
+    // `truck`/`trailer` check at index 6 keeps it out. Its running-balance
+    // columns would double-count if summed.
+    const result = parseExpensesDocument(text, 'doc-expenses-headerless-3');
+    for (const row of result.rows) {
+      const p = row.parsedPayload as Record<string, unknown>;
+      expect(String(p.unitTypeRaw ?? '').toLowerCase()).not.toMatch(/^(invoice|paid|unpaid)$/);
+      expect(String(p.vendorRaw ?? '').toLowerCase()).not.toMatch(/^(invoice|paid)$/);
     }
   });
 });

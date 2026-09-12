@@ -8,8 +8,8 @@ import { createDocument, getDocumentRows, getDocumentSummary } from '@/db/repo/d
 import { commitDocument } from '@/db/repo/commit';
 import { updateStagingRow } from '@/db/repo/stagingRows';
 import { listLedgerEntries } from '@/db/repo/ledger';
-import { CATEGORY_REVENUE, ENTITY_XTRACK_ID, ensureBaseFixtures } from './helpers';
-import { dispatchFixture } from './fixtures';
+import { CATEGORY_MAINTENANCE, CATEGORY_REVENUE, ENTITY_XTRACK_ID, ENTITY_ZONE_ID, ensureBaseFixtures } from './helpers';
+import { dispatchFixture, expensesFixture } from './fixtures';
 
 beforeAll(async () => {
   await ensureBaseFixtures();
@@ -172,5 +172,79 @@ describe('commitDocument — parse_status reflects staging state independent of 
     await commitDocument(created.documentId, 'controller@fleet');
     const summary = await getDocumentSummary(created.documentId);
     expect(summary?.parseStatus).toBe('parsed');
+  });
+});
+
+/**
+ * `under_review` has to actually hold, or every review flag the parsers raise
+ * is decoration. Commit used to select `status IN ('parsed','under_review')`,
+ * so any flagged row whose required fields happened to be filled posted
+ * anyway — and the real expenses sheet supplies both shapes that exposes: a
+ * drag-filled date of 02.18.32, and a 420-row section whose header the export
+ * dropped. Both carry an entity, an amount and a category.
+ */
+describe('a held row is neither posted nor rejected', () => {
+  beforeAll(async () => {
+    await ensureBaseFixtures();
+  });
+
+  it('leaves an under_review row in staging and counts it as held', async () => {
+    const unit = `HOLD${Date.now().toString().slice(-6)}`;
+    const created = await createDocument({
+      docType: 'maintenance',
+      fileName: `hold-${unit}.txt`,
+      mimeType: 'text/plain',
+      bytes: Buffer.from(expensesFixture(unit, '250.00', 'company', '03.04.26'), 'utf8'),
+      uploadedBy: 'integration-test',
+    });
+    const [row] = await getDocumentRows(created.documentId);
+
+    // Fill everything a commit needs, then flag it — so the ONLY thing
+    // stopping it is the flag.
+    const edit = await updateStagingRow(row!.stagingRowId, {
+      entityId: ENTITY_ZONE_ID,
+      categoryId: CATEGORY_MAINTENANCE,
+    });
+    expect(edit.ok).toBe(true);
+    await query(`UPDATE accounting.staging_row SET status = 'under_review' WHERE staging_row_id = $1`, [
+      row!.stagingRowId,
+    ]);
+
+    const result = await commitDocument(created.documentId, 'controller@fleet');
+    expect(result.committed).toBe(0);
+    expect(result.rejected).toBe(0);
+    expect(result.held).toBe(1);
+
+    // Still there, still flagged — recoverable, not silently dropped.
+    const after = await query<{ status: string }>(
+      `SELECT status FROM accounting.staging_row WHERE staging_row_id = $1`,
+      [row!.stagingRowId],
+    );
+    expect(after[0]?.status).toBe('under_review');
+  });
+
+  it('posts that same row once a reviewer clears the flag by editing it', async () => {
+    const unit = `CLR${Date.now().toString().slice(-6)}`;
+    const created = await createDocument({
+      docType: 'maintenance',
+      fileName: `clear-${unit}.txt`,
+      mimeType: 'text/plain',
+      bytes: Buffer.from(expensesFixture(unit, '310.00', 'company', '03.05.26'), 'utf8'),
+      uploadedBy: 'integration-test',
+    });
+    const [row] = await getDocumentRows(created.documentId);
+    await query(`UPDATE accounting.staging_row SET status = 'under_review' WHERE staging_row_id = $1`, [
+      row!.stagingRowId,
+    ]);
+
+    const edit = await updateStagingRow(row!.stagingRowId, {
+      entityId: ENTITY_ZONE_ID,
+      categoryId: CATEGORY_MAINTENANCE,
+    });
+    expect(edit.ok).toBe(true);
+
+    const result = await commitDocument(created.documentId, 'controller@fleet');
+    expect(result.committed).toBe(1);
+    expect(result.held).toBe(0);
   });
 });

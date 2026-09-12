@@ -108,19 +108,23 @@ export async function patchStagingRow(
  */
 export async function commitDocument(documentId: string): Promise<CommitResult> {
   const doc = documents.get(documentId);
-  if (!doc) return delay({ committed: 0, rejected: 0, entryIds: [] });
+  if (!doc) return delay({ committed: 0, rejected: 0, held: 0, entryIds: [] });
 
   if (committedDocuments.has(documentId)) {
     const committed = doc.rows.filter((r) => r.status === 'committed');
     return delay({
       committed: committed.length,
       rejected: doc.rows.filter((r) => r.status === 'rejected').length,
+      held: doc.rows.filter((r) => r.status === 'under_review').length,
       entryIds: committed.map((r) => `entry-${r.stagingRowId}`),
     });
   }
 
+  // Mirrors the server: only `parsed` rows are candidates. An
+  // `under_review` row is held, so its missing fields are not a reason to
+  // refuse the whole commit.
   const blocked = doc.rows.some(
-    (r) => r.status !== 'rejected' && r.status !== 'committed' &&
+    (r) => r.status === 'parsed' &&
       (r.entityId == null || r.accrualDate == null || r.categoryId == null || r.amount == null),
   );
   if (blocked) {
@@ -129,7 +133,7 @@ export async function commitDocument(documentId: string): Promise<CommitResult> 
 
   const entryIds: string[] = [];
   doc.rows = doc.rows.map((r) => {
-    if (r.status === 'rejected') return r;
+    if (r.status !== 'parsed') return r;
     entryIds.push(`entry-${r.stagingRowId}`);
     return { ...r, status: 'committed' as const };
   });
@@ -138,6 +142,7 @@ export async function commitDocument(documentId: string): Promise<CommitResult> 
   return delay({
     committed: entryIds.length,
     rejected: doc.rows.filter((r) => r.status === 'rejected').length,
+    held: doc.rows.filter((r) => r.status === 'under_review').length,
     entryIds,
   });
 }

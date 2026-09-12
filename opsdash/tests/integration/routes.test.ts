@@ -71,7 +71,8 @@ describe('API routes, end to end against a real database', () => {
     expect(patchRes.status).toBe(200);
     const patchBody = await patchRes.json();
     expect(patchBody.row.jurisdiction).toBe('IL');
-    expect(patchBody.row.status).toBe('under_review');
+    // A reviewer's edit marks the row ready to post, not still-pending.
+    expect(patchBody.row.status).toBe('parsed');
 
     const commitReq = new Request(`http://localhost/api/documents/${documentId}/commit`, { method: 'POST' });
     const commitRes = await postCommit(commitReq, { params: Promise.resolve({ id: documentId }) });

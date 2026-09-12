@@ -77,6 +77,57 @@ function detectExpenseHeader(cells: string[]): ExpenseColumnMap | null {
   };
 }
 
+/**
+ * A cost section whose header row was blanked out by the export.
+ *
+ * Real data has a 420-row block of variant-B cost rows — Penske and Ryder
+ * tolls, parking violations, shop invoices, a Samsara subscription — whose
+ * header survived only as a stray "Date" in one cell. Requiring a header match
+ * discarded every one of them as `outside_recognized_cost_table`, which is
+ * hundreds of real cost rows silently absent from the P&L.
+ *
+ * So a headerless section is adopted when a row carries variant B's
+ * *signature*, not its column count (§5: column counts on this tab are 11, 9,
+ * 4 and 3, and are never a safe key):
+ *
+ *   - index 3 parses as money,
+ *   - index 6 is literally `truck` or `trailer`,
+ *   - index 8 parses as a date.
+ *
+ * Index 6 is what makes this safe. The settlement table pasted into the same
+ * tab also has money at index 3 and a date at index 8, but carries `paid`
+ * there — so it is still refused, and its running-balance columns are still
+ * never summed.
+ *
+ * Rows adopted this way are staged `under_review` regardless of how clean
+ * they look: the column meanings were inferred from shape rather than read
+ * from a header, and that inference is exactly the kind of thing a person
+ * should confirm before it reaches the ledger.
+ */
+function inferHeaderlessVariantB(cells: string[]): ExpenseColumnMap | null {
+  if (cells.length < 10) return null;
+  const at = (i: number) => (cells[i] ?? '').trim();
+  const MONEY = /^\$?-?[\d,]+\.\d{2}$/;
+  const DATE = /^\d{1,2}\.{1,2}\d{1,2}\.{1,2}(\d{2}|\d{4})$/;
+  if (!MONEY.test(at(3))) return null;
+  if (!/^(truck|trailer)$/i.test(at(6))) return null;
+  if (!DATE.test(at(8))) return null;
+  return {
+    variant: 'B',
+    vendorIdx: 0,
+    transferCodeIdx: 1,
+    idIdx: 2,
+    amountIdx: 3,
+    unitIdx: 4,
+    issuedToIdx: 5,
+    unitTypeIdx: 6,
+    costTypeIdx: 7,
+    dateIdx: 8,
+    expenseSideIdx: 9,
+    detailsIdx: 10,
+  };
+}
+
 /** Shop-invoice summary tables (`Invoice number | Amount`, `Inv# | Inv date
  *  | Amount | Total`) share this tab. They are bulk totals, not itemised
  *  per-truck costs — SOURCE-DISCOVERY §11 flags ingesting both as a
@@ -100,6 +151,8 @@ export interface ExpenseParseStats {
   categoryGroupCounts: Record<CategoryGroupHint, number>;
   underReviewCount: number;
   flaggedDateCount: number;
+  /** Sections parsed without a header, by matching a known variant's shape. */
+  headerlessSectionsAdopted: number;
 }
 
 export interface ExpenseParseResult {
@@ -127,6 +180,7 @@ function emptyStats(sourceRowsTotal: number): ExpenseParseStats {
     categoryGroupCounts: { toll: 0, maintenance: 0 },
     underReviewCount: 0,
     flaggedDateCount: 0,
+    headerlessSectionsAdopted: 0,
   };
 }
 
@@ -143,6 +197,8 @@ export function parseExpensesDocument(text: string, documentId: string): Expense
 
   let currentSchema: ExpenseColumnMap | null = null;
   let inCostTable = false;
+  let schemaWasInferred = false;
+  let headerlessSectionsAdopted = 0;
   let sectionsFound = 0;
   let alignmentRowsSeen = 0;
   let nonCostHeaderRowsSeen = 0;
@@ -160,6 +216,7 @@ export function parseExpensesDocument(text: string, documentId: string): Expense
       // whose column count changed anyway. Require a fresh header match.
       currentSchema = null;
       inCostTable = false;
+      schemaWasInferred = false;
       alignmentRowsSeen += 1;
       continue;
     }
@@ -168,6 +225,7 @@ export function parseExpensesDocument(text: string, documentId: string): Expense
     if (headerMap) {
       currentSchema = headerMap;
       inCostTable = true;
+      schemaWasInferred = false;
       sectionsFound += 1;
       continue;
     }
@@ -175,13 +233,27 @@ export function parseExpensesDocument(text: string, documentId: string): Expense
     if (isInvoiceSummaryHeader(cells)) {
       inCostTable = false;
       currentSchema = null;
+      schemaWasInferred = false;
       nonCostHeaderRowsSeen += 1;
       continue;
     }
 
     if (!currentSchema || !inCostTable) {
-      bump('outside_recognized_cost_table');
-      continue;
+      // The section's header may simply be missing from the export. Adopt it
+      // from the row's own shape if it unmistakably matches a known variant,
+      // and remember that it was inferred so every row it produces is held
+      // for review.
+      const inferred = inferHeaderlessVariantB(cells);
+      if (inferred) {
+        currentSchema = inferred;
+        inCostTable = true;
+        schemaWasInferred = true;
+        sectionsFound += 1;
+        headerlessSectionsAdopted += 1;
+      } else {
+        bump('outside_recognized_cost_table');
+        continue;
+      }
     }
 
     if (isBlankRow(cells)) {
@@ -242,6 +314,12 @@ export function parseExpensesDocument(text: string, documentId: string): Expense
     const entityHint = extractEntityHint(detailsRaw || null);
 
     const reviewReasons: string[] = [];
+    if (schemaWasInferred) {
+      // The column meanings came from the row's shape, not from a header this
+      // section actually carried. Every such row waits for a person, however
+      // clean it looks.
+      reviewReasons.push('schema:inferred_from_row_shape(section header missing from the export)');
+    }
     if (date.flagged) reviewReasons.push(`date:${date.reason ?? 'unknown'}("${dateRawCell}")`);
     if (chargedTo.value === 'unknown') {
       reviewReasons.push(`chargedTo:unrecognized_value("${expenseSideRawCell}")`);
@@ -309,6 +387,7 @@ export function parseExpensesDocument(text: string, documentId: string): Expense
   stats.tableSectionsFound = sectionsFound;
   stats.alignmentRowsSeen = alignmentRowsSeen;
   stats.nonCostHeaderRowsSeen = nonCostHeaderRowsSeen;
+  stats.headerlessSectionsAdopted = headerlessSectionsAdopted;
   stats.rowsEmitted = rows.length;
   stats.skippedByReason = skippedByReason;
   stats.rowsSkipped = Object.values(skippedByReason).reduce((a, b) => a + b, 0);

@@ -9,11 +9,25 @@
  * `edit` is `Partial<StagingRowEdit>` from `@/contract/types` — the shape
  * the UI workstream defined and now imports directly. It carries no
  * `reviewedPayload`/`status`/`reviewedBy`: `reviewedPayload` is derived here
- * from whichever normalized fields changed, `status` moves to
- * `under_review` automatically (an edit can never reopen a `committed` row,
- * and can never itself set `committed` — only `POST /commit` does that),
- * and `reviewedBy` is a side channel the route reads from a header rather
- * than the body, since the contract type has no slot for it.
+ * from whichever normalized fields changed, and `reviewedBy` is a side
+ * channel the route reads from a header rather than the body, since the
+ * contract type has no slot for it.
+ *
+ * **An edit clears `under_review`.** `under_review` means "a machine flagged
+ * this and a person has not looked yet"; a person editing the row is that
+ * person looking, so the row becomes `parsed` and the next commit posts it.
+ * What the operator decided stays traceable through `reviewed_payload`,
+ * `reviewed_by` and `reviewed_at` — the status is a queue position, not the
+ * audit trail.
+ *
+ * This used to move every edit TO `under_review`, which was harmless only
+ * because `commitDocument` posted `under_review` rows too. Once commit
+ * started honouring the flag, that pair became a deadlock: an edit could
+ * never be posted. Holding the flag is the useful half, so the edit side
+ * gives way.
+ *
+ * An edit can never reopen a `committed` row, and can never itself set
+ * `committed` — only `POST /commit` does that.
  */
 import { isDecimal, isIsoDate, type StagingRow, type StagingRowEdit } from '@/contract/types';
 import { withTransaction } from '@/db/pool';
@@ -93,7 +107,7 @@ export async function updateStagingRow(
       quantity: pick(edit.quantity, current.quantity),
       jurisdiction: pick(edit.jurisdiction, current.jurisdiction),
       reviewNotes: pick(edit.reviewNotes, current.reviewNotes),
-      status: touchesValue && current.status !== 'committed' ? 'under_review' : current.status,
+      status: touchesValue && current.status !== 'committed' ? 'parsed' : current.status,
     };
 
     // reviewed_payload is never sent by the caller (the contract's
