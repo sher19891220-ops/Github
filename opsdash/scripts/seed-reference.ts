@@ -47,6 +47,12 @@ const CATEGORIES: Array<[id: string, group: string, name: string, sign: number]>
   ['maintenance.tires', 'maintenance', 'Tires', -1],
   ['maintenance.pm', 'maintenance', 'Preventive maintenance', -1],
   ['maintenance.roadside', 'maintenance', 'Roadside service', -1],
+  // Added from the real expenses export rather than from imagination:
+  // washing and detailing is 93 rows and $18,277, and consumables
+  // (straps, chains, mudflaps) another 137 rows and $36,416. Filing
+  // either under "repairs" would make that category mean nothing.
+  ['maintenance.wash', 'maintenance', 'Washing and detailing', -1],
+  ['maintenance.supplies', 'maintenance', 'Consumables and fittings', -1],
   ['ifta.tax', 'ifta', 'IFTA fuel tax', -1],
   ['ifta.weight_distance', 'ifta', 'Weight-distance tax (NY/KY/NM/OR)', -1],
   ['insurance.liability', 'insurance', 'Liability and cargo insurance', -1],
@@ -54,6 +60,7 @@ const CATEGORIES: Array<[id: string, group: string, name: string, sign: number]>
   ['lease.truck', 'lease', 'Truck lease and financing', -1],
   ['other_cost.eld', 'other_cost', 'ELD and telematics', -1],
   ['other_cost.factoring_fee', 'other_cost', 'Factoring fees', -1],
+  ['other_cost.parking', 'other_cost', 'Parking, yard and storage', -1],
 ];
 
 async function main(): Promise<void> {
@@ -103,6 +110,18 @@ async function main(): Promise<void> {
        VALUES ('entity', $1, $2, $3)
        ON CONFLICT (source_system, source_key, canonical_kind) DO NOTHING`,
       [id, system, key],
+    );
+  }
+
+  // A rule that proposes a category the chart of accounts does not have
+  // would fail at apply time, in front of the operator, after they had
+  // already made the decision. Checked here instead.
+  const { suggestableCategories } = await import('../src/engines/categorise/suggest');
+  const known = new Set(CATEGORIES.map(([id]) => id));
+  const missing = suggestableCategories().filter((c) => !known.has(c));
+  if (missing.length > 0) {
+    throw new Error(
+      `The categorisation rules can propose ${missing.join(', ')}, which this chart of accounts does not define.`,
     );
   }
 

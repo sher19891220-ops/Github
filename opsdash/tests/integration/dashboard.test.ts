@@ -96,6 +96,41 @@ describe('getDashboard', () => {
     expect(d.marginBlocked).toMatch(/shown equal to revenue/);
   });
 
+  it('says how much cost is staged but not posted, beside the margin', async () => {
+    /**
+     * Making margin computable was not the same as making it right. On
+     * the first real run the cost side posted $57,028 against $2,336,117
+     * of revenue — a 97.6% margin, which no trucking fleet has ever had.
+     * Arithmetically correct, every bit as misleading as the figure it
+     * replaced, and harder to notice because it no longer equalled
+     * revenue exactly.
+     *
+     * A reader should not need to know what a plausible operating ratio
+     * is to see that a number is unfinished.
+     */
+    // A staged, uncommitted cost row in the window — which is the state
+    // the real run was in, with 1,008 of them.
+    const doc = await createDocument({
+      docType: 'maintenance',
+      fileName: `unposted-${YEAR}.txt`,
+      mimeType: 'application/pdf',
+      bytes: Buffer.from(`unposted cost ${YEAR}`, 'utf8'),
+      uploadedBy: 'test',
+    });
+    await query(
+      `INSERT INTO accounting.staging_row
+         (document_id, row_index, parsed_payload, accrual_date, category_id, amount, status)
+       VALUES ($1, 9001, '{}'::jsonb, $2::date, $3, -1234.56, 'under_review')
+       ON CONFLICT (document_id, row_index) DO NOTHING`,
+      [doc.documentId, `${YEAR}-03-20`, CATEGORY_FUEL],
+    );
+
+    const d = await getDashboard(WINDOW.from, WINDOW.to);
+    expect(d.unpostedCost.rowCount).toBeGreaterThan(0);
+    expect(d.unpostedCost.amount).toMatch(/^\d+\.\d{2}$/);
+    expect(Number(d.unpostedCost.amount)).toBeGreaterThanOrEqual(1234.56);
+  });
+
   it('withholds margin the other way round too', async () => {
     await post(`${YEAR + 4}-04-01`, CATEGORY_FUEL, '-5000.00', 'company');
     const d = await getDashboard(`${YEAR + 4}-01-01`, `${YEAR + 4}-12-31`);

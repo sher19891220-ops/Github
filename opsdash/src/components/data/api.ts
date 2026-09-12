@@ -69,6 +69,11 @@ export const getDashboard = http.getDashboard;
 // its actuals all the way to the screen.
 export const getCeoView = http.getCeoView;
 
+// Bulk categorisation. Live only — a suggested category applied to
+// fabricated rows would teach the wrong instinct about a real one.
+export const getCategoryGroups = http.getCategoryGroups;
+export const bulkCategorise = http.bulkCategorise;
+
 // Live only. An IFTA figure that traces to nothing is the exact thing
 // this engine was built to refuse; a mock one would be that, on screen.
 export const getIftaReturn = http.getIftaReturn;

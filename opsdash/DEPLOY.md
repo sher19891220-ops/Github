@@ -86,6 +86,22 @@ highest rate is under $0.50 per gallon, because that means the wrong
 column was copied — the matrix prints US$/gallon beside CAN$/litre, and
 that mistake has already happened once during this build.
 
+## Categorising the first expenses upload
+
+The expenses parser leaves `category_id` null on purpose — a category is
+an accounting judgement, not something to read out of a free-text cell.
+On the real export that is 1,342 rows, which one at a time means never.
+
+Open the document from the review queue and use **Categorise in bulk** at
+the top. On the operator's real file the rules group 1,020 of 1,342 rows
+into nine decisions covering $575k of $719k; the remaining 247 distinct
+descriptions ("restack", "claim", "truck issue") are genuine one-offs and
+are listed last for individual attention.
+
+Nothing is applied automatically. Each group shows the rule that fired and
+its longest, least tidy descriptions, so what might not belong is visible
+before a few hundred rows are accepted at once.
+
 ## The integration suite needs its own database
 
 `npm test` seeds its own entities and `source_key_map` entries under the

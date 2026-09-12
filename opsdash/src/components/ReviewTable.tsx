@@ -205,6 +205,9 @@ export function ReviewTable({ documentId }: { documentId: string }) {
         <p role="alert" style={{ color: 'var(--bad)' }}>{commitState.message}</p>
       )}
 
+      {/* The table is wide and the payload column is unpredictable; its
+          own scroller keeps a long row from moving the page. */}
+      <div style={{ overflowX: 'auto' }}>
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.92em' }}>
         <thead>
           <tr style={{ borderBottom: '2px solid var(--line)' }}>
@@ -333,15 +336,30 @@ export function ReviewTable({ documentId }: { documentId: string }) {
           })}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }
 
+/**
+ * What the parser read, as one line.
+ *
+ * `overflowWrap: anywhere` is load-bearing. The real expenses export
+ * produces payloads like `idRaw: has paid · dateRaw: 02.18.22 · unitRaw:
+ * 225 · unitType: …` — a single unbroken 426px run that pushed the whole
+ * review page 148px wider than the viewport, so every row scrolled
+ * sideways. It only shows up on real data: the test fixtures' payloads
+ * are short enough to fit.
+ *
+ * `display: block` with a max width, rather than letting the cell size
+ * itself: a table cell will happily grow to fit its content and take the
+ * table with it.
+ */
 function ParsedSummary({ row }: { row: StagingRow }) {
   const entries = Object.entries(row.parsedPayload);
   if (entries.length === 0) return <span>(no parsed fields)</span>;
   return (
-    <span>
+    <span style={{ display: 'block', maxWidth: '32rem', overflowWrap: 'anywhere' }}>
       {entries.map(([k, v]) => `${k}: ${formatParsedValue(v)}`).join(' · ')}
     </span>
   );

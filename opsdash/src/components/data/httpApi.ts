@@ -14,6 +14,7 @@ import type { RegisterInput, SheetSourceRecord, SyncResult } from '@/db/repo/she
 import type { IftaReturnView } from '@/db/repo/ifta';
 import type { DashboardResponse } from '@/db/repo/dashboard';
 import type { CeoResponse } from '@/db/repo/ceo';
+import type { ApplyResult, CategoryGroupsView } from '@/db/repo/categorise';
 import type {
   LedgerEntry,
   ManualAttestation,
@@ -433,6 +434,24 @@ export async function getCeoView(q: { from?: string; to?: string } = {}): Promis
   if (q.to) params.set('to', q.to);
   const qs = params.toString();
   return fetchJson<CeoResponse>(`/api/ceo${qs ? `?${qs}` : ''}`);
+}
+
+export async function getCategoryGroups(documentId: string): Promise<CategoryGroupsView> {
+  return fetchJson<CategoryGroupsView>(`/api/staging/groups?documentId=${encodeURIComponent(documentId)}`);
+}
+
+export async function bulkCategorise(input: {
+  documentId: string;
+  categoryId: string;
+  stagingRowIds: readonly string[];
+  appliedBy: string;
+  basis: string;
+}): Promise<ApplyResult> {
+  return fetchJson('/api/staging/bulk-categorise', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(input),
+  });
 }
 
 export type { Decimal };

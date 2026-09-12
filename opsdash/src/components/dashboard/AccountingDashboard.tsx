@@ -191,14 +191,29 @@ export function AccountingDashboard() {
                 sub={live.data.marginBlocked}
               />
             ) : (
-              <LiveMoneyTile
+              <StatTile
                 label="Margin"
-                figure={{
-                  amount: live.data.margin,
-                  entryCount: live.data.revenue.entryCount + live.data.companyCost.entryCount,
-                }}
-                tone={live.data.margin.startsWith('-') ? 'bad' : 'good'}
-                sub="Revenue less company cost only"
+                value={
+                  <span style={{ color: live.data.margin.startsWith('-') ? 'var(--bad)' : 'var(--good)' }}>
+                    {formatMoney(live.data.margin)}
+                  </span>
+                }
+                // A computable margin is not a finished one. On the first
+                // real run the cost side was $57k against $2.34M of
+                // revenue — a 97.6% margin, which no fleet has ever had.
+                // The chip says which it is.
+                chip={
+                  live.data.unpostedCost.rowCount > 0 ? (
+                    <StatusPill label="Incomplete" tone="warn" />
+                  ) : (
+                    <StatusPill label="Live" tone="good" />
+                  )
+                }
+                sub={
+                  live.data.unpostedCost.rowCount > 0
+                    ? `${live.data.unpostedCost.rowCount} cost rows worth ${formatMoney(live.data.unpostedCost.amount)} are staged and not posted, so this margin is higher than the real one.`
+                    : 'Revenue less company cost only'
+                }
               />
             )}
             <LiveMoneyTile

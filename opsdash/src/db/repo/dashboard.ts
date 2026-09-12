@@ -52,6 +52,21 @@ export interface DashboardResponse {
   workQueue: DashboardWorkItem[];
   /** True when nothing at all has been posted in this window. */
   isEmpty: boolean;
+  /**
+   * Cost that is staged and not posted.
+   *
+   * Making margin computable was not the same as making it right. On the
+   * first real run the cost side posted $57,028 against $2,336,117 of
+   * revenue — a 97.6% margin, which no trucking fleet has ever had. The
+   * figure was arithmetically correct and every bit as misleading as the
+   * one it replaced; it just no longer equalled revenue exactly, which
+   * made it harder to notice rather than easier.
+   *
+   * So the margin carries how much cost is still sitting in staging. A
+   * reader should not have to know what a plausible operating ratio is to
+   * see that a number is not finished.
+   */
+  unpostedCost: { rowCount: number; amount: Decimal };
 }
 
 /**
@@ -109,6 +124,21 @@ export async function getDashboard(from: string, to: string): Promise<DashboardR
   const rev = figure(revenue);
   const cst = figure(cost);
 
+  // Staged, uncommitted, and destined for a cost account. Counted from
+  // the staging table rather than inferred from the ledger's silence,
+  // because "no cost posted" and "cost waiting on a person" are different
+  // states and only one of them is anybody's fault.
+  const unposted = await query<{ n: string; amount: string }>(
+    `SELECT count(*) AS n, COALESCE(sum(abs(s.amount)), 0)::numeric(14,2)::text AS amount
+       FROM accounting.staging_row s
+       LEFT JOIN accounting.category c ON c.category_id = s.category_id
+      WHERE s.status <> 'committed'
+        AND s.amount IS NOT NULL
+        AND (c.category_group IS NULL OR c.category_group <> 'revenue')
+        AND (s.accrual_date IS NULL OR s.accrual_date BETWEEN $1::date AND $2::date)`,
+    [from, to],
+  );
+
   /**
    * Margin is withheld when either side has no entries, and this is the
    * most important rule on the page.
@@ -148,6 +178,10 @@ export async function getDashboard(from: string, to: string): Promise<DashboardR
     driverReceivable: figure(driverBorne),
     workQueue,
     isEmpty: rev.entryCount === 0 && cst.entryCount === 0,
+    unpostedCost: {
+      rowCount: Number(unposted[0]?.n ?? 0),
+      amount: unposted[0]?.amount ?? '0.00',
+    },
   };
 }
 
