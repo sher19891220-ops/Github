@@ -67,6 +67,12 @@ Two consequences the Phase 2/3/4 agents must design around:
   to Xtrack, or a driver converting from company to lease-to-own, must not silently
   restate a closed period. `truck_entity_history` and `driver_class_history` are
   what the posting code reads to resolve the correct value for the accrual date.
+  **`truck_entity_history` is wired up as of migration 015.** Until then the
+  truck → carrier map lived in `source_key_map`, which permits one carrier per
+  unit for all time, so a transferred truck's whole year landed on one side of
+  the move. `resolveEntityFromTruck(unit, onDate)` now reads the history table
+  and refuses a date no period covers, rather than borrowing the neighbouring
+  one. `driver_class_history` is still unwired.
 - Upstream systems disagree on identity. `source_key_map` is the single crosswalk
   from any `(source_system, source_key)` to a canonical `entity`/`truck`/`driver`.
   Nothing else may join on truck numbers by string match.

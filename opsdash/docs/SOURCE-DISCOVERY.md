@@ -307,6 +307,60 @@ those 63 came from the driver-name match** — the second-weakest tier — and o
 right direction even though the assigned count barely moved: the point is not
 how many cells are filled, it is what fills them.
 
+### The unanswerable ones were asking the wrong question
+
+Thirteen units resisted every source. Put to the operator, the answer was that
+the question had no single answer: **units transfer between the carriers
+mid-year, and units leave** — returned to the vendor, or an owner-operator who
+quits. A truck listed under two companies is not ambiguous data. It is a
+transfer, and it has a date.
+
+That is checkable, and it checks out. Every unit absent from the declared
+roster **stops earning before the dispatch sheet ends** — one after a single
+week, the rest within six to fourteen — and three of the five carry an
+owner-operator pay code. They did not go missing from the
+roster; they left, and the roster is current.
+
+So the dispatch sheet's own weekly blocks, which are dated, give each unit a
+period: first week seen, and an end date from either the roster's `Inactive
+date` column or the last week the unit appears while the sheet runs on without
+it. Resolving the carrier within a period uses the driver on those weekly rows,
+scored against every company list including the fuel summary's, which still
+names drivers who have since left.
+
+That driver method agrees with the declared roster on **36 of 39 units (92%)**,
+the best of any inferred source here — but only after requiring **two** matching
+name tokens. One is not identity: the real data has three different drivers
+sharing one common first name, and a single-token rule maps all of them to
+whichever of the three is on the declared roster.
+
+Result: **74 of 82 units carry a dated carrier period**, 50 of them declared;
+23 periods have an end date; 8 units remain open at 5.8% of revenue. Replayed
+against the real dispatch sheet, **313 of 336 truck-weeks (93.2%) resolve to a
+carrier**.
+
+One row resolves to nothing for an interesting reason: a unit whose roster
+`Inactive date` falls ten days before a week in which the sheet still shows it
+earning. The resolver refuses it as `outside_period` rather than quietly
+stretching the period to fit — one of those two records is wrong, and only the
+operator knows which.
+
+### What this cost in the schema
+
+`truck_entity_history` had been in the schema since migration 001, described in
+DATA-CONTRACT.md as "what the posting code reads to resolve the correct value
+for the accrual date", and **nothing had ever written to it**. The truck →
+carrier map lived in `source_key_map` instead, whose primary key
+(source_system, source_key, canonical_kind) allows exactly one carrier per unit
+for all time.
+
+Migration 015 wires the history table up and adds the one guarantee it lacked:
+its primary key (truck_id, effective_from) stops two periods *starting* on the
+same day but happily accepts 01-01..06-01 alongside 03-01..09-01, which would
+leave the resolver picking whichever row the planner reached first. An
+exclusion constraint over `daterange(effective_from, effective_to, '[]')` makes
+overlap impossible, so the date lookup is a function.
+
 None of this belongs in a parser. Resolution happens in the review/commit layer
 through `source_key_map`, so that a figure can always be traced to *which*
 source decided its entity. Until a truck is resolved, its entity is null — an

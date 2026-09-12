@@ -74,16 +74,33 @@ export async function insertStagingRows(
     // real dispatch export 1,322 of 1,386 revenue rows have no marker, and
     // every one of them names a truck.
     if (resolved.entityId === null && unitForEntity !== null) {
-      const viaTruck = await resolveEntityFromTruck(q, unitForEntity);
+      // Trucks move between the carriers mid-year, so the roster is
+      // effective-dated and the lookup needs this row's own accrual date.
+      // Without it a transferred unit's whole year lands on one carrier.
+      const viaTruck = await resolveEntityFromTruck(q, unitForEntity, row.accrualDate ?? null);
       if (viaTruck.entityId !== null) {
-        resolved = viaTruck;
+        resolved = { entityId: viaTruck.entityId, resolvedFrom: 'truck_roster' };
         // Attributed, not asserted. The roster is the operator's own
         // working crosswalk and its column is named `entity_CONFIRM_THIS`;
         // posting a year of revenue on an unconfirmed guess would be the
         // silent estimate this build exists to refuse. The row carries the
         // entity AND the reason, and waits for a person.
+        const on = row.accrualDate ? ` as of ${row.accrualDate}` : '';
         const note =
-          `Company not stated on this row; attributed to the entity the truck roster gives for unit ${unitForEntity}. Confirm before this posts.`;
+          `Company not stated on this row; attributed to the entity the truck roster gives for unit ${unitForEntity}${on} (${viaTruck.basis}). Confirm before this posts.`;
+        status = 'under_review';
+        reviewNotes = reviewNotes ? `${reviewNotes} ${note}` : note;
+      } else {
+        // Say which of the three failures it was. "No entity" sends a
+        // reviewer hunting for a missing roster line that may not be the
+        // problem: a departed unit and an undated transfer need different
+        // answers from the operator.
+        const why = {
+          no_assignment: `unit ${unitForEntity} is not in the truck roster`,
+          outside_period: `unit ${unitForEntity} is in the truck roster, but no carrier assignment covers ${row.accrualDate} — the unit had left, or had not yet arrived`,
+          date_required: `unit ${unitForEntity} transferred between carriers and this row has no accrual date, so which carrier earned it cannot be told from the row`,
+        }[viaTruck.reason];
+        const note = `Company not stated on this row and could not be derived: ${why}.`;
         status = 'under_review';
         reviewNotes = reviewNotes ? `${reviewNotes} ${note}` : note;
       }
