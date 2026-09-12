@@ -1,7 +1,8 @@
 """
-Builds the payload for the dashboard's "Registration, debt & break-even" view.
+Builds the payload for the dashboard's "True cost: registration, insurance,
+maintenance & debt" view.
 
-Three pieces that are computed and tested elsewhere, assembled here and
+Five pieces that are computed and tested elsewhere, assembled here and
 NOWHERE recomputed -- the same discipline as build_pnl_view.py, for the same
 reason: a second derivation can drift from the one the tests actually cover.
 
@@ -31,6 +32,24 @@ reason: a second derivation can drift from the one the tests actually cover.
      effect of the correction is visible at a glance rather than as one
      number.
 
+  4. INSURANCE AT COST. `insurance_cost.py` prices every coverage line on its
+     own basis (per unit, per dollar of insured value, per dollar of gross,
+     per mile, per owner-operator) and prefers the ACTUAL bill over the rated
+     figure wherever one exists -- auto liability nets six return-premium
+     credits as units left the schedule. This assembles its per-company
+     effective annual/weekly/per-truck-week cost, alongside (never merged
+     into) the sheet's own blended admin/insurance/trailer line, and the
+     "carried by nobody" total for insured units on no company's P&L.
+
+  5. MAINTENANCE, MEASURED AGAINST THE PANEL'S OWN LINE. `truck_maintenance.py`
+     joins two independent repair ledgers to each truck's own P&L window and
+     reconciles the combined, company-borne total against the weekly P&L
+     panel's own `maintenance` line for the SAME weeks. The ledgers cover
+     roughly 40-50% of what the panel books -- a measured floor, never the
+     true figure -- and that gap is exactly why `build_pnl_view.py`'s P&L
+     view still prices maintenance from a modeled $/mile range rather than
+     this ledger alone.
+
 WHY WEEKS=13. Same window `cost_structure.py`'s own tests and CLI default use
 -- the last 13 weeks of each company's own sheet -- so this view cannot
 disagree with what `python analysis/cost_structure.py` prints for the same
@@ -46,9 +65,12 @@ sys.path.insert(0, str(ROOT / "analysis"))
 sys.path.insert(0, str(ROOT / "ingest"))
 warnings.filterwarnings("ignore")
 
-import cost_structure as C   # noqa: E402
-import truck_breakeven as B  # noqa: E402
-import iron_lease as IL      # noqa: E402
+import cost_structure as C     # noqa: E402
+import truck_breakeven as B    # noqa: E402
+import iron_lease as IL        # noqa: E402
+import insurance_cost as INS   # noqa: E402
+import truck_maintenance as TM  # noqa: E402
+from xtrack_trend import load as load_weeks  # noqa: E402
 
 WEEKS = 13
 RATES = (2.40, 2.60, 2.80, 3.00, 3.20, 3.40)
@@ -154,6 +176,87 @@ def iron_lease_debt_section():
     }
 
 
+def insurance_section(ss):
+    reg = INS.load()
+    by = INS.per_company(reg)
+    fails = INS.controls(reg, by)
+    pdal = reg["allocation"]["physical_damage"]["from_the_submitted_schedule"]
+    u = INS.unallocated(reg)
+
+    companies = {}
+    for c in C.COMPANIES:
+        annual = sum(by[c].values())
+        units = pdal[c]["units"]
+        companies[c] = {
+            "annual": round(annual, 2),
+            "per_week": round(annual / INS.WEEKS, 2),
+            "units": units,
+            "per_truck_week": round(annual / INS.WEEKS / units, 2) if units else None,
+            "lines": {k: round(v, 2) for k, v in by[c].items()},
+            "sheet_admin_insur_trailer_per_truck_week": round(ss[c]["m"]["admin_per_truck_week"], 2),
+        }
+
+    carried_annual = sum(v for k, v in u.items() if not k.startswith("_"))
+    return {
+        "controls_pass": not fails,
+        "companies": companies,
+        "carried_by_nobody": {
+            "annual": round(carried_annual, 2),
+            "per_week": round(carried_annual / INS.WEEKS, 2),
+            "note": u["_note"],
+        },
+        "note": "The effective (at-cost) premium: the actual bill where one exists, "
+                "the rated figure only where it does not -- auto liability already "
+                "nets six return-premium credits paid back as units left the "
+                "schedule. The sheet's own 'admin/insurance/trailer' column blends "
+                "insurance with a little admin and trailer rent, so it is not the "
+                "same figure; shown alongside for comparison, never reconciled "
+                "into it. 'Carried by nobody' is the insured units on no "
+                "company's P&L at all -- a cleanup, not a misstatement.",
+    }
+
+
+def maintenance_section(ss):
+    charges, ledger_fails = TM.all_charges()
+    weeks_df = TM.all_weeks()
+    rec = TM.reconcile_to_panel(charges, weeks_df)
+
+    companies = {}
+    tot_panel = tot_combined = 0.0
+    for c in C.COMPANIES:
+        wk = load_weeks(B.ROOT / B.WORKBOOK[c])
+        n_weeks = len(wk)
+        trucks = ss[c]["m"]["trucks"]
+        r = rec[c]
+        companies[c] = {
+            "window_weeks": n_weeks,
+            "panel_total": round(r["panel"], 2),
+            "ledger_first_source": round(r["first_source"], 2),
+            "ledger_second_source": round(r["second_source"], 2),
+            "ledger_combined": round(r["combined"], 2),
+            "coverage_ratio": round(r["ratio"], 4) if r["ratio"] else None,
+            "panel_per_truck_week": round(r["panel"] / n_weeks / trucks, 2),
+            "ledger_per_truck_week": round(r["combined"] / n_weeks / trucks, 2),
+        }
+        tot_panel += r["panel"]
+        tot_combined += r["combined"]
+
+    return {
+        "companies": companies,
+        "fleet_coverage_ratio": round(tot_combined / tot_panel, 4) if tot_panel else None,
+        "ledger_has_known_data_quality_issues": any(ledger_fails.values()),
+        "note": "Two independent repair ledgers, joined to each truck's own P&L "
+                "window and reconciled against the weekly panel's own "
+                "'maintenance' line for the same weeks. The ledgers cover "
+                "roughly 40-50% of what the panel books -- a measured FLOOR, "
+                "never the true figure -- because most repair spend rides the "
+                "fuel card or Truck Max invoices this pipeline has not yet "
+                "matched line for line. The panel's own per-truck-week figure "
+                "is the better number for a total; the ledger is the better "
+                "number for which trucks and categories are driving it.",
+    }
+
+
 def main():
     ss = {c: C.structure(c, WEEKS) for c in C.COMPANIES}
     bad = {c: C.controls(s) for c, s in ss.items()}
@@ -170,6 +273,8 @@ def main():
         "registration": registration_section(ss),
         "breakeven": {c: breakeven_grid(ss[c]) for c in C.COMPANIES},
         "iron_lease_debt": iron_lease_debt_section(),
+        "insurance": insurance_section(ss),
+        "maintenance": maintenance_section(ss),
     }
     out_path = ROOT / "data" / "processed" / "cost_structure_view.json"
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -183,6 +288,16 @@ def main():
     if out["iron_lease_debt"]:
         print(f"  Iron Lease/TBK remaining obligation: "
               f"${out['iron_lease_debt']['total_remaining_cash_obligation']:,.0f}")
+    for c in C.COMPANIES:
+        i = out["insurance"]["companies"][c]
+        print(f"  {c}: insurance at cost ${i['per_truck_week']:,.0f}/truck-wk "
+              f"({i['units']} units) vs sheet's admin/insur/trailer "
+              f"${i['sheet_admin_insur_trailer_per_truck_week']:,.0f}/truck-wk")
+    for c in C.COMPANIES:
+        m = out["maintenance"]["companies"][c]
+        print(f"  {c}: maintenance ledger covers "
+              f"{m['coverage_ratio'] * 100:.0f}% of the panel's own line "
+              f"(${m['ledger_per_truck_week']:,.0f} vs ${m['panel_per_truck_week']:,.0f}/truck-wk)")
 
 
 if __name__ == "__main__":
