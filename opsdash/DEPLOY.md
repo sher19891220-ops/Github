@@ -56,6 +56,22 @@ company on about 5% of its rows; the truck is on all of them. Without the
 roster loaded, 1,322 of 1,386 real revenue rows are rejected at commit for
 a missing entity — 95% of a year's revenue unable to reach the ledger.
 
+## 3b. OCR needs two binaries on the box
+
+Accounting can upload a photo or a scan, which is read by OCR. That needs
+`pdftoppm` (poppler) and `tesseract` on the machine running the app:
+
+```bash
+# Debian/Ubuntu, which is what the Render runtime is
+apt-get install -y poppler-utils tesseract-ocr
+```
+
+Without them a scanned upload fails with a named missing-tool error rather
+than returning empty text that would look exactly like a blank document —
+but it still fails, so install them before accounting starts sending photos.
+A PDF that has a real text layer, a spreadsheet and a CSV all work without
+either binary.
+
 ## 4. Create the accounts
 
 ```bash

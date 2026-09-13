@@ -8,8 +8,25 @@ import { DOC_TYPE_OPTIONS, inferDocType } from './data/inferDocType';
 import type { DocumentStatus } from './data/types';
 import { StatusPill } from './StatusPill';
 
-const ACCEPTED_EXTENSIONS = ['.pdf', '.xlsx', '.csv'];
-const ACCEPTED_ATTR = ACCEPTED_EXTENSIONS.join(',');
+/**
+ * What the extraction layer can actually read, which is broader than a
+ * spreadsheet export: it routes on the bytes, not the extension, and OCRs a
+ * scan or a photo when there is no text layer.
+ *
+ * Accounting does not control what a vendor sends. A fuel statement is a CSV
+ * one month, a PDF the next, and a photo of a printout when someone is at a
+ * truck stop — so the picker takes all of them rather than making somebody
+ * convert a file before the system will look at it.
+ */
+const ACCEPTED_EXTENSIONS = [
+  '.pdf',
+  '.xlsx', '.xlsm', '.xls',
+  '.csv', '.tsv', '.txt', '.md',
+  '.png', '.jpg', '.jpeg', '.webp', '.heic', '.heif', '.tif', '.tiff', '.bmp',
+];
+/** `image/*` also lets a phone offer the camera roll (and the camera itself)
+ *  rather than a file browser that cannot see photos. */
+const ACCEPTED_ATTR = [...ACCEPTED_EXTENSIONS, 'image/*', 'application/pdf'].join(',');
 
 // Fast poll for the common case (a text/CSV document that parses in well
 // under a second), backing off once it looks like this one is going to take
@@ -165,9 +182,16 @@ export function UploadDropzone({ onUploaded }: { onUploaded?: (status: DocumentS
             if (file) handleFile(file);
           }}
         />
-        <p style={{ margin: 0, fontWeight: 600 }}>Drop a PDF, XLSX or CSV here, or click to browse</p>
+        <p style={{ margin: 0, fontWeight: 600 }}>
+          Drop a file here, or click to browse
+        </p>
         <p style={{ margin: '0.25rem 0 0', color: 'var(--muted)', fontSize: '0.9em' }}>
-          No reformatting needed — upload the file as it came from the bank, EFS/Relay, or the shop.
+          PDF, Excel, CSV — or a photo of a printout. No reformatting: upload it
+          exactly as it came from EFS/Relay, the bank, or the shop.
+        </p>
+        <p style={{ margin: '0.25rem 0 0', color: 'var(--muted)', fontSize: '0.85em' }}>
+          A scan or photo is read by OCR, so every row from one waits for your
+          review before it posts.
         </p>
       </div>
 

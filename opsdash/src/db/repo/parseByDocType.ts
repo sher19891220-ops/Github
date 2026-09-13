@@ -174,7 +174,63 @@ export async function parseBinaryDocument(
       }));
       return { status: 'parsed', rows: stagingRows };
     }
-    default:
-      return { status: 'failed', error: `no binary parser implemented for doc_type "${docType}".` };
+    default: {
+      // Everything else: hand the extracted content to the SAME text parser
+      // the text-upload path uses.
+      //
+      // Accounting does not get to choose what a vendor sends. A fuel
+      // statement arrives as a CSV one month, a PDF the next, and a photo of
+      // a printout when someone is at a truck stop. The extraction layer
+      // already turns all of those into text — routed by sniffing bytes, not
+      // by the extension — so refusing them here was a gap in the plumbing,
+      // not a missing capability.
+      const text = textFromExtraction(extracted);
+      if (text === null) {
+        return {
+          status: 'failed',
+          error:
+            `"${fileName}" was read, but produced no text to parse. ` +
+            'If it is a photo, it may be too blurry or too dark to read — retake it square-on in good light.',
+        };
+      }
+
+      const outcome = parseByDocType(docType, text, documentId);
+      if (outcome.status === 'failed' || !extracted.anyPageOcrd) return outcome;
+
+      // OCR read this, not a text layer. Measured VIN recovery on a real
+      // scan was 79% (SOURCE-DISCOVERY §14), so a figure here is a reading
+      // of a picture of a number. Every row waits for a person, however
+      // clean it looks — an OCR'd amount that posts unseen is exactly the
+      // silent estimate this build refuses.
+      const note =
+        'Read by OCR from a scan or photo, not from a text layer. Check every figure against the document before this posts.';
+      return {
+        status: 'parsed',
+        rows: outcome.rows.map((row) => ({
+          ...row,
+          status: 'under_review' as const,
+          reviewNotes: row.reviewNotes ? `${row.reviewNotes} ${note}` : note,
+        })),
+      };
+    }
   }
+}
+
+/**
+ * Flattens whatever the extractor produced into text a doc-family parser can
+ * read. Sheets become tab-separated rows, which is what `parseDelimited`
+ * and the fuel-card column mapper already expect; pages are joined in order.
+ */
+function textFromExtraction(extracted: ExtractionResult): string | null {
+  if (extracted.sheets && extracted.sheets.length > 0) {
+    const text = extracted.sheets
+      .map((sheet) => sheet.rows.map((cells) => cells.join('\t')).join('\n'))
+      .join('\n\n');
+    return text.trim() === '' ? null : text;
+  }
+  if (extracted.pages && extracted.pages.length > 0) {
+    const text = extracted.pages.map((page) => page.text).join('\n');
+    return text.trim() === '' ? null : text;
+  }
+  return null;
 }

@@ -114,11 +114,21 @@ describe.skipIf(!haveFixture)('parseBinaryDocument("registration", ...) — drag
     expect(flaggedRow?.vin.reason).toBeTruthy();
   });
 
-  it('still fails cleanly, never fabricating a parse, for a doc type with no binary parser wired', async () => {
+  it('still fails cleanly, never fabricating a parse, when the file is not what the doc type says', async () => {
+    // A registration PDF filed as a toll document. Binary uploads are no
+    // longer refused by doc type — the extracted text now goes to the same
+    // parser the text path uses, so accounting can send a PDF or a photo of
+    // anything. That makes THIS the load-bearing case: the file is read,
+    // genuinely attempted, and rejected on its content rather than waved
+    // through. The message moved from "no binary parser implemented" to the
+    // parser's own refusal, which is the more honest of the two.
     const bytes = readFileSync(FIXTURE_PATH);
     const outcome = await parseBinaryDocument('toll', bytes, 'irp_42_units.pdf', 'application/pdf', randomUUID());
     expect(outcome.status).toBe('failed');
     if (outcome.status !== 'failed') return;
-    expect(outcome.error).toMatch(/no binary parser implemented for doc_type "toll"/);
+    expect(outcome.error).toMatch(/does not look like the expenses sheet export/i);
+    // The point of the assertion: no toll rows were invented from a
+    // registration document.
+    expect((outcome as { rows?: unknown[] }).rows ?? []).toHaveLength(0);
   });
 });
