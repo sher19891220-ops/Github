@@ -6,8 +6,11 @@ behaviour, and confusing if you are not expecting it.
 
 ## 1. Create the services
 
-The blueprint at `render.yaml` (this directory) describes a web service and
-a managed Postgres. On Render: **New → Blueprint**, point it at this
+The blueprint is the **repo-root `render.yaml`**, not one in this directory.
+Render reads only the file at the repo root, so opsdash's web service and its
+managed Postgres are defined there alongside the other apps in this repo.
+There used to be an `opsdash/render.yaml` as well; it was deleted, because
+Render never read it and editing it looked like it was doing something. On Render: **New → Blueprint**, point it at this
 repository, and it reads that file.
 
 `autoDeploy` is **off** on purpose. This app posts to a ledger; a deploy

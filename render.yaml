@@ -1,44 +1,72 @@
-# Render blueprint for DriverQual.
+# Render blueprint for this repo.
 #
-# Data lives in a hosted Turso (libSQL) database rather than on local disk, so
-# this runs on Render's free tier: nothing is stored on the container's
-# filesystem, and a restart or redeploy loses nothing.
+# Render reads ONE render.yaml, and only the one at the REPO ROOT. A
+# per-project file like opsdash/render.yaml is never looked at, so every app
+# in this repo is defined here or it silently does not deploy.
 #
-# Create the database first (see driverqual/DEPLOY.md), then paste its URL and
-# auth token into the Render dashboard when prompted.
+# Each app's own DEPLOY.md still applies: neither the migrations, the
+# reference data, nor the accounts happen by themselves.
+#
+# driverqual - Turso (libSQL) hosted elsewhere, so it needs no database here.
+#              Create it first (driverqual/DEPLOY.md), then paste its URL and
+#              auth token into the dashboard when prompted. autoDeploy is on.
+#
+# opsdash    - The ops/accounting ledger, on Docker rather than the native
+#              Node runtime: accounting uploads photos of fuel statements and
+#              reading those needs poppler and tesseract on the box, which a
+#              native build cannot install. See opsdash/Dockerfile.
+#              autoDeploy is OFF on purpose — this one posts to a ledger, so
+#              a deploy should be a decision, not a consequence of a push.
 
 services:
-  - type: web
-    name: driverqual
-    runtime: node
-    plan: free
-    rootDir: driverqual
-    buildCommand: npm ci && npm run build
-    startCommand: npm run start
-    # Public, and touches neither the session nor the database, so protecting
-    # the app does not make Render think it has died.
-    healthCheckPath: /api/health
-    autoDeploy: true
-    envVars:
-      - key: NODE_VERSION
-        value: "22"
-      - key: NODE_ENV
-        value: production
-      # Prompted for on first deploy. Never commit these.
-      - key: TURSO_DATABASE_URL
-        sync: false
-      - key: TURSO_AUTH_TOKEN
-        sync: false
-      # The shared access code. Without it the app runs open to anyone with the
-      # URL and shows a warning banner on every screen.
-      - key: APP_ACCESS_CODE
-        sync: false
-      # Optional extra entropy for session signing. Sessions stay valid across
-      # restarts only if this is set; leave unset and a restart signs everyone out.
-      - key: SESSION_SECRET
-        generateValue: true
-      # Optional integrations; the app runs without them.
-      - key: OPENAI_API_KEY
-        sync: false
-      - key: FMCSA_API_KEY
-        sync: false
+- type: web
+  name: driverqual
+  runtime: node
+  plan: free
+  rootDir: driverqual
+  buildCommand: npm ci && npm run build
+  startCommand: npm run start
+  healthCheckPath: /api/health
+  autoDeploy: true
+  envVars:
+  - key: NODE_VERSION
+    value: '22'
+  - key: NODE_ENV
+    value: production
+  - key: TURSO_DATABASE_URL
+    sync: false
+  - key: TURSO_AUTH_TOKEN
+    sync: false
+  - key: APP_ACCESS_CODE
+    sync: false
+  - key: SESSION_SECRET
+    generateValue: true
+  - key: OPENAI_API_KEY
+    sync: false
+  - key: FMCSA_API_KEY
+    sync: false
+- type: web
+  name: opsdash
+  runtime: docker
+  plan: starter
+  rootDir: opsdash
+  dockerfilePath: ./opsdash/Dockerfile
+  dockerContext: ./opsdash
+  healthCheckPath: /api/health
+  autoDeploy: false
+  envVars:
+  - key: NODE_VERSION
+    value: '22'
+  - key: NODE_ENV
+    value: production
+  - key: DATABASE_URL
+    fromDatabase:
+      name: opsdash-db
+      property: connectionString
+  - key: SESSION_SECRET
+    generateValue: true
+databases:
+- name: opsdash-db
+  plan: basic-256mb
+  databaseName: opsdash
+  user: opsdash
