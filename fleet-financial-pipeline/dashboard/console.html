@@ -390,10 +390,15 @@ V.pnl = () => {
       ${names.map(n=>`<td class="n"><span class="chip ${rangeCls(cos[n].net_lo_total,cos[n].net_hi_total)}">${usd(cos[n].net_lo_total)} to ${usd(cos[n].net_hi_total)}</span></td>`).join('')}
       <td class="n"><span class="chip ${rangeCls(g.net_lo,g.net_hi)}">${usd(g.net_lo)} to ${usd(g.net_hi)}</span></td></tr>
     </tbody></table></div></div>
-  <div class="panel"><h3>Weekly P&amp;L<span class="note">every week on its own, not collapsed to YTD</span></h3>
-    <div class="pad" style="padding-bottom:0"><div style="display:flex;gap:8px;flex-wrap:wrap" id="wkco">
-      ${names.map((n,i)=>`<button class="navbtn" data-wkco="${n}" aria-current="${i===0}" style="width:auto">${LABEL[n]||n}</button>`).join('')}
-    </div></div>
+  <div class="panel"><h3>P&amp;L by period<span class="note">week, month, quarter or year — not just YTD</span></h3>
+    <div class="pad" style="padding-bottom:0;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div style="display:flex;gap:8px;flex-wrap:wrap" id="wkco">
+        ${names.map((n,i)=>`<button class="navbtn" data-wkco="${n}" aria-current="${i===0}" style="width:auto">${LABEL[n]||n}</button>`).join('')}
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap" id="wkperiodbar">
+        ${['week','month','quarter','year'].map((p,i)=>`<button class="navbtn" data-wkperiod="${p}" aria-current="${i===0}" style="width:auto;text-transform:capitalize">${p}</button>`).join('')}
+      </div>
+    </div>
     <div id="wkpnl"></div></div>
   <div class="panel"><h3>Per truck-week, comparable across companies<span class="note">model-independent metrics only</span></h3>
     <div class="scroll"><table><thead><tr><th>Metric</th>${names.map(n=>`<th class="n">${LABEL[n]||n}</th>`).join('')}</tr></thead><tbody>
@@ -415,25 +420,91 @@ V.pnl = () => {
   </div>`;
 };
 
-function weeklyPnlPanel(co){
-  const WK = D.weekly_pnl, rows = WK.companies[co].weeks;
-  const flagged = WK.companies[co].flagged_weeks;
-  const short2 = w => w.slice(5).replace('-','/');
+/* ---------- P&L by period: aggregate the same weekly rows into month/quarter/year buckets ---------- */
+const PNL_PERIODS = ['week','month','quarter','year'];
+const PNL_SUM_FIELDS = ['gross','driver_pay','fuel','rent','toll','admin','other',
+  'cd_gross','cd_result','cd_miles','oo_gross','oo_result','overhead','maintenance',
+  'insurance','trailer','factoring','net','unallocated'];
+
+function periodKeyOf(week, period){
+  const [y, m] = week.split('-');
+  if(period==='week') return week;
+  if(period==='month') return `${y}-${m}`;
+  if(period==='quarter') return `${y}-Q${Math.ceil(Number(m)/3)}`;
+  return y;
+}
+function periodLabelOf(key, period){
+  if(period==='month'){
+    const [y, m] = key.split('-');
+    return new Date(Number(y), Number(m)-1, 1).toLocaleString('en-US', {month:'short', year:'numeric'});
+  }
+  if(period==='quarter') return key.replace('-', ' ');
+  return key; // week (ISO date) or year
+}
+function aggregatePeriod(weeks, period){
+  const buckets = new Map();
+  weeks.forEach(w=>{
+    const key = periodKeyOf(w.week, period);
+    if(!buckets.has(key)){
+      const b = {period:key, weeks:[], flagWeeks:[], cd_trucks_sum:0, oo_trucks_sum:0, n:0};
+      PNL_SUM_FIELDS.forEach(f=> b[f]=0);
+      buckets.set(key, b);
+    }
+    const b = buckets.get(key);
+    b.weeks.push(w.week); b.n++;
+    b.cd_trucks_sum += w.cd_trucks; b.oo_trucks_sum += w.oo_trucks;
+    PNL_SUM_FIELDS.forEach(f=> b[f] += w[f]);
+    if(w.flags.length) b.flagWeeks.push(w.week);
+  });
+  return Array.from(buckets.values()).sort((a,b)=> a.period.localeCompare(b.period))
+    .map(b=> Object.assign(b, {
+      cd_trucks: Math.round(b.cd_trucks_sum / b.n), oo_trucks: Math.round(b.oo_trucks_sum / b.n),
+    }));
+}
+function trucksForBucket(co, weeksInBucket){
+  const tbw = D.weekly_pnl.companies[co].trucks_by_week;
+  const map = new Map();
+  weeksInBucket.forEach(wk=>{
+    (tbw[wk] || []).forEach(t=>{
+      let e = map.get(t.unit);
+      if(!e){
+        e = {unit:t.unit, driver:t.driver, kind:t.kind, iron_leased:t.iron_leased,
+             gross:0, miles:0, driver_pay:0, fuel:0, rent:0, toll:0, admin:0, other:0, cost:0, result:0};
+        map.set(t.unit, e);
+      }
+      e.driver = t.driver || e.driver; e.kind = t.kind; e.iron_leased = e.iron_leased || t.iron_leased;
+      e.gross += t.gross; e.miles += t.miles; e.driver_pay += t.driver_pay; e.fuel += t.fuel;
+      e.rent += t.rent; e.toll += t.toll; e.admin += t.admin; e.other += t.other;
+      e.cost += t.cost; e.result += t.result;
+    });
+  });
+  const rows = Array.from(map.values());
+  rows.forEach(r=> r.rpm = r.miles ? r.gross / r.miles : null);
+  rows.sort((a,b)=> a.result - b.result);
+  return rows;
+}
+
+function weeklyPnlPanel(co, period){
+  period = period && PNL_PERIODS.includes(period) ? period : 'week';
+  const WK = D.weekly_pnl, rawWeeks = WK.companies[co].weeks;
+  const rows = aggregatePeriod(rawWeeks, period);
+  const flaggedTotal = rows.reduce((a,r)=> a + r.flagWeeks.length, 0);
+  const colHead = {week:'Week', month:'Month', quarter:'Quarter', year:'Year'}[period];
   return `
-  ${flagged ? `<div class="dsec"><p><span class="chip warn">${flagged} of ${rows.length} weeks flagged</span>
+  ${flaggedTotal ? `<div class="dsec"><p><span class="chip warn">${flaggedTotal} of ${rawWeeks.length} weeks flagged</span>
     that week's own panel total does not reconcile to its unit rows or its own itemisation —
     the sheet's assertion, not a verified figure. See CLAUDE.md's P&amp;L-accuracy findings.</p></div>` : ''}
   ${legend([{c:css('--ok'),t:'net profit'}])}
-  <div class="pad" style="padding-top:0">${lineChart(rows.map(r=>short2(r.week)),
-    [{v:rows.map(r=>r.net),c:css('--ok')}],{fmt:v=>usd(v),area:true,h:170,alt:'Net profit by week'})}</div>
-  <div class="scroll"><table><thead><tr><th>Week</th><th class="n">Trucks CD/OO</th>
+  <div class="pad" style="padding-top:0">${lineChart(rows.map(r=>periodLabelOf(r.period, period)),
+    [{v:rows.map(r=>r.net),c:css('--ok')}],{fmt:v=>usd(v),area:true,h:170,alt:'Net profit by '+period})}</div>
+  <div class="scroll"><table><thead><tr><th>${colHead}</th><th class="n">Trucks CD/OO</th>
     <th class="n">Gross</th><th class="n">Driver pay</th><th class="n">Fuel</th>
     <th class="n">Rent</th><th class="n">Tolls</th><th class="n">Admin</th>
     <th class="n">CD margin</th><th class="n">OO profit</th><th class="n">Overhead</th>
     <th class="n">Net</th></tr></thead><tbody>
-    ${rows.slice().reverse().map(r=>`<tr class="click wk-row" data-wkweek="${r.week}"${r.flags.length?
-        ` title="${r.flags.map(f=>`${f.what}: ${f.detail}`).join('; ').replace(/"/g,'&quot;')}"`:''}>
-      <td class="mono" style="white-space:nowrap">▸ ${r.week}${r.flags.length?' <span class="chip warn">flag</span>':''}</td>
+    ${rows.slice().reverse().map(r=>`<tr class="click wk-row" data-wkbucket="${r.period}"${r.flagWeeks.length?
+        ` title="${r.flagWeeks.length} flagged week(s): ${r.flagWeeks.join(', ')} — see the sheet's own control failures"`:''}>
+      <td class="mono" style="white-space:nowrap">▸ ${periodLabelOf(r.period, period)}${r.flagWeeks.length?' <span class="chip warn">flag</span>':''}</td>
       <td class="n">${r.cd_trucks}/${r.oo_trucks}</td>
       <td class="n">${usd(r.gross)}</td><td class="n">${usd(r.driver_pay)}</td>
       <td class="n">${usd(r.fuel)}</td><td class="n">${usd(r.rent)}</td>
@@ -442,12 +513,12 @@ function weeklyPnlPanel(co){
       <td class="n">${usd(-r.overhead)}</td>
       <td class="n"><span class="chip ${r.net<0?'crit':'ok'}">${usd(r.net)}</span></td></tr>`).join('')}
   </tbody></table></div>
-  <div class="dsec"><p>Click a week to see every truck's own gross, cost lines and result for it,
-  worst result first. ${WK.note}</p></div>`;
+  <div class="dsec"><p>Click a ${period} to see every truck's own gross, cost lines and result summed
+  over it, worst result first. ${WK.note}</p></div>`;
 }
 
-function weekTruckDetailRow(co, week, cols){
-  const trucks = (D.weekly_pnl.companies[co].trucks_by_week[week]) || [];
+function weekTruckDetailRow(co, weeksInBucket, cols){
+  const trucks = trucksForBucket(co, weeksInBucket);
   const tr = document.createElement('tr');
   tr.className = 'wk-detail';
   tr.innerHTML = `<td colspan="${cols}" style="padding:0;background:var(--surface-2)">
@@ -465,18 +536,24 @@ function weekTruckDetailRow(co, week, cols){
         <td class="n">${usd(t.admin)}</td><td class="n">${usd(t.other)}</td>
         <td class="n"><span class="chip ${t.result<0?'crit':'ok'}">${usd(t.result)}</span></td></tr>`).join('')}
       </tbody></table></div>
-      <div class="dsec" style="padding:10px 0 0 2px"><p>Sorted worst result first. On an owner-operator
-      row, driver pay/fuel/rent/toll are the driver's OWN settlement deductions — recovered from them,
-      not the company's spend — so only Result reads the same way as a company-driver row's.</p></div>
+      <div class="dsec" style="padding:10px 0 0 2px"><p>${weeksInBucket.length>1?
+        `Summed over ${weeksInBucket.length} weeks (${weeksInBucket[0]}&ndash;${weeksInBucket[weeksInBucket.length-1]}), `:''}sorted
+      worst result first. On an owner-operator row, driver pay/fuel/rent/toll are the driver's OWN
+      settlement deductions — recovered from them, not the company's spend — so only Result reads the
+      same way as a company-driver row's.</p></div>
     </div></td>`;
   return tr;
 }
 
-function wireWeeklyPnl(co){
+function wireWeeklyPnl(co, period){
+  period = period && PNL_PERIODS.includes(period) ? period : 'week';
+  const weeksByBucket = new Map(aggregatePeriod(D.weekly_pnl.companies[co].weeks, period)
+    .map(b=>[b.period, b.weeks]));
   document.querySelectorAll('#wkpnl tr.wk-row').forEach(tr=> tr.onclick = ()=>{
     const next = tr.nextElementSibling;
     if(next && next.classList.contains('wk-detail')){ next.remove(); return; }
-    const detail = weekTruckDetailRow(co, tr.dataset.wkweek, tr.children.length);
+    const weeksInBucket = weeksByBucket.get(tr.dataset.wkbucket) || [];
+    const detail = weekTruckDetailRow(co, weeksInBucket, tr.children.length);
     tr.after(detail);
     enableSort(detail.querySelector('table'));
   });
@@ -884,16 +961,18 @@ function render(v){
   const firstRender = current === null;
   current = v;
   $('#main').innerHTML = ENTS.includes(v) ? entityView(v) : (V[v]||V.overview)();
-  document.querySelectorAll('.navbtn').forEach(b=>{ if(!b.dataset.cdco && !b.dataset.wkco) b.setAttribute('aria-current', String(b.dataset.view===v)); });
+  document.querySelectorAll('.navbtn').forEach(b=>{ if(!b.dataset.cdco && !b.dataset.wkco && !b.dataset.wkperiod) b.setAttribute('aria-current', String(b.dataset.view===v)); });
   if(!firstRender) $('#main').scrollIntoView({block:'start'});
   wire();
   if(v==='costdebt'){
     const grid = $('#cdgrid'); if(grid) grid.innerHTML = costdebtGrid('ZONE');
   }
   if(v==='pnl'){
-    const wk = $('#wkpnl'); if(wk){ wk.innerHTML = weeklyPnlPanel('ZONE'); wireWeeklyPnl('ZONE'); }
+    const wk = $('#wkpnl'); if(wk){ wk.innerHTML = weeklyPnlPanel('ZONE','week'); wireWeeklyPnl('ZONE','week'); }
   }
 }
+function currentWkCo(){ return (document.querySelector('[data-wkco][aria-current="true"]')||{}).dataset?.wkco || 'ZONE'; }
+function currentWkPeriod(){ return (document.querySelector('[data-wkperiod][aria-current="true"]')||{}).dataset?.wkperiod || 'week'; }
 function wire(){
   document.querySelectorAll('[data-goto]').forEach(b=> b.onclick = ()=>go(b.dataset.goto));
   document.querySelectorAll('[data-cdco]').forEach(b=> b.onclick = ()=>{
@@ -902,8 +981,15 @@ function wire(){
   });
   document.querySelectorAll('[data-wkco]').forEach(b=> b.onclick = ()=>{
     document.querySelectorAll('[data-wkco]').forEach(x=>x.setAttribute('aria-current', String(x===b)));
-    $('#wkpnl').innerHTML = weeklyPnlPanel(b.dataset.wkco);
-    wireWeeklyPnl(b.dataset.wkco);
+    const period = currentWkPeriod();
+    $('#wkpnl').innerHTML = weeklyPnlPanel(b.dataset.wkco, period);
+    wireWeeklyPnl(b.dataset.wkco, period);
+  });
+  document.querySelectorAll('[data-wkperiod]').forEach(b=> b.onclick = ()=>{
+    document.querySelectorAll('[data-wkperiod]').forEach(x=>x.setAttribute('aria-current', String(x===b)));
+    const co = currentWkCo();
+    $('#wkpnl').innerHTML = weeklyPnlPanel(co, b.dataset.wkperiod);
+    wireWeeklyPnl(co, b.dataset.wkperiod);
   });
   document.querySelectorAll('tr.click[data-cat]').forEach(tr=> tr.onclick = ()=>{
     const c = D.cash.outflow_by_category.find(x=>x.category===tr.dataset.cat);
