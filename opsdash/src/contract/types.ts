@@ -135,7 +135,11 @@ export type AccountNature = 'pnl' | 'balance_sheet' | 'intercompany';
 
 export type CategoryGroup =
   | 'revenue' | 'fuel' | 'toll' | 'maintenance' | 'permit'
-  | 'ifta' | 'insurance' | 'driver_pay' | 'lease' | 'other_cost';
+  | 'ifta' | 'insurance' | 'driver_pay' | 'lease' | 'other_cost'
+  // Trailer upkeep, booked as fixed cost in the carrier that bore it.
+  // Trailers are pooled between the carriers, so this is deliberately NOT a
+  // per-truck cost and must never be divided by one (migration 016).
+  | 'trailer';
 
 export interface StagingRow {
   stagingRowId: string;

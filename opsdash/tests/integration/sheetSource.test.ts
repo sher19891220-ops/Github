@@ -113,16 +113,20 @@ describe('syncSheetSource', () => {
     const s = await register();
     await syncSheetSource(s.sheetSourceId, sheet(), 'tester');
 
-    const before = (await query(
-      `SELECT count(*)::int AS n FROM accounting.source_document`,
-    )) as unknown as { n: number }[];
+    // Scoped to THIS source's own documents. A count over the whole table
+    // races every other test file — vitest runs them in parallel — and any
+    // upload landing between the two reads fails this for a reason that has
+    // nothing to do with the refusal being tested. `register()` gives each
+    // source a uuid-suffixed title, and the sync names its document after it.
+    const mine = `SELECT count(*)::int AS n FROM accounting.source_document WHERE file_name LIKE $1`;
+    const like = `${s.title}%`;
+
+    const before = (await query(mine, [like])) as unknown as { n: number }[];
 
     const reordered = '| Unit | Issued To | Unit Type | Cost type | Date | Expense side | $ used | Details |';
     await expect(syncSheetSource(s.sheetSourceId, sheet(reordered), 'tester')).rejects.toThrow();
 
-    const after = (await query(
-      `SELECT count(*)::int AS n FROM accounting.source_document`,
-    )) as unknown as { n: number }[];
+    const after = (await query(mine, [like])) as unknown as { n: number }[];
 
     // The header is checked before a document row exists. Otherwise every
     // refused sync would leave an unparseable artifact on the documents

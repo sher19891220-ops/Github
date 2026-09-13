@@ -50,7 +50,10 @@ async function seed(): Promise<void> {
     `INSERT INTO accounting.category (category_id, category_group, display_name, sign) VALUES
        ($1, 'revenue', 'Linehaul (test fixture)', 1),
        ($2, 'fuel', 'Diesel (test fixture)', -1),
-       ($3, 'maintenance', 'Repair (test fixture)', -1)
+       ($3, 'maintenance', 'Repair (test fixture)', -1),
+       -- Not a fixture id: getCategoryGroups proposes this exact category
+       -- for every trailer row, so it must be the real one.
+       ('trailer.fixed', 'trailer', 'Trailer cost (fixed)', -1)
      ON CONFLICT (category_id) DO NOTHING`,
     [CATEGORY_REVENUE, CATEGORY_FUEL, CATEGORY_MAINTENANCE],
   );

@@ -71,3 +71,23 @@ export function expensesFixture(
   const dataRowLine = `| ${unitNumber} | Some Driver | truck | Repair | ${dateMmDdYy} | $${amount} | ${chargedTo} | test fixture ${salt} |`;
   return `${EXPENSE_HEADER_ROW}\n${dataRowLine}\n`;
 }
+
+/**
+ * A trailer cost row that names the truck pulling it, the way the real sheet
+ * does ("484507 BACCUS DEVONTA" in the Issued To cell). Used to prove that
+ * the puller is never followed — trailers are pooled between the carriers,
+ * so its cost is fixed cost and belongs to no truck.
+ */
+export function trailerExpenseFixture(
+  trailerNumber: string,
+  pullingTruckNumber: string,
+  amount: string,
+  dateMmDdYy: string,
+  expenseSide = 'company',
+): string {
+  const salt = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  const dataRowLine =
+    `| ${trailerNumber} | ${pullingTruckNumber} Some Driver | trailer | Tire replacement | ` +
+    `${dateMmDdYy} | $${amount} | ${expenseSide} | test fixture ${salt} |`;
+  return `${EXPENSE_HEADER_ROW}\n${dataRowLine}\n`;
+}

@@ -73,6 +73,18 @@ Two consequences the Phase 2/3/4 agents must design around:
   the move. `resolveEntityFromTruck(unit, onDate)` now reads the history table
   and refuses a date no period covers, rather than borrowing the neighbouring
   one. `driver_class_history` is still unwired.
+- **Trailer cost is fixed cost, and it stays in the carrier that bore it.**
+  Trailers are pooled: of the trailers in the real expenses sheet with enough
+  cost history to tell, 47% were pulled by trucks from more than one carrier
+  and one by all three. So a trailer cost row never resolves a truck — the
+  puller named beside it is recorded for tracing and never used to decide
+  whose cost it is — and it is categorised by unit type into the single
+  `trailer.fixed` category rather than by its description, which would file a
+  trailer tyre beside a truck tyre. Its carrier comes only from what the sheet
+  states bore the cost (`Expense side`), never from the driver or the puller.
+  **Decided:** the fixed cost sits in each carrier's own P&L; it does not roll
+  to the asset-holding company and return as lease rent, so it is not an
+  intercompany leg and the group roll-up does not eliminate it.
 - Upstream systems disagree on identity. `source_key_map` is the single crosswalk
   from any `(source_system, source_key)` to a canonical `entity`/`truck`/`driver`.
   Nothing else may join on truck numbers by string match.
