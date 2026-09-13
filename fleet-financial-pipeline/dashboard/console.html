@@ -725,6 +725,34 @@ V.fuel = () => {
 };
 
 const PAYER={zone:'Zone (the company)',stl:'STL',driver:'Driver',dealer:'Dealer / warranty'};
+const BD_PERIODS = ['month','quarter','year'];
+const BD_QUARTER_OF = {January:'Q1',February:'Q1',March:'Q1',April:'Q2',May:'Q2',June:'Q2',
+  July:'Q3',August:'Q3',September:'Q3',October:'Q4',November:'Q4',December:'Q4'};
+
+function bdBuckets(period){
+  const b = D.breakdowns;
+  if(period==='year'){
+    const yr = (D.pnl && D.pnl.year) || 'Total';
+    return {labels:[yr], events:[b.events.reduce((a,c)=>a+c,0)], roadside:[b.roadside.reduce((a,c)=>a+c,0)]};
+  }
+  if(period==='quarter'){
+    const order = [], sums = {};
+    b.months.forEach((m,i)=>{
+      const q = BD_QUARTER_OF[m] || '?';
+      if(!sums[q]){ sums[q] = {events:0, roadside:0}; order.push(q); }
+      sums[q].events += b.events[i]; sums[q].roadside += b.roadside[i];
+    });
+    return {labels:order, events:order.map(q=>sums[q].events), roadside:order.map(q=>sums[q].roadside)};
+  }
+  return {labels:b.months.map(m=>m.slice(0,3)), events:b.events, roadside:b.roadside};
+}
+function bdChartBody(period){
+  period = BD_PERIODS.includes(period) ? period : 'month';
+  const k = bdBuckets(period);
+  return `${legend([{c:css('--accent'),t:'all events'},{c:css('--critical'),t:'road calls and tows'}])}
+  <div class="pad" style="padding-top:0">${barChart(k.labels,
+    [{v:k.events,c:css('--accent')},{v:k.roadside,c:css('--critical')}],{alt:'Breakdown events by period'})}</div>`;
+}
 V.maintenance = () => {
   const b = D.breakdowns, tot = Object.values(b.by_payer).reduce((a,c)=>a+c,0);
   return `
@@ -742,10 +770,14 @@ V.maintenance = () => {
     ${Object.entries(b.by_payer).sort((a,c)=>c[1]-a[1]).map(([k,v])=>`<tr><td>${PAYER[k]||k}</td>
       <td class="n">${usd(v)}</td><td class="n">${pct(v/tot*100)}</td></tr>`).join('')}
     </tbody></table></div></div>
-  <div class="panel"><h3>Events and cost by month<span class="note">rising</span></h3>
-    ${legend([{c:css('--accent'),t:'all events'},{c:css('--critical'),t:'road calls and tows'}])}
-    <div class="pad" style="padding-top:0">${barChart(b.months.map(m=>m.slice(0,3)),
-      [{v:b.events,c:css('--accent')},{v:b.roadside,c:css('--critical')}],{alt:'Breakdown events by month'})}</div></div>`;
+  <div class="panel"><h3>Events and cost by period<span class="note">rising</span></h3>
+    <div class="pad" style="padding-bottom:0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+      <div class="src">Month, quarter or year — a weekly view isn't available for this source: the source ledger's per-row dates don't survive past month-level in what's tracked here</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap" id="bdperiodbar">
+        ${BD_PERIODS.map((p,i)=>`<button class="navbtn" data-bdperiod="${p}" aria-current="${i===0}" style="width:auto;text-transform:capitalize">${p}</button>`).join('')}
+      </div>
+    </div>
+    <div id="bdchart">${bdChartBody('month')}</div></div>`;
 };
 
 V.tolls = () => {
@@ -961,7 +993,7 @@ function render(v){
   const firstRender = current === null;
   current = v;
   $('#main').innerHTML = ENTS.includes(v) ? entityView(v) : (V[v]||V.overview)();
-  document.querySelectorAll('.navbtn').forEach(b=>{ if(!b.dataset.cdco && !b.dataset.wkco && !b.dataset.wkperiod) b.setAttribute('aria-current', String(b.dataset.view===v)); });
+  document.querySelectorAll('.navbtn').forEach(b=>{ if(!b.dataset.cdco && !b.dataset.wkco && !b.dataset.wkperiod && !b.dataset.bdperiod) b.setAttribute('aria-current', String(b.dataset.view===v)); });
   if(!firstRender) $('#main').scrollIntoView({block:'start'});
   wire();
   if(v==='costdebt'){
@@ -990,6 +1022,10 @@ function wire(){
     const co = currentWkCo();
     $('#wkpnl').innerHTML = weeklyPnlPanel(co, b.dataset.wkperiod);
     wireWeeklyPnl(co, b.dataset.wkperiod);
+  });
+  document.querySelectorAll('[data-bdperiod]').forEach(b=> b.onclick = ()=>{
+    document.querySelectorAll('[data-bdperiod]').forEach(x=>x.setAttribute('aria-current', String(x===b)));
+    $('#bdchart').innerHTML = bdChartBody(b.dataset.bdperiod);
   });
   document.querySelectorAll('tr.click[data-cat]').forEach(tr=> tr.onclick = ()=>{
     const c = D.cash.outflow_by_category.find(x=>x.category===tr.dataset.cat);
