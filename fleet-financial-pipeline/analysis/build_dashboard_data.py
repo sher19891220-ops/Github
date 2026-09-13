@@ -6,15 +6,29 @@ trends the findings rest on, and it keeps the payload small enough to ship
 inside the page. Nothing here recomputes anything -- it reads the outputs the
 ingesters already produced, so the dashboard cannot disagree with the analysis.
 
+THE ONE EXCEPTION IS CASH, WHICH ALSO GETS A WEEKLY CUT. Every cash transaction
+already carries its own real date (a bank statement line, a card charge), so
+unlike the P&L sheets -- where the week only exists because a tab is named for
+it -- a weekly bucket here is not invented, it is the same transactions grouped
+finer. The dashboard aggregates week up into month/quarter/year client-side
+from this one series, the same pattern the P&L-by-period view already uses, so
+there is exactly one cash time series to keep consistent, not four.
+
 Every figure carries where it came from, because the dashboard separates what a
 bank statement proves from what a hand-kept sheet asserts, and a reader has to
 be able to tell which they are looking at.
 """
 import csv
+import datetime
 import json
 import collections
 from pathlib import Path
 import argparse
+
+
+def iso_week_monday(datestr):
+    d = datetime.date.fromisoformat(datestr)
+    return (d - datetime.timedelta(days=d.weekday())).isoformat()
 
 
 def rd(p):
@@ -102,6 +116,19 @@ def main():
     D["cash"]["monthly"] = {"months": mk,
                             "revenue": [round(bym[k]["revenue"], 2) for k in mk],
                             "spend": [round(bym[k]["spend"], 2) for k in mk]}
+
+    byw = collections.defaultdict(lambda: collections.defaultdict(float))
+    for r in cash:
+        v = f(r, "amount")
+        k = iso_week_monday(r["date"])
+        if r["category"] == "revenue" and v > 0:
+            byw[k]["revenue"] += v
+        elif v < 0 and r["category"] not in NOT_SPEND:
+            byw[k]["spend"] += -v
+    wk = sorted(byw)
+    D["cash"]["weekly"] = {"weeks": wk,
+                           "revenue": [round(byw[k]["revenue"], 2) for k in wk],
+                           "spend": [round(byw[k]["spend"], 2) for k in wk]}
 
     # ---- utilization from odometers --------------------------------------
     odo = [r for r in rd(I / "odometers.csv") if r.get("flag") == "ok"]
