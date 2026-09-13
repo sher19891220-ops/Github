@@ -400,6 +400,13 @@ V.pnl = () => {
       </div>
     </div>
     <div id="wkpnl"></div></div>
+  <div class="panel"><h3>Full truck &amp; driver detail, by week<span class="note">sorted by gross, highest to lowest</span></h3>
+    <div class="pad" style="padding-bottom:0;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div style="display:flex;gap:8px;flex-wrap:wrap" id="wkdco">
+        ${names.map((n,i)=>`<button class="navbtn" data-wkdco="${n}" aria-current="${i===0}" style="width:auto">${LABEL[n]||n}</button>`).join('')}
+      </div>
+    </div>
+    <div id="wkweekpanel"></div></div>
   <div class="panel"><h3>Per truck-week, comparable across companies<span class="note">model-independent metrics only</span></h3>
     <div class="scroll"><table><thead><tr><th>Metric</th>${names.map(n=>`<th class="n">${LABEL[n]||n}</th>`).join('')}</tr></thead><tbody>
     <tr><td>Revenue per mile</td>${names.map(n=>`<td class="n">$${cos[n].revenue_per_mile.toFixed(3)}</td>`).join('')}</tr>
@@ -558,6 +565,45 @@ function wireWeeklyPnl(co, period){
     enableSort(detail.querySelector('table'));
   });
   enableSort($('#wkpnl table'));
+}
+
+function weekDetailTable(co, week){
+  const rows = (D.weekly_pnl.companies[co].trucks_by_week[week] || []).slice()
+    .sort((a,b)=> b.gross - a.gross);
+  return `<div class="scroll"><table><thead><tr><th>Unit</th><th>Driver</th><th>Kind</th>
+    <th class="n">Gross</th><th class="n">Miles</th><th class="n">RPM</th>
+    <th class="n">Driver pay</th><th class="n">Fuel</th><th class="n">Rent</th>
+    <th class="n">Toll</th><th class="n">Admin</th><th class="n">Other</th>
+    <th class="n">Cost</th><th class="n">Result</th></tr></thead><tbody>
+    ${rows.map(t=>`<tr><td class="mono">${t.unit}${t.iron_leased?' <span class="chip flat">iron</span>':''}</td>
+      <td>${t.driver||'—'}</td><td><span class="chip ${t.kind==='owner_operator'?'flat':'ok'}">${t.kind==='owner_operator'?'OO':'CD'}</span></td>
+      <td class="n">${usd(t.gross)}</td><td class="n">${num(t.miles)}</td>
+      <td class="n">${t.rpm!=null?'$'+t.rpm.toFixed(3):'—'}</td>
+      <td class="n">${usd(t.driver_pay)}</td><td class="n">${usd(t.fuel)}</td>
+      <td class="n">${usd(t.rent)}</td><td class="n">${usd(t.toll)}</td>
+      <td class="n">${usd(t.admin)}</td><td class="n">${usd(t.other)}</td>
+      <td class="n">${usd(t.cost)}</td>
+      <td class="n"><span class="chip ${t.result<0?'crit':'ok'}">${usd(t.result)}</span></td></tr>`).join('')}
+    </tbody></table></div>`;
+}
+function weekDetailPanel(co, week){
+  const weeks = D.weekly_pnl.companies[co].weeks.map(w=>w.week);
+  const activeWeek = week && weeks.includes(week) ? week : weeks[weeks.length-1];
+  const wk = D.weekly_pnl.companies[co].weeks.find(w=>w.week===activeWeek);
+  const flagged = (wk && wk.flags) || [];
+  return `
+  <div style="display:flex;gap:6px;flex-wrap:wrap;overflow-x:auto;padding-bottom:10px" id="wkweekbar">
+    ${weeks.map(w=>`<button class="navbtn" data-wkweek="${w}" aria-current="${w===activeWeek}" style="width:auto">${w}</button>`).join('')}
+  </div>
+  ${flagged.length ? `<div class="dsec"><p><span class="chip warn">flagged</span> ${flagged.map(f=>f.what+(f.detail?': '+f.detail:'')).join('; ')} — the sheet's own assertion, not a verified figure.</p></div>` : ''}
+  <div id="wkweektable">${weekDetailTable(co, activeWeek)}</div>`;
+}
+function wireWeekDetail(co){
+  document.querySelectorAll('#wkweekpanel [data-wkweek]').forEach(b=> b.onclick = ()=>{
+    $('#wkweekpanel').innerHTML = weekDetailPanel(co, b.dataset.wkweek);
+    wireWeekDetail(co);
+  });
+  enableSort($('#wkweekpanel table'));
 }
 
 V.cash = () => {
@@ -993,7 +1039,7 @@ function render(v){
   const firstRender = current === null;
   current = v;
   $('#main').innerHTML = ENTS.includes(v) ? entityView(v) : (V[v]||V.overview)();
-  document.querySelectorAll('.navbtn').forEach(b=>{ if(!b.dataset.cdco && !b.dataset.wkco && !b.dataset.wkperiod && !b.dataset.bdperiod) b.setAttribute('aria-current', String(b.dataset.view===v)); });
+  document.querySelectorAll('.navbtn').forEach(b=>{ if(!b.dataset.cdco && !b.dataset.wkco && !b.dataset.wkperiod && !b.dataset.bdperiod && !b.dataset.wkdco && !b.dataset.wkweek) b.setAttribute('aria-current', String(b.dataset.view===v)); });
   if(!firstRender) $('#main').scrollIntoView({block:'start'});
   wire();
   if(v==='costdebt'){
@@ -1001,6 +1047,7 @@ function render(v){
   }
   if(v==='pnl'){
     const wk = $('#wkpnl'); if(wk){ wk.innerHTML = weeklyPnlPanel('ZONE','week'); wireWeeklyPnl('ZONE','week'); }
+    const wkd = $('#wkweekpanel'); if(wkd){ wkd.innerHTML = weekDetailPanel('ZONE'); wireWeekDetail('ZONE'); }
   }
 }
 function currentWkCo(){ return (document.querySelector('[data-wkco][aria-current="true"]')||{}).dataset?.wkco || 'ZONE'; }
@@ -1026,6 +1073,11 @@ function wire(){
   document.querySelectorAll('[data-bdperiod]').forEach(b=> b.onclick = ()=>{
     document.querySelectorAll('[data-bdperiod]').forEach(x=>x.setAttribute('aria-current', String(x===b)));
     $('#bdchart').innerHTML = bdChartBody(b.dataset.bdperiod);
+  });
+  document.querySelectorAll('[data-wkdco]').forEach(b=> b.onclick = ()=>{
+    document.querySelectorAll('[data-wkdco]').forEach(x=>x.setAttribute('aria-current', String(x===b)));
+    $('#wkweekpanel').innerHTML = weekDetailPanel(b.dataset.wkdco);
+    wireWeekDetail(b.dataset.wkdco);
   });
   document.querySelectorAll('tr.click[data-cat]').forEach(tr=> tr.onclick = ()=>{
     const c = D.cash.outflow_by_category.find(x=>x.category===tr.dataset.cat);
