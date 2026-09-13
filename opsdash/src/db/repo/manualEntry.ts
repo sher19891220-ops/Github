@@ -60,7 +60,16 @@ export interface ManualEntryInput {
    * allocation posted without setting this is silently indistinguishable
    * from real data, which is the whole failure the column exists to prevent.
    */
-  allocationBasis?: 'actual' | 'even_split' | 'by_weight' | 'by_miles' | 'manual' | 'by_truck_count';
+  allocationBasis?:
+    | 'actual'
+    | 'even_split'
+    | 'by_weight'
+    | 'by_miles'
+    | 'manual'
+    | 'by_truck_count'
+    /** Derived from a per-truck-per-week rate the operator maintains, not
+     *  from an invoice — see migration 018. */
+    | 'rate_card';
   /** What was split, and over what, in the operator's words. */
   allocationNote?: string | null;
 

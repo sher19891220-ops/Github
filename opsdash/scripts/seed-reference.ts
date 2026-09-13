@@ -58,6 +58,15 @@ const CATEGORIES: Array<[id: string, group: string, name: string, sign: number]>
   // as a single line rather than split across the maintenance categories,
   // because nothing downstream should be tempted to divide it by a truck.
   ['trailer.fixed', 'trailer', 'Trailer cost (fixed)', -1],
+  // The rest of the fixed cost the operator already tracks per truck per week
+  // ("Fixed costs by company"). The chart had nowhere to put salaries, and
+  // insurance was a single line when the sheet carries three.
+  ['insurance.physical_damage', 'insurance', 'Physical damage insurance', -1],
+  ['insurance.occupational', 'insurance', 'Occupational accident insurance', -1],
+  ['overhead.salaries', 'overhead', 'Office salaries', -1],
+  ['overhead.software', 'overhead', 'Software and subscriptions', -1],
+  ['overhead.recruiting', 'overhead', 'Recruiting and driver compliance', -1],
+  ['overhead.travel', 'overhead', 'Travel (driver relocation)', -1],
   ['maintenance.supplies', 'maintenance', 'Consumables and fittings', -1],
   ['ifta.tax', 'ifta', 'IFTA fuel tax', -1],
   ['ifta.weight_distance', 'ifta', 'Weight-distance tax (NY/KY/NM/OR)', -1],
