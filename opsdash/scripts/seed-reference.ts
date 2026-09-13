@@ -52,6 +52,12 @@ const CATEGORIES: Array<[id: string, group: string, name: string, sign: number]>
   // (straps, chains, mudflaps) another 137 rows and $36,416. Filing
   // either under "repairs" would make that category mean nothing.
   ['maintenance.wash', 'maintenance', 'Washing and detailing', -1],
+  // Trailers are pooled across the carriers — 47% of those with enough cost
+  // history were pulled by trucks from more than one company — so their
+  // upkeep is not any one truck's variable cost. It is fixed cost, carried
+  // as a single line rather than split across the maintenance categories,
+  // because nothing downstream should be tempted to divide it by a truck.
+  ['trailer.fixed', 'trailer', 'Trailer cost (fixed)', -1],
   ['maintenance.supplies', 'maintenance', 'Consumables and fittings', -1],
   ['ifta.tax', 'ifta', 'IFTA fuel tax', -1],
   ['ifta.weight_distance', 'ifta', 'Weight-distance tax (NY/KY/NM/OR)', -1],
@@ -101,6 +107,12 @@ async function main(): Promise<void> {
     ['dispatch', 'AFG', 'AFG'],
     ['irp', 'ZONE-OH LLC', 'ZONE'],
     ['irp', 'XTRACK LLC', 'XTRACK'],
+    // The expenses sheet's own vocabulary: its `Expense side` column says
+    // "Xtrack exp" / "AFG exp", and its Details column a bare code. Its own
+    // source system, so the same string from two sheets is never merged.
+    ['expenses', 'zone', 'ZONE'],
+    ['expenses', 'xtrack', 'XTRACK'],
+    ['expenses', 'afg', 'AFG'],
   ];
   for (const [system, key, code] of MARKERS) {
     const id = byCode.get(code);
@@ -117,8 +129,12 @@ async function main(): Promise<void> {
   // would fail at apply time, in front of the operator, after they had
   // already made the decision. Checked here instead.
   const { suggestableCategories } = await import('../src/engines/categorise/suggest');
+  // `getCategoryGroups` proposes this one directly, by unit type rather than
+  // through a description rule, so it is not in `suggestableCategories()` and
+  // has to be checked alongside it.
+  const { TRAILER_FIXED_CATEGORY } = await import('../src/db/repo/categorise');
   const known = new Set(CATEGORIES.map(([id]) => id));
-  const missing = suggestableCategories().filter((c) => !known.has(c));
+  const missing = [...suggestableCategories(), TRAILER_FIXED_CATEGORY].filter((c) => !known.has(c));
   if (missing.length > 0) {
     throw new Error(
       `The categorisation rules can propose ${missing.join(', ')}, which this chart of accounts does not define.`,

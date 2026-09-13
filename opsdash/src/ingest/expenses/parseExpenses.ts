@@ -4,7 +4,13 @@ import { cellAt, isBlankRow, normalizeHeaderCell, tokenizeTable } from './table'
 import { parseExpenseDate } from './dates';
 import { parseExpenseAmount } from './money';
 import { extractIssuedToSignals } from './identity';
-import { classifyCategoryGroup, extractEntityHint, normalizeChargedTo, normalizeUnitType } from './classify';
+import {
+  carrierFromBearer,
+  classifyCategoryGroup,
+  extractEntityHint,
+  normalizeChargedTo,
+  normalizeUnitType,
+} from './classify';
 import type { ChargedTo, UnitType, CategoryGroupHint } from './classify';
 
 /**
@@ -311,9 +317,26 @@ export function parseExpensesDocument(text: string, documentId: string): Expense
     const issuedTo = extractIssuedToSignals(issuedToRaw);
     const categoryText = costTypeRaw || detailsRaw || null;
     const categoryGroup = classifyCategoryGroup([vendorRaw, costTypeRaw, detailsRaw]);
-    const entityHint = extractEntityHint(detailsRaw || null);
+    // Two independent statements of the same fact. The Details column holds
+    // a bare entity code in one late section; the Expense side column says
+    // "<name> exp" far more often. Details wins when both are present only
+    // because it is the narrower, more deliberate signal — they are checked
+    // for disagreement below rather than silently merged.
+    const detailsEntity = extractEntityHint(detailsRaw || null);
+    const bearerEntity = carrierFromBearer(chargedTo.bearerRaw);
+    const entityHint = detailsEntity ?? bearerEntity;
 
     const reviewReasons: string[] = [];
+    if (detailsEntity !== null && bearerEntity !== null && detailsEntity !== bearerEntity) {
+      reviewReasons.push(
+        `entity:sources_disagree(details says ${detailsEntity}, expense side says ${bearerEntity})`,
+      );
+    }
+    if (chargedTo.bearerRaw !== null && bearerEntity === null) {
+      // "Iron Lease exp", "STL exp", "Sher Imam exp" — the sheet names a
+      // bearer that is not one of the three carriers. Never guessed at.
+      reviewReasons.push(`entity:bearer_is_not_a_carrier("${chargedTo.bearerRaw}")`);
+    }
     if (schemaWasInferred) {
       // The column meanings came from the row's shape, not from a header this
       // section actually carried. Every such row waits for a person, however
@@ -352,13 +375,22 @@ export function parseExpensesDocument(text: string, documentId: string): Expense
         dateRaw: dateRawCell,
         expenseSideRaw: expenseSideRawCell || null,
         chargedTo: chargedTo.value,
+        // The name in an "<name> exp" value, unresolved. `Iron Lease` and
+        // `STL` land here too: the first is the asset-holding company and the
+        // second a terminal, so neither becomes `entityHint`, but both are
+        // real statements about who bore the cost and are not discarded.
+        expenseBearerRaw: chargedTo.bearerRaw,
         detailsRaw: detailsRaw || null,
         categoryGroupHint: categoryGroup,
         categoryText,
         entityHint,
       },
       reviewedPayload: null,
-      entityId: null,
+      // A raw code in the expenses sheet's vocabulary, never an entity_id:
+      // `insertStagingRows` resolves it through `source_key_map` under the
+      // `expenses` source system, the same way the dispatch marker is
+      // resolved under `dispatch`.
+      entityId: entityHint,
       truckId: null,
       driverId: null,
       accrualDate: date.iso,

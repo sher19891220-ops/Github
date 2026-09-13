@@ -16,6 +16,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { query } from '@/db/pool';
 import { createDocument, getDocumentRows } from '@/db/repo/documents';
 import { commitDocument } from '@/db/repo/commit';
+import { updateStagingRow } from '@/db/repo/stagingRows';
 import { getIftaReturn, upsertRate } from '@/db/repo/ifta';
 import { CATEGORY_FUEL, ENTITY_ZONE_ID, ensureBaseFixtures } from './helpers';
 
@@ -89,13 +90,25 @@ beforeAll(async () => {
   });
   documentId = doc.documentId;
 
-  // The review step, standing in for a person: a statement names a unit
-  // and a vendor, not an entity, so the entity is assigned before commit.
-  await query(
-    `UPDATE accounting.staging_row SET entity_id = $2
-      WHERE document_id = $1 AND category_id IS NOT NULL`,
-    [documentId, ENTITY_ZONE_ID],
-  );
+  // The review step, standing in for a person: a statement names a unit and
+  // a vendor, not an entity, so the entity is assigned before commit.
+  //
+  // This goes through `updateStagingRow`, the same path the review screen
+  // uses, rather than writing entity_id with raw SQL. The parser flags these
+  // rows `under_review` on purpose — "a row a human should look at", e.g.
+  // DEF gallons that are not IFTA diesel — and a held row does not post. A
+  // person clearing that flag is the whole point of the review step, so a
+  // stand-in that sets one column and leaves the flag up is not standing in
+  // for anything a person actually does.
+  // The fixture is content-stable on purpose (see YEAR above), so a second
+  // run finds the same document with its rows already posted. Those are
+  // immutable, and a real reviewer could not edit them either — skip them
+  // exactly as the review screen would.
+  for (const row of await getDocumentRows(documentId)) {
+    if (row.categoryId === null || row.status === 'committed') continue;
+    const edit = await updateStagingRow(row.stagingRowId, { entityId: ENTITY_ZONE_ID });
+    if (!edit.ok) throw new Error(`review stand-in failed: ${JSON.stringify(edit)}`);
+  }
   await commitDocument(documentId, 'controller@fleet');
 
   await upsertRate({
@@ -150,8 +163,22 @@ describe('what reaches the ledger', () => {
   it('holds back the line it cannot categorise instead of inventing a category', async () => {
     const rows = await getDocumentRows(documentId);
     const advance = rows.find((r) => r.categoryId === null)!;
-    expect(advance.status).toBe('rejected');
-    expect(advance.reviewNotes).toMatch(/categoryId/);
+
+    // A cash advance is not fuel, so the parser assigns no category and the
+    // line never reaches the ledger. It is `under_review` rather than
+    // `rejected` because a commit no longer examines held rows at all: this
+    // one is held on the blocker it hit first — no company on the row — and
+    // naming that is more use to a reviewer than "missing categoryId", which
+    // they would only see after supplying the company.
+    expect(advance.status).toBe('under_review');
+    expect(advance.reviewNotes).toMatch(/Company not stated/);
+
+    // And it stays out either way: the three fuel lines posted, this did not.
+    const posted = await query<{ n: string }>(
+      `SELECT count(*)::text n FROM accounting.ledger_entry WHERE staging_row_id = $1`,
+      [advance.stagingRowId],
+    );
+    expect(posted[0]?.n).toBe('0');
   });
 });
 

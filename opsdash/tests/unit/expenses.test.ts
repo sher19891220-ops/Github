@@ -7,6 +7,7 @@ import { parseExpenseDate } from '@/ingest/expenses/dates';
 // Real, live-sheet export. Never a synthetic fixture — see CLAUDE.md §2 and
 // docs/SOURCE-DISCOVERY.md, which are quoted from this exact file.
 const FIXTURE_PATH = '/home/user/opsdash-fixtures/expenses.txt';
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const haveFixture = existsSync(FIXTURE_PATH);
 
 describe.skipIf(!haveFixture)('parseExpensesDocument — real expenses.txt', () => {
@@ -109,8 +110,42 @@ describe.skipIf(!haveFixture)('parseExpensesDocument — real expenses.txt', () 
     );
     expect(withHint.length).toBeGreaterThan(0);
     for (const row of withHint) {
-      // A hint informs the review step; it never resolves entityId itself.
+      // The hint is carried out on `entityId` as a RAW CODE in the expenses
+      // sheet's own vocabulary — the same thing the dispatch parser does with
+      // its free-text marker. `insertStagingRows` resolves it through
+      // `source_key_map` under the `expenses` source system. What the parser
+      // must never emit is a resolved entity_id, so that is what is asserted.
+      expect(row.entityId).not.toBeNull();
+      expect(row.entityId).not.toMatch(UUID_RE);
+      expect(['zone', 'xtrack', 'afg']).toContain(row.entityId);
+    }
+  });
+
+  it('reads the company out of the "<name> exp" values in the Expense side column', () => {
+    // 170 rows say "Xtrack exp", 92 "AFG exp" — that cell states BOTH that a
+    // company bears the cost and which one. Reading only the first fact left
+    // $67k of 2026 spend unattributable.
+    const result = parseExpensesDocument(text, 'doc-expenses-side');
+    const byBearer = result.rows.filter(
+      (r) => (r.parsedPayload as { expenseBearerRaw: string | null }).expenseBearerRaw !== null,
+    );
+    expect(byBearer.length).toBeGreaterThan(300);
+    for (const row of byBearer) {
+      // "<name> exp" is a company-borne cost, whoever the company turns out
+      // to be — it is never the driver side.
+      expect((row.parsedPayload as { chargedTo: string }).chargedTo).toBe('company');
+    }
+
+    // `Iron Lease` is the asset-holding company and `STL` a terminal, so
+    // neither is silently booked to a carrier. They are still captured.
+    const nonCarrier = byBearer.filter(
+      (r) => (r.parsedPayload as { entityHint: string | null }).entityHint === null,
+    );
+    expect(nonCarrier.length).toBeGreaterThan(0);
+    for (const row of nonCarrier) {
       expect(row.entityId).toBeNull();
+      expect(row.status).toBe('under_review');
+      expect(row.reviewNotes).toMatch(/bearer_is_not_a_carrier/);
     }
   });
 
@@ -119,7 +154,9 @@ describe.skipIf(!haveFixture)('parseExpensesDocument — real expenses.txt', () 
     for (const row of result.rows) {
       expect(row.driverId).toBeNull();
       expect(row.truckId).toBeNull();
-      expect(row.entityId).toBeNull();
+      // `entityId` may carry a raw code, but never a resolved uuid: resolution
+      // is `source_key_map`'s job and no parser may do it by string match.
+      if (row.entityId !== null) expect(row.entityId).not.toMatch(UUID_RE);
     }
   });
 });

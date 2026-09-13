@@ -34,7 +34,30 @@ function readUnitType(payload: Record<string, unknown>): UnitType | null {
   return typeof v === 'string' && UNIT_TYPE_VALUES.has(v) ? (v as UnitType) : null;
 }
 
+/**
+ * Trailer cost is a FIXED cost, never a truck's or a driver's.
+ *
+ * Trailers are pooled: of the trailers with enough cost history to tell,
+ * 47% were pulled by trucks from more than one carrier — one by all three.
+ * A trailer cost row names the truck that happened to be pulling it, and
+ * following that would charge a tyre to whichever driver drew that trailer
+ * that week, which is neither fair nor stable: the same trailer's next
+ * repair would land on a different truck, in a different company.
+ *
+ * So for a trailer row the pulling truck is deliberately NOT used. The row
+ * still carries it in `parsed_payload` for tracing, and the entity comes
+ * from what the sheet itself says bore the cost (`Expense side`), not from
+ * anything about who was driving.
+ */
+function isTrailerRow(payload: Record<string, unknown>): boolean {
+  return payload.unitType === 'trailer';
+}
+
 function readUnitNumber(payload: Record<string, unknown>): string | null {
+  // A trailer's own unit number is not a truck and must not be looked up as
+  // one; the truck named beside it is the puller, not the cost bearer.
+  if (isTrailerRow(payload)) return null;
+
   const fromIssuedTo = payload.extractedTruckNumber;
   if (typeof fromIssuedTo === 'string' && fromIssuedTo.trim() !== '') return fromIssuedTo;
   const fromUnitRaw = payload.unitRaw;
@@ -73,7 +96,16 @@ export async function insertStagingRows(
     // it might — see `resolveEntityFromTruck` for why this matters: on the
     // real dispatch export 1,322 of 1,386 revenue rows have no marker, and
     // every one of them names a truck.
-    if (resolved.entityId === null && unitForEntity !== null) {
+    if (resolved.entityId === null && unitForEntity === null && isTrailerRow(payloadForUnit)) {
+      // Fixed cost with no company named on the row. Not guessable from the
+      // puller — see `isTrailerRow`. A person says which company's overhead
+      // this is, or it stays out of every P&L.
+      const note =
+        'Trailer cost is a fixed cost and is never attributed through the truck pulling it. ' +
+        'This row does not say which company bore it — assign one before it posts.';
+      status = 'under_review';
+      reviewNotes = reviewNotes ? `${reviewNotes} ${note}` : note;
+    } else if (resolved.entityId === null && unitForEntity !== null) {
       // Trucks move between the carriers mid-year, so the roster is
       // effective-dated and the lookup needs this row's own accrual date.
       // Without it a transferred unit's whole year lands on one carrier.

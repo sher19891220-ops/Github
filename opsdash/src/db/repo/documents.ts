@@ -115,6 +115,17 @@ export async function createDocument(input: CreateDocumentInput): Promise<Create
  * kicks off its work and returns immediately, letting `parse_status` sit at
  * `'pending'` until the background extraction finishes.
  */
+/**
+ * Which upstream vocabulary a document's raw entity strings are written in.
+ * The expenses sheet says "Xtrack exp" / "AFG exp" in its own Expense side
+ * column; the dispatch sheet writes a bare marker in the driver-name cell.
+ * Keeping them in separate source systems is what stops the same string from
+ * two sheets being merged into one meaning (DATA-CONTRACT.md §3).
+ */
+function entitySourceSystemFor(docType: string): string {
+  return docType === 'toll' || docType === 'maintenance' ? 'expenses' : 'dispatch';
+}
+
 async function parseAndStage(
   documentId: string,
   docType: string,
@@ -132,7 +143,9 @@ async function parseAndStage(
     }
 
     await withTransaction(async (q) => {
-      await insertStagingRows(q, outcome.rows);
+      await insertStagingRows(q, outcome.rows, {
+        entitySourceSystem: entitySourceSystemFor(docType),
+      });
     });
     await setDocumentParseResult(documentId, 'parsed', null);
     return;
@@ -164,7 +177,9 @@ async function runBinaryParseInBackground(
     // marks structurally-invalid fields `under_review` (see its doc
     // comment); this only ever stages, exactly like the text path above.
     await withTransaction(async (q) => {
-      await insertStagingRows(q, outcome.rows);
+      await insertStagingRows(q, outcome.rows, {
+        entitySourceSystem: entitySourceSystemFor(docType),
+      });
     });
     await setDocumentParseResult(documentId, 'parsed', null);
   } catch (err) {

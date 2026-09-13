@@ -8,12 +8,43 @@ export type CategoryGroupHint = 'toll' | 'maintenance';
  * blanks, `Iron Lease exp`, `STL exp` and `?` all appear. Anything other
  * than an exact, recognized value comes back `unknown` so the reviewer sees
  * it, rather than silently defaulting to `company`.
+ *
+ * **The `<name> exp` values carry a second fact.** `Xtrack exp` says both
+ * that a company bears this cost AND which company — 170 rows and $67k of
+ * 2026 spend say `Xtrack exp`, 92 say `AFG exp`, 98 say `Iron Lease exp` in
+ * three spellings. Reading only the first fact threw the second away and
+ * left that money unattributable. `bearerRaw` carries it out; it stays a raw
+ * string, because resolving it to an `entity_id` is `source_key_map`'s job
+ * and CLAUDE.md forbids matching identity by string anywhere else.
+ *
+ * `STL exp` is deliberately NOT treated as a carrier: STL is a terminal, and
+ * the same sheet writes "from STL" in the details of rows belonging to all
+ * three carriers. It comes back as a bearer string for the review step to
+ * resolve or reject, never silently as a company.
  */
-export function normalizeChargedTo(raw: string): { value: ChargedTo; raw: string } {
+export function normalizeChargedTo(raw: string): {
+  value: ChargedTo;
+  raw: string;
+  /** The name in a `<name> exp` value, lower-cased and trimmed; null
+   *  otherwise. Never resolved to an entity here. */
+  bearerRaw: string | null;
+} {
   const norm = raw.trim().toLowerCase();
-  if (norm === 'company') return { value: 'company', raw };
-  if (norm === 'driver') return { value: 'driver', raw };
-  return { value: 'unknown', raw };
+  if (norm === 'company') return { value: 'company', raw, bearerRaw: null };
+  if (norm === 'driver') return { value: 'driver', raw, bearerRaw: null };
+
+  // "Xtrack exp", "Iron lease exp", "STL exp\t" — one or more words then the
+  // literal suffix "exp". Trailing markdown-escaped tabs (&#9;) are stripped
+  // by the caller's cell unescaping, but guard the plain case too.
+  const m = /^([a-z][a-z .&'-]*?)\s+exp\.?$/.exec(norm.replace(/\s+/g, ' ').trim());
+  if (m && m[1]) {
+    const bearer = m[1].trim();
+    // "driver exp" is the driver side said the long way, not a company.
+    if (bearer === 'driver') return { value: 'driver', raw, bearerRaw: null };
+    return { value: 'company', raw, bearerRaw: bearer };
+  }
+
+  return { value: 'unknown', raw, bearerRaw: null };
 }
 
 /**
@@ -58,6 +89,21 @@ export function extractEntityHint(raw: string | null): 'zone' | 'xtrack' | 'afg'
   const norm = raw.trim().toLowerCase();
   if (norm === 'zone') return 'zone';
   if (norm === 'xtrack' || norm === 'xtuck') return 'xtrack';
+  if (norm === 'afg') return 'afg';
+  return null;
+}
+
+/**
+ * The carriers, as the `Expense side` column spells them. Only these three
+ * are carriers: `iron lease` is the asset-holding company and `stl` is a
+ * terminal, so both come back null and their rows wait for a person rather
+ * than being booked to a carrier that did not bear them.
+ */
+export function carrierFromBearer(bearerRaw: string | null): 'zone' | 'xtrack' | 'afg' | null {
+  if (!bearerRaw) return null;
+  const norm = bearerRaw.trim().toLowerCase();
+  if (norm === 'zone' || norm === 'zone oh') return 'zone';
+  if (norm === 'xtrack' || norm === 'xtuck' || norm === 'xrack') return 'xtrack';
   if (norm === 'afg') return 'afg';
   return null;
 }

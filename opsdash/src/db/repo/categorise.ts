@@ -57,6 +57,10 @@ export interface CategoryGroup {
   stagingRowIds: string[];
 }
 
+/** Every trailer cost lands here. See migration 016 for why it is one line
+ *  and not a trailer-flavoured copy of the maintenance categories. */
+export const TRAILER_FIXED_CATEGORY = 'trailer.fixed';
+
 export interface CategoryGroupsView {
   documentId: string;
   uncategorisedRows: number;
@@ -71,6 +75,7 @@ interface Row {
   text: string | null;
   amount: string | null;
   entity_id: string | null;
+  unit_type: string | null;
 }
 
 export async function getCategoryGroups(documentId: string): Promise<CategoryGroupsView> {
@@ -78,7 +83,8 @@ export async function getCategoryGroups(documentId: string): Promise<CategoryGro
     `SELECT staging_row_id,
             parsed_payload->>'categoryText' AS text,
             amount,
-            entity_id
+            entity_id,
+            parsed_payload->>'unitType' AS unit_type
        FROM accounting.staging_row
       WHERE document_id = $1
         AND category_id IS NULL
@@ -91,7 +97,15 @@ export async function getCategoryGroups(documentId: string): Promise<CategoryGro
   const unrecognised = new Set<string>();
 
   for (const r of rows) {
-    const suggestion = suggestCategory(r.text ?? '');
+    // A trailer's cost is fixed cost, decided by what the row is ABOUT, not
+    // by the words in its description. Reading the description would file a
+    // trailer tyre under `maintenance.tires` alongside truck tyres, and
+    // per-truck cost per mile would then carry a share of equipment that
+    // three different companies took turns pulling.
+    const suggestion =
+      r.unit_type === 'trailer'
+        ? { categoryId: TRAILER_FIXED_CATEGORY, rule: 'trailer cost, booked as fixed cost' }
+        : suggestCategory(r.text ?? '');
     const key = suggestion?.categoryId ?? '';
     if (suggestion === null) unrecognised.add(normalizeDescription(r.text ?? '') || '(blank)');
     const bucket = buckets.get(key) ?? { rule: suggestion?.rule ?? null, rows: [] };
