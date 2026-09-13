@@ -24,6 +24,20 @@ itemisation -- XTRACK fails 12 of 27 weeks (CLAUDE.md: a real $48,100
 disagreement, not a parsing bug). Those weeks are marked `flags` rather than
 excluded, so a reader sees exactly which week's numbers the sheet itself does
 not reconcile.
+
+PER-TRUCK BREAKDOWN, FROM `truck_weeks.py`. Every week's aggregate above is
+also a roll-up of individual trucks, and "which truck" is exactly what the
+aggregate cannot answer -- `truck_weeks.truck_weeks()` is the same per-unit
+join `truck_report.py` and the maintenance modules already trust. A truck is
+included on the week it appears in a P&L block, whether it earned anything
+or not, so a parked truck still shows up with its rent and admin and a
+negative result. THE COST COLUMNS ON AN OWNER-OPERATOR ROW ARE NOT THE SAME
+CLAIM AS ON A COMPANY-DRIVER ROW -- see the module docstring above: rent and
+fuel there are the driver's own deductions, recovered from them, not the
+company's spend, and `result` (the sheet's own P&L Profit column) is the
+number that actually reads as the company's outcome on that truck. Both
+kinds are shown side by side, `kind` named on every row, so a reader is
+never left guessing which arithmetic applies.
 """
 import json
 import sys
@@ -36,9 +50,32 @@ sys.path.insert(0, str(ROOT / "ingest"))
 warnings.filterwarnings("ignore")
 
 import truck_breakeven as B  # noqa: E402
+import truck_weeks as T      # noqa: E402
 import xtrack_trend as X     # noqa: E402
 
 COMPANIES = ("ZONE", "XTRACK", "AFG")
+
+
+def trucks_by_week(company):
+    d = T.truck_weeks(company)
+    out = {}
+    for wk, g in d.groupby("week"):
+        rows = []
+        for r in g.itertuples():
+            rows.append({
+                "unit": r.unit, "driver": r.driver, "kind": r.kind,
+                "gross": round(r.gross, 2), "miles": round(r.miles),
+                "rpm": None if r.rpm != r.rpm else round(r.rpm, 3),
+                "driver_pay": round(r.driver_pay, 2), "fuel": round(r.fuel, 2),
+                "rent": round(r.rent, 2), "toll": round(r.toll, 2),
+                "admin": round(r.admin, 2),
+                "other": round(r.additional + r.other, 2),
+                "cost": round(r.cost, 2), "result": round(r.result, 2),
+                "iron_leased": bool(r.iron_leased),
+            })
+        rows.sort(key=lambda x: x["result"])
+        out[wk] = rows
+    return out
 
 
 def weekly_rows(company):
@@ -83,9 +120,11 @@ def main():
     for c in COMPANIES:
         rows = weekly_rows(c)
         flagged = sum(1 for r in rows if r["flags"])
-        companies[c] = {"weeks": rows, "flagged_weeks": flagged}
+        trucks = trucks_by_week(c)
+        companies[c] = {"weeks": rows, "flagged_weeks": flagged, "trucks_by_week": trucks}
+        n_trucks = sum(len(v) for v in trucks.values())
         print(f"  {c}: {len(rows)} weeks, {flagged} flagged by the sheet's own controls, "
-              f"{rows[0]['week']}..{rows[-1]['week']}")
+              f"{rows[0]['week']}..{rows[-1]['week']}, {n_trucks} truck-weeks in the breakdown")
 
     out = {
         "companies": companies,
@@ -97,7 +136,12 @@ def main():
                 "own line. A week marked with a flag failed one of the sheet's "
                 "own reconciliation checks (its panel total does not match its "
                 "own unit rows, or its own itemisation does not sum) -- that "
-                "week's numbers are the sheet's own assertion, not a verified figure.",
+                "week's numbers are the sheet's own assertion, not a verified figure. "
+                "Each week's per-truck breakdown (trucks_by_week) sorts worst-result "
+                "first; a company-driver row's cost columns are the company's own "
+                "spend, but the same columns on an owner-operator row are the "
+                "driver's settlement deductions -- recovered from them, not borne by "
+                "the company -- so only that row's 'result' is comparable across kinds.",
     }
     out_path = ROOT / "data" / "processed" / "weekly_pnl_view.json"
     out_path.parent.mkdir(parents=True, exist_ok=True)
