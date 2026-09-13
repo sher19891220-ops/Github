@@ -16,11 +16,24 @@ databases:
 services:
   - type: web
     name: opsdash
-    runtime: node
+    # Docker, not the native Node runtime, and not by preference.
+    #
+    # Accounting uploads photos and scans of fuel statements; reading those
+    # needs `pdftoppm` (poppler) and `tesseract` on the box. Render's native
+    # runtime ships neither, and a native build has no apt — an
+    # `apt-get install` in buildCommand would fail at deploy rather than
+    # install anything. Render's own docs say to use Docker for any OS-level
+    # package, so the tools are installed in the Dockerfile.
+    # https://render.com/docs/native-runtimes
+    #
+    # Paths are relative to the REPO root, not to rootDir; the app lives in
+    # opsdash/. There is no buildCommand or startCommand under Docker — the
+    # Dockerfile's own build steps and CMD are what run.
+    runtime: docker
     plan: starter
     rootDir: opsdash
-    buildCommand: npm ci && npm run build
-    startCommand: npm run start
+    dockerfilePath: ./opsdash/Dockerfile
+    dockerContext: ./opsdash
     # Public, and touches neither the session nor the database: a health
     # check that needs either reports the app as dead during exactly the
     # incidents where you want it up and telling you what is wrong.
