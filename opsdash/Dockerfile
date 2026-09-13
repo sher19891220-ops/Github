@@ -63,8 +63,9 @@ COPY --from=builder --chown=node:node /app/node_modules/typescript ./node_module
 # to USER node gives a container that boots and then fails the first time it
 # tries to cache a render.
 COPY --from=builder --chown=node:node /app/.next ./.next
-COPY --from=builder --chown=node:node /app/public ./public
 COPY --from=builder --chown=node:node /app/next.config.ts ./next.config.ts
+# No `public/` copy: this project has none, and COPY on a missing path fails
+# the build rather than being skipped. Add it back the day one appears.
 
 # Render sets PORT; `next start` reads it. Declared for local runs.
 ENV PORT=3000
