@@ -345,6 +345,34 @@ earning. The resolver refuses it as `outside_period` rather than quietly
 stretching the period to fit — one of those two records is wrong, and only the
 operator knows which.
 
+### Resolved: the operator answered, and the dating held
+
+All thirteen open units were confirmed. Six had left and the operator named
+the carrier; the dispatch sheet had already evidenced the dates. Four were
+resolved by the sources above once the precedence was fixed. **Two had run
+under two carriers, and the operator confirmed both the carriers and the
+handover dates** — each placed where the dispatch sheet shows the driver
+change, then confirmed rather than assumed.
+
+Those two are the first units with more than one period, so the
+effective-dated model finally got a real test on real money. It splits
+cleanly: one unit's revenue stops at its first carrier on the day before the
+handover and resumes at the second on the day of it, with no row landing on
+the wrong side, and the database's non-overlap constraint accepted both
+boundaries without complaint.
+
+The roster now covers **every revenue-bearing truck**: 84 carrier periods
+across 82 units, 31 of them closed because the unit left or went inactive.
+Revenue posted went from 1,221 to **1,381 of 1,386 rows**.
+
+One correction worth recording. The remaining held rows were not a mystery:
+84 of the 97 were dated in the week 2025-12-29 to 2026-01-04, which is
+*before* every carrier period. The periods had been derived from each
+dispatch week's LABEL rather than the day that week begins, so 28 trucks
+started a week late. Moving each first period back to the day the truck
+actually earned released them. A period boundary taken from a label instead
+of the underlying date is worth watching for wherever else weeks are parsed.
+
 ### What this cost in the schema
 
 `truck_entity_history` had been in the schema since migration 001, described in
