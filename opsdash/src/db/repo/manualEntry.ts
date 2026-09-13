@@ -52,6 +52,18 @@ export interface ManualEntryInput {
   jurisdiction?: string | null;
   memo?: string | null;
 
+  /**
+   * How a figure that is NOT a measured amount was derived. Defaults to
+   * `'actual'`, meaning the source stated this exact amount. Anything else
+   * marks the row an allocation, and migration 003 requires it to be
+   * presented as one and never as a measured per-unit cost — so an
+   * allocation posted without setting this is silently indistinguishable
+   * from real data, which is the whole failure the column exists to prevent.
+   */
+  allocationBasis?: 'actual' | 'even_split' | 'by_weight' | 'by_miles' | 'manual' | 'by_truck_count';
+  /** What was split, and over what, in the operator's words. */
+  allocationNote?: string | null;
+
   /** Who is standing behind this figure, and what they are going on. */
   assertedBy: string;
   basis: string;
@@ -110,11 +122,13 @@ export async function createManualEntry(
       `INSERT INTO accounting.ledger_entry
          (entity_id, truck_id, driver_id, accrual_date, category_id, amount,
           quantity, jurisdiction, unit_type, unit_number, charged_to,
-          source_kind, attestation_id, memo, posted_by)
+          source_kind, attestation_id, memo, posted_by,
+          allocation_basis, allocation_note)
        VALUES ($1, $2, $3, $4::date, $5, $6, $7, $8,
                COALESCE($9::accounting.unit_type, 'unknown'), $10,
                COALESCE($11::accounting.charged_to, 'company'),
-               'manual', $12, $13, $14)
+               'manual', $12, $13, $14,
+               COALESCE($15::accounting.allocation_basis, 'actual'), $16)
        RETURNING ${LEDGER_ENTRY_COLUMNS_SQL}`,
       [
         input.entityId,
@@ -131,6 +145,8 @@ export async function createManualEntry(
         att.attestation_id,
         input.memo ?? null,
         postedBy,
+        input.allocationBasis ?? null,
+        input.allocationNote ?? null,
       ],
     )) as unknown as Record<string, unknown>[];
 
