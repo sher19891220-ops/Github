@@ -6,7 +6,8 @@
 INSERT INTO accounting.entity (entity_id, code, legal_name)
 VALUES ('11111111-1111-1111-1111-111111111111','ZONE','Zone Logistics LLC');
 INSERT INTO accounting.category (category_id, category_group, display_name, sign)
-VALUES ('fuel.diesel','fuel','Diesel',-1), ('revenue.linehaul','revenue','Linehaul',1);
+VALUES ('fuel.diesel','fuel','Diesel',-1), ('revenue.linehaul','revenue','Linehaul',1),
+       ('trailer.fixed','trailer','Trailer cost (fixed)',-1);
 INSERT INTO accounting.source_document
   (document_id, doc_type, file_name, mime_type, byte_size, sha256, storage_key, uploaded_by)
 VALUES ('22222222-2222-2222-2222-222222222222','fuel','efs_2026_q1.csv','text/csv',
@@ -773,3 +774,55 @@ SELECT CASE WHEN count(*) = 1
             ELSE 'FAIL: a saved return traces to nothing' END AS result
 FROM accounting.ifta_run_source
 WHERE calc_run_id = 'eeeeeeee-0000-0000-0000-00000000c001';
+
+\echo '--- ASSERT 58: a truck cannot be two carriers on the same day -----'
+-- Trucks transfer mid-year, so the carrier is effective-dated. The lookup is
+-- only a function if the periods cannot overlap; without this, a roster bug
+-- would leave the resolver picking whichever row the planner reached first.
+INSERT INTO accounting.truck (truck_id, unit_number)
+VALUES ('eeeeeeee-0000-0000-0000-00000000f001','VERIFY-XFER')
+ON CONFLICT DO NOTHING;
+INSERT INTO accounting.truck_entity_history
+  (truck_id, entity_id, effective_from, effective_to, basis)
+VALUES ('eeeeeeee-0000-0000-0000-00000000f001','11111111-1111-1111-1111-111111111111',
+        '2026-01-01','2026-03-29','verify');
+DO $$
+BEGIN
+  INSERT INTO accounting.truck_entity_history
+    (truck_id, entity_id, effective_from, effective_to, basis)
+  VALUES ('eeeeeeee-0000-0000-0000-00000000f001','66666666-6666-6666-6666-666666666666',
+          '2026-03-29', NULL, 'verify');
+  RAISE EXCEPTION 'FAIL: two carriers accepted for one truck on the same day';
+EXCEPTION WHEN exclusion_violation THEN
+  RAISE NOTICE 'PASS: overlapping carrier periods rejected';
+END $$;
+
+\echo '--- ASSERT 59: adjacent carrier periods are accepted --------------'
+-- The same constraint must not forbid the thing it exists to describe: a
+-- handover where one period ends the day before the next begins.
+INSERT INTO accounting.truck_entity_history
+  (truck_id, entity_id, effective_from, effective_to, basis)
+VALUES ('eeeeeeee-0000-0000-0000-00000000f001','66666666-6666-6666-6666-666666666666',
+        '2026-03-30', NULL, 'verify');
+SELECT CASE WHEN count(*) = 2
+            THEN 'PASS: a real transfer stores as two adjacent periods'
+            ELSE 'FAIL: adjacent carrier periods were not both stored' END AS result
+FROM accounting.truck_entity_history
+WHERE truck_id = 'eeeeeeee-0000-0000-0000-00000000f001';
+
+\echo '--- ASSERT 60: trailer cost has its own group, never a truck one --'
+-- Trailers are pooled between the carriers, so their upkeep is fixed cost and
+-- must not be filed under a maintenance category that per-truck cost per mile
+-- would then divide by a truck.
+SELECT CASE WHEN count(*) = 1
+            THEN 'PASS: trailer.fixed exists in its own category group'
+            ELSE 'FAIL: trailer cost has nowhere of its own to go' END AS result
+FROM accounting.category
+WHERE category_id = 'trailer.fixed' AND category_group = 'trailer';
+
+\echo '--- ASSERT 61: a consolidated share is never stored as an actual --'
+-- Shared cost split across carriers is an allocation. The column exists so it
+-- can never be read back as a measured per-carrier amount.
+SELECT CASE WHEN 'by_truck_count' = ANY (enum_range(NULL::accounting.allocation_basis)::text[])
+            THEN 'PASS: a truck-count split is a nameable allocation basis'
+            ELSE 'FAIL: a consolidated share could only be stored as actual' END AS result;

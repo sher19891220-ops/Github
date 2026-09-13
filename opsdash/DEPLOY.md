@@ -6,8 +6,8 @@ behaviour, and confusing if you are not expecting it.
 
 ## 1. Create the services
 
-The blueprint at `../opsdash-render.yaml` describes a web service and a
-managed Postgres. On Render: **New → Blueprint**, point it at this
+The blueprint at `render.yaml` (this directory) describes a web service and
+a managed Postgres. On Render: **New → Blueprint**, point it at this
 repository, and it reads that file.
 
 `autoDeploy` is **off** on purpose. This app posts to a ledger; a deploy
@@ -23,7 +23,7 @@ export DATABASE_URL='<the connection string Render shows>'
 for m in db/migrations/*.sql; do psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$m"; done
 ```
 
-Then prove the schema is what the contract says it is — 59 assertions, all
+Then prove the schema is what the contract says it is — 63 assertions, all
 of which must pass:
 
 ```bash
@@ -38,10 +38,20 @@ cost under, and neither failure says "you have not set up yet".
 
 ```bash
 npx tsx scripts/seed-reference.ts
-npx tsx scripts/load-truck-roster.ts tests/fixtures/real/truck-entity-roster.csv
+npx tsx scripts/load-truck-roster.ts <path to the roster csv>
 ```
 
-The second one matters more than it looks. The dispatch sheet names the
+**The roster is not in the repository, and cannot be.** It lists real unit
+numbers, and this repo is public — `.gitignore` excludes
+`tests/fixtures/real/`. A deploy that pulls from GitHub will not have the
+file, and the command above fails with a missing path rather than a wrong
+answer, which is the right failure but a surprising one at 2am.
+
+So the roster travels out of band: copy it to the machine running the
+command, or upload it and point the script at wherever it landed. Treat it
+like a credential — it is business data, not source.
+
+The second command matters more than it looks. The dispatch sheet names the
 company on about 5% of its rows; the truck is on all of them. Without the
 roster loaded, 1,322 of 1,386 real revenue rows are rejected at commit for
 a missing entity — 95% of a year's revenue unable to reach the ledger.
