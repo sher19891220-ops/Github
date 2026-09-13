@@ -400,7 +400,7 @@ V.pnl = () => {
       </div>
     </div>
     <div id="wkpnl"></div></div>
-  <div class="panel"><h3>Full truck &amp; driver detail, by week<span class="note">sorted by gross, highest to lowest</span></h3>
+  <div class="panel"><h3>Full truck &amp; driver detail, by week<span class="note">sortable by gross or RPM</span></h3>
     <div class="pad" style="padding-bottom:0;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px">
       <div style="display:flex;gap:8px;flex-wrap:wrap" id="wkdco">
         ${names.map((n,i)=>`<button class="navbtn" data-wkdco="${n}" aria-current="${i===0}" style="width:auto">${LABEL[n]||n}</button>`).join('')}
@@ -567,9 +567,18 @@ function wireWeeklyPnl(co, period){
   enableSort($('#wkpnl table'));
 }
 
-function weekDetailTable(co, week){
+function weekDetailTable(co, week, sortBy){
+  sortBy = sortBy === 'rpm' ? 'rpm' : 'gross';
   const rows = (D.weekly_pnl.companies[co].trucks_by_week[week] || []).slice()
-    .sort((a,b)=> b.gross - a.gross);
+    .sort((a,b)=>{
+      if(sortBy === 'rpm'){
+        if(a.rpm==null && b.rpm==null) return 0;
+        if(a.rpm==null) return 1;
+        if(b.rpm==null) return -1;
+        return b.rpm - a.rpm;
+      }
+      return b.gross - a.gross;
+    });
   return `<div class="scroll"><table><thead><tr><th>Unit</th><th>Driver</th><th>Kind</th>
     <th class="n">Gross</th><th class="n">Miles</th><th class="n">RPM</th>
     <th class="n">Driver pay</th><th class="n">Fuel</th><th class="n">Rent</th>
@@ -586,21 +595,34 @@ function weekDetailTable(co, week){
       <td class="n"><span class="chip ${t.result<0?'crit':'ok'}">${usd(t.result)}</span></td></tr>`).join('')}
     </tbody></table></div>`;
 }
-function weekDetailPanel(co, week){
+function weekDetailPanel(co, week, sortBy){
+  sortBy = sortBy === 'rpm' ? 'rpm' : 'gross';
   const weeks = D.weekly_pnl.companies[co].weeks.map(w=>w.week);
   const activeWeek = week && weeks.includes(week) ? week : weeks[weeks.length-1];
   const wk = D.weekly_pnl.companies[co].weeks.find(w=>w.week===activeWeek);
   const flagged = (wk && wk.flags) || [];
   return `
-  <div style="display:flex;gap:6px;flex-wrap:wrap;overflow-x:auto;padding-bottom:10px" id="wkweekbar">
-    ${weeks.map(w=>`<button class="navbtn" data-wkweek="${w}" aria-current="${w===activeWeek}" style="width:auto">${w}</button>`).join('')}
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;padding-bottom:10px">
+    <div style="display:flex;gap:6px;flex-wrap:wrap;overflow-x:auto" id="wkweekbar">
+      ${weeks.map(w=>`<button class="navbtn" data-wkweek="${w}" aria-current="${w===activeWeek}" style="width:auto">${w}</button>`).join('')}
+    </div>
+    <div style="display:flex;gap:6px;flex-shrink:0" id="wkdsort">
+      <span class="src" style="align-self:center;margin-right:2px">Sort by</span>
+      ${[['gross','Gross'],['rpm','RPM']].map(([s,lb])=>`<button class="navbtn" data-wkdsort="${s}" aria-current="${s===sortBy}" style="width:auto">${lb}</button>`).join('')}
+    </div>
   </div>
   ${flagged.length ? `<div class="dsec"><p><span class="chip warn">flagged</span> ${flagged.map(f=>f.what+(f.detail?': '+f.detail:'')).join('; ')} — the sheet's own assertion, not a verified figure.</p></div>` : ''}
-  <div id="wkweektable">${weekDetailTable(co, activeWeek)}</div>`;
+  <div id="wkweektable">${weekDetailTable(co, activeWeek, sortBy)}</div>`;
 }
 function wireWeekDetail(co){
+  const sortBy = (document.querySelector('#wkweekpanel [data-wkdsort][aria-current="true"]')||{}).dataset?.wkdsort || 'gross';
   document.querySelectorAll('#wkweekpanel [data-wkweek]').forEach(b=> b.onclick = ()=>{
-    $('#wkweekpanel').innerHTML = weekDetailPanel(co, b.dataset.wkweek);
+    $('#wkweekpanel').innerHTML = weekDetailPanel(co, b.dataset.wkweek, sortBy);
+    wireWeekDetail(co);
+  });
+  document.querySelectorAll('#wkweekpanel [data-wkdsort]').forEach(b=> b.onclick = ()=>{
+    const activeWeek = (document.querySelector('#wkweekbar [data-wkweek][aria-current="true"]')||{}).dataset?.wkweek;
+    $('#wkweekpanel').innerHTML = weekDetailPanel(co, activeWeek, b.dataset.wkdsort);
     wireWeekDetail(co);
   });
   enableSort($('#wkweekpanel table'));
