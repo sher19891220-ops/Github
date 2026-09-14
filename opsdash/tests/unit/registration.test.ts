@@ -12,11 +12,12 @@ import type {
   RegistrationPostingInput,
 } from '@/engines/registration';
 import { decimalFromCents, centsFromDecimal, evenSplitCents, sumCents } from '@/engines/registration/money';
+import { realFixture } from '../realFixtures';
 
 // Real, live documents — never synthetic. See CLAUDE.md §2 and
 // docs/SOURCE-DISCOVERY.md §11b/§11c, which quote this exact transaction.
-const ROSTER_PATH = '/home/user/opsdash-fixtures/irp_invoice_units.txt';
-const STATUS_PATH = '/home/user/opsdash-fixtures/irp_unit_status.csv';
+const ROSTER_PATH = realFixture('irp_invoice_units.txt');
+const STATUS_PATH = realFixture('irp_unit_status.csv');
 const haveFixtures = existsSync(ROSTER_PATH) && existsSync(STATUS_PATH);
 
 // The dollar figures below are quoted verbatim from the real paid invoice

@@ -47,7 +47,13 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_PASSWORD: postgres
+          # trust, not a password. This container lives for the length of one
+          # job, listens on localhost only, and holds nothing. Giving it a
+          # password would mean writing a credential-shaped string into a
+          # public repository, which the hygiene job correctly refuses — and
+          # "it's only CI" is exactly the reasoning that puts a real one
+          # there later.
+          POSTGRES_HOST_AUTH_METHOD: trust
           POSTGRES_DB: opsdash_test
         ports: ['5432:5432']
         options: >-
@@ -60,10 +66,10 @@ jobs:
       # The integration suite inserts -TEST carriers and never deletes them,
       # so it refuses any database whose name does not read as disposable.
       # This one does.
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/opsdash_test
+      DATABASE_URL: postgresql://postgres@localhost:5432/opsdash_test
       # Explicit, never inherited from DATABASE_URL: db:verify creates and
       # drops databases on whatever server this names.
-      VERIFY_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+      VERIFY_DATABASE_URL: postgresql://postgres@localhost:5432/postgres
       # Documents go to a directory the runner throws away. Correct here and
       # refused in production — see src/db/repo/blobStore.ts.
       #
@@ -81,6 +87,17 @@ jobs:
         node-version: '22'
         cache: npm
         cache-dependency-path: opsdash/package-lock.json
+
+    - name: install document-reading tools
+      # The same two the production image installs. Without them the
+      # PDF/photo upload tests do not fail cleanly — they fail with
+      # "pdfinfo is not installed", which is a CI environment gap wearing a
+      # product bug's clothes. The parser is right to refuse rather than
+      # return empty text; CI should just have the tools.
+      run: |
+        sudo apt-get update -qq
+        sudo apt-get install -y -qq --no-install-recommends \
+          poppler-utils tesseract-ocr tesseract-ocr-eng
 
     - name: install
       run: npm ci
@@ -113,6 +130,23 @@ jobs:
 
     - name: build
       run: npm run build
+
+    - name: say what did not run here
+      # The engines are required to be proven against the operator's real
+      # documents rather than synthetic data, and those documents cannot be
+      # on a public runner — they carry unit numbers, driver names and
+      # licence details. Those suites skip here by name.
+      #
+      # Printed rather than left silent: a suite that quietly skips is how a
+      # green tick comes to mean less than it looks like it means. Run
+      # `npm run test:real` with OPSDASH_FIXTURES set before deploying.
+      if: always()
+      run: |
+        echo "::notice title=Real-document tests::Suites needing the operator's own"\
+             "documents are skipped on this runner. Run 'npm run test:real' with"\
+             "OPSDASH_FIXTURES set before a production deploy."
+        npx vitest list 2>/dev/null | grep -c 'needs real documents' \
+          | xargs -I{} echo "{} suite(s) skipped for want of real documents." || true
 
   driverqual:
     name: driverqual — types and unit tests

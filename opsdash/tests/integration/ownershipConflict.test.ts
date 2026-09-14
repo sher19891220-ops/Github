@@ -17,6 +17,7 @@ import { updateStagingRow } from '@/db/repo/stagingRows';
 import { listLedgerEntries } from '@/db/repo/ledger';
 import { CATEGORY_MAINTENANCE, ENTITY_XTRACK_ID, ensureBaseFixtures } from './helpers';
 import { dispatchFixture, expensesFixture } from './fixtures';
+import { describeReal, realFixture } from '../realFixtures';
 
 /**
  * A real VIN from the real ownership crosswalk — one whose `cost_bearer`
@@ -33,7 +34,7 @@ import { dispatchFixture, expensesFixture } from './fixtures';
  * comes from is gitignored.
  */
 function firstLtpOwnerVin(): string {
-  const path = process.env.OPSDASH_IRP_OWNERSHIP_PATH ?? '/home/user/opsdash-fixtures/irp_unit_ownership.csv';
+  const path = process.env.OPSDASH_IRP_OWNERSHIP_PATH ?? realFixture('irp_unit_ownership.csv');
   const text = readFileSync(path, 'utf8');
   const lines = text.split(/\r?\n/).filter((l) => l.trim() !== '');
   const header = lines[0]!.split(',').map((c) => c.trim().toLowerCase());
@@ -46,7 +47,14 @@ function firstLtpOwnerVin(): string {
   throw new Error('no ltp_owner row in the ownership crosswalk');
 }
 
-const LTP_OWNER_VIN = firstLtpOwnerVin();
+// Resolved lazily. At import time this file used to read an absolute path
+// into one developer's home directory, so every machine without it failed
+// the whole suite at collection rather than skipping the one test.
+let ltpOwnerVinCache: string | null = null;
+function ltpOwnerVin(): string {
+  if (ltpOwnerVinCache === null) ltpOwnerVinCache = firstLtpOwnerVin();
+  return ltpOwnerVinCache;
+}
 
 beforeAll(async () => {
   await ensureBaseFixtures();
@@ -68,9 +76,9 @@ async function makeDriver(name: string): Promise<string> {
   return driverId;
 }
 
-describe('commitDocument — ownership conflict (SOURCE-DISCOVERY.md §11h)', () => {
+describeReal('commitDocument — ownership conflict (SOURCE-DISCOVERY.md §11h)', ['irp_unit_ownership.csv'], () => {
   it('flags and rejects a cost charged to a driver who already owns that unit, naming both facts', async () => {
-    const truckId = await makeTruck(LTP_OWNER_VIN);
+    const truckId = await makeTruck(ltpOwnerVin());
     const driverId = await makeDriver(`Owner Driver ${randomUUID()}`);
 
     // Establish (via the real commit path, not a shortcut) that this driver

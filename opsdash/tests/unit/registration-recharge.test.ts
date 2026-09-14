@@ -10,6 +10,7 @@ import {
 } from '@/engines/registration';
 import type { IrpFeeLine, RegistrationPostingInput, RegistrationPostingResult, UnitOperatorRow } from '@/engines/registration';
 import { centsFromDecimal, decimalFromCents, sumCents } from '@/engines/registration/money';
+import { realFixture } from '../realFixtures';
 
 // Real, live documents — never synthetic. See CLAUDE.md §2 and
 // docs/SOURCE-DISCOVERY.md §11d/§11e. The operator crosswalk was corrected
@@ -17,9 +18,9 @@ import { centsFromDecimal, decimalFromCents, sumCents } from '@/engines/registra
 // owner-held units are never an *operator* — title and operation are
 // different facts, and every unit Iron Lease held title to is operated by
 // Zone. Only zone/xtrack/afg appear as `operating_entity` now.
-const ROSTER_PATH = '/home/user/opsdash-fixtures/irp_invoice_units.txt';
-const STATUS_PATH = '/home/user/opsdash-fixtures/irp_unit_status.csv';
-const OPERATOR_PATH = '/home/user/opsdash-fixtures/irp_unit_operator.csv';
+const ROSTER_PATH = realFixture('irp_invoice_units.txt');
+const STATUS_PATH = realFixture('irp_unit_status.csv');
+const OPERATOR_PATH = realFixture('irp_unit_operator.csv');
 const haveFixtures = existsSync(ROSTER_PATH) && existsSync(STATUS_PATH) && existsSync(OPERATOR_PATH);
 
 const REAL_FEE_LINES: IrpFeeLine[] = [

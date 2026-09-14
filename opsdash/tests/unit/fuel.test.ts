@@ -2,9 +2,10 @@ import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { isDecimal } from '@/contract/types';
 import { parseFuelDocument, sniffFuelDocument } from '@/ingest/fuel';
+import { realFixture } from '../realFixtures';
 
 // Real, live-sheet export — never a synthetic fixture (CLAUDE.md §2).
-const FIXTURE_PATH = '/home/user/opsdash-fixtures/fuel.txt';
+const FIXTURE_PATH = realFixture('fuel.txt');
 const haveFixture = existsSync(FIXTURE_PATH);
 
 describe.skipIf(!haveFixture)('parseFuelDocument — real fuel.txt', () => {

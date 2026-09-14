@@ -1,13 +1,14 @@
-import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { extractEntityMarker, mapDriverClass, parseDispatchSheet } from '@/ingest/dispatch';
 import { isDecimal, isIsoDate } from '@/contract/types';
+import { describeReal, readRealFixture } from '../realFixtures';
 
 // Real 2026 dispatch sheet, exported as markdown tables. Deliberately kept
 // outside the repo (operator data, never committed) — see
 // opsdash/docs/SOURCE-DISCOVERY.md §2 and the task brief for provenance.
-const FIXTURE_PATH = '/home/user/opsdash-fixtures/dispatch2026.txt';
-const fixtureText = readFileSync(FIXTURE_PATH, 'utf8');
+// Read inside the suite that needs it, never at import time. Read here and
+// this file does not skip on a machine without the sheet — it crashes the
+// whole run before a single test is collected.
 
 describe('mapDriverClass', () => {
   it('maps CPM/LO/OO regardless of case or trailing whitespace', () => {
@@ -59,8 +60,8 @@ describe('parseDispatchSheet — malformed input', () => {
   });
 });
 
-describe('parseDispatchSheet — the real 2026 sheet', () => {
-  const result = parseDispatchSheet(fixtureText, 'doc-2026');
+describeReal('parseDispatchSheet — the real 2026 sheet', ['dispatch2026.txt'], () => {
+  const result = parseDispatchSheet(readRealFixture('dispatch2026.txt'), 'doc-2026');
 
   it('parses end to end with no crash', () => {
     expect(result.status).toBe('parsed');

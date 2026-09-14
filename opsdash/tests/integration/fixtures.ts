@@ -1,6 +1,6 @@
 /**
  * Small, hand-built dispatch-sheet fragments for the integration suite.
- * Real fixture files (/home/user/opsdash-fixtures/dispatch2026.txt) already
+ * Real fixture files (OPSDASH_FIXTURES/dispatch2026.txt) already
  * exercise the parser thoroughly in tests/unit/dispatch.test.ts; these exist
  * only to give the *persistence* layer a document small enough to reason
  * about row-by-row (one truck-week, one revenue day), built to the exact

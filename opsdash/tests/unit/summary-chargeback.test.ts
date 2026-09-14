@@ -12,6 +12,7 @@ import {
 import type { IrpFeeLine, LedgerEntryDraft, RegistrationPostingInput } from '@/engines/registration';
 import { summarizeTruck } from '@/engines/summary';
 import type { SummaryLedgerEntry } from '@/engines/summary';
+import { describeReal, realFixture } from '../realFixtures';
 
 /**
  * Real, live document (CLAUDE.md §2): the same IRP/HVUT transaction as
@@ -20,8 +21,8 @@ import type { SummaryLedgerEntry } from '@/engines/summary';
  * as a receivable" — proven against a real unit whose HVUT the real
  * unit-status crosswalk resolves to `chargedTo: 'driver'`.
  */
-const ROSTER_PATH = '/home/user/opsdash-fixtures/irp_invoice_units.txt';
-const STATUS_PATH = '/home/user/opsdash-fixtures/irp_unit_status.csv';
+const ROSTER_PATH = realFixture('irp_invoice_units.txt');
+const STATUS_PATH = realFixture('irp_unit_status.csv');
 const haveFixtures = existsSync(ROSTER_PATH) && existsSync(STATUS_PATH);
 
 const REAL_FEE_LINES: IrpFeeLine[] = [
@@ -74,7 +75,7 @@ function toSummaryEntry(draft: LedgerEntryDraft): SummaryLedgerEntry {
   };
 }
 
-describe.skipIf(!haveFixtures)('summary engine — real driver-borne HVUT (readiness criterion 2)', () => {
+describeReal('summary engine — real driver-borne HVUT (readiness criterion 2)', ['irp_invoice_units.txt', 'irp_unit_status.csv'], () => {
   const roster = parseIrpVehicleStatusReport(readFileSync(ROSTER_PATH, 'utf8'));
   const statuses = parseUnitStatusCsv(readFileSync(STATUS_PATH, 'utf8'));
 

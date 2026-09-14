@@ -17,7 +17,8 @@
     "db:local": "bash scripts/db-local.sh",
     "db:backup": "bash scripts/backup-db.sh",
     "db:restore-drill": "bash scripts/restore-drill.sh",
-    "blobs:check": "npx tsx scripts/check-blobs.ts"
+    "blobs:check": "npx tsx scripts/check-blobs.ts",
+    "test:real": "node -e \"if(!process.env.OPSDASH_FIXTURES){console.error('OPSDASH_FIXTURES is not set. These tests prove the engines against the operator\\'s real documents; point it at the directory holding them.');process.exit(1)}\" && vitest run"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1131.0",

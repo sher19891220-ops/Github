@@ -3,10 +3,11 @@ import { describe, expect, it } from 'vitest';
 import { isDecimal, isIsoDate } from '@/contract/types';
 import { parseExpensesDocument, sniffExpensesDocument } from '@/ingest/expenses';
 import { parseExpenseDate } from '@/ingest/expenses/dates';
+import { realFixture } from '../realFixtures';
 
 // Real, live-sheet export. Never a synthetic fixture — see CLAUDE.md §2 and
 // docs/SOURCE-DISCOVERY.md, which are quoted from this exact file.
-const FIXTURE_PATH = '/home/user/opsdash-fixtures/expenses.txt';
+const FIXTURE_PATH = realFixture('expenses.txt');
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const haveFixture = existsSync(FIXTURE_PATH);
 

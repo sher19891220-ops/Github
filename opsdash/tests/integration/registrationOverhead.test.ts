@@ -11,9 +11,10 @@ import { query } from '@/db/pool';
 import { getOverheadRates, RegistrationSourcesUnavailableError } from '@/db/repo/registrationOverhead';
 import { GET as getOverheadRoute } from '@/app/api/registration/overhead/route';
 import { ENTITY_ZONE_ID, ensureBaseFixtures } from './helpers';
+import { realFixture } from '../realFixtures';
 
-const ROSTER_PATH = '/home/user/opsdash-fixtures/irp_invoice_units.txt';
-const STATUS_PATH = '/home/user/opsdash-fixtures/irp_unit_status.csv';
+const ROSTER_PATH = realFixture('irp_invoice_units.txt');
+const STATUS_PATH = realFixture('irp_unit_status.csv');
 const haveFixtures = existsSync(ROSTER_PATH) && existsSync(STATUS_PATH);
 
 beforeAll(async () => {

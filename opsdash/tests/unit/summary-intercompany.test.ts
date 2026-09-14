@@ -13,6 +13,7 @@ import {
 import type { IrpFeeLine, LedgerEntryDraft, RegistrationPostingInput } from '@/engines/registration';
 import { summarizeGroup } from '@/engines/summary';
 import type { SummaryLedgerEntry } from '@/engines/summary';
+import { describeReal, realFixture } from '../realFixtures';
 
 /**
  * Real, live documents — never synthetic (CLAUDE.md §2). Same fixtures and
@@ -23,9 +24,9 @@ import type { SummaryLedgerEntry } from '@/engines/summary';
  * here against the real invoice total ($78,959.21) and real HVUT split, not
  * a fabricated pair of numbers.
  */
-const ROSTER_PATH = '/home/user/opsdash-fixtures/irp_invoice_units.txt';
-const STATUS_PATH = '/home/user/opsdash-fixtures/irp_unit_status.csv';
-const OPERATOR_PATH = '/home/user/opsdash-fixtures/irp_unit_operator.csv';
+const ROSTER_PATH = realFixture('irp_invoice_units.txt');
+const STATUS_PATH = realFixture('irp_unit_status.csv');
+const OPERATOR_PATH = realFixture('irp_unit_operator.csv');
 const haveFixtures = existsSync(ROSTER_PATH) && existsSync(STATUS_PATH) && existsSync(OPERATOR_PATH);
 
 const REAL_FEE_LINES: IrpFeeLine[] = [
@@ -93,7 +94,7 @@ function toSummaryEntry(draft: LedgerEntryDraft): SummaryLedgerEntry {
   };
 }
 
-describe.skipIf(!haveFixtures)('summary engine — real intercompany recharge (readiness criteria 1 & 3)', () => {
+describeReal('summary engine — real intercompany recharge (readiness criteria 1 & 3)', ['irp_invoice_units.txt', 'irp_unit_status.csv', 'irp_unit_operator.csv'], () => {
   const roster = parseIrpVehicleStatusReport(readFileSync(ROSTER_PATH, 'utf8'));
   const statuses = parseUnitStatusCsv(readFileSync(STATUS_PATH, 'utf8'));
   const operatorAssignments = parseUnitOperatorCsv(readFileSync(OPERATOR_PATH, 'utf8'));

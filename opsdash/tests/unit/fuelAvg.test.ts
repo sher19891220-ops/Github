@@ -1,9 +1,10 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { buildDriverEntityMap } from '@/ingest/fuel';
+import { realFixture } from '../realFixtures';
 
 // Real, live-sheet export — never a synthetic fixture (CLAUDE.md §2).
-const FIXTURE_PATH = '/home/user/opsdash-fixtures/fuelavg.txt';
+const FIXTURE_PATH = realFixture('fuelavg.txt');
 const haveFixture = existsSync(FIXTURE_PATH);
 
 describe.skipIf(!haveFixture)('buildDriverEntityMap — real fuelavg.txt', () => {

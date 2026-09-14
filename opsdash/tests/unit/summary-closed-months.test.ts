@@ -11,6 +11,7 @@ import {
 import type { IrpFeeLine, LedgerEntryDraft, RegistrationPostingInput } from '@/engines/registration';
 import { summarizeTruck } from '@/engines/summary';
 import type { SummaryLedgerEntry } from '@/engines/summary';
+import { realFixture } from '../realFixtures';
 
 /**
  * Real, live document (CLAUDE.md §2): readiness criterion 4 — "an unposted
@@ -31,8 +32,8 @@ import type { SummaryLedgerEntry } from '@/engines/summary';
  * equal to the closed months' real sum — not a coincidence, not an
  * approximation.
  */
-const ROSTER_PATH = '/home/user/opsdash-fixtures/irp_invoice_units.txt';
-const STATUS_PATH = '/home/user/opsdash-fixtures/irp_unit_status.csv';
+const ROSTER_PATH = realFixture('irp_invoice_units.txt');
+const STATUS_PATH = realFixture('irp_unit_status.csv');
 const haveFixtures = existsSync(ROSTER_PATH) && existsSync(STATUS_PATH);
 
 const REAL_FEE_LINES: IrpFeeLine[] = [
