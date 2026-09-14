@@ -36,6 +36,7 @@
 import { readFileSync } from 'node:fs';
 import { getPool, query, withTransaction } from '../src/db/pool';
 import { postExternalShopWork, postShopWork } from '../src/db/repo/intercompany';
+import { describeDuplicate, findPossibleDoubleBilling } from '../src/db/repo/doubleBilling';
 import {
   decide,
   naturalKey,
@@ -84,10 +85,31 @@ async function main(): Promise<void> {
   const plan = { pair: 0, external: 0, skipped: 0, held: [] as string[] };
   let pairTotal = 0, externalTotal = 0, billingAddressTotal = 0;
 
+  // Checked before anything is written, so the report says what --apply
+  // would actually do rather than discovering it halfway through.
+  const duplicates = new Map<string, string>();
+  for (const { charge, decision } of decisions) {
+    if (decision.kind === 'refused' || decision.kind === 'held' || seen.has(decision.key)) continue;
+    if (!charge.date) continue;
+    const hits = await findPossibleDoubleBilling(query, {
+      unitNumber: charge.truck ?? charge.trailer ?? null,
+      accrualDate: charge.date,
+      amount: charge.amount.toFixed(2),
+    });
+    if (hits.length > 0) duplicates.set(decision.key, describeDuplicate(hits[0]!));
+  }
+
   for (const { charge, decision } of decisions) {
     if (decision.kind === 'refused') continue;
     if (decision.kind === 'held') { plan.held.push(decision.reason); continue; }
     if (seen.has(decision.key)) { plan.skipped++; continue; }
+    if (duplicates.has(decision.key)) {
+      plan.held.push(
+        `same unit, day and amount is ${duplicates.get(decision.key)} — ` +
+          'held, because one repair billed from two sources charges the carrier twice',
+      );
+      continue;
+    }
     if (decision.kind === 'external') { plan.external++; externalTotal += charge.amount; continue; }
     plan.pair++;
     pairTotal += charge.amount;
@@ -120,7 +142,7 @@ async function main(): Promise<void> {
   await withTransaction(async (q) => {
     for (const { charge, decision } of decisions) {
       if (decision.kind === 'refused' || decision.kind === 'held') continue;
-      if (seen.has(decision.key)) continue;
+      if (seen.has(decision.key) || duplicates.has(decision.key)) continue;
 
       const memo = `${decision.key} ${charge.issue ?? ''}`.trim();
       const shared = {
