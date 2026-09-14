@@ -14,7 +14,9 @@
     "dev": "next dev -p 3000",
     "build": "next build",
     "start": "next start",
-    "db:local": "bash scripts/db-local.sh"
+    "db:local": "bash scripts/db-local.sh",
+    "db:backup": "bash scripts/backup-db.sh",
+    "db:restore-drill": "bash scripts/restore-drill.sh"
   },
   "dependencies": {
     "exceljs": "^4.4.0",

@@ -1,0 +1,29 @@
+# The nightly backup job.
+#
+# A separate image from the web service on purpose. The web image has no
+# reason to carry pg_dump or cloud credentials, and this one has no reason
+# to carry the app, its node_modules, or the OCR toolchain. Neither can be
+# used to reach the other's job.
+#
+# Debian rather than Alpine: `awscli` is a first-class Debian package and
+# this runs once a night, so the smaller image would buy nothing and cost
+# certainty.
+FROM postgres:17-bookworm
+
+# pg_dump 17 against a 16 server is the supported direction (newer client,
+# older server). The reverse is not — a 16 client refuses a 17 server
+# outright. So this deliberately tracks AHEAD of whatever Render is running,
+# and stays correct when they upgrade it underneath us.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends awscli ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY scripts/backup-db.sh scripts/restore-drill.sh ./scripts/
+COPY db/verify ./db/verify
+RUN chmod +x scripts/*.sh
+
+# The base image's entrypoint exists to initialise a database server. This
+# is a client; running it would try to start Postgres and never get here.
+ENTRYPOINT []
+CMD ["bash", "scripts/backup-db.sh"]
