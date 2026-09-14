@@ -170,6 +170,8 @@ Run `bash ~/Github/setup_skills.sh` once on any machine to install:
 | **github** plugin | GitHub integration | All projects |
 | **linear** plugin | Linear task management | TMS, freight, driver ops |
 | **serena** plugin | Semantic LSP code intelligence — go-to-definition, find-references, rename across the whole project | All coding projects (Axel, TMS, etc.) |
+| **unlazy** skill | Anti-laziness Depth Tree — forces full effort on each sub-task of complex work | Any long or multi-step task |
+| **witr** CLI | "Why is this running?" — trace any process/port/container to what started it | Mac mini system debugging, port conflicts |
 
 ### Wiki vault setup (first time)
 
