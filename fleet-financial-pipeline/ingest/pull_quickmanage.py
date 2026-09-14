@@ -47,7 +47,11 @@ ENV_VAR = "QUICKMANAGE_CREDENTIALS"
 CREDS_FILE = ROOT / "config/quickmanage_credentials.json"
 BASE = "https://api.quickmanage.com"
 OUT_DIR = ROOT / "data/raw/quickmanage"
-COMPANIES = ("ZONE_OH", "XTRACK", "AFG")
+# The carriers, which must always be present. The list of companies actually
+# pulled comes from the credentials themselves (see `companies_in`) so that
+# adding the shop, or a fourth carrier, is a credential change rather than a
+# code change.
+REQUIRED_COMPANIES = ("ZONE_OH", "XTRACK", "AFG")
 
 
 def read_credentials():
@@ -66,15 +70,30 @@ def read_credentials():
         creds = json.loads(raw)
     except json.JSONDecodeError as exc:
         raise SystemExit(f"{where} is not valid JSON: {exc}")
-    missing_co = [c for c in COMPANIES if c not in creds]
+    # The three carriers must be present; anything else in the file is
+    # additional and is pulled too. The shop (TRUCKMAX) issues its own keys
+    # and is expected here eventually -- as a credentials entry, not a code
+    # change, because a hard-coded company list means every new company in
+    # the group needs a commit before its data can be read.
+    missing_co = [c for c in REQUIRED_COMPANIES if c not in creds]
     if missing_co:
         raise SystemExit(f"{where} is missing credentials for: "
                          f"{', '.join(missing_co)}")
     for co, pair in creds.items():
+        if not isinstance(pair, dict):
+            raise SystemExit(f"{where}[{co}] should be an object with "
+                             "client_id and client_secret.")
         if not pair.get("client_id") or not pair.get("client_secret"):
             raise SystemExit(f"{where}[{co}] is missing client_id or "
                              "client_secret.")
     return creds
+
+
+def companies_in(creds):
+    """Every company the credentials name, required ones first so the output
+    reads in a stable order however the JSON was written."""
+    extra = sorted(k for k in creds if k not in REQUIRED_COMPANIES)
+    return [c for c in REQUIRED_COMPANIES if c in creds] + extra
 
 
 def get_token(client_id, client_secret):
@@ -127,11 +146,18 @@ def main():
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--whoami", action="store_true",
                     help="prove each company's token exchange works; fetch nothing")
-    ap.add_argument("--only", help="one company from " + ", ".join(COMPANIES))
+    ap.add_argument("--only", help="one company named in the credentials, "
+                                  "e.g. " + ", ".join(REQUIRED_COMPANIES))
     a = ap.parse_args()
 
     creds = read_credentials()
-    companies = [a.only] if a.only else list(COMPANIES)
+    if a.only and a.only not in creds:
+        # Named rather than a KeyError three lines later. The shop's keys are
+        # expected but not here yet, and "--only TRUCKMAX" before they arrive
+        # should say so rather than raise.
+        raise SystemExit(f"No credentials for {a.only}. The ones on file are: "
+                         f"{', '.join(companies_in(creds))}.")
+    companies = [a.only] if a.only else companies_in(creds)
 
     if a.whoami:
         for co in companies:
