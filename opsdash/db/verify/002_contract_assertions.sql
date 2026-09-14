@@ -458,23 +458,66 @@ EXCEPTION WHEN check_violation THEN
 END $$;
 
 \echo '--- ASSERT 33: stated and measured coexist, and the gap is visible ---'
+-- A rate carries TWO independent facts and this assertion covers the first.
+--
+--   kind         stated or measured -- how well the number is known
+--   rate_key     charge. or cost.   -- which direction the money goes
+--
+-- They were conflated: `kind` was being read as charge-versus-cost, which
+-- leaves a stated COST -- the operator's own estimate of what something
+-- costs, which is most of the current rate card -- with nowhere to live,
+-- and a measured CHARGE with nowhere at all.
+--
+-- Here: what the admin fee was assumed to cost, against what it measurably
+-- costs. Same subject, same direction, different confidence.
 INSERT INTO accounting.calc_run
   (calc_run_id, engine, engine_version, period_start, period_end, inputs_hash, status)
 VALUES ('cccccccc-0000-0000-0000-0000000000c1','registration','1.0.0',
         '2026-01-01','2026-12-31', repeat('d',64), 'succeeded');
 INSERT INTO accounting.rate_fact
   (rate_key, kind, amount, basis, effective_from, source_document_id, recorded_by)
-VALUES ('admin.per_driver_week','stated', 50.0000,'per_enrollee','2026-01-01',
+VALUES ('cost.admin.per_driver_week','stated', 50.0000,'per_enrollee','2026-01-01',
         '22222222-2222-2222-2222-222222222222','controller@fleet');
 INSERT INTO accounting.rate_fact
   (rate_key, kind, amount, basis, effective_from, calc_run_id, recorded_by)
-VALUES ('admin.per_driver_week','measured', 173.4200,'per_enrollee','2026-01-01',
+VALUES ('cost.admin.per_driver_week','measured', 173.4200,'per_enrollee','2026-01-01',
         'cccccccc-0000-0000-0000-0000000000c1','controller@fleet');
 SELECT CASE WHEN gap = 123.4200
-            THEN 'PASS: the real cost exceeds the stated fee by ' || gap::text
+            THEN 'PASS: the measured cost exceeds the assumed cost by ' || gap::text
             ELSE 'FAIL: gap = ' || gap::text END AS result
 FROM accounting.v_rate_gap
-WHERE rate_key = 'admin.per_driver_week';
+WHERE rate_key = 'cost.admin.per_driver_week';
+
+\echo '--- ASSERT 33b: a rate must say whether it is charged or borne ------'
+DO $$
+BEGIN
+  INSERT INTO accounting.rate_fact
+    (rate_key, kind, amount, basis, effective_from, source_document_id, recorded_by)
+  VALUES ('admin.per_driver_week','stated', 50.0000,'per_enrollee','2026-01-01',
+          '22222222-2222-2222-2222-222222222222','controller@fleet');
+  RAISE EXCEPTION 'FAIL: a rate that says neither charge nor cost was accepted';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: rate with no charge/cost direction rejected';
+END $$;
+
+\echo '--- ASSERT 33c: an arrangement billed under its cost is visible -----'
+-- The second axis, and the one this business turns on. The admin fee is
+-- charged at 100 a week and measurably costs 173.42. Filed under one name
+-- that is a single number; filed as two it is a subtraction, and the answer
+-- is that every driver on this fee loses the company 73.42 a week.
+INSERT INTO accounting.rate_fact
+  (rate_key, kind, amount, basis, effective_from, source_document_id, recorded_by)
+VALUES ('charge.admin.per_driver_week','stated', 100.0000,'per_enrollee','2026-01-01',
+        '22222222-2222-2222-2222-222222222222','controller@fleet');
+SELECT CASE WHEN spread = -73.4200
+            THEN 'PASS: the fee is charged ' || abs(spread)::text || ' below what it costs'
+            ELSE 'FAIL: spread = ' || COALESCE(spread::text,'null') END AS result
+FROM (
+  SELECT (SELECT amount FROM accounting.rate_fact
+           WHERE rate_key = 'charge.admin.per_driver_week' LIMIT 1)
+       - (SELECT amount FROM accounting.rate_fact
+           WHERE rate_key = 'cost.admin.per_driver_week' AND kind = 'measured' LIMIT 1) AS spread
+) t;
 
 \echo '--- ASSERT 34: a document cannot have two reconciliations open -------'
 DO $$
