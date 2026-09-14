@@ -100,8 +100,35 @@ export async function resolveEntityId(
  */
 export type TruckResolutionFailure = 'no_assignment' | 'outside_period' | 'date_required';
 
+export interface TruckResolutionOptions {
+  /**
+   * Resolve a date that falls BEFORE a truck's earliest known period to the
+   * carrier of that earliest period.
+   *
+   * Off by default, and it has to be, because it is an inference rather than
+   * a record. It exists for costs: `truck_entity_history` is built from the
+   * dispatch sheet, so a period begins the first week a truck EARNED. A
+   * truck incurs cost before it earns — it is bought, prepped, plated,
+   * insured and repaired first — and measured on the real expenses sheet
+   * 197 rows fall into exactly that window, with no period covering them
+   * despite the unit being perfectly well known.
+   *
+   * The inference: the earliest period names the first carrier this truck is
+   * known to have run under, and a cost before it belongs to that carrier
+   * unless something says otherwise. For a unit that later transferred this
+   * is still the right end to extend — the earliest period IS the original
+   * carrier.
+   *
+   * What it must never do is run the other way. Extending the LAST period
+   * forward would claim a truck's costs for a carrier after it left, which
+   * is the error the effective dating was built to prevent.
+   */
+  beforeFirstPeriod?: boolean;
+}
+
 export type TruckEntityResolution =
   | { entityId: string; resolvedFrom: 'truck_roster'; basis: string | null; confidence: string }
+  | { entityId: string; resolvedFrom: 'earliest_period'; basis: string | null; confidence: 'inferred'; firstPeriodFrom: string }
   | { entityId: null; resolvedFrom: 'unresolved'; reason: TruckResolutionFailure };
 
 /**
@@ -115,6 +142,7 @@ export async function resolveEntityFromTruck(
   q: QueryFn,
   unitNumber: string | null,
   onDate: string | null = null,
+  options: TruckResolutionOptions = {},
 ): Promise<TruckEntityResolution> {
   const unit = unitNumber?.trim();
   if (!unit) return { entityId: null, resolvedFrom: 'unresolved', reason: 'no_assignment' };
@@ -160,6 +188,18 @@ export async function resolveEntityFromTruck(
     (r) => iso(r.effective_from) <= onDate && (r.effective_to === null || onDate <= iso(r.effective_to)),
   );
 
-  if (!hit) return { entityId: null, resolvedFrom: 'unresolved', reason: 'outside_period' };
+  if (!hit) {
+    const earliest = all[0]!;
+    if (options.beforeFirstPeriod && onDate < iso(earliest.effective_from)) {
+      return {
+        entityId: earliest.entity_id,
+        resolvedFrom: 'earliest_period',
+        basis: earliest.basis,
+        confidence: 'inferred',
+        firstPeriodFrom: iso(earliest.effective_from),
+      };
+    }
+    return { entityId: null, resolvedFrom: 'unresolved', reason: 'outside_period' };
+  }
   return hitOf(hit);
 }
