@@ -164,7 +164,14 @@ def main():
     # ---- overhead, operator-supplied --------------------------------------
     ov = load_overhead(a.overhead)
     tashkent = a.tashkent if a.tashkent is not None else ov["tashkent"]
-    us = a.us_office if a.us_office is not None else ov["us_total"]
+    # ov["us_total"] is staff + w2 + OWNERS + yard (see load_overhead) -- it
+    # already includes owners, so the roster default here must have owners
+    # subtracted back out before "Owners" is added as its own line below, or
+    # every default run double-counts the $5,000/wk owner draw. (An explicit
+    # --us-office override is assumed to already exclude owners, matching how
+    # company_pnl.py and build_pnl_view.py use this same us_total field with
+    # no separate owners addition at all.)
+    us = a.us_office if a.us_office is not None else ov["us_total"] - ov["owners"]
     owners = a.owners if a.owners is not None else ov["owners"]
     shop = ov["shop"] if a.include_shop else 0.0
     oh = tashkent + us + owners + shop
