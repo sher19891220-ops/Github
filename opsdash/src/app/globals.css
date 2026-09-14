@@ -110,3 +110,120 @@ kbd {
   margin-bottom: 0.75rem;
   font-size: 0.9em;
 }
+
+/* ==================================================================
+   BOARD SYSTEM
+   ------------------------------------------------------------------
+   The screens were readable and plain: inline style objects, one type
+   size, tables with no visual weight. Plain is not the same as clear.
+   A board is scanned, not read, so what needs attention has to arrive
+   before the reader has finished looking — which is a job for form and
+   position, not for more numbers.
+
+   Three rules hold everything below together.
+
+   1. Semantic colour is reserved. --good / --bad / --warn mean a state,
+      never a series or a decoration. The accent is for interaction.
+   2. A figure that is a ceiling, a model or a forecast never looks like
+      a measured actual. It carries a chip, and the chip has a word on
+      it, because colour alone is not a label.
+   3. Magnitude is drawn where a column of numbers cannot show it. The
+      bars below share ONE scale per table, so two rows are comparable.
+   ================================================================== */
+
+:root {
+  --surface: color-mix(in srgb, var(--fg) 2.5%, var(--bg));
+  --surface-2: color-mix(in srgb, var(--fg) 5%, var(--bg));
+  --radius: 10px;
+  --radius-sm: 6px;
+  --gap: 1rem;
+  --shadow: 0 1px 2px color-mix(in srgb, var(--fg) 8%, transparent);
+}
+
+/* ---------- layout ---------- */
+.board { display: flex; flex-direction: column; gap: 2rem; }
+.board-section { display: flex; flex-direction: column; gap: 0.75rem; }
+.board-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.board-head h2 {
+  margin: 0; font-size: 0.8rem; font-weight: 700;
+  letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted);
+}
+.board-note { color: var(--muted); font-size: 0.85em; max-width: 68ch; margin: 0; }
+
+/* ---------- the hero row: the four numbers the page exists for ---------- */
+.hero-row {
+  display: grid; gap: var(--gap);
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+.hero {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 1rem 1.1rem;
+  display: flex; flex-direction: column; gap: 0.3rem;
+}
+/* The one figure the reader came for is lifted; the rest stay quiet.
+   Spending emphasis on everything spends it on nothing. */
+.hero-lead { border-color: color-mix(in srgb, var(--fg) 22%, var(--line)); box-shadow: var(--shadow); }
+.hero-label {
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--muted);
+}
+.hero-value {
+  font-size: clamp(1.5rem, 3.4vw, 2rem); font-weight: 700; line-height: 1.1;
+  font-variant-numeric: tabular-nums; letter-spacing: -0.01em;
+}
+.hero-sub { font-size: 0.82em; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* ---------- chips: state as a word plus a colour, never a colour alone ---------- */
+.chip {
+  display: inline-flex; align-items: center; gap: 0.35em;
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em;
+  text-transform: uppercase; padding: 0.15em 0.5em;
+  border-radius: var(--radius-sm); border: 1px solid currentColor;
+  white-space: nowrap;
+}
+.chip-good { color: var(--good); background: color-mix(in srgb, var(--good) 10%, transparent); }
+.chip-bad { color: var(--bad); background: color-mix(in srgb, var(--bad) 10%, transparent); }
+.chip-warn { color: var(--warn); background: color-mix(in srgb, var(--warn) 10%, transparent); }
+.chip-muted { color: var(--muted); background: var(--surface-2); }
+
+/* ---------- table ---------- */
+.board-table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+table.board-table { border-collapse: collapse; width: 100%; min-width: 640px; }
+.board-table th {
+  text-align: right; font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted);
+  padding: 0.7rem 0.8rem; border-bottom: 1px solid var(--line); white-space: nowrap;
+}
+.board-table th:first-child, .board-table td:first-child { text-align: left; }
+.board-table td {
+  padding: 0.55rem 0.8rem; text-align: right; white-space: nowrap;
+  font-variant-numeric: tabular-nums; border-bottom: 1px solid var(--line);
+}
+.board-table tbody tr:last-child td { border-bottom: 0; }
+.board-table tbody tr:hover { background: var(--surface-2); }
+
+/* ---------- magnitude bar: one scale per table, or it lies ---------- */
+.bar-cell { width: 120px; }
+.bar-track {
+  position: relative; height: 8px; border-radius: 4px;
+  background: var(--surface-2); overflow: hidden;
+}
+.bar-fill { position: absolute; top: 0; bottom: 0; border-radius: 4px; }
+.bar-zero { position: absolute; top: -2px; bottom: -2px; width: 1px; background: var(--muted); opacity: 0.5; }
+
+/* ---------- the forecast, fenced off ---------- */
+.forecast-panel {
+  border: 1px dashed var(--warn); border-radius: var(--radius);
+  padding: 1rem 1.1rem; background: color-mix(in srgb, var(--warn) 4%, transparent);
+  display: flex; flex-direction: column; gap: 0.75rem;
+}
+.forecast-grid { display: grid; gap: var(--gap); grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+.forecast-range { font-size: 1.15rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+figure.spark { margin: 0; }
+figure.spark svg { display: block; width: 100%; height: auto; }
+
+@media (max-width: 560px) {
+  .board { gap: 1.5rem; }
+  .hero-value { font-size: 1.35rem; }
+}
