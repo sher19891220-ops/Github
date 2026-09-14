@@ -21,7 +21,8 @@
  * overstate what an owner-operator truck costs. That needs the deduction side
  * of the OO terms sheet, which is a separate piece of work.
  *
- *   npx tsx scripts/post-driver-pay.ts <from> <to> <cents-per-mile> <asserted-by> [--apply]
+ *   npx tsx scripts/post-driver-pay.ts <from> <to> <cents-per-mile> <asserted-by> \\
+ *                                       <dispatch-path> [--apply]
  */
 import { readFileSync } from 'node:fs';
 import { query } from '../src/db/pool';
@@ -75,15 +76,27 @@ function readDispatch(text: string): Week[] {
 }
 
 async function main(): Promise<void> {
-  const [from, to, cpmRaw, assertedBy] = process.argv.slice(2);
-  const apply = process.argv.includes('--apply');
+  const argv = process.argv.slice(2);
+  const apply = argv.includes('--apply');
+  const [from, to, cpmRaw, assertedBy, pathArg] = argv.filter((a) => !a.startsWith('--'));
   if (!from || !to || !cpmRaw || !assertedBy || !ISO.test(from) || !ISO.test(to)) {
-    throw new Error('Usage: post-driver-pay.ts <from> <to> <cents-per-mile> <asserted-by> [--apply]');
+    throw new Error('Usage: post-driver-pay.ts <from> <to> <cents-per-mile> <asserted-by> [dispatch-path] [--apply]');
+  }
+  // The dispatch sheet is not in this repository and never will be — it
+  // carries unit numbers and driver names. So its location is an argument
+  // or an environment variable, never a path baked into the source. It was
+  // baked in, which meant this script ran on exactly one machine.
+  const dispatchPath = pathArg ?? process.env.OPSDASH_DISPATCH;
+  if (!dispatchPath) {
+    throw new Error(
+      'No dispatch sheet given. Pass its path as the 5th argument, or set OPSDASH_DISPATCH. ' +
+        'It is not in this repository because it carries fleet and driver identifiers.',
+    );
   }
   const cpm = Number(cpmRaw);
   if (!Number.isFinite(cpm) || cpm <= 0 || cpm > 200) throw new Error(`Implausible rate: ${cpmRaw} cents per mile.`);
 
-  const rows = readDispatch(readFileSync('/home/user/opsdash-fixtures/dispatch2026.txt', 'utf8'))
+  const rows = readDispatch(readFileSync(dispatchPath, 'utf8'))
     .filter((r) => r.week >= from && r.week <= to);
 
   // Aggregate to carrier-week: one entry per carrier per week, not per truck.

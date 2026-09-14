@@ -36,7 +36,30 @@ export function ensureBaseFixtures(): Promise<void> {
   return readyPromise;
 }
 
+/**
+ * The suite is additive on purpose — no global TRUNCATE, so files run in
+ * parallel. The cost of that choice is that pointing DATABASE_URL at real
+ * books would insert `-TEST` carriers into them and leave them there. They
+ * are obvious and harmless to read, but they have no business being in a
+ * production ledger, and nothing stopped it. This does.
+ *
+ * Opt out deliberately with OPSDASH_ALLOW_TEST_WRITES=1 if you ever need to
+ * run the suite against a database whose name does not say it is disposable.
+ */
+function refuseToPolluteRealBooks(): void {
+  if (process.env.OPSDASH_ALLOW_TEST_WRITES === '1') return;
+  const url = process.env.DATABASE_URL ?? '';
+  const dbName = url.split('/').pop()?.split('?')[0] ?? '';
+  if (/test|_ci\b|scratch|rebuild/i.test(dbName)) return;
+  throw new Error(
+    `Refusing to run the integration suite against database "${dbName}": it does not read as disposable.\n` +
+      'The suite inserts -TEST carriers and never deletes them, so this would leave test rows in real books.\n' +
+      'Point DATABASE_URL at a database whose name contains "test", or set OPSDASH_ALLOW_TEST_WRITES=1.',
+  );
+}
+
 async function seed(): Promise<void> {
+  refuseToPolluteRealBooks();
   await query(
     `INSERT INTO accounting.entity (entity_id, code, legal_name) VALUES
        ($1, 'ZONE-TEST', 'Test Fixture Carrier One'),
