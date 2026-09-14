@@ -54,6 +54,41 @@ scan "connection string with an inline password" \
 scan "GitHub token"          'gh[pousr]_[A-Za-z0-9]{30,}'
 scan "Slack token"           'xox[baprs]-[A-Za-z0-9-]{10,}'
 
+# --- a populated secret in a config file ------------------------------------
+#
+# Every pattern above matches a VENDOR'S distinctive key shape. Most secrets
+# have no such shape: a QuickManage client_secret is thirty-two characters of
+# nothing in particular, and this scanner read straight past one. Found by
+# planting a real-shaped credentials file and watching the check pass it.
+#
+# So this rule matches the FIELD NAME rather than the value: a key named like
+# a secret, holding a quoted literal that is not a placeholder.
+#
+# Two things this got wrong first, both worth keeping written down.
+#
+#   The value must be a QUOTED LITERAL. Without that it fired on
+#   `json={"client_secret": client_secret}` and on `const password =
+#   generatePassword()` -- code passing a secret around, which is the right
+#   way to handle one and exactly what must not be flagged.
+#
+#   The placeholder filter must apply to the VALUE, not to the grep line.
+#   Filtering the whole line meant the path counted too, so any file with
+#   "test" or "example" in its name was exempt -- which silently excused the
+#   entire tests/ tree. Caught by planting a leak in a file called
+#   qm-leak-test.json and watching it pass.
+SECRETISH='(client_secret|api_?key|secret_?key|auth_?token|refresh_token|access_token|password|passwd)'
+secret_hits="$(git grep -nIE "\"?${SECRETISH}\"?[[:space:]]*[:=][[:space:]]*[\"'][A-Za-z0-9._/+=-]{8,}[\"']" \
+                 -- $(git ls-files | grep -vE '(^|/)scripts/check-repo-hygiene\.sh$') 2>/dev/null \
+               | awk -F: '{ v = $0; sub(/^[^:]*:[^:]*:/, "", v); v = tolower(v);
+                            if (v ~ /x{4,}|\.\.\.|<[^>]*>|your[-_ ]|example|placeholder|changeme|redacted|\$\{/) next;
+                            print }' || true)"
+if [[ -n "$secret_hits" ]]; then
+  while read -r line; do
+    [[ -z "$line" ]] && continue
+    report "a secret-named field holds a real value: $(echo "$line" | cut -d: -f1,2)"
+  done <<<"$secret_hits"
+fi
+
 if [[ $fail -eq 0 ]]; then
   echo "  ✓ nothing tracked that should not be"
 else
