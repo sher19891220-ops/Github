@@ -180,3 +180,70 @@ export async function unbalancedIntercompany(q: QueryFn): Promise<UnbalancedPair
   );
   return rows as UnbalancedPair[];
 }
+
+/**
+ * Shop work billed to someone outside the group — a driver, or an
+ * individual owner.
+ *
+ * This is NOT an intercompany transaction and must not be posted as one.
+ * Nobody inside the group bears the cost, so there is no second leg to
+ * write; inventing one would put a cost on a company that was never billed.
+ * TruckMax's revenue is real either way, which is the whole point: the shop
+ * earns from outside customers too, and a shop P&L that counted only
+ * group work would understate it.
+ */
+export interface ExternalShopWorkInput {
+  shopEntityId: string;
+  accrualDate: string;
+  amount: string;
+  truckId?: string | null;
+  unitNumber?: string | null;
+  memo?: string | null;
+  sourceDocumentId?: string | null;
+  assertedBasis?: string | null;
+  postedBy: string;
+}
+
+export async function postExternalShopWork(q: QueryFn, input: ExternalShopWorkInput): Promise<string> {
+  if (!/^\d+(\.\d+)?$/.test(input.amount) || Number(input.amount) <= 0) {
+    throw new IntercompanyError(`Shop work must be billed as a positive amount; got "${input.amount}".`);
+  }
+  if (!input.sourceDocumentId && !input.assertedBasis) {
+    throw new IntercompanyError(
+      'Shop work needs either the invoice that bills it, or a stated basis for posting it without one.',
+    );
+  }
+  const kindRows = await q(`SELECT kind::text AS kind, code FROM accounting.entity WHERE entity_id = $1`, [
+    input.shopEntityId,
+  ]);
+  const shop = kindRows[0] as { kind: string; code: string } | undefined;
+  if (!shop) throw new IntercompanyError(`No entity ${input.shopEntityId}.`);
+  if (shop.kind !== 'shop') throw new IntercompanyError(`${shop.code} is a ${shop.kind}, not a shop.`);
+
+  let attestationId: string | null = null;
+  if (!input.sourceDocumentId) {
+    const att = (await q(
+      `INSERT INTO accounting.manual_attestation (asserted_by, basis) VALUES ($1, $2)
+       RETURNING attestation_id`,
+      [input.postedBy, input.assertedBasis],
+    )) as { attestation_id: string }[];
+    attestationId = att[0]!.attestation_id;
+  }
+
+  const entryId = randomUUID();
+  await q(
+    `INSERT INTO accounting.ledger_entry
+       (entry_id, entity_id, truck_id, accrual_date, category_id, amount, unit_number,
+        charged_to, source_kind, source_document_id, attestation_id, memo, posted_by, allocation_basis)
+     VALUES ($1, $2, $3, $4::date, 'revenue.shop_work', $5, $6,
+             'driver', $7::accounting.source_kind, $8, $9, $10, $11, 'actual')`,
+    [
+      entryId, input.shopEntityId, input.truckId ?? null, input.accrualDate,
+      Number(input.amount).toFixed(4), input.unitNumber ?? null,
+      input.sourceDocumentId ? 'document' : 'manual',
+      input.sourceDocumentId ?? null, attestationId, input.memo ?? null, input.postedBy,
+    ],
+  );
+  return entryId;
+}
+
