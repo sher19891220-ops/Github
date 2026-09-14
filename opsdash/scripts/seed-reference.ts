@@ -20,11 +20,16 @@ import { query } from '../src/db/pool';
 /** The operating companies. Iron Lease holds title to trucks and does not
  *  operate them, so it is an entity for ownership purposes and never a
  *  recharge target — see docs/SOURCE-DISCOVERY.md §11e. */
-const ENTITIES: Array<{ code: string; legalName: string; base: string | null }> = [
-  { code: 'ZONE', legalName: 'Zone OH LLC', base: 'OH' },
-  { code: 'XTRACK', legalName: 'Xtrack LLC', base: 'IL' },
-  { code: 'AFG', legalName: 'AFG Logistics LLC', base: null },
-  { code: 'IRONLEASE', legalName: 'Iron Lease LLC', base: null },
+const ENTITIES: Array<{ code: string; legalName: string; base: string | null; kind: 'carrier' | 'shop' | 'asset_holder' }> = [
+  { code: 'ZONE', legalName: 'Zone OH LLC', base: 'OH', kind: 'carrier' },
+  { code: 'XTRACK', legalName: 'Xtrack LLC', base: 'IL', kind: 'carrier' },
+  { code: 'AFG', legalName: 'AFG Logistics LLC', base: null, kind: 'carrier' },
+  { code: 'IRONLEASE', legalName: 'Iron Lease LLC', base: null, kind: 'asset_holder' },
+  // The shop was missing entirely. It bills the carriers for repairs, so
+  // leaving it out meant every repair was a cost to a carrier and revenue to
+  // nobody — the group's cost overstated by the shop's markup, and the shop
+  // with no P&L at all.
+  { code: 'TRUCKMAX', legalName: 'Truck Max LLC', base: null, kind: 'shop' },
 ];
 
 /**
@@ -81,12 +86,13 @@ const CATEGORIES: Array<[id: string, group: string, name: string, sign: number]>
 async function main(): Promise<void> {
   for (const e of ENTITIES) {
     await query(
-      `INSERT INTO accounting.entity (code, legal_name, ifta_base_jurisdiction)
-       VALUES ($1, $2, $3)
+      `INSERT INTO accounting.entity (code, legal_name, ifta_base_jurisdiction, kind)
+       VALUES ($1, $2, $3, $4::accounting.entity_kind)
        ON CONFLICT (code) DO UPDATE
          SET legal_name = EXCLUDED.legal_name,
-             ifta_base_jurisdiction = COALESCE(EXCLUDED.ifta_base_jurisdiction, accounting.entity.ifta_base_jurisdiction)`,
-      [e.code, e.legalName, e.base],
+             ifta_base_jurisdiction = COALESCE(EXCLUDED.ifta_base_jurisdiction, accounting.entity.ifta_base_jurisdiction),
+             kind = EXCLUDED.kind`,
+      [e.code, e.legalName, e.base, e.kind],
     );
   }
 

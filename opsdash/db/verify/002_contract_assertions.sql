@@ -869,3 +869,61 @@ WHERE category_id = 'trailer.fixed' AND category_group = 'trailer';
 SELECT CASE WHEN 'by_truck_count' = ANY (enum_range(NULL::accounting.allocation_basis)::text[])
             THEN 'PASS: a truck-count split is a nameable allocation basis'
             ELSE 'FAIL: a consolidated share could only be stored as actual' END AS result;
+
+\echo '--- ASSERT 66: a company cannot bill itself ------------------------'
+DO $$
+BEGIN
+  INSERT INTO accounting.ledger_entry
+    (entity_id, counterparty_entity_id, accrual_date, category_id, amount,
+     source_kind, source_document_id, posted_by)
+  VALUES ('11111111-1111-1111-1111-111111111111','11111111-1111-1111-1111-111111111111',
+          '2026-04-06','payable.intercompany', -100, 'document',
+          '22222222-2222-2222-2222-222222222222','controller@fleet');
+  RAISE EXCEPTION 'FAIL: an entity was accepted as its own counterparty';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: an entity cannot be its own counterparty';
+END $$;
+
+\echo '--- ASSERT 67: a one-legged intercompany transaction is visible -----'
+-- Uses categories the MIGRATIONS create, not ones seed-reference.ts adds:
+-- this file runs against a schema with no reference data, and a category
+-- that only exists after seeding would fail here for the wrong reason.
+--
+-- The shop is created here too, which is itself worth asserting: `kind` has
+-- to accept a company that is not a carrier, because the group contains
+-- three carriers, an asset holder and a shop.
+INSERT INTO accounting.entity (entity_id, code, legal_name, kind)
+VALUES ('33333333-3333-3333-3333-333333333333','TRUCKMAX-T','Truck Max test','shop');
+-- The shop bills a carrier and the group has not spent what it charged --
+-- it has spent what the parts cost. Posting only the carrier's side
+-- overstates the group by the shop's markup and leaves the shop with no
+-- revenue for work it did. Whether the other leg exists is a fact about two
+-- rows, so it cannot be a CHECK; it has to be a view somebody can look at.
+INSERT INTO accounting.ledger_entry
+  (entity_id, counterparty_entity_id, intercompany_pair_id, accrual_date,
+   category_id, amount, source_kind, source_document_id, posted_by)
+VALUES ('11111111-1111-1111-1111-111111111111','33333333-3333-3333-3333-333333333333',
+        'aaaaaaaa-0000-0000-0000-00000000aa01','2026-04-06',
+        'payable.intercompany', -1000, 'document',
+        '22222222-2222-2222-2222-222222222222','controller@fleet');
+SELECT CASE WHEN problem LIKE '%only one leg%'
+            THEN 'PASS: a one-legged intercompany transaction is reported'
+            ELSE 'FAIL: ' || COALESCE(problem,'not reported at all') END AS result
+FROM accounting.v_intercompany_unbalanced
+WHERE intercompany_pair_id = 'aaaaaaaa-0000-0000-0000-00000000aa01';
+
+\echo '--- ASSERT 68: a balanced pair is NOT reported ----------------------'
+-- The other direction matters as much. A check that flags correct work gets
+-- switched off, and then it is protecting nothing.
+INSERT INTO accounting.ledger_entry
+  (entity_id, counterparty_entity_id, intercompany_pair_id, accrual_date,
+   category_id, amount, source_kind, source_document_id, posted_by)
+VALUES ('33333333-3333-3333-3333-333333333333','11111111-1111-1111-1111-111111111111',
+        'aaaaaaaa-0000-0000-0000-00000000aa01','2026-04-06',
+        'revenue.shop_work', 1000, 'document',
+        '22222222-2222-2222-2222-222222222222','controller@fleet');
+SELECT CASE WHEN count(*) = 0
+            THEN 'PASS: once both legs are posted the pair stops being reported'
+            ELSE 'FAIL: a balanced pair is still reported' END AS result
+FROM accounting.v_intercompany_unbalanced
+WHERE intercompany_pair_id = 'aaaaaaaa-0000-0000-0000-00000000aa01';
