@@ -34,9 +34,26 @@ export class MissingToolError extends Error {
   }
 }
 
+/**
+ * Tesseract is built against OpenMP and, left alone, opens a thread pool
+ * sized to the machine's core count *per process*. Several OCR jobs at once
+ * — concurrent uploads in production, parallel test files in CI — then
+ * oversubscribe the box and the threads spend their time fighting over
+ * cores instead of reading the page. Measured on this 4-core container with
+ * a 200dpi page: one process takes ~2s either way, but eight at once take
+ * 3.4s with the limit and did not finish inside TEN MINUTES without it.
+ * That is not a slowdown, it is a hang, and it looked like a flaky test
+ * until it was measured.
+ *
+ * One thread per process is the right setting for page-at-a-time OCR:
+ * throughput comes from running pages in parallel, which the callers
+ * already do. Harmless for the poppler tools, which do not use OpenMP.
+ */
+const TOOL_ENV = { ...process.env, OMP_THREAD_LIMIT: '1' };
+
 async function runTool(cmd: string, args: string[]): Promise<{ stdout: string; stderr: string }> {
   try {
-    return await execFileAsync(cmd, args, { maxBuffer: 64 * 1024 * 1024, encoding: 'utf8' });
+    return await execFileAsync(cmd, args, { maxBuffer: 64 * 1024 * 1024, encoding: 'utf8', env: TOOL_ENV });
   } catch (err) {
     const e = err as NodeJS.ErrnoException & { stdout?: string; stderr?: string };
     if (e.code === 'ENOENT') throw new MissingToolError(cmd);
