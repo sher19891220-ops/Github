@@ -1,0 +1,130 @@
+# Continuous integration.
+#
+# Until this file existed, nothing ran on push. The 827 tests and 63
+# contract assertions were true because somebody ran them and said so, which
+# is a habit, not a foundation. A green branch meant nobody had checked.
+#
+# Every gate here already existed as an npm script. The only thing being
+# added is that a machine runs them whether anyone remembers to or not.
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+# A second push to the same branch makes the first run irrelevant. Cancelling
+# it keeps the queue honest about what is actually being tested.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # Cheapest job, no dependencies, catches the worst mistake: something
+  # secret or personal committed to a public repository. Runs first and
+  # alone so the answer arrives in seconds rather than after the test suite.
+  hygiene:
+    name: nothing secret is tracked
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - run: bash scripts/check-repo-hygiene.sh
+
+  opsdash:
+    name: opsdash — types, tests, schema contract
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: opsdash
+
+    services:
+      # 16 to match what the platform runs. The client tools on the runner
+      # are the same major version, so nothing is being tested against a
+      # server newer than the one that will actually hold the ledger.
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: opsdash_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      # The integration suite inserts -TEST carriers and never deletes them,
+      # so it refuses any database whose name does not read as disposable.
+      # This one does.
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/opsdash_test
+      # Explicit, never inherited from DATABASE_URL: db:verify creates and
+      # drops databases on whatever server this names.
+      VERIFY_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+      # Documents go to a directory the runner throws away. Correct here and
+      # refused in production — see src/db/repo/blobStore.ts.
+      OPSDASH_BLOB_DIR: ${{ runner.temp }}/blobs
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        cache: npm
+        cache-dependency-path: opsdash/package-lock.json
+
+    - name: install
+      run: npm ci
+
+    - name: typecheck
+      # next.config.ts sets ignoreBuildErrors=false on purpose: a stray
+      # `any` in a route handler is how a float gets back into the money
+      # path. This is the same gate, run earlier and faster.
+      run: npm run typecheck
+
+    - name: apply migrations
+      run: |
+        for m in db/migrations/*.sql; do
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 --quiet -f "$m"
+        done
+
+    - name: tests
+      # Unit and integration together. The integration half is the half that
+      # matters here: the EXCLUDE constraints, the commit transaction and
+      # the review gate are only real against a live PostgreSQL.
+      run: npm test
+
+    - name: schema contract
+      # Proves the database itself still rejects what the contract says it
+      # rejects — overlapping carrier periods, taxable miles above total
+      # miles, a rate card with two values on one day. Application code
+      # cannot be trusted to enforce these because application code is what
+      # gets edited.
+      run: npm run db:verify
+
+    - name: build
+      run: npm run build
+
+  driverqual:
+    name: driverqual — types and unit tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: driverqual
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        cache: npm
+        cache-dependency-path: driverqual/package-lock.json
+    - run: npm ci
+    - run: npm run typecheck
+    # Unit tests only: this app's integration tests reach a hosted database
+    # whose credentials do not belong in CI. Stated rather than silently
+    # skipped, so the gap is visible.
+    - run: npm run test:unit
