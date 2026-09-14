@@ -1,0 +1,42 @@
+{
+  "name": "opsdash",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:unit": "vitest run tests/unit",
+    "db:verify": "bash scripts/db-verify.sh",
+    "check": "npm run typecheck && npm run test:unit",
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start",
+    "db:local": "bash scripts/db-local.sh",
+    "db:backup": "bash scripts/backup-db.sh",
+    "db:restore-drill": "bash scripts/restore-drill.sh",
+    "blobs:check": "npx tsx scripts/check-blobs.ts",
+    "test:real": "node -e \"if(!process.env.OPSDASH_FIXTURES){console.error('OPSDASH_FIXTURES is not set. These tests prove the engines against the operator\\'s real documents; point it at the directory holding them.');process.exit(1)}\" && vitest run",
+    "db:migrate": "npx tsx scripts/migrate.ts",
+    "db:migrate:status": "npx tsx scripts/migrate.ts --status"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1131.0",
+    "exceljs": "^4.4.0",
+    "next": "^15.5.23",
+    "pg": "^8.16.3",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "@types/pg": "^8.15.5",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "typescript": "5.9",
+    "vitest": "^4.1.11"
+  }
+}

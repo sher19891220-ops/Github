@@ -1,0 +1,929 @@
+-- Proves the schema ENFORCES the CLAUDE.md §8 acceptance criteria, rather
+-- than merely leaving room for them. Run against a scratch database.
+\set ON_ERROR_STOP on
+\pset pager off
+
+INSERT INTO accounting.entity (entity_id, code, legal_name)
+VALUES ('11111111-1111-1111-1111-111111111111','ZONE','Zone Logistics LLC');
+INSERT INTO accounting.category (category_id, category_group, display_name, sign)
+VALUES ('fuel.diesel','fuel','Diesel',-1), ('revenue.linehaul','revenue','Linehaul',1),
+       ('trailer.fixed','trailer','Trailer cost (fixed)',-1);
+INSERT INTO accounting.source_document
+  (document_id, doc_type, file_name, mime_type, byte_size, sha256, storage_key, uploaded_by)
+VALUES ('22222222-2222-2222-2222-222222222222','fuel','efs_2026_q1.csv','text/csv',
+        1024, repeat('a',64), 'docs/efs_2026_q1.csv','ceo@fleet');
+INSERT INTO accounting.connector_pull
+  (pull_id, source_system, source_table, source_pk, snapshot, payload_hash)
+VALUES ('33333333-3333-3333-3333-333333333333','dispatch','load_pipeline','L-9001',
+        '{"load_id":"L-9001","revenue":2400.00}'::jsonb, repeat('b',64));
+
+\echo '--- ASSERT 1: an untraceable number cannot be posted -----------------'
+DO $$
+BEGIN
+  INSERT INTO accounting.ledger_entry
+    (entity_id, accrual_date, category_id, amount, source_kind, posted_by)
+  VALUES ('11111111-1111-1111-1111-111111111111','2026-01-15','fuel.diesel',
+          -812.44,'document','ceo@fleet');   -- claims 'document', names none
+  RAISE EXCEPTION 'FAIL: untraceable entry was accepted';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: untraceable entry rejected by provenance_matches_kind';
+END $$;
+
+\echo '--- ASSERT 2: a document-traced number posts fine --------------------'
+INSERT INTO accounting.ledger_entry
+  (entry_id, entity_id, accrual_date, category_id, amount, quantity, jurisdiction,
+   source_kind, source_document_id, posted_by)
+VALUES ('44444444-4444-4444-4444-444444444444','11111111-1111-1111-1111-111111111111',
+        '2026-01-15','fuel.diesel',-812.44, 214.3300,'TX',
+        'document','22222222-2222-2222-2222-222222222222','ceo@fleet');
+\echo 'PASS: traced entry accepted'
+
+\echo '--- ASSERT 3: the ledger is append-only ------------------------------'
+DO $$
+BEGIN
+  UPDATE accounting.ledger_entry SET amount = -1.00
+   WHERE entry_id = '44444444-4444-4444-4444-444444444444';
+  RAISE EXCEPTION 'FAIL: ledger UPDATE was allowed';
+EXCEPTION WHEN raise_exception THEN
+  IF SQLERRM LIKE 'FAIL:%' THEN RAISE; END IF;
+  RAISE NOTICE 'PASS: UPDATE blocked -- %', SQLERRM;
+END $$;
+
+DO $$
+BEGIN
+  DELETE FROM accounting.ledger_entry
+   WHERE entry_id = '44444444-4444-4444-4444-444444444444';
+  RAISE EXCEPTION 'FAIL: ledger DELETE was allowed';
+EXCEPTION WHEN raise_exception THEN
+  IF SQLERRM LIKE 'FAIL:%' THEN RAISE; END IF;
+  RAISE NOTICE 'PASS: DELETE blocked -- %', SQLERRM;
+END $$;
+
+\echo '--- ASSERT 4: re-running a connector pull cannot double-post revenue --'
+INSERT INTO accounting.ledger_entry
+  (entity_id, accrual_date, category_id, amount, source_kind, connector_pull_id, posted_by)
+VALUES ('11111111-1111-1111-1111-111111111111','2026-01-15','revenue.linehaul',
+        2400.00,'connector','33333333-3333-3333-3333-333333333333','ingest-job');
+DO $$
+BEGIN
+  INSERT INTO accounting.ledger_entry
+    (entity_id, accrual_date, category_id, amount, source_kind, connector_pull_id, posted_by)
+  VALUES ('11111111-1111-1111-1111-111111111111','2026-01-15','revenue.linehaul',
+          2400.00,'connector','33333333-3333-3333-3333-333333333333','ingest-job');
+  RAISE EXCEPTION 'FAIL: revenue double-posted';
+EXCEPTION WHEN unique_violation THEN
+  RAISE NOTICE 'PASS: duplicate connector post rejected';
+END $$;
+
+\echo '--- ASSERT 5: a correction reverses, it does not overwrite -----------'
+INSERT INTO accounting.ledger_entry
+  (entity_id, accrual_date, category_id, amount, source_kind,
+   reverses_entry_id, memo, posted_by)
+VALUES ('11111111-1111-1111-1111-111111111111','2026-01-16','fuel.diesel',
+        812.44,'adjustment','44444444-4444-4444-4444-444444444444',
+        'EFS restated gallons','controller@fleet');
+\echo 'PASS: reversing entry accepted; original still on the books'
+
+\echo '--- ASSERT 6: money arithmetic is exact, not floating point ----------'
+SELECT CASE WHEN SUM(amount) = 2400.00
+            THEN 'PASS: net = ' || SUM(amount)::text
+            ELSE 'FAIL: net = ' || SUM(amount)::text END AS result
+FROM accounting.ledger_entry;
+
+\echo '--- ASSERT 7: a forecast cannot be stored without a confidence band --'
+DO $$
+DECLARE r uuid;
+BEGIN
+  INSERT INTO accounting.calc_run (engine, engine_version, period_start, period_end, inputs_hash)
+  VALUES ('forecast','0.1.0','2026-01-19','2026-01-25', repeat('c',64))
+  RETURNING calc_run_id INTO r;
+  INSERT INTO accounting.forecast_run
+    (calc_run_id, horizon_start, horizon_end, metric,
+     point_estimate, lower_bound, upper_bound, method, basis)
+  VALUES (r,'2026-01-19','2026-01-25','revenue', 50000, 60000, 40000,  -- inverted
+          'moving_average','{}'::jsonb);
+  RAISE EXCEPTION 'FAIL: inverted confidence band accepted';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: inverted confidence band rejected';
+END $$;
+
+\echo '--- ASSERT 8: a truck-attributed cost must actually name a truck ------'
+DO $$
+BEGIN
+  INSERT INTO accounting.ledger_entry
+    (entity_id, accrual_date, category_id, amount, source_kind,
+     source_document_id, unit_type, posted_by)
+  VALUES ('11111111-1111-1111-1111-111111111111','2026-01-20','fuel.diesel',
+          -100.00,'document','22222222-2222-2222-2222-222222222222',
+          'truck','ceo@fleet');   -- claims 'truck', names none
+  RAISE EXCEPTION 'FAIL: unattributed truck cost accepted';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: truck cost without a truck rejected';
+END $$;
+
+\echo '--- ASSERT 9: a trailer cost cannot masquerade as a truck cost -------'
+DO $$
+BEGIN
+  INSERT INTO accounting.ledger_entry
+    (entity_id, truck_id, accrual_date, category_id, amount, source_kind,
+     source_document_id, unit_type, unit_number, posted_by)
+  VALUES ('11111111-1111-1111-1111-111111111111',
+          NULL,'2026-01-20','fuel.diesel',-100.00,'document',
+          '22222222-2222-2222-2222-222222222222','trailer','50272','ceo@fleet');
+  -- A trailer cost with no truck_id is correct and must be accepted.
+  RAISE NOTICE 'PASS: trailer cost accepted without a truck attribution';
+END $$;
+
+\echo '--- ASSERT 10: an unattributed cost defaults to unknown, not truck ---'
+INSERT INTO accounting.ledger_entry
+  (entry_id, entity_id, accrual_date, category_id, amount, source_kind,
+   source_document_id, posted_by)
+VALUES ('55555555-5555-5555-5555-555555555555',
+        '11111111-1111-1111-1111-111111111111','2026-01-21','fuel.diesel',
+        -55.00,'document','22222222-2222-2222-2222-222222222222','ceo@fleet');
+SELECT CASE WHEN unit_type = 'unknown'
+            THEN 'PASS: unattributed cost defaulted to unknown'
+            ELSE 'FAIL: defaulted to ' || unit_type::text END AS result
+FROM accounting.ledger_entry WHERE entry_id = '55555555-5555-5555-5555-555555555555';
+
+\echo '--- ASSERT 11: driver-charged cost is separable from company cost ----'
+INSERT INTO accounting.ledger_entry
+  (entity_id, accrual_date, category_id, amount, source_kind,
+   source_document_id, charged_to, memo, posted_by)
+VALUES ('11111111-1111-1111-1111-111111111111','2026-01-22','fuel.diesel',
+        -420.00,'document','22222222-2222-2222-2222-222222222222',
+        'driver','radiator, charged back to LO driver','controller@fleet');
+SELECT CASE WHEN COUNT(*) FILTER (WHERE charged_to = 'driver') = 1
+             AND COUNT(*) FILTER (WHERE charged_to = 'company') >= 1
+            THEN 'PASS: company and driver costs are distinguishable'
+            ELSE 'FAIL: chargeback not separable' END AS result
+FROM accounting.ledger_entry;
+
+\echo '--- ASSERT 12: intercompany recharge keeps both sides straight --------'
+INSERT INTO accounting.entity (entity_id, code, legal_name)
+VALUES ('66666666-6666-6666-6666-666666666666','XTRACK','Xtrack LLC');
+INSERT INTO accounting.category (category_id, category_group, display_name, sign)
+VALUES ('permit.test','permit','Permit test',-1) ON CONFLICT DO NOTHING;
+
+-- Zone pays; the cost belongs to Xtrack, who operates the truck.
+INSERT INTO accounting.ledger_entry
+  (entity_id, paid_by_entity_id, accrual_date, category_id, amount,
+   source_kind, source_document_id, posted_by)
+VALUES ('66666666-6666-6666-6666-666666666666','11111111-1111-1111-1111-111111111111',
+        '2026-09-30','permit.test',-1879.98,'document',
+        '22222222-2222-2222-2222-222222222222','engine');
+-- Zone's matching receivable from Xtrack.
+INSERT INTO accounting.ledger_entry
+  (entity_id, counterparty_entity_id, accrual_date, category_id, amount,
+   source_kind, source_document_id, posted_by)
+VALUES ('11111111-1111-1111-1111-111111111111','66666666-6666-6666-6666-666666666666',
+        '2026-09-30','receivable.intercompany',1879.98,'document',
+        '22222222-2222-2222-2222-222222222222','engine');
+\echo 'PASS: recharge and its receivable both accepted'
+
+\echo '--- ASSERT 13: an intercompany balance must name a counterparty ------'
+DO $$
+BEGIN
+  INSERT INTO accounting.ledger_entry
+    (entity_id, accrual_date, category_id, amount, source_kind,
+     source_document_id, posted_by)
+  VALUES ('11111111-1111-1111-1111-111111111111','2026-09-30',
+          'receivable.intercompany',100.00,'document',
+          '22222222-2222-2222-2222-222222222222','engine');
+  RAISE EXCEPTION 'FAIL: unmatched intercompany balance accepted';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: intercompany without a counterparty rejected';
+END $$;
+
+\echo '--- ASSERT 14: a company cannot owe itself ---------------------------'
+DO $$
+BEGIN
+  INSERT INTO accounting.ledger_entry
+    (entity_id, counterparty_entity_id, accrual_date, category_id, amount,
+     source_kind, source_document_id, posted_by)
+  VALUES ('11111111-1111-1111-1111-111111111111','11111111-1111-1111-1111-111111111111',
+          '2026-09-30','receivable.intercompany',100.00,'document',
+          '22222222-2222-2222-2222-222222222222','engine');
+  RAISE EXCEPTION 'FAIL: self-counterparty accepted';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: self-counterparty rejected';
+END $$;
+
+\echo '--- ASSERT 15: group roll-up does not double-count the recharge ------'
+SELECT CASE
+  WHEN (SELECT COUNT(*) FROM accounting.ledger_entry
+        WHERE category_id LIKE '%.intercompany') = 1
+   AND (SELECT COUNT(*) FROM accounting.v_ledger_consolidated
+        WHERE category_id LIKE '%.intercompany') = 0
+  THEN 'PASS: intercompany legs excluded from the consolidated view'
+  ELSE 'FAIL: consolidated view still carries intercompany legs' END AS result;
+
+\echo '--- ASSERT 16: a truck transferring mid-month splits across carriers -'
+INSERT INTO accounting.ledger_entry
+  (entry_id, entity_id, accrual_date, category_id, amount, source_kind,
+   source_document_id, posted_by)
+VALUES ('99999999-9999-9999-9999-999999999999','11111111-1111-1111-1111-111111111111',
+        '2026-09-09','permit.test',-2429.98,'document',
+        '22222222-2222-2222-2222-222222222222','engine');
+
+-- Zone holds unit 9008 for the first 14 days of Feb 2027, Xtrack the rest.
+INSERT INTO accounting.amortization_schedule
+  (source_document_id, prepaid_entry_id, entity_id, unit_number, category_id,
+   period_month, segment_start, segment_end, days, amount)
+VALUES
+ ('22222222-2222-2222-2222-222222222222','99999999-9999-9999-9999-999999999999',
+  '11111111-1111-1111-1111-111111111111','9008','permit.test',
+  '2027-02-01','2027-02-01','2027-02-14',14,-93.20),
+ ('22222222-2222-2222-2222-222222222222','99999999-9999-9999-9999-999999999999',
+  '66666666-6666-6666-6666-666666666666','9008','permit.test',
+  '2027-02-01','2027-02-15','2027-02-28',14,-93.20);
+\echo 'PASS: both halves of a transfer month accepted'
+
+\echo '--- ASSERT 17: the changeover day cannot be charged twice ----------'
+DO $$
+BEGIN
+  -- Xtrack tries to claim the 14th, which Zone already holds.
+  INSERT INTO accounting.amortization_schedule
+    (source_document_id, prepaid_entry_id, entity_id, unit_number, category_id,
+     period_month, segment_start, segment_end, days, amount)
+  VALUES ('22222222-2222-2222-2222-222222222222',
+          '99999999-9999-9999-9999-999999999999',
+          '66666666-6666-6666-6666-666666666666','9008','permit.test',
+          '2027-02-01','2027-02-14','2027-02-20',7,-46.60);
+  RAISE EXCEPTION 'FAIL: overlapping segments accepted - a day was double-charged';
+EXCEPTION WHEN exclusion_violation THEN
+  RAISE NOTICE 'PASS: overlapping carrier segments rejected';
+END $$;
+
+\echo '--- ASSERT 18: a segment cannot escape its month -------------------'
+DO $$
+BEGIN
+  INSERT INTO accounting.amortization_schedule
+    (source_document_id, prepaid_entry_id, entity_id, unit_number, category_id,
+     period_month, segment_start, segment_end, days, amount)
+  VALUES ('22222222-2222-2222-2222-222222222222',
+          '99999999-9999-9999-9999-999999999999',
+          '11111111-1111-1111-1111-111111111111','9999','permit.test',
+          '2027-03-01','2027-03-01','2027-04-05',36,-100.00);
+  RAISE EXCEPTION 'FAIL: segment spilling past its month accepted';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: segment outside its month rejected';
+END $$;
+
+\echo '--- ASSERT 19: the split reconciles to the whole month -------------'
+SELECT CASE WHEN SUM(days) = 28 AND SUM(amount) = -186.40
+            THEN 'PASS: Feb segments sum to 28 days and the month total'
+            ELSE 'FAIL: got ' || SUM(days) || ' days, ' || SUM(amount) END AS result
+FROM accounting.amortization_schedule
+WHERE unit_number = '9008' AND period_month = '2027-02-01';
+
+\echo '--- ASSERT 20: a split without a ratio is not a decision -------------'
+INSERT INTO accounting.driver (driver_id, full_name)
+VALUES ('88888888-8888-8888-8888-888888888888','Test Driver') ON CONFLICT DO NOTHING;
+DO $$
+BEGIN
+  INSERT INTO accounting.chargeback_decision
+    (ledger_entry_id, charged_to, driver_id, decided_by)
+  VALUES ('44444444-4444-4444-4444-444444444444','split',
+          '88888888-8888-8888-8888-888888888888','controller@fleet');
+  RAISE EXCEPTION 'FAIL: split with no ratio accepted';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: split without a ratio rejected';
+END $$;
+
+\echo '--- ASSERT 21: charging a driver must name the driver ----------------'
+DO $$
+BEGIN
+  INSERT INTO accounting.chargeback_decision
+    (ledger_entry_id, charged_to, decided_by)
+  VALUES ('44444444-4444-4444-4444-444444444444','driver','controller@fleet');
+  RAISE EXCEPTION 'FAIL: driver charge with no driver accepted';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: driver charge without a driver rejected';
+END $$;
+
+\echo '--- ASSERT 22: a valid split is accepted -----------------------------'
+INSERT INTO accounting.chargeback_decision
+  (ledger_entry_id, charged_to, split_percent, driver_id, decided_by, note)
+VALUES ('44444444-4444-4444-4444-444444444444','split',60.000,
+        '88888888-8888-8888-8888-888888888888','controller@fleet','driver bears 60%');
+\echo 'PASS: split with a percentage accepted'
+
+\echo '--- ASSERT 23: expected-missing must carry a reason ------------------'
+INSERT INTO accounting.reconciliation_run
+  (run_id, source_document_id, period_start, period_end, opened_by)
+VALUES ('aaaaaaaa-0000-0000-0000-00000000aaaa',
+        '22222222-2222-2222-2222-222222222222','2026-01-01','2026-01-31','controller@fleet');
+DO $$
+BEGIN
+  INSERT INTO accounting.reconciliation_match
+    (run_id, ledger_entry_id, status, decided_by, decided_at)
+  VALUES ('aaaaaaaa-0000-0000-0000-00000000aaaa',
+          '44444444-4444-4444-4444-444444444444','expected_missing',
+          'controller@fleet', now());
+  RAISE EXCEPTION 'FAIL: expected_missing with no note accepted';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: expected_missing without a reason rejected';
+END $$;
+
+\echo '--- ASSERT 24: a stated variance must be the real difference ---------'
+DO $$
+BEGIN
+  INSERT INTO accounting.reconciliation_match
+    (run_id, ledger_entry_id, status, document_amount, ledger_amount, variance)
+  VALUES ('aaaaaaaa-0000-0000-0000-00000000aaaa',
+          '55555555-5555-5555-5555-555555555555','auto_matched',
+          100.00, 90.00, 5.00);   -- claims 5.00; the real difference is 10.00
+  RAISE EXCEPTION 'FAIL: a fabricated variance was accepted';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: variance that is not the difference rejected';
+END $$;
+
+\echo '--- ASSERT 25: one document line cannot match twice in a run ---------'
+INSERT INTO accounting.reconciliation_match
+  (run_id, ledger_entry_id, status, document_amount, ledger_amount, variance)
+VALUES ('aaaaaaaa-0000-0000-0000-00000000aaaa',
+        '55555555-5555-5555-5555-555555555555','auto_matched', 100.00, 90.00, 10.00);
+DO $$
+BEGIN
+  INSERT INTO accounting.reconciliation_match
+    (run_id, ledger_entry_id, status, document_amount, ledger_amount, variance)
+  VALUES ('aaaaaaaa-0000-0000-0000-00000000aaaa',
+          '55555555-5555-5555-5555-555555555555','auto_matched', 50.00, 50.00, 0.00);
+  RAISE EXCEPTION 'FAIL: the same ledger entry matched twice in one run';
+EXCEPTION WHEN unique_violation THEN
+  RAISE NOTICE 'PASS: double-matching the same entry rejected';
+END $$;
+
+-- =====================================================================
+-- Migration 007 — arrangement, collection status, cost shape, rate pair
+-- =====================================================================
+
+INSERT INTO accounting.connector_pull
+  (pull_id, source_system, source_table, source_pk, snapshot, payload_hash)
+VALUES ('bbbbbbbb-0000-0000-0000-0000000000b1','dispatch','load_pipeline','L-9002',
+        '{"load_id":"L-9002","revenue":3100.00}'::jsonb, repeat('c',64));
+
+INSERT INTO accounting.ledger_entry
+  (entry_id, entity_id, accrual_date, category_id, amount, driver_class,
+   source_kind, connector_pull_id, posted_by)
+VALUES ('bbbbbbbb-0000-0000-0000-0000000000e1','11111111-1111-1111-1111-111111111111',
+        '2026-02-02','revenue.linehaul', 3100.00, 'ltwa',
+        'connector','bbbbbbbb-0000-0000-0000-0000000000b1','ingest-job');
+
+\echo '--- ASSERT 26: lease-to-walk-away is a class the schema can express --'
+SELECT CASE WHEN driver_class = 'ltwa'
+            THEN 'PASS: ltwa accepted as a driver class'
+            ELSE 'FAIL: ltwa not stored' END AS result
+FROM accounting.ledger_entry
+WHERE entry_id = 'bbbbbbbb-0000-0000-0000-0000000000e1';
+
+\echo '--- ASSERT 27: funded and paid are different states, never a sum -----'
+INSERT INTO accounting.collection_event
+  (ledger_entry_id, status, effective_date, settled_amount, fee_amount,
+   factor_name, recorded_by)
+VALUES ('bbbbbbbb-0000-0000-0000-0000000000e1','submitted','2026-02-03',
+        NULL, NULL, 'Triumph','controller@fleet'),
+       ('bbbbbbbb-0000-0000-0000-0000000000e1','funded','2026-02-05',
+        NULL, -93.00, 'Triumph','controller@fleet'),
+       ('bbbbbbbb-0000-0000-0000-0000000000e1','paid','2026-02-27',
+        3100.00, NULL, 'Triumph','controller@fleet');
+SELECT CASE WHEN count(*) = 1 AND max(status::text) = 'paid'
+            THEN 'PASS: current status is the latest event, not the total'
+            ELSE 'FAIL: got ' || count(*)::text || ' current rows' END AS result
+FROM accounting.v_collection_current
+WHERE ledger_entry_id = 'bbbbbbbb-0000-0000-0000-0000000000e1';
+
+\echo '--- ASSERT 28: a factoring fee is money out --------------------------'
+DO $$
+BEGIN
+  INSERT INTO accounting.collection_event
+    (ledger_entry_id, status, effective_date, fee_amount, recorded_by)
+  VALUES ('bbbbbbbb-0000-0000-0000-0000000000e1','funded','2026-03-01',
+          93.00,'controller@fleet');   -- a fee booked as an inflow
+  RAISE EXCEPTION 'FAIL: a positive factoring fee was accepted';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: factoring fee booked as an inflow rejected';
+END $$;
+
+\echo '--- ASSERT 29: short-paid must say what actually arrived -------------'
+DO $$
+BEGIN
+  INSERT INTO accounting.collection_event
+    (ledger_entry_id, status, effective_date, recorded_by)
+  VALUES ('bbbbbbbb-0000-0000-0000-0000000000e1','short_paid','2026-03-02',
+          'controller@fleet');
+  RAISE EXCEPTION 'FAIL: short_paid with no amount accepted';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: short_paid without a settled amount rejected';
+END $$;
+
+\echo '--- ASSERT 30: revenue has no cost shape -----------------------------'
+DO $$
+BEGIN
+  UPDATE accounting.category
+     SET cost_shape = 'variable_pct_of_gross', cost_basis = 'per_gross_dollar'
+   WHERE category_id = 'revenue.linehaul';
+  RAISE EXCEPTION 'FAIL: a revenue category took a cost shape';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: cost shape on a revenue category rejected';
+END $$;
+
+\echo '--- ASSERT 31: shape and basis cannot disagree -----------------------'
+DO $$
+BEGIN
+  UPDATE accounting.category
+     SET cost_shape = 'fixed', cost_basis = 'per_mile'
+   WHERE category_id = 'fuel.diesel';
+  RAISE EXCEPTION 'FAIL: a fixed cost measured per mile was accepted';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: contradictory cost shape and basis rejected';
+END $$;
+
+UPDATE accounting.category
+   SET cost_shape = 'variable_per_mile', cost_basis = 'per_mile'
+ WHERE category_id = 'fuel.diesel';
+\echo 'PASS: fuel classified as variable-per-mile'
+
+\echo '--- ASSERT 32: a stated rate must name the document stating it -------'
+DO $$
+BEGIN
+  INSERT INTO accounting.rate_fact
+    (rate_key, kind, amount, basis, effective_from, recorded_by)
+  VALUES ('registration.per_unit_year','stated', 1879.98,'per_unit',
+          '2026-01-01','controller@fleet');   -- no source document
+  RAISE EXCEPTION 'FAIL: an unsourced stated rate was accepted';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: stated rate with no source document rejected';
+END $$;
+
+\echo '--- ASSERT 33: stated and measured coexist, and the gap is visible ---'
+-- A rate carries TWO independent facts and this assertion covers the first.
+--
+--   kind         stated or measured -- how well the number is known
+--   rate_key     charge. or cost.   -- which direction the money goes
+--
+-- They were conflated: `kind` was being read as charge-versus-cost, which
+-- leaves a stated COST -- the operator's own estimate of what something
+-- costs, which is most of the current rate card -- with nowhere to live,
+-- and a measured CHARGE with nowhere at all.
+--
+-- Here: what the admin fee was assumed to cost, against what it measurably
+-- costs. Same subject, same direction, different confidence.
+INSERT INTO accounting.calc_run
+  (calc_run_id, engine, engine_version, period_start, period_end, inputs_hash, status)
+VALUES ('cccccccc-0000-0000-0000-0000000000c1','registration','1.0.0',
+        '2026-01-01','2026-12-31', repeat('d',64), 'succeeded');
+INSERT INTO accounting.rate_fact
+  (rate_key, kind, amount, basis, effective_from, source_document_id, recorded_by)
+VALUES ('cost.admin.per_driver_week','stated', 50.0000,'per_enrollee','2026-01-01',
+        '22222222-2222-2222-2222-222222222222','controller@fleet');
+INSERT INTO accounting.rate_fact
+  (rate_key, kind, amount, basis, effective_from, calc_run_id, recorded_by)
+VALUES ('cost.admin.per_driver_week','measured', 173.4200,'per_enrollee','2026-01-01',
+        'cccccccc-0000-0000-0000-0000000000c1','controller@fleet');
+SELECT CASE WHEN gap = 123.4200
+            THEN 'PASS: the measured cost exceeds the assumed cost by ' || gap::text
+            ELSE 'FAIL: gap = ' || gap::text END AS result
+FROM accounting.v_rate_gap
+WHERE rate_key = 'cost.admin.per_driver_week';
+
+\echo '--- ASSERT 33b: a rate must say whether it is charged or borne ------'
+DO $$
+BEGIN
+  INSERT INTO accounting.rate_fact
+    (rate_key, kind, amount, basis, effective_from, source_document_id, recorded_by)
+  VALUES ('admin.per_driver_week','stated', 50.0000,'per_enrollee','2026-01-01',
+          '22222222-2222-2222-2222-222222222222','controller@fleet');
+  RAISE EXCEPTION 'FAIL: a rate that says neither charge nor cost was accepted';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: rate with no charge/cost direction rejected';
+END $$;
+
+\echo '--- ASSERT 33c: an arrangement billed under its cost is visible -----'
+-- The second axis, and the one this business turns on. The admin fee is
+-- charged at 100 a week and measurably costs 173.42. Filed under one name
+-- that is a single number; filed as two it is a subtraction, and the answer
+-- is that every driver on this fee loses the company 73.42 a week.
+INSERT INTO accounting.rate_fact
+  (rate_key, kind, amount, basis, effective_from, source_document_id, recorded_by)
+VALUES ('charge.admin.per_driver_week','stated', 100.0000,'per_enrollee','2026-01-01',
+        '22222222-2222-2222-2222-222222222222','controller@fleet');
+SELECT CASE WHEN spread = -73.4200
+            THEN 'PASS: the fee is charged ' || abs(spread)::text || ' below what it costs'
+            ELSE 'FAIL: spread = ' || COALESCE(spread::text,'null') END AS result
+FROM (
+  SELECT (SELECT amount FROM accounting.rate_fact
+           WHERE rate_key = 'charge.admin.per_driver_week' LIMIT 1)
+       - (SELECT amount FROM accounting.rate_fact
+           WHERE rate_key = 'cost.admin.per_driver_week' AND kind = 'measured' LIMIT 1) AS spread
+) t;
+
+\echo '--- ASSERT 34: a document cannot have two reconciliations open -------'
+DO $$
+BEGIN
+  INSERT INTO accounting.reconciliation_run
+    (source_document_id, period_start, period_end, opened_by)
+  VALUES ('22222222-2222-2222-2222-222222222222','2026-02-01','2026-02-28','other@fleet');
+  RAISE EXCEPTION 'FAIL: a second open run on the same document accepted';
+EXCEPTION WHEN unique_violation THEN
+  RAISE NOTICE 'PASS: second open reconciliation on one document rejected';
+END $$;
+
+\echo '--- ASSERT 35: closing the first lets a later one open ---------------'
+UPDATE accounting.reconciliation_run
+   SET closed_at = now()
+ WHERE run_id = 'aaaaaaaa-0000-0000-0000-00000000aaaa';
+INSERT INTO accounting.reconciliation_run
+  (source_document_id, period_start, period_end, opened_by)
+VALUES ('22222222-2222-2222-2222-222222222222','2026-02-01','2026-02-28','other@fleet');
+\echo 'PASS: a second run opens once the first is closed'
+
+\echo '--- ASSERT 36: a rejected pairing frees both lines to stand alone ----'
+UPDATE accounting.reconciliation_match
+   SET status = 'rejected', decided_by = 'controller@fleet', decided_at = now()
+ WHERE run_id = 'aaaaaaaa-0000-0000-0000-00000000aaaa'
+   AND ledger_entry_id = '55555555-5555-5555-5555-555555555555';
+INSERT INTO accounting.reconciliation_match
+  (run_id, ledger_entry_id, status, ledger_amount)
+VALUES ('aaaaaaaa-0000-0000-0000-00000000aaaa',
+        '55555555-5555-5555-5555-555555555555','unmatched', 90.00);
+\echo 'PASS: the freed line takes a standalone row'
+
+\echo '--- ASSERT 37: but two live pairings on one line are still refused ---'
+DO $$
+BEGIN
+  INSERT INTO accounting.reconciliation_match
+    (run_id, ledger_entry_id, status, ledger_amount)
+  VALUES ('aaaaaaaa-0000-0000-0000-00000000aaaa',
+          '55555555-5555-5555-5555-555555555555','auto_matched', 90.00);
+  RAISE EXCEPTION 'FAIL: a second live row on the same line accepted';
+EXCEPTION WHEN unique_violation THEN
+  RAISE NOTICE 'PASS: a second live row on the same line still rejected';
+END $$;
+
+-- =====================================================================
+-- Migration 009 — account nature
+-- =====================================================================
+
+\echo '--- ASSERT 38: a principal repayment cannot claim to be a P&L line --'
+DO $$
+BEGIN
+  INSERT INTO accounting.category (category_id, category_group, display_name, sign)
+  VALUES ('lease.principal', 'lease', 'Equipment loan principal', -1);
+  RAISE EXCEPTION 'FAIL: a principal category defaulted onto the P&L';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: principal category rejected as a P&L line';
+END $$;
+
+\echo '--- ASSERT 39: the same category is accepted once it says what it is -'
+INSERT INTO accounting.category
+  (category_id, category_group, display_name, sign, account_nature)
+VALUES ('lease.principal', 'lease', 'Equipment loan principal', -1, 'balance_sheet');
+\echo 'PASS: principal category accepted as a balance-sheet movement'
+
+\echo '--- ASSERT 40: interest IS a cost, and stays on the P&L --------------'
+INSERT INTO accounting.category (category_id, category_group, display_name, sign)
+VALUES ('lease.interest', 'lease', 'Equipment loan interest', -1);
+SELECT CASE WHEN account_nature = 'pnl'
+            THEN 'PASS: interest is a P&L line'
+            ELSE 'FAIL: interest classified as ' || account_nature::text END AS result
+FROM accounting.category WHERE category_id = 'lease.interest';
+
+\echo '--- ASSERT 41: a prepaid or receivable id cannot be a P&L line -------'
+DO $$
+BEGIN
+  INSERT INTO accounting.category (category_id, category_group, display_name, sign)
+  VALUES ('prepaid.insurance', 'insurance', 'Prepaid insurance', -1);
+  RAISE EXCEPTION 'FAIL: a prepaid asset defaulted onto the P&L';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: prepaid category rejected as a P&L line';
+END $$;
+
+\echo '--- ASSERT 42: revenue can never be a balance-sheet movement ---------'
+DO $$
+BEGIN
+  UPDATE accounting.category
+     SET account_nature = 'balance_sheet'
+   WHERE category_id = 'revenue.linehaul';
+  RAISE EXCEPTION 'FAIL: revenue was reclassified off the P&L';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: revenue cannot be moved off the P&L';
+END $$;
+
+\echo '--- ASSERT 43: the categories that shipped wrong were corrected ------'
+SELECT CASE WHEN count(*) = 0
+            THEN 'PASS: every seeded non-P&L category is classified'
+            ELSE 'FAIL: ' || count(*)::text || ' still marked pnl' END AS result
+FROM accounting.category
+WHERE account_nature = 'pnl'
+  AND category_id IN ('prepaid.registration', 'receivable.driver',
+                      'receivable.intercompany', 'payable.intercompany');
+
+-- =====================================================================
+-- Migration 010 — manual entry and truck status
+-- =====================================================================
+
+\echo '--- ASSERT 44: a typed figure cannot skip provenance either -------'
+DO $$
+BEGIN
+  INSERT INTO accounting.ledger_entry
+    (entity_id, accrual_date, category_id, amount, source_kind, posted_by)
+  VALUES ('11111111-1111-1111-1111-111111111111','2026-04-01','fuel.diesel',
+          -250.00,'manual','controller@fleet');   -- claims manual, attests nothing
+  RAISE EXCEPTION 'FAIL: a manual entry with no attestation was accepted';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: manual entry without an attestation rejected';
+END $$;
+
+\echo '--- ASSERT 45: an attestation must name a person and a basis ------'
+DO $$
+BEGIN
+  INSERT INTO accounting.manual_attestation (asserted_by, basis)
+  VALUES ('controller@fleet', '   ');
+  RAISE EXCEPTION 'FAIL: an attestation with a blank basis was accepted';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: attestation without a stated basis rejected';
+END $$;
+
+\echo '--- ASSERT 46: a properly attested manual figure posts ------------'
+INSERT INTO accounting.manual_attestation (attestation_id, asserted_by, basis)
+VALUES ('dddddddd-0000-0000-0000-0000000000d1','controller@fleet',
+        'Shop quoted this by phone; invoice has not arrived yet.');
+INSERT INTO accounting.ledger_entry
+  (entry_id, entity_id, accrual_date, category_id, amount, source_kind,
+   attestation_id, posted_by)
+VALUES ('dddddddd-0000-0000-0000-0000000000e1','11111111-1111-1111-1111-111111111111',
+        '2026-04-01','fuel.diesel', -250.00,'manual',
+        'dddddddd-0000-0000-0000-0000000000d1','controller@fleet');
+\echo 'PASS: attested manual entry accepted'
+
+\echo '--- ASSERT 47: a manual entry cannot also claim a document --------'
+DO $$
+BEGIN
+  INSERT INTO accounting.ledger_entry
+    (entity_id, accrual_date, category_id, amount, source_kind,
+     attestation_id, source_document_id, posted_by)
+  VALUES ('11111111-1111-1111-1111-111111111111','2026-04-02','fuel.diesel',
+          -100.00,'manual','dddddddd-0000-0000-0000-0000000000d1',
+          '22222222-2222-2222-2222-222222222222','controller@fleet');
+  RAISE EXCEPTION 'FAIL: a manual entry borrowed a document as evidence';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: manual entry cannot borrow document provenance';
+END $$;
+
+\echo '--- ASSERT 48: a parsed entry cannot borrow an attestation --------'
+DO $$
+BEGIN
+  INSERT INTO accounting.ledger_entry
+    (entity_id, accrual_date, category_id, amount, source_kind,
+     source_document_id, attestation_id, posted_by)
+  VALUES ('11111111-1111-1111-1111-111111111111','2026-04-03','fuel.diesel',
+          -100.00,'document','22222222-2222-2222-2222-222222222222',
+          'dddddddd-0000-0000-0000-0000000000d1','controller@fleet');
+  RAISE EXCEPTION 'FAIL: a document entry carried an attestation too';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: document entry cannot carry an attestation';
+END $$;
+
+\echo '--- ASSERT 49: a manual figure is distinguishable after the fact --'
+SELECT CASE WHEN count(*) = 1
+            THEN 'PASS: manual entries are separable from parsed ones'
+            ELSE 'FAIL: found ' || count(*)::text END AS result
+FROM accounting.ledger_entry WHERE source_kind = 'manual';
+
+\echo '--- ASSERT 50: a later document supersedes without erasing --------'
+UPDATE accounting.manual_attestation
+   SET superseded_by_document_id = '22222222-2222-2222-2222-222222222222',
+       superseded_at = now()
+ WHERE attestation_id = 'dddddddd-0000-0000-0000-0000000000d1';
+SELECT CASE WHEN basis LIKE 'Shop quoted%' AND superseded_at IS NOT NULL
+            THEN 'PASS: what we believed, and what replaced it, both on file'
+            ELSE 'FAIL: supersede lost the original basis' END AS result
+FROM accounting.manual_attestation
+WHERE attestation_id = 'dddddddd-0000-0000-0000-0000000000d1';
+
+\echo '--- ASSERT 51: a truck cannot be in two states at once ------------'
+INSERT INTO accounting.truck (truck_id, unit_number)
+VALUES ('dddddddd-0000-0000-0000-00000000a0f1','STATUS-TEST-1');
+INSERT INTO accounting.manual_attestation (attestation_id, asserted_by, basis)
+VALUES ('dddddddd-0000-0000-0000-0000000000d2','dispatch@fleet','Driver called in.');
+INSERT INTO accounting.truck_status_history
+  (truck_id, status, effective_from, effective_to, source, attestation_id)
+VALUES ('dddddddd-0000-0000-0000-00000000a0f1','shop',
+        '2026-04-01 08:00+00','2026-04-05 17:00+00','manual',
+        'dddddddd-0000-0000-0000-0000000000d2');
+DO $$
+BEGIN
+  INSERT INTO accounting.truck_status_history
+    (truck_id, status, effective_from, effective_to, source, attestation_id)
+  VALUES ('dddddddd-0000-0000-0000-00000000a0f1','assigned',
+          '2026-04-03 08:00+00','2026-04-08 17:00+00','manual',
+          'dddddddd-0000-0000-0000-0000000000d2');
+  RAISE EXCEPTION 'FAIL: a truck was assigned and in the shop at once';
+EXCEPTION WHEN exclusion_violation THEN
+  RAISE NOTICE 'PASS: overlapping truck status rejected';
+END $$;
+
+\echo '--- ASSERT 52: a status must say where it came from ---------------'
+DO $$
+BEGIN
+  INSERT INTO accounting.truck_status_history
+    (truck_id, status, effective_from, source)
+  VALUES ('dddddddd-0000-0000-0000-00000000a0f1','open',
+          '2026-05-01 08:00+00','manual');   -- manual, attests nothing
+  RAISE EXCEPTION 'FAIL: an unattributed manual status was accepted';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: manual status without an attestation rejected';
+END $$;
+
+\echo '--- ASSERT 53: "no status on file" is not "available" -------------'
+INSERT INTO accounting.truck (truck_id, unit_number)
+VALUES ('dddddddd-0000-0000-0000-00000000a0f2','STATUS-TEST-2');
+SELECT CASE WHEN count(*) = 0
+            THEN 'PASS: a truck with no status is absent, not defaulted to open'
+            ELSE 'FAIL: a status was invented for it' END AS result
+FROM accounting.v_truck_status_current
+WHERE truck_id = 'dddddddd-0000-0000-0000-00000000a0f2';
+
+-- =====================================================================
+-- Migration 011 — the IFTA return has somewhere honest to land.
+--
+-- The engine refuses to net a surcharge. These assert the *table* refuses
+-- it too, so a future writer that skips the engine cannot store what the
+-- engine would not produce.
+-- =====================================================================
+
+\echo '--- ASSERT 54: a surcharge can never be a credit ------------------'
+INSERT INTO accounting.entity (entity_id, code, legal_name)
+VALUES ('eeeeeeee-0000-0000-0000-00000000e001','IFTA-TEST','IFTA TEST LLC')
+ON CONFLICT DO NOTHING;
+INSERT INTO accounting.calc_run
+  (calc_run_id, engine, engine_version, period_start, period_end, inputs_hash, status)
+VALUES ('eeeeeeee-0000-0000-0000-00000000c001','ifta','test','2026-04-01','2026-06-30',
+        repeat('a',64),'succeeded');
+DO $$
+BEGIN
+  INSERT INTO accounting.ifta_liability
+    (calc_run_id, entity_id, period_year, period_quarter, jurisdiction,
+     total_miles, taxable_miles, taxable_gallons, tax_paid_gallons,
+     rate_per_gallon, surcharge_per_gallon, tax_due, surcharge_due, net_liability)
+  VALUES ('eeeeeeee-0000-0000-0000-00000000c001','eeeeeeee-0000-0000-0000-00000000e001',
+          2026, 2, 'IN', 1000.00, 1000.00, 200.0000, 500.0000,
+          0.34000, 0.55000, -102.00, -275.00, -377.00);
+  RAISE EXCEPTION 'FAIL: a netted surcharge was stored as a credit';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: surcharge stored as a credit rejected';
+END $$;
+
+\echo '--- ASSERT 55: taxable miles cannot exceed miles driven -----------'
+DO $$
+BEGIN
+  INSERT INTO accounting.ifta_liability
+    (calc_run_id, entity_id, period_year, period_quarter, jurisdiction,
+     total_miles, taxable_miles, taxable_gallons, tax_paid_gallons,
+     rate_per_gallon, surcharge_per_gallon, tax_due, surcharge_due, net_liability)
+  VALUES ('eeeeeeee-0000-0000-0000-00000000c001','eeeeeeee-0000-0000-0000-00000000e001',
+          2026, 2, 'OH', 1000.00, 1200.00, 240.0000, 0.0000,
+          0.38500, 0.00000, 92.40, 0.00, 92.40);
+  RAISE EXCEPTION 'FAIL: more miles were taxed than were driven';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: taxable miles above total miles rejected';
+END $$;
+
+\echo '--- ASSERT 56: a correct IFTA line stores, surcharge kept apart ---'
+INSERT INTO accounting.ifta_liability
+  (calc_run_id, entity_id, period_year, period_quarter, jurisdiction,
+   total_miles, taxable_miles, taxable_gallons, tax_paid_gallons,
+   rate_per_gallon, surcharge_per_gallon, tax_due, surcharge_due, net_liability, fleet_mpg)
+VALUES ('eeeeeeee-0000-0000-0000-00000000c001','eeeeeeee-0000-0000-0000-00000000e001',
+        2026, 2, 'IN', 5000.00, 5000.00, 1000.0000, 500.0000,
+        0.34000, 0.55000, 170.00, 550.00, 720.00, 5.0000);
+SELECT CASE WHEN tax_due = 170.00 AND surcharge_due = 550.00 AND net_liability = 720.00
+            THEN 'PASS: base tax and surcharge stored separately, not collapsed'
+            ELSE 'FAIL: the surcharge was folded into the base tax' END AS result
+FROM accounting.ifta_liability
+WHERE calc_run_id = 'eeeeeeee-0000-0000-0000-00000000c001' AND jurisdiction = 'IN';
+
+\echo '--- ASSERT 57: a saved return names the documents it read ---------'
+INSERT INTO accounting.source_document
+  (document_id, doc_type, file_name, mime_type, byte_size, sha256, storage_key, uploaded_by)
+VALUES ('eeeeeeee-0000-0000-0000-00000000d001','ifta_mileage','miles.txt','text/plain',
+        10, repeat('b',64),'k/miles.txt','test');
+INSERT INTO accounting.ifta_run_source (calc_run_id, document_id, role)
+VALUES ('eeeeeeee-0000-0000-0000-00000000c001','eeeeeeee-0000-0000-0000-00000000d001','mileage');
+SELECT CASE WHEN count(*) = 1
+            THEN 'PASS: the return is linked to the mileage report it came from'
+            ELSE 'FAIL: a saved return traces to nothing' END AS result
+FROM accounting.ifta_run_source
+WHERE calc_run_id = 'eeeeeeee-0000-0000-0000-00000000c001';
+
+\echo '--- ASSERT 58: a truck cannot be two carriers on the same day -----'
+-- Trucks transfer mid-year, so the carrier is effective-dated. The lookup is
+-- only a function if the periods cannot overlap; without this, a roster bug
+-- would leave the resolver picking whichever row the planner reached first.
+INSERT INTO accounting.truck (truck_id, unit_number)
+VALUES ('eeeeeeee-0000-0000-0000-00000000f001','VERIFY-XFER')
+ON CONFLICT DO NOTHING;
+INSERT INTO accounting.truck_entity_history
+  (truck_id, entity_id, effective_from, effective_to, basis)
+VALUES ('eeeeeeee-0000-0000-0000-00000000f001','11111111-1111-1111-1111-111111111111',
+        '2026-01-01','2026-03-29','verify');
+DO $$
+BEGIN
+  INSERT INTO accounting.truck_entity_history
+    (truck_id, entity_id, effective_from, effective_to, basis)
+  VALUES ('eeeeeeee-0000-0000-0000-00000000f001','66666666-6666-6666-6666-666666666666',
+          '2026-03-29', NULL, 'verify');
+  RAISE EXCEPTION 'FAIL: two carriers accepted for one truck on the same day';
+EXCEPTION WHEN exclusion_violation THEN
+  RAISE NOTICE 'PASS: overlapping carrier periods rejected';
+END $$;
+
+\echo '--- ASSERT 59: adjacent carrier periods are accepted --------------'
+-- The same constraint must not forbid the thing it exists to describe: a
+-- handover where one period ends the day before the next begins.
+INSERT INTO accounting.truck_entity_history
+  (truck_id, entity_id, effective_from, effective_to, basis)
+VALUES ('eeeeeeee-0000-0000-0000-00000000f001','66666666-6666-6666-6666-666666666666',
+        '2026-03-30', NULL, 'verify');
+SELECT CASE WHEN count(*) = 2
+            THEN 'PASS: a real transfer stores as two adjacent periods'
+            ELSE 'FAIL: adjacent carrier periods were not both stored' END AS result
+FROM accounting.truck_entity_history
+WHERE truck_id = 'eeeeeeee-0000-0000-0000-00000000f001';
+
+\echo '--- ASSERT 60: trailer cost has its own group, never a truck one --'
+-- Trailers are pooled between the carriers, so their upkeep is fixed cost and
+-- must not be filed under a maintenance category that per-truck cost per mile
+-- would then divide by a truck.
+SELECT CASE WHEN count(*) = 1
+            THEN 'PASS: trailer.fixed exists in its own category group'
+            ELSE 'FAIL: trailer cost has nowhere of its own to go' END AS result
+FROM accounting.category
+WHERE category_id = 'trailer.fixed' AND category_group = 'trailer';
+
+\echo '--- ASSERT 61: a consolidated share is never stored as an actual --'
+-- Shared cost split across carriers is an allocation. The column exists so it
+-- can never be read back as a measured per-carrier amount.
+SELECT CASE WHEN 'by_truck_count' = ANY (enum_range(NULL::accounting.allocation_basis)::text[])
+            THEN 'PASS: a truck-count split is a nameable allocation basis'
+            ELSE 'FAIL: a consolidated share could only be stored as actual' END AS result;
+
+\echo '--- ASSERT 66: a company cannot bill itself ------------------------'
+DO $$
+BEGIN
+  INSERT INTO accounting.ledger_entry
+    (entity_id, counterparty_entity_id, accrual_date, category_id, amount,
+     source_kind, source_document_id, posted_by)
+  VALUES ('11111111-1111-1111-1111-111111111111','11111111-1111-1111-1111-111111111111',
+          '2026-04-06','payable.intercompany', -100, 'document',
+          '22222222-2222-2222-2222-222222222222','controller@fleet');
+  RAISE EXCEPTION 'FAIL: an entity was accepted as its own counterparty';
+EXCEPTION WHEN check_violation THEN
+  RAISE NOTICE 'PASS: an entity cannot be its own counterparty';
+END $$;
+
+\echo '--- ASSERT 67: a one-legged intercompany transaction is visible -----'
+-- Uses categories the MIGRATIONS create, not ones seed-reference.ts adds:
+-- this file runs against a schema with no reference data, and a category
+-- that only exists after seeding would fail here for the wrong reason.
+--
+-- The shop is created here too, which is itself worth asserting: `kind` has
+-- to accept a company that is not a carrier, because the group contains
+-- three carriers, an asset holder and a shop.
+INSERT INTO accounting.entity (entity_id, code, legal_name, kind)
+VALUES ('33333333-3333-3333-3333-333333333333','TRUCKMAX-T','Truck Max test','shop');
+-- The shop bills a carrier and the group has not spent what it charged --
+-- it has spent what the parts cost. Posting only the carrier's side
+-- overstates the group by the shop's markup and leaves the shop with no
+-- revenue for work it did. Whether the other leg exists is a fact about two
+-- rows, so it cannot be a CHECK; it has to be a view somebody can look at.
+INSERT INTO accounting.ledger_entry
+  (entity_id, counterparty_entity_id, intercompany_pair_id, accrual_date,
+   category_id, amount, source_kind, source_document_id, posted_by)
+VALUES ('11111111-1111-1111-1111-111111111111','33333333-3333-3333-3333-333333333333',
+        'aaaaaaaa-0000-0000-0000-00000000aa01','2026-04-06',
+        'payable.intercompany', -1000, 'document',
+        '22222222-2222-2222-2222-222222222222','controller@fleet');
+SELECT CASE WHEN problem LIKE '%only one leg%'
+            THEN 'PASS: a one-legged intercompany transaction is reported'
+            ELSE 'FAIL: ' || COALESCE(problem,'not reported at all') END AS result
+FROM accounting.v_intercompany_unbalanced
+WHERE intercompany_pair_id = 'aaaaaaaa-0000-0000-0000-00000000aa01';
+
+\echo '--- ASSERT 68: a balanced pair is NOT reported ----------------------'
+-- The other direction matters as much. A check that flags correct work gets
+-- switched off, and then it is protecting nothing.
+INSERT INTO accounting.ledger_entry
+  (entity_id, counterparty_entity_id, intercompany_pair_id, accrual_date,
+   category_id, amount, source_kind, source_document_id, posted_by)
+VALUES ('33333333-3333-3333-3333-333333333333','11111111-1111-1111-1111-111111111111',
+        'aaaaaaaa-0000-0000-0000-00000000aa01','2026-04-06',
+        'revenue.shop_work', 1000, 'document',
+        '22222222-2222-2222-2222-222222222222','controller@fleet');
+SELECT CASE WHEN count(*) = 0
+            THEN 'PASS: once both legs are posted the pair stops being reported'
+            ELSE 'FAIL: a balanced pair is still reported' END AS result
+FROM accounting.v_intercompany_unbalanced
+WHERE intercompany_pair_id = 'aaaaaaaa-0000-0000-0000-00000000aa01';

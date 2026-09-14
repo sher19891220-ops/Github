@@ -50,9 +50,12 @@ cleaning charge that were entered in the Truck column with the service name.
 Neither resolves to a truck, and both are reported as unresolvable rather than
 guessed into a real unit.
 """
+import argparse
+import json
 import re
 import sys
 import warnings
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
@@ -179,7 +182,60 @@ def load():
     return all_charges, controls
 
 
+def export_json(charges, controls, path):
+    """The bridge to the ledger.
+
+    opsdash posts Truck Max's invoices as two legs -- a cost to whoever was
+    billed and revenue to the shop -- and it must not re-parse these
+    spreadsheets to do it. Two parsers over one source eventually disagree,
+    and then nobody knows which is right.
+
+    Each file's control travels with the rows, because the loader refuses a
+    file whose detail does not tie to its own printed total. A figure that
+    does not reconcile here should not become a ledger entry there.
+    """
+    out = {
+        "generated_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "source": "fleet-financial-pipeline/ingest/parse_truckmax_invoices.py",
+        "payer_is_a_billing_address": (
+            "Truck Max invoices Zone for almost everything and the teams "
+            "redistribute afterwards. This file has no record of the "
+            "redistribution, so `payer` is who was BILLED, not who bore the "
+            "cost. Anything drawn from it per-company measures the invoicing "
+            "convention, not the economics."),
+        "controls": [
+            {"payer": c["payer"], "rows": int(c["rows"]),
+             "detail_sum": round(float(c["detail_sum"]), 2),
+             "printed_total": (None if c["printed_total"] is None
+                               else round(float(c["printed_total"]), 2)),
+             "ties": bool(c["ties"])}
+            for c in controls
+        ],
+        "charges": [
+            {"payer": r.payer,
+             "date": (None if pd.isna(r.date) else str(r.date)[:10]),
+             "invoice": (None if pd.isna(r.invoice) else str(r.invoice).strip()),
+             "truck": (None if r.truck is None or pd.isna(r.truck) else str(r.truck)),
+             "trailer": (None if r.trailer is None or pd.isna(r.trailer) else str(r.trailer)),
+             "is_trailer": bool(r.is_trailer),
+             "unresolvable_truck": bool(r.unresolvable_truck),
+             "issue": (None if pd.isna(r.issue) else str(r.issue).strip()),
+             "amount": round(float(r.amount), 2)}
+            for r in charges.itertuples()
+        ],
+    }
+    Path(path).write_text(json.dumps(out, indent=1))
+    return out
+
+
 def main():
+    ap = argparse.ArgumentParser(description=__doc__,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--json", metavar="PATH",
+                    help="write every charge and every control to PATH, for "
+                         "opsdash to post from")
+    a = ap.parse_args()
+
     charges, controls = load()
     print(f"{len(charges)} invoice-level charges across {len(controls)} files, "
           f"${charges.amount.sum():,.2f}")
@@ -200,6 +256,14 @@ def main():
     print(f"\n  date range: {charges.date.min()} .. {charges.date.max()}")
     print(f"  distinct trucks: "
           f"{charges[charges.truck.notna()].truck.nunique()}")
+
+    if a.json:
+        out = export_json(charges, controls, a.json)
+        off = [c["payer"] for c in out["controls"] if not c["ties"]]
+        print(f"\n  wrote {len(out['charges'])} charges to {a.json}")
+        if off:
+            print(f"  NOTE: {', '.join(off)} does not tie to its printed "
+                  f"total; the loader will refuse those rows.")
 
 
 if __name__ == "__main__":

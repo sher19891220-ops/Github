@@ -1,44 +1,136 @@
-# Render blueprint for DriverQual.
+# Render blueprint for this repo.
 #
-# Data lives in a hosted Turso (libSQL) database rather than on local disk, so
-# this runs on Render's free tier: nothing is stored on the container's
-# filesystem, and a restart or redeploy loses nothing.
+# Render reads ONE render.yaml, and only the one at the REPO ROOT. A
+# per-project file like opsdash/render.yaml is never looked at, so every app
+# in this repo is defined here or it silently does not deploy.
 #
-# Create the database first (see driverqual/DEPLOY.md), then paste its URL and
-# auth token into the Render dashboard when prompted.
+# Each app's own DEPLOY.md still applies: neither the migrations, the
+# reference data, nor the accounts happen by themselves.
+#
+# driverqual - Turso (libSQL) hosted elsewhere, so it needs no database here.
+#              Create it first (driverqual/DEPLOY.md), then paste its URL and
+#              auth token into the dashboard when prompted. autoDeploy is on.
+#
+# opsdash    - The ops/accounting ledger, on Docker rather than the native
+#              Node runtime: accounting uploads photos of fuel statements and
+#              reading those needs poppler and tesseract on the box, which a
+#              native build cannot install. See opsdash/Dockerfile.
+#              autoDeploy is OFF on purpose — this one posts to a ledger, so
+#              a deploy should be a decision, not a consequence of a push.
+#              It needs BLOB_S3_BUCKET or its health check fails on purpose.
+#
+# opsdash-backup
+#            - Nightly pg_dump of that ledger to object storage. Render's own
+#              database backups are the first line and should be on as well;
+#              this is the second, because a backup that lives inside the
+#              same account as the thing it protects is not really a backup.
+#              It refuses to run without a destination rather than writing
+#              into a container that is about to be thrown away.
+#              See opsdash/docs/BACKUP.md.
 
 services:
-  - type: web
-    name: driverqual
-    runtime: node
-    plan: free
-    rootDir: driverqual
-    buildCommand: npm ci && npm run build
-    startCommand: npm run start
-    # Public, and touches neither the session nor the database, so protecting
-    # the app does not make Render think it has died.
-    healthCheckPath: /api/health
-    autoDeploy: true
-    envVars:
-      - key: NODE_VERSION
-        value: "22"
-      - key: NODE_ENV
-        value: production
-      # Prompted for on first deploy. Never commit these.
-      - key: TURSO_DATABASE_URL
-        sync: false
-      - key: TURSO_AUTH_TOKEN
-        sync: false
-      # The shared access code. Without it the app runs open to anyone with the
-      # URL and shows a warning banner on every screen.
-      - key: APP_ACCESS_CODE
-        sync: false
-      # Optional extra entropy for session signing. Sessions stay valid across
-      # restarts only if this is set; leave unset and a restart signs everyone out.
-      - key: SESSION_SECRET
-        generateValue: true
-      # Optional integrations; the app runs without them.
-      - key: OPENAI_API_KEY
-        sync: false
-      - key: FMCSA_API_KEY
-        sync: false
+- type: web
+  name: driverqual
+  runtime: node
+  plan: free
+  rootDir: driverqual
+  buildCommand: npm ci && npm run build
+  startCommand: npm run start
+  healthCheckPath: /api/health
+  autoDeploy: true
+  envVars:
+  - key: NODE_VERSION
+    value: '22'
+  - key: NODE_ENV
+    value: production
+  - key: TURSO_DATABASE_URL
+    sync: false
+  - key: TURSO_AUTH_TOKEN
+    sync: false
+  - key: APP_ACCESS_CODE
+    sync: false
+  - key: SESSION_SECRET
+    generateValue: true
+  - key: OPENAI_API_KEY
+    sync: false
+  - key: FMCSA_API_KEY
+    sync: false
+- type: web
+  name: opsdash
+  runtime: docker
+  plan: starter
+  rootDir: opsdash
+  dockerfilePath: ./opsdash/Dockerfile
+  dockerContext: ./opsdash
+  healthCheckPath: /api/health
+  autoDeploy: false
+  envVars:
+  - key: NODE_VERSION
+    value: '22'
+  - key: NODE_ENV
+    value: production
+  - key: DATABASE_URL
+    fromDatabase:
+      name: opsdash-db
+      property: connectionString
+  - key: SESSION_SECRET
+    generateValue: true
+  # Uploaded documents. Without BLOB_S3_BUCKET the app REFUSES its own
+  # health check in production and the deploy rolls back, which is the
+  # intended behaviour: this service used to write documents to a container
+  # directory that every deploy deleted, so uploads reported success and the
+  # files were gone by the next release. A loud failure at deploy time beats
+  # a silent one discovered when somebody asks for the invoice.
+  # See opsdash/docs/BLOB-STORAGE.md.
+  - key: BLOB_S3_BUCKET
+    sync: false
+  - key: BLOB_S3_PREFIX
+    value: documents
+  # Only for S3-compatible storage that is not AWS (R2, B2, Wasabi, MinIO).
+  - key: BLOB_S3_ENDPOINT
+    sync: false
+  - key: BLOB_S3_REGION
+    sync: false
+  - key: AWS_ACCESS_KEY_ID
+    sync: false
+  - key: AWS_SECRET_ACCESS_KEY
+    sync: false
+- type: cron
+  name: opsdash-backup
+  runtime: docker
+  plan: starter
+  # 08:00 UTC — after the overnight settlement work and before the morning
+  # dispatch shift, so a dump is never taken mid-write on the busiest hour.
+  schedule: '0 8 * * *'
+  rootDir: opsdash
+  dockerfilePath: ./opsdash/Dockerfile.backup
+  dockerContext: ./opsdash
+  autoDeploy: false
+  envVars:
+  - key: DATABASE_URL
+    fromDatabase:
+      name: opsdash-db
+      property: connectionString
+  # Every value below is set in the dashboard, never here. A bucket name in
+  # a public repository is a map to the thing worth stealing.
+  - key: BACKUP_S3_BUCKET
+    sync: false
+  - key: BACKUP_S3_PREFIX
+    sync: false
+  # Only needed for S3-compatible storage that is not AWS (Cloudflare R2,
+  # Backblaze B2, Wasabi, MinIO). Leave unset for AWS itself.
+  - key: BACKUP_S3_ENDPOINT
+    sync: false
+  - key: AWS_ACCESS_KEY_ID
+    sync: false
+  - key: AWS_SECRET_ACCESS_KEY
+    sync: false
+  - key: AWS_DEFAULT_REGION
+    sync: false
+  - key: BACKUP_RETAIN_DAYS
+    value: '90'
+databases:
+- name: opsdash-db
+  plan: basic-256mb
+  databaseName: opsdash
+  user: opsdash

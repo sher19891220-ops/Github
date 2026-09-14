@@ -1,0 +1,20 @@
+node_modules/
+.env
+.env.*
+*.tsbuildinfo
+
+# Real financial documents never enter version control. This repository is
+# public, and fuel/toll/maintenance reports carry card numbers, account
+# numbers and driver names. Redacted fixtures under tests/fixtures/redacted
+# are the only ones that get committed.
+tests/fixtures/real/
+
+.next/
+next-env.d.ts
+
+# Database dumps. These contain the entire ledger — every posted amount,
+# every unit number, every driver the staging rows name. This repository is
+# public. Nothing produced by scripts/backup-db.sh may ever be committed.
+backups/
+*.dump
+*.manifest

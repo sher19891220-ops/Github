@@ -1,0 +1,23 @@
+-- Shared cost split across the carriers by fleet size.
+--
+-- The expenses sheet leaves ~$50k of 2026 trailer cost without saying which
+-- company bore it. Trailers are pooled (migration 016), so that money is a
+-- genuine shared cost rather than a labelling accident, and the operator's
+-- instruction is to consolidate it across the carriers.
+--
+-- The basis has to be named on the row, because the three candidate bases
+-- disagree enormously on this data:
+--
+--   by trailer cost already attributed : AFG 38.0%  Xtrack 57.0%  Zone  5.0%
+--   by revenue                         : AFG  4.9%  Xtrack 50.7%  Zone 44.4%
+--   by truck count                     : AFG  5.4%  Xtrack 52.7%  Zone 41.9%
+--
+-- The first is not a business fact at all: it measures which rows happened to
+-- carry a company name, and would hand AFG — four trucks and 4.9% of revenue
+-- — 38% of the shared pool. Revenue and truck count are independent proxies
+-- that agree within three points, which is the reason to trust either.
+--
+-- Truck count is the one recorded here: trailer wear follows how many trucks
+-- are pulling, not what those trucks earned. A carrier having a strong or
+-- weak revenue quarter should not move its share of trailer upkeep.
+ALTER TYPE accounting.allocation_basis ADD VALUE IF NOT EXISTS 'by_truck_count';

@@ -1,0 +1,170 @@
+# Continuous integration.
+#
+# Until this file existed, nothing ran on push. The 827 tests and 63
+# contract assertions were true because somebody ran them and said so, which
+# is a habit, not a foundation. A green branch meant nobody had checked.
+#
+# Every gate here already existed as an npm script. The only thing being
+# added is that a machine runs them whether anyone remembers to or not.
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+# A second push to the same branch makes the first run irrelevant. Cancelling
+# it keeps the queue honest about what is actually being tested.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # Cheapest job, no dependencies, catches the worst mistake: something
+  # secret or personal committed to a public repository. Runs first and
+  # alone so the answer arrives in seconds rather than after the test suite.
+  hygiene:
+    name: nothing secret is tracked
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - run: bash scripts/check-repo-hygiene.sh
+
+  opsdash:
+    name: opsdash — types, tests, schema contract
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: opsdash
+
+    services:
+      # 16 to match what the platform runs. The client tools on the runner
+      # are the same major version, so nothing is being tested against a
+      # server newer than the one that will actually hold the ledger.
+      postgres:
+        image: postgres:16
+        env:
+          # trust, not a password. This container lives for the length of one
+          # job, listens on localhost only, and holds nothing. Giving it a
+          # password would mean writing a credential-shaped string into a
+          # public repository, which the hygiene job correctly refuses — and
+          # "it's only CI" is exactly the reasoning that puts a real one
+          # there later.
+          POSTGRES_HOST_AUTH_METHOD: trust
+          POSTGRES_DB: opsdash_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      # The integration suite inserts -TEST carriers and never deletes them,
+      # so it refuses any database whose name does not read as disposable.
+      # This one does.
+      DATABASE_URL: postgresql://postgres@localhost:5432/opsdash_test
+      # Explicit, never inherited from DATABASE_URL: db:verify creates and
+      # drops databases on whatever server this names.
+      VERIFY_DATABASE_URL: postgresql://postgres@localhost:5432/postgres
+      # Documents go to a directory the runner throws away. Correct here and
+      # refused in production — see src/db/repo/blobStore.ts.
+      #
+      # A literal path, not ${{ runner.temp }}: the `runner` context is not
+      # available in job-level `env`, and using it there is not a warning —
+      # the whole workflow fails to start with zero jobs and no logs, which
+      # reads like the runner is broken rather than like a typo.
+      OPSDASH_BLOB_DIR: /tmp/opsdash-ci-blobs
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        cache: npm
+        cache-dependency-path: opsdash/package-lock.json
+
+    - name: install document-reading tools
+      # The same two the production image installs. Without them the
+      # PDF/photo upload tests do not fail cleanly — they fail with
+      # "pdfinfo is not installed", which is a CI environment gap wearing a
+      # product bug's clothes. The parser is right to refuse rather than
+      # return empty text; CI should just have the tools.
+      run: |
+        sudo apt-get update -qq
+        sudo apt-get install -y -qq --no-install-recommends \
+          poppler-utils tesseract-ocr tesseract-ocr-eng
+
+    - name: install
+      run: npm ci
+
+    - name: typecheck
+      # next.config.ts sets ignoreBuildErrors=false on purpose: a stray
+      # `any` in a route handler is how a float gets back into the money
+      # path. This is the same gate, run earlier and faster.
+      run: npm run typecheck
+
+    - name: apply migrations
+      # Through the runner, not a shell loop, so CI exercises the same path a
+      # deploy uses. It records what it applied and refuses to continue if a
+      # migration has been edited since it ran — which is a thing CI can
+      # actually catch, because its database starts empty every time.
+      run: npm run db:migrate
+
+    - name: tests
+      # Unit and integration together. The integration half is the half that
+      # matters here: the EXCLUDE constraints, the commit transaction and
+      # the review gate are only real against a live PostgreSQL.
+      run: npm test
+
+    - name: schema contract
+      # Proves the database itself still rejects what the contract says it
+      # rejects — overlapping carrier periods, taxable miles above total
+      # miles, a rate card with two values on one day. Application code
+      # cannot be trusted to enforce these because application code is what
+      # gets edited.
+      run: npm run db:verify
+
+    - name: build
+      run: npm run build
+
+    - name: say what did not run here
+      # The engines are required to be proven against the operator's real
+      # documents rather than synthetic data, and those documents cannot be
+      # on a public runner — they carry unit numbers, driver names and
+      # licence details. Those suites skip here by name.
+      #
+      # Printed rather than left silent: a suite that quietly skips is how a
+      # green tick comes to mean less than it looks like it means. Run
+      # `npm run test:real` with OPSDASH_FIXTURES set before deploying.
+      if: always()
+      run: |
+        echo "::notice title=Real-document tests::Suites needing the operator's own"\
+             "documents are skipped on this runner. Run 'npm run test:real' with"\
+             "OPSDASH_FIXTURES set before a production deploy."
+        npx vitest list 2>/dev/null | grep -c 'needs real documents' \
+          | xargs -I{} echo "{} suite(s) skipped for want of real documents." || true
+
+  driverqual:
+    name: driverqual — types and unit tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: driverqual
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        cache: npm
+        cache-dependency-path: driverqual/package-lock.json
+    - run: npm ci
+    - run: npm run typecheck
+    # Unit tests only: this app's integration tests reach a hosted database
+    # whose credentials do not belong in CI. Stated rather than silently
+    # skipped, so the gap is visible.
+    - run: npm run test:unit

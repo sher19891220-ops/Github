@@ -1,0 +1,184 @@
+/**
+ * Writes a parser's `StagingRow[]` output into `accounting.staging_row`.
+ *
+ * This is the one place a parser's output is translated into what the
+ * database will actually accept:
+ *  - `entityId` is resolved through `source_key_map` (see entityResolution.ts)
+ *    rather than trusted as a canonical id, because the dispatch parser
+ *    hands back a raw sheet marker (`"XTRACK"`), not a uuid.
+ *  - `charged_to` / `unit_type` / `unit_number` — columns `staging_row` has
+ *    but the wire `StagingRow` type does not (see repo/types.ts) — are
+ *    lifted out of `parsedPayload` where the expenses parser already put
+ *    them, so the signal survives into the database even though the fixed
+ *    API contract has no top-level field for it yet.
+ *
+ * Runs entirely against the query function passed in, so a caller can wrap
+ * it in a transaction alongside document bookkeeping (sheetSync.ts does).
+ */
+import type { StagingRow } from '@/contract/types';
+import { resolveEntityFromTruck, resolveEntityId } from './entityResolution';
+import type { ChargedTo, UnitType } from './types';
+
+type QueryFn = (text: string, params?: readonly unknown[]) => Promise<unknown[]>;
+
+const CHARGED_TO_VALUES: ReadonlySet<string> = new Set(['company', 'driver', 'split', 'unknown']);
+const UNIT_TYPE_VALUES: ReadonlySet<string> = new Set(['truck', 'trailer', 'other', 'unknown']);
+
+function readChargedTo(payload: Record<string, unknown>): ChargedTo | null {
+  const v = payload.chargedTo;
+  return typeof v === 'string' && CHARGED_TO_VALUES.has(v) ? (v as ChargedTo) : null;
+}
+
+function readUnitType(payload: Record<string, unknown>): UnitType | null {
+  const v = payload.unitType;
+  return typeof v === 'string' && UNIT_TYPE_VALUES.has(v) ? (v as UnitType) : null;
+}
+
+/**
+ * Trailer cost is a FIXED cost, never a truck's or a driver's.
+ *
+ * Trailers are pooled: of the trailers with enough cost history to tell,
+ * 47% were pulled by trucks from more than one carrier — one by all three.
+ * A trailer cost row names the truck that happened to be pulling it, and
+ * following that would charge a tyre to whichever driver drew that trailer
+ * that week, which is neither fair nor stable: the same trailer's next
+ * repair would land on a different truck, in a different company.
+ *
+ * So for a trailer row the pulling truck is deliberately NOT used. The row
+ * still carries it in `parsed_payload` for tracing, and the entity comes
+ * from what the sheet itself says bore the cost (`Expense side`), not from
+ * anything about who was driving.
+ */
+function isTrailerRow(payload: Record<string, unknown>): boolean {
+  return payload.unitType === 'trailer';
+}
+
+function readUnitNumber(payload: Record<string, unknown>): string | null {
+  // A trailer's own unit number is not a truck and must not be looked up as
+  // one; the truck named beside it is the puller, not the cost bearer.
+  if (isTrailerRow(payload)) return null;
+
+  const fromIssuedTo = payload.extractedTruckNumber;
+  if (typeof fromIssuedTo === 'string' && fromIssuedTo.trim() !== '') return fromIssuedTo;
+  const fromUnitRaw = payload.unitRaw;
+  if (typeof fromUnitRaw === 'string' && fromUnitRaw.trim() !== '') return fromUnitRaw;
+  // The dispatch parser names it differently: its rows are keyed by the
+  // truck that ran the load.
+  const fromTruck = payload.truckNumber;
+  if (typeof fromTruck === 'string' && fromTruck.trim() !== '') return fromTruck;
+  return null;
+}
+
+export interface InsertStagingRowsOptions {
+  /** Which upstream vocabulary raw entity/truck/driver signals are written
+   *  in, for the source_key_map lookup. Defaults to 'dispatch', the only
+   *  parser that currently emits an unresolved entity signal. */
+  entitySourceSystem?: string;
+}
+
+export async function insertStagingRows(
+  q: QueryFn,
+  rows: readonly StagingRow[],
+  options: InsertStagingRowsOptions = {},
+): Promise<void> {
+  const entitySourceSystem = options.entitySourceSystem ?? 'dispatch';
+
+  for (const row of rows) {
+    const payloadForUnit = row.parsedPayload;
+    const unitForEntity = readUnitNumber(payloadForUnit);
+
+    let resolved = await resolveEntityId(q, row.entityId, entitySourceSystem);
+
+    let status = row.status;
+    let reviewNotes = row.reviewNotes;
+
+    // The sheet did not say which company earned this. The truck that ran
+    // it might — see `resolveEntityFromTruck` for why this matters: on the
+    // real dispatch export 1,322 of 1,386 revenue rows have no marker, and
+    // every one of them names a truck.
+    if (resolved.entityId === null && unitForEntity === null && isTrailerRow(payloadForUnit)) {
+      // Fixed cost with no company named on the row. Not guessable from the
+      // puller — see `isTrailerRow`. A person says which company's overhead
+      // this is, or it stays out of every P&L.
+      const note =
+        'Trailer cost is a fixed cost and is never attributed through the truck pulling it. ' +
+        'This row does not say which company bore it — assign one before it posts.';
+      status = 'under_review';
+      reviewNotes = reviewNotes ? `${reviewNotes} ${note}` : note;
+    } else if (resolved.entityId === null && unitForEntity !== null) {
+      // Trucks move between the carriers mid-year, so the roster is
+      // effective-dated and the lookup needs this row's own accrual date.
+      // Without it a transferred unit's whole year lands on one carrier.
+      const viaTruck = await resolveEntityFromTruck(q, unitForEntity, row.accrualDate ?? null);
+      if (viaTruck.entityId !== null) {
+        resolved = { entityId: viaTruck.entityId, resolvedFrom: 'truck_roster' };
+        // Attributed, not asserted. The roster is the operator's own
+        // working crosswalk and its column is named `entity_CONFIRM_THIS`;
+        // posting a year of revenue on an unconfirmed guess would be the
+        // silent estimate this build exists to refuse. The row carries the
+        // entity AND the reason, and waits for a person.
+        const on = row.accrualDate ? ` as of ${row.accrualDate}` : '';
+        const note =
+          `Company not stated on this row; attributed to the entity the truck roster gives for unit ${unitForEntity}${on} (${viaTruck.basis}). Confirm before this posts.`;
+        status = 'under_review';
+        reviewNotes = reviewNotes ? `${reviewNotes} ${note}` : note;
+      } else {
+        // Say which of the three failures it was. "No entity" sends a
+        // reviewer hunting for a missing roster line that may not be the
+        // problem: a departed unit and an undated transfer need different
+        // answers from the operator.
+        const why = {
+          no_assignment: `unit ${unitForEntity} is not in the truck roster`,
+          outside_period: `unit ${unitForEntity} is in the truck roster, but no carrier assignment covers ${row.accrualDate} — the unit had left, or had not yet arrived`,
+          date_required: `unit ${unitForEntity} transferred between carriers and this row has no accrual date, so which carrier earned it cannot be told from the row`,
+        }[viaTruck.reason];
+        const note = `Company not stated on this row and could not be derived: ${why}.`;
+        status = 'under_review';
+        reviewNotes = reviewNotes ? `${reviewNotes} ${note}` : note;
+      }
+    }
+
+    if (row.entityId !== null && resolved.resolvedFrom === 'unresolved') {
+      // A marker was present but source_key_map has no mapping for it yet.
+      // Never default to a guessed entity (SOURCE-DISCOVERY.md §8) — surface
+      // it for review instead of silently dropping the signal.
+      const note = `entity marker "${row.entityId}" not found in source_key_map (source_system=${entitySourceSystem}); left unattributed.`;
+      status = 'under_review';
+      reviewNotes = reviewNotes ? `${reviewNotes} ${note}` : note;
+    }
+
+    const payload = row.parsedPayload;
+    const chargedTo = readChargedTo(payload);
+    const unitType = readUnitType(payload);
+    const unitNumber = unitForEntity;
+
+    await q(
+      `INSERT INTO accounting.staging_row
+         (staging_row_id, document_id, row_index, source_page, parsed_payload, reviewed_payload,
+          entity_id, truck_id, driver_id, accrual_date, category_id, amount, quantity, jurisdiction,
+          status, review_notes, charged_to, unit_type, unit_number)
+       VALUES ($1,$2,$3,$4,$5::jsonb,$6::jsonb,$7,$8,$9,$10::date,$11,$12,$13,$14,$15,$16,$17,$18,$19)`,
+      [
+        row.stagingRowId,
+        row.documentId,
+        row.rowIndex,
+        row.sourcePage,
+        JSON.stringify(row.parsedPayload),
+        row.reviewedPayload ? JSON.stringify(row.reviewedPayload) : null,
+        resolved.entityId,
+        row.truckId,
+        row.driverId,
+        row.accrualDate,
+        row.categoryId,
+        row.amount,
+        row.quantity,
+        row.jurisdiction,
+        status,
+        reviewNotes,
+        chargedTo,
+        unitType,
+        unitNumber,
+      ],
+    );
+  }
+}
