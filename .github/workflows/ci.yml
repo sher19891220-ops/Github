@@ -66,7 +66,12 @@ jobs:
       VERIFY_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
       # Documents go to a directory the runner throws away. Correct here and
       # refused in production — see src/db/repo/blobStore.ts.
-      OPSDASH_BLOB_DIR: ${{ runner.temp }}/blobs
+      #
+      # A literal path, not ${{ runner.temp }}: the `runner` context is not
+      # available in job-level `env`, and using it there is not a warning —
+      # the whole workflow fails to start with zero jobs and no logs, which
+      # reads like the runner is broken rather than like a typo.
+      OPSDASH_BLOB_DIR: /tmp/opsdash-ci-blobs
 
     steps:
     - uses: actions/checkout@v4
