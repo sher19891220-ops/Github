@@ -154,34 +154,59 @@ rather than silently allocating $0 if the chosen basis totals zero across
 every entity (e.g. allocating by revenue when no revenue figure was
 supplied).
 
-## 6. Two open assumptions from the original prompt's own pre-flight questions
+## 6. One open assumption resolved with real data; one still open
 
 The original prompt's Section 8 said to ask rather than assume anything not
-already answered in the codebase. Two of its four questions ARE already
-answered here (which Postgres tables hold GL data: none yet, this hasn't
-been built; overhead allocation default: per-truck, confirmed by the
-project owner). The other two are not yet resolved by real data, and are
-recorded here as open rather than guessed silently:
+already answered in the codebase. Two of its four questions were already
+answered in the first version of this document (which Postgres tables hold
+GL data: none yet, this hasn't been built; overhead allocation default:
+per-truck, confirmed by the project owner). Of the remaining two, one is
+now resolved with real data; the other is still open.
 
-- **Per-truck lease/loan payment schedule, source of truth.** This project
-  already has real financing schedules for Iron Lease's own equipment debt
-  (`data/raw/iron_lease/financing/`, read by `analysis/iron_lease.py`'s
-  `tbk_financing()` — two TBK Bank loans, $453,585 and $632,985 principal)
-  and Iron Lease's own per-truck rate card
+- **Tire replacement — RESOLVED, measured, not benchmarked.** The operator
+  pointed at a maintenance ledger already in this corpus (the
+  "ZONE_MAINT_MASTER" Google Sheet, `data/raw/pnl/gs-ZONE_master_truck_
+  trailer_expenses.xlsx`) that carries real truck and trailer tire changes,
+  already tagged `tires/rims` by `analysis/maintenance_ledger.py`'s own
+  categorizer — 252 tire-related charges, 2025-01 through 2026-09-01,
+  simply never queried for this purpose before. `analysis/tire_cost.py`
+  measures it, company-borne only (same rule as `truck_maintenance.py`:
+  driver-billed and Iron-Lease-reversal rows are not a company cost):
+
+  | | Company-borne tire $, truck+trailer | $/loaded mile |
+  |---|--:|--:|
+  | ZONE | $44,856 | $0.0180 |
+  | XTRACK | $42,823 | $0.0137 |
+  | AFG | $9,699 | $0.0189 |
+  | **Fleet** | **$97,378** | **$0.0159** |
+
+  (2026-02-23..2026-08-24, the window every company's P&L mileage covers.)
+  **This replaces the earlier industry-benchmark placeholder of
+  $0.03-0.04/mile — the real, measured rate is about half that.** Using the
+  benchmark instead of this measured figure would have overstated tire
+  cost by roughly 2x. `tests/test_tire_cost.py` locks in the real numbers
+  as a regression and guards against the rate ever silently exceeding the
+  old benchmark (which would mean the join broke, not that tires got more
+  expensive). Two disclosed limits: this draws on the primary maintenance
+  ledger only, not the separate Truck Max invoice log
+  `truck_maintenance.py` also reads (that second source has no per-category
+  tag, so it cannot be split into "tires" specifically) — so, like every
+  other maintenance figure in this project, treat it as a measured floor,
+  not a ceiling; and it is reported truck+trailer combined per loaded mile,
+  matching how every other variable-cost line here already blends the
+  running fleet's cost over its own miles, rather than split per truck vs.
+  per trailer.
+
+- **Per-truck lease/loan payment schedule, source of truth — still open.**
+  This project already has real financing schedules for Iron Lease's own
+  equipment debt (`data/raw/iron_lease/financing/`, read by
+  `analysis/iron_lease.py`'s `tbk_financing()` — two TBK Bank loans,
+  $453,585 and $632,985 principal) and Iron Lease's own per-truck rate card
   (`analysis/truck_weeks.py`'s `IRON_RATE_CARD`, two tiers: $735/wk+$0.10/mi
   and $900/wk+$0.12/mi). Neither of these is a lease/loan schedule for
   every individual truck across all three companies — they cover the
   Iron-Lease-financed subset only. No broader source exists in this corpus
   yet.
-- **Tire replacement amortization.** No tire replacement data exists
-  anywhere in this project's corpus. Pending real data, this engine has NO
-  built-in default — a caller must supply its own tire cost as part of
-  `variable_cost_per_mile` (or as a separate line item at whatever level it
-  is tracked). If an interim placeholder is wanted before real data is
-  loaded, industry benchmarks commonly cited for OTR dry van tractor tires
-  run roughly **$0.03-0.04/mile** (a full tractor tire set replaced roughly
-  every 150,000-200,000 miles) — offered here as a documented starting
-  point only, not as a measured figure for this fleet.
 
 ## 7. What's not built yet
 
