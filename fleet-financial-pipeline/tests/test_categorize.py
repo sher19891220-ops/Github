@@ -74,6 +74,23 @@ CASES = [
     ("TBK BANK, SSB DES:ACH ID: INDN:IRON LEASE LLC", -14443.50, "loan_finance",
      "$14,443.50 x17 monthly is an amortisation schedule on an owned truck, "
      "not rent"),
+    ("WIRE TYPE:WIRE IN DATE: 250811 TIME:1726 ET TRN:2025081100599001 "
+     "SEQ:5223010822603/001626 ORIG:TRIUMPH ID:4966429 SND BK:TBK BANK, SSB "
+     "ID:11 1909579 PMT DET:9294271 /LOCINS/CTRC", 123951.00, "revenue",
+     "TBK Bank is Triumph's OWN sending bank on a factoring wire-IN, not a "
+     "vendor being paid -- this moved $1.9M of ZONE's factoring revenue and "
+     "$91K of XTRACK's into loan_finance until the tbk_bank rule was gated "
+     "on a negative amount"),
+    ("WIRE TYPE:WIRE IN DATE: 260501 TIME:1143 ET TRN:2026050100348932 "
+     "SEQ:2026050100113242/270807 ORIG:TBK BANK, SSB ID:000004506159516 "
+     "SND BK:WELLS FARGO BANK NA ID:0407 PMT DET:10097314", 28312.13,
+     "uncategorized",
+     "TBK Bank named as the ORIGINATOR of a wire-IN with no Triumph mention "
+     "either -- the generic loan_finance category list used to carry its own "
+     "unconditional tbk_bank pattern too, catching this right back after the "
+     "sign-gated named-vendor rule above correctly declined it; a positive "
+     "amount can never be a loan payment, so this should fall through, not "
+     "guess"),
     ("WIRE TYPE:WIRE OUT BNF:RIGHT TRUCK DEAL ID", -150000,
      "capex_truck_trailer", "buying trucks, not renting them"),
     ("RELAY PAYMENTS DES:AJ4NTKSURZ ID:XYZ INDN:ZONE", -50000, "fuel",

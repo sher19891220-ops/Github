@@ -222,8 +222,16 @@ CATEGORY_RULES = [
     # Equipment finance on trucks the group OWNS. $14,443.50 seventeen times
     # on a monthly cycle is an amortisation schedule; the truck is an asset and
     # this is debt service on it, not rent for someone else's equipment.
-    ("loan_finance",         [r"\btbk\s+bank\b",
-                              r"\bloans?\b", r"\bfinanc(e|ing)\b", r"\bnote\s+payments?\b",
+    #
+    # NO \btbk\s+bank\b HERE, ON PURPOSE. It used to be here too, unconditional
+    # -- and since this list is reached only after the sign-gated NAMED_VENDOR
+    # tbk_bank rule above already declined a positive-amount match, this
+    # unconditional copy caught it right back, re-labeling ZONE wire-INS that
+    # merely route through TBK Bank (via Wells Fargo, no Triumph mention
+    # either) as loan_finance again. A positive amount can never BE a loan
+    # payment; those two rows now correctly fall through to uncategorized
+    # rather than being force-labeled debt service they cannot be.
+    ("loan_finance",         [r"\bloans?\b", r"\bfinanc(e|ing)\b", r"\bnote\s+payments?\b",
                               r"\binterest\s+(charge|payment|expense)\b", r"\bprincipal\s+payment\b"]),
 
     ("driver_settlement",    [r"\bsettlements?\b", r"\bpayrolls?\b", r"\bdrivers?\s+pay\b",
@@ -281,19 +289,34 @@ _CARD_PAYMENT = [re.compile(p, re.IGNORECASE) for p in CARD_PAYMENT_PATTERNS]
 # between our companies. Kept as an explicit short list rather than stripping
 # INDN wholesale: a blunt strip also removed the originator name from genuine
 # intercompany ACH and moved $29M into the wrong buckets.
+#
+# "TBK BANK" ALSO NAMES A BANK, NOT JUST A VENDOR -- and that produced a real
+# false positive: Triumph Finance's factoring wires are sent FROM TBK Bank
+# ("WIRE TYPE:WIRE IN ... ORIG:TRIUMPH ... SND BK:TBK BANK, SSB"), so every
+# such wire-IN was classified loan_finance on the bank's name alone, moving
+# $1.9M of ZONE's factoring revenue and $91K of XTRACK's into a truck-loan
+# category that does not apply to either company (see docs/ACCOUNTING_MODEL.
+# md section 8 -- only Iron Lease carries the real TBK equipment loans; ZONE
+# and XTRACK pay Iron Lease rent, not a loan of their own). A loan is money
+# going OUT; require_negative gates the tbk_bank rule on the sign so a wire-IN
+# instead falls through to the ordinary revenue check below, where `\btriumph
+# \b` already classifies it correctly. The other three vendor names here are
+# not known to have this ambiguity (nothing in this corpus wires money IN
+# under any of them) and are left unconditional.
 NAMED_VENDOR_PATTERNS = [
-    (r"\btbk\s+bank\b", "loan_finance"),
-    (r"\bfleet\s+advantage\b", "capex_truck_trailer"),
-    (r"\bequiplinc\b", "capex_truck_trailer"),
+    (r"\btbk\s+bank\b", "loan_finance", True),
+    (r"\bfleet\s+advantage\b", "capex_truck_trailer", False),
+    (r"\bequiplinc\b", "capex_truck_trailer", False),
     # An auction house sells whatever is on the block. The Ritchie Bros
     # purchase here was a LIFTER for the shop, not a tractor -- shop equipment
     # does not earn revenue per mile and must not inflate fleet capex or the
     # cost-per-truck it feeds.
-    (r"\britchie\s+bros\b", "capex_shop_equipment"),
+    (r"\britchie\s+bros\b", "capex_shop_equipment", False),
 ]
 
 _RELATED_REVIEW = [re.compile(p, re.IGNORECASE) for p in RELATED_PARTY_REVIEW_PATTERNS]
-_NAMED_VENDORS = [(re.compile(p, re.IGNORECASE), c) for p, c in NAMED_VENDOR_PATTERNS]
+_NAMED_VENDORS = [(re.compile(p, re.IGNORECASE), c, req_neg)
+                   for p, c, req_neg in NAMED_VENDOR_PATTERNS]
 
 
 
@@ -318,8 +341,13 @@ def classify(memo: str, amount: float | None = None) -> Classification:
 
     # 0b. Named third-party vendors whose ACH memo carries one of our entity
     #     names in INDN:. Without this they read as intercompany.
-    for pat, cat in _NAMED_VENDORS:
+    #     require_negative vendors (currently just tbk_bank) name a BANK, not
+    #     only a vendor, so a positive amount naming them is not this vendor
+    #     being paid -- fall through instead of forcing the category.
+    for pat, cat, require_negative in _NAMED_VENDORS:
         if pat.search(memo):
+            if require_negative and not (amount is not None and amount < 0):
+                continue
             return Classification(cat, "high", pat.pattern)
 
     # 1. Intercompany, before anything else.

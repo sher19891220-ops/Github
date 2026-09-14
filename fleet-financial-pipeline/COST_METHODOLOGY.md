@@ -154,14 +154,14 @@ rather than silently allocating $0 if the chosen basis totals zero across
 every entity (e.g. allocating by revenue when no revenue figure was
 supplied).
 
-## 6. One open assumption resolved with real data; one still open
+## 6. Both remaining open assumptions are now resolved
 
 The original prompt's Section 8 said to ask rather than assume anything not
 already answered in the codebase. Two of its four questions were already
 answered in the first version of this document (which Postgres tables hold
 GL data: none yet, this hasn't been built; overhead allocation default:
-per-truck, confirmed by the project owner). Of the remaining two, one is
-now resolved with real data; the other is still open.
+per-truck, confirmed by the project owner). The other two are now resolved
+with real data.
 
 - **Tire replacement — RESOLVED, measured, not benchmarked.** The operator
   pointed at a maintenance ledger already in this corpus (the
@@ -197,16 +197,56 @@ now resolved with real data; the other is still open.
   running fleet's cost over its own miles, rather than split per truck vs.
   per trailer.
 
-- **Per-truck lease/loan payment schedule, source of truth — still open.**
-  This project already has real financing schedules for Iron Lease's own
-  equipment debt (`data/raw/iron_lease/financing/`, read by
-  `analysis/iron_lease.py`'s `tbk_financing()` — two TBK Bank loans,
-  $453,585 and $632,985 principal) and Iron Lease's own per-truck rate card
-  (`analysis/truck_weeks.py`'s `IRON_RATE_CARD`, two tiers: $735/wk+$0.10/mi
-  and $900/wk+$0.12/mi). Neither of these is a lease/loan schedule for
-  every individual truck across all three companies — they cover the
-  Iron-Lease-financed subset only. No broader source exists in this corpus
-  yet.
+- **Per-truck lease/loan payment schedule, source of truth — RESOLVED: there
+  isn't one, per truck, because this business's structure doesn't have one,
+  and that's now confirmed rather than assumed.** ZONE, XTRACK, and AFG do
+  not hold truck loans of their own — they pay Iron Lease **rent** (a fixed
+  weekly charge, sometimes plus a per-mile charge), which is the economic
+  equivalent of a truck payment and is already the `fixed_costs_total`
+  input `breakeven_engine.py` uses (`cost_structure.py`'s "truck rent, base"
+  line, itself a weighted blend of Iron Lease's rate card and the P&L's own
+  measured rent — see `docs/ACCOUNTING_MODEL.md` section 8). No separate
+  loan schedule applies at the operating-company level because the
+  operating company isn't the one holding debt on the truck.
+
+  This was checked, not assumed: `data/processed/cash_categorized.csv`
+  appeared to show ZONE and XTRACK carrying real `loan_finance` activity —
+  $1.92M and $91K respectively. Both were a taxonomy false positive, found
+  and fixed while chasing this down. Triumph Finance's factoring-advance
+  wires route through TBK Bank as their own sending bank ("ORIG:TRIUMPH ...
+  SND BK:TBK BANK, SSB"), and `taxonomy/categorize.py`'s `loan_finance`
+  rule matched on the bank's name alone — in two places, one gated by
+  ingest order and a second, redundant, fully unconditional copy in the
+  generic category list that caught the same rows right back. Both are now
+  fixed: `loan_finance` from a named-vendor match requires a negative
+  amount (a loan payment is money going OUT; a positive amount naming the
+  same bank cannot be one), and the redundant unconditional copy is
+  removed. Regenerating `cash_categorized.csv` after the fix: ZONE's
+  `loan_finance` drops to $100,591 of real, one-off outflows (a Triumph
+  advance reversal and one TBK Bank transfer — neither an amortization
+  schedule), XTRACK's to $71,145 (one wire whose own memo reads "IRON LEASE
+  14 TRUCKS" — plausibly XTRACK funding Iron Lease's equipment, i.e.
+  intercompany, not XTRACK's own debt; not reclassified here since that is
+  a separate, not-yet-confirmed attribution question). IRON_LEASE's own
+  figure, $332,431 — the real TBK loan debits — is unchanged, exactly as it
+  should be: that debt is real, it is just Iron Lease's, not the operating
+  companies'. `tests/test_categorize.py` locks in both fixes as regression
+  cases (99 taxonomy cases, up from 97).
+
+  **The real per-truck/per-driver schedules that DO exist**, for the two
+  arrangements where a truck's payment is genuinely tracked individually:
+  - **Iron Lease's own equipment debt** (the trucks it bought to lease out):
+    `data/raw/iron_lease/financing/`, read by `analysis/iron_lease.py`'s
+    `tbk_financing()` — two TBK Bank loans, $453,585 and $632,985
+    principal, principal/interest/balance broken out per payment.
+  - **Lease-to-Purchase drivers** (paying down a specific truck through
+    settlement deductions): the "Iron Lease Leased trucks" weekly sheet
+    (`data/raw/iron_lease/leased_trucks_weekly.csv` — driver name, truck
+    number, overall/charged/remaining balance). This is the driver's own
+    payment schedule, not the operating company's cost.
+
+  Owner-operators finance their own trucks entirely outside this corpus —
+  correctly absent, not a gap to fill.
 
 ## 7. What's not built yet
 
