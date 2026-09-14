@@ -27,25 +27,28 @@ BY="${OPSDASH_ASSERTED_BY:-rebuild}"
 
 step() { printf '\n\033[1m=== %s ===\033[0m\n' "$1"; }
 
-step "1/7  reference data (entities, chart of accounts)"
+step "1/8  schema — apply any pending migrations"
+npx tsx scripts/migrate.ts
+
+step "2/8  reference data (entities, chart of accounts)"
 npx tsx scripts/seed-reference.ts
 
-step "2/7  truck roster -> effective-dated carrier history"
+step "3/8  truck roster -> effective-dated carrier history"
 npx tsx scripts/load-truck-roster.ts tests/fixtures/real/truck-entity-roster.csv
 
-step "3/7  fixed-cost rate card"
+step "4/8  fixed-cost rate card"
 npx tsx scripts/load-fixed-cost-rates.ts tests/fixtures/real/fixed-cost-rate-card.csv "$FROM"
 
-step "4/7  revenue — dispatch sheet, through the upload path"
+step "5/8  revenue — dispatch sheet, through the upload path"
 npx tsx scripts/load-document.ts revenue "$SRC/dispatch2026.txt" "$BY" $APPLY
 
-step "5/7  toll & maintenance — expenses sheet, through the upload path"
+step "6/8  toll & maintenance — expenses sheet, through the upload path"
 npx tsx scripts/load-document.ts maintenance "$SRC/expenses.txt" "$BY" $APPLY
 
-step "6/7  unattributed trailer cost -> split across the carriers"
+step "7/8  unattributed trailer cost -> split across the carriers"
 npx tsx scripts/consolidate-trailer-cost.ts "$FROM" "$TO" "$BY" $APPLY
 
-step "7/7  modelled cost — rate card, then company driver pay"
+step "8/8  modelled cost — rate card, then company driver pay"
 npx tsx scripts/post-fixed-costs.ts "$FROM" "$TO" "$BY" $APPLY
 npx tsx scripts/post-driver-pay.ts "$FROM" "$TO" 65 "$BY" "$SRC/dispatch2026.txt" $APPLY
 

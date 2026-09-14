@@ -25,20 +25,17 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PSQL=""
+VERIFY_URL=""
 
 run_verification() {
+  # Through the same runner a deploy uses, not a private loop. Two ways of
+  # applying migrations means one of them is eventually wrong, and this is
+  # the check whose whole job is to notice that.
   echo "db-verify: applying migrations..."
-  for m in "$ROOT"/db/migrations/*.sql; do
-    echo "  $(basename "$m")"
-    set +e
-    MOUT="$($PSQL -f "$m" 2>&1)"; MRC=$?
-    set -e
-    if [[ $MRC -ne 0 ]]; then
-      echo "db-verify: FAILED applying $(basename "$m")" >&2
-      echo "$MOUT" >&2
-      exit 1
-    fi
-  done
+  if ! DATABASE_URL="$VERIFY_URL" npx tsx "$ROOT/scripts/migrate.ts"; then
+    echo "db-verify: FAILED applying migrations" >&2
+    exit 1
+  fi
 
   echo "db-verify: running contract assertions..."
   # Captured without `set -e` aborting: a failed assertion run must be
@@ -72,6 +69,7 @@ if [[ -n "${VERIFY_DATABASE_URL:-}" ]]; then
   psql "$SERVER/postgres" -qc "DROP DATABASE IF EXISTS $SCRATCH;" >/dev/null
   psql "$SERVER/postgres" -qc "CREATE DATABASE $SCRATCH;" >/dev/null
   PSQL="psql $SERVER/$SCRATCH -v ON_ERROR_STOP=1 --quiet"
+  VERIFY_URL="$SERVER/$SCRATCH"
 
   echo "db-verify: verifying against a scratch database on the supplied server"
   run_verification
@@ -112,5 +110,6 @@ su postgres -c "$PGBIN/pg_ctl -D $DATADIR/data \
 psql -h 127.0.0.1 -p "$PORT" -U postgres -v ON_ERROR_STOP=1 --quiet \
      -c "CREATE DATABASE aiops_verify;" >/dev/null
 PSQL="psql -h 127.0.0.1 -p $PORT -U postgres -d aiops_verify -v ON_ERROR_STOP=1 --quiet"
+VERIFY_URL="postgresql://postgres@127.0.0.1:$PORT/aiops_verify"
 
 run_verification

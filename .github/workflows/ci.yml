@@ -109,10 +109,11 @@ jobs:
       run: npm run typecheck
 
     - name: apply migrations
-      run: |
-        for m in db/migrations/*.sql; do
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 --quiet -f "$m"
-        done
+      # Through the runner, not a shell loop, so CI exercises the same path a
+      # deploy uses. It records what it applied and refuses to continue if a
+      # migration has been edited since it ran — which is a thing CI can
+      # actually catch, because its database starts empty every time.
+      run: npm run db:migrate
 
     - name: tests
       # Unit and integration together. The integration half is the half that

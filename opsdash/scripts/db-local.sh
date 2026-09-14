@@ -18,9 +18,13 @@ if ! su postgres -c "$PGBIN/pg_ctl -D $D/data status" >/dev/null 2>&1; then
   psql -h 127.0.0.1 -p "$PORT" -U postgres -qc "CREATE DATABASE opsdash;" >/dev/null
 fi
 
-for m in "$ROOT"/db/migrations/*.sql; do
-  psql -h 127.0.0.1 -p "$PORT" -U postgres -d opsdash -v ON_ERROR_STOP=1 \
-       --quiet -f "$m" >/dev/null 2>&1 || true
-done
+URL="postgresql://postgres@127.0.0.1:$PORT/opsdash"
 
-echo "postgresql://postgres@127.0.0.1:$PORT/opsdash"
+# This used to be a loop over the directory ending in `|| true`, which meant
+# a migration that FAILED was skipped and the script still printed a URL as
+# though the database were ready. The runner records what it applied, refuses
+# to continue on drift, and fails loudly — and its output goes to stderr so
+# this script still prints nothing but the URL on stdout.
+DATABASE_URL="$URL" npx tsx "$ROOT/scripts/migrate.ts" >&2
+
+echo "$URL"
