@@ -171,6 +171,9 @@ Run `bash ~/Github/setup_skills.sh` once on any machine to install:
 | **linear** plugin | Linear task management | TMS, freight, driver ops |
 | **serena** plugin | Semantic LSP code intelligence — go-to-definition, find-references, rename across the whole project | All coding projects (Axel, TMS, etc.) |
 | **unlazy** skill | Anti-laziness Depth Tree — forces full effort on each sub-task of complex work | Any long or multi-step task |
+| **impeccable** skill | AI design language — typography, color, spacing, components, anti-generic-slop | TMS frontend, marketing pages, Axel UI, client decks |
+| **frontend-slides** skill | Create beautiful web presentations from a coding agent's frontend skills | TMS client decks, freight data, Axel demos, driver ops reports |
+| **stop-slop** skill | Removes AI writing patterns from prose | TMS docs, marketing copy, Axel Telegram messages, driver comms |
 | **witr** CLI | "Why is this running?" — trace any process/port/container to what started it | Mac mini system debugging, port conflicts |
 
 ### Wiki vault setup (first time)

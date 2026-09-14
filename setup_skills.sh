@@ -32,6 +32,18 @@ npx --yes skills add AgriciDaniel/claude-obsidian -g
 echo "  → unlazy (depth tree anti-laziness)"
 npx --yes skills add Leonxlnx/unlazy -g
 
+# Design language for AI — typography, color, components, anti-generic-slop
+echo "  → impeccable (AI design language)"
+npx --yes skills add pbakaus/impeccable -g
+
+# Web presentations — client decks, TMS demos, freight data, Axel pitch
+echo "  → frontend-slides (web-based presentations)"
+npx --yes skills add zarazhangrui/frontend-slides -g
+
+# Remove AI writing patterns — TMS docs, marketing copy, Axel messages
+echo "  → stop-slop (remove AI writing tells)"
+npx --yes skills add hardikpandya/stop-slop -g
+
 echo "  Skills installed."
 
 # ── Plugin marketplace ─────────────────────────────────────────────────────
@@ -79,12 +91,15 @@ echo ""
 echo "=== Done! Restart Claude Code to activate all skills and plugins. ==="
 echo ""
 echo "Available skills after restart:"
-echo "  /archify       → architecture + flow diagrams"
-echo "  /unlazy        → enforce full effort on complex tasks"
-echo "  /wiki          → knowledge base (needs vault init)"
-echo "  /autoresearch  → deep web research into vault"
-echo "  /wiki-ingest   → ingest sources into vault"
-echo "  /wiki-query    → query vault for answers"
+echo "  /archify          → architecture + flow diagrams"
+echo "  /unlazy           → enforce full effort on complex tasks"
+echo "  /impeccable       → AI design language (typography, color, components)"
+echo "  /frontend-slides  → web-based presentations"
+echo "  /stop-slop        → remove AI writing patterns from prose"
+echo "  /wiki             → knowledge base (needs vault init)"
+echo "  /autoresearch     → deep web research into vault"
+echo "  /wiki-ingest      → ingest sources into vault"
+echo "  /wiki-query       → query vault for answers"
 echo ""
 echo "CLI tools:"
 echo "  witr <port|pid|file>  → trace what started it"
