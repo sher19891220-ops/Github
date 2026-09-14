@@ -283,3 +283,38 @@ function isUniqueViolation(err: unknown): boolean {
 // Re-exported so callers that only need the ledger column list (e.g. the
 // commit path's post-insert lookups) do not need a second import path.
 export { LEDGER_ENTRY_COLUMNS_SQL };
+
+export interface DocumentFileMeta {
+  storageKey: string;
+  fileName: string;
+  mimeType: string;
+  byteSize: number;
+  sha256: string;
+}
+
+/** Just enough to serve the original bytes back. Separate from
+ *  `getDocumentSummary` because that one is the contract shape the screens
+ *  render, and widening it to carry a storage key would put an internal
+ *  location into every JSON response that mentions a document. */
+export async function getDocumentFileMeta(documentId: string): Promise<DocumentFileMeta | null> {
+  const rows = await query<{
+    storage_key: string;
+    file_name: string;
+    mime_type: string;
+    byte_size: number;
+    sha256: string;
+  }>(
+    `SELECT storage_key, file_name, mime_type, byte_size, sha256
+       FROM accounting.source_document WHERE document_id = $1`,
+    [documentId],
+  );
+  const r = rows[0];
+  if (!r) return null;
+  return {
+    storageKey: r.storage_key,
+    fileName: r.file_name,
+    mimeType: r.mime_type,
+    byteSize: Number(r.byte_size),
+    sha256: r.sha256,
+  };
+}

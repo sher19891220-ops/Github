@@ -17,6 +17,7 @@
 #              native build cannot install. See opsdash/Dockerfile.
 #              autoDeploy is OFF on purpose — this one posts to a ledger, so
 #              a deploy should be a decision, not a consequence of a push.
+#              It needs BLOB_S3_BUCKET or its health check fails on purpose.
 #
 # opsdash-backup
 #            - Nightly pg_dump of that ledger to object storage. Render's own
@@ -74,6 +75,26 @@ services:
       property: connectionString
   - key: SESSION_SECRET
     generateValue: true
+  # Uploaded documents. Without BLOB_S3_BUCKET the app REFUSES its own
+  # health check in production and the deploy rolls back, which is the
+  # intended behaviour: this service used to write documents to a container
+  # directory that every deploy deleted, so uploads reported success and the
+  # files were gone by the next release. A loud failure at deploy time beats
+  # a silent one discovered when somebody asks for the invoice.
+  # See opsdash/docs/BLOB-STORAGE.md.
+  - key: BLOB_S3_BUCKET
+    sync: false
+  - key: BLOB_S3_PREFIX
+    value: documents
+  # Only for S3-compatible storage that is not AWS (R2, B2, Wasabi, MinIO).
+  - key: BLOB_S3_ENDPOINT
+    sync: false
+  - key: BLOB_S3_REGION
+    sync: false
+  - key: AWS_ACCESS_KEY_ID
+    sync: false
+  - key: AWS_SECRET_ACCESS_KEY
+    sync: false
 - type: cron
   name: opsdash-backup
   runtime: docker

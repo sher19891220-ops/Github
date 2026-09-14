@@ -16,9 +16,11 @@
     "start": "next start",
     "db:local": "bash scripts/db-local.sh",
     "db:backup": "bash scripts/backup-db.sh",
-    "db:restore-drill": "bash scripts/restore-drill.sh"
+    "db:restore-drill": "bash scripts/restore-drill.sh",
+    "blobs:check": "npx tsx scripts/check-blobs.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1131.0",
     "exceljs": "^4.4.0",
     "next": "^15.5.23",
     "pg": "^8.16.3",
