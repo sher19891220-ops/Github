@@ -135,6 +135,29 @@ def main():
     oh_excl = tashkent + us + owners
     oh_incl = oh_excl + shop
 
+    recent_changes = [
+        {"name": "Samuel Gonzalez Frank", "role": "US staff (fleet and staff)",
+         "field": "amount_per_week", "old": 1000, "new": 1150,
+         "changed": "2026-09-14"},
+        {"name": "Ilfat", "role": "shop mechanic", "field": "hourly_rate",
+         "old": 32, "new": 35, "hours": 54,
+         "old_amount_per_week": 1728, "new_amount_per_week": 1890,
+         "changed": "2026-09-14"},
+    ]
+    # "Before" is derived by subtracting each change's own delta back out of the
+    # CURRENT roster totals, using this run's own corrected (post-bugfix)
+    # arithmetic throughout -- never a second, independently-computed baseline
+    # that could drift from it. Frank's delta sits in "us" (US staff); Ilfat's
+    # sits in "shop", which is excluded from the group figure by default, so
+    # only the shop-included scenario ever reflects it.
+    delta_us = sum(c["new"] - c["old"] for c in recent_changes if c["field"] == "amount_per_week")
+    delta_shop = sum(c["new_amount_per_week"] - c["old_amount_per_week"]
+                      for c in recent_changes if c["field"] == "hourly_rate")
+    us_before = us - delta_us
+    shop_before = shop - delta_shop
+    oh_excl_before = tashkent + us_before + owners
+    oh_incl_before = oh_excl_before + shop_before
+
     out = {
         "as_of": cfg["as_of"],
         "trucks_assumed": TRUCKS,
@@ -146,27 +169,22 @@ def main():
                 "read this roster at all, so a named raise here (Frank, Ilfat) "
                 "never moves it. This view exists so a roster change is visible "
                 "somewhere.",
-        "recent_changes": [
-            {"name": "Samuel Gonzalez Frank", "role": "US staff (fleet and staff)",
-             "field": "amount_per_week", "old": 1000, "new": 1150,
-             "changed": "2026-09-14"},
-            {"name": "Ilfat", "role": "shop mechanic", "field": "hourly_rate",
-             "old": 32, "new": 35, "hours": 54,
-             "old_amount_per_week": 1728, "new_amount_per_week": 1890,
-             "changed": "2026-09-14"},
-        ],
+        "recent_changes": recent_changes,
         "roster": roster_detail(cfg),
         "equipment_fixed": eq,
         "overhead": {
             "tashkent_per_week": round(tashkent, 2),
             "us_staff_and_office_per_week": round(us, 2),
+            "us_staff_and_office_before_per_week": round(us_before, 2),
             "owners_per_week": round(owners, 2),
             "shop_per_week": round(shop, 2),
+            "shop_before_per_week": round(shop_before, 2),
             "total_excl_shop_per_week": round(oh_excl, 2),
             "total_incl_shop_per_week": round(oh_incl, 2),
         },
         "variable": var,
         "group_breakeven": {
+            "before": group_figures(eq["total_per_week"], oh_excl_before, cm_exact, TRUCKS),
             "shop_excluded": group_figures(eq["total_per_week"], oh_excl, cm_exact, TRUCKS),
             "shop_included": group_figures(eq["total_per_week"], oh_incl, cm_exact, TRUCKS),
         },
