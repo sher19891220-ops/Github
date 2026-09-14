@@ -1,0 +1,95 @@
+{
+  "_note": "Operator-supplied 2026-09-08, via chat, not yet reconciled against any P&L or the Iron Lease truck-sale sheet (data/raw/pnl -- see 'Iron lease Leased trucks' Google Sheet, id 1X28pWOL4DDTpml9ZcNyqiukUVLxrSn5qmu0riI-gAOg). CROSS-CHECK BEFORE USING IN A COST MODEL: the lease-to-purchase sheet shows truck 2703 (Nelson Reginald) being charged $1,500/week against its $75,000 balance, not the $1,000 'truck payment' below -- other drivers on that sheet show irregular, lumpy paydowns instead of a fixed weekly amount. This file records what the operator STATED the rate card is, not what is actually being charged.",
+  "lease_to_walk_away": {
+    "truck_rent": 900,
+    "insurance": 450,
+    "trailer_rent": 200,
+    "admin_fee": 100,
+    "mileage_charge_cpm": 0.13,
+    "total_fixed": 1650,
+    "_note": "mileage_charge_cpm is variable, per mile -- total_fixed excludes it, matching how the operator wrote it (Total: $1650 with mileage listed separately above)."
+  },
+  "lease_to_purchase": {
+    "truck_payment": 1000,
+    "insurance": 450,
+    "trailer_rent": 200,
+    "admin_fee": 100,
+    "total_fixed": 1750,
+    "_note": "truck_payment pays down the Overall Amount on the Iron Lease truck-sale sheet -- see the $1,500/week vs $1,000 discrepancy noted above."
+  },
+  "owner_operator": {
+    "insurance": 350,
+    "trailer_rent": 200,
+    "admin_fee": 100,
+    "total_fixed": 650
+  },
+  "admin_fee_new_breakdown": {
+    "ELD": 15,
+    "transponders_prepass_bestpass": 5,
+    "Samsara": 10,
+    "Trippak": 3,
+    "_note": "Sums to $33 of the $100 admin fee as stated 2026-09-08 -- the remaining ~$67 of components was not given and should not be assumed or invented. SUPERSEDED for measurement purposes by admin_fee_actual_cost_per_truck_week below, which prices the same idea (what the fee is meant to cover) from real invoices and bank/card data instead of a stated estimate -- both are kept, since one is what was SAID and the other is what was MEASURED."
+  },
+  "admin_fee_actual_cost_per_truck_week": {
+    "_note": "Operator, 2026-09-08: the $100/month ($23.09/week) admin fee is meant to cover ONLY six services -- IFTA, ELD, transponders, Samsara, Verizon, Trippak -- not the wider staff overhead in config/staff_overhead_costs.json. Pedigree TPMS/trailer tracking was added as a SEVENTH item on the operator's later instruction the same day, not part of the original six. Priced from real sources: IFTA from actual filed returns (analysis/cost_structure.py's fuel_tax_per_mile, TAX-ONLY, not bundled with IRP/HVUT permits since permits were not named here), ELD from the Green Light invoices (software only, no team payroll -- team payroll is a labor cost, not a vendor fee, and none of the other items have a labor component either), PrePass/BestPass from the device-level CSV cross-referenced to the fleet registry, Samsara/Verizon/Pedigree from what is actually confirmed in the corpus.",
+    "stated_admin_fee_per_week": 23.09,
+    "by_company_per_truck_week": {
+      "XTRACK": {"ifta": 17.75, "eld_software": 9.37, "transponders": 3.94, "samsara": null, "verizon": null, "trippak": null},
+      "ZONE":   {"ifta": 23.29, "eld_software": 9.43, "transponders": 3.96, "samsara": null, "verizon": null, "trippak": null},
+      "AFG":    {"ifta": 6.70,  "eld_software": 10.18, "transponders": 4.06, "samsara": null, "verizon": null, "trippak": null}
+    },
+    "fleet_wide_not_split_by_company": {
+      "_note": "Samsara, Verizon and Pedigree are billed to one account each (Samsara and Pedigree to ZONE-OH; Verizon Wireless found on the AMEX card and bank feed with no per-truck or per-company breakdown anywhere in the corpus) -- PrePass proved a 'ZONE-OH' bill can cover all three fleets once checked at the device level, so the same is assumed possible here, NOT assumed absent. Applied uniformly per truck across all 90 trucks until a device-level bill says otherwise.",
+      "samsara_per_truck_week": 7.88,
+      "verizon_per_truck_week": 7.07,
+      "verizon_detail": "SUPERSEDED 2026-09-09 -- see verizon_60_lines below. This $7.07 spread the $636.42/wk fleet-wide Verizon total over all 90 trucks, which the operator corrected: the Verizon account only covers 60 lines, not one per truck. $7.07 understates the true per-line cost for the trucks that actually have one and wrongly charges the ~30 that don't. Left here, not deleted, so the correction is visible against what it replaced.",
+      "pedigree_tpms_per_truck_week": 7.46,
+      "pedigree_detail": "ADDED 2026-09-08 on the operator's instruction -- not one of the six originally named. Same Pedigree invoice as config/telematics_costs.json's pedigree_trailer_tracking ($2,781.00, Sep 1-30 2026, $671.28/wk fleet-wide) -- re-based from per-trailer ($5.37/trailer/wk over 125 trailers) to per-truck ($7.46/truck/wk over the same 90-truck denominator as everything else here), since the admin fee is charged per truck, not per trailer.",
+      "trippak_per_truck_week": null,
+      "trippak_note": "NOT FOUND anywhere in this corpus -- not on the AMEX card, not on the bank feed, no invoice uploaded. Cannot be priced yet; not assumed to be $0."
+    },
+    "verizon_60_lines": {
+      "_note": "Operator, 2026-09-09: the Verizon account is only 60 lines, not one per truck -- some owners supply their own tablet/line and should not be charged for one the company isn't providing. Operator also gave a reference price, same message: 'each tablet with line costs about $40'. No per-line Verizon bill exists in this corpus (the only per-line wireless CSV on file is STL TRUCKERS LLC's own account -- a different entity, see config/saas_app_charges.json -- not usable as a stand-in). Dividing each individual monthly AMEX invoice by $40 (not just the multi-month average) surfaces something real: the line count was NOT steady at 60 the whole time.",
+      "implied_line_count_by_invoice": {
+        "_note": "AMEX 'VZWRLSS APOCC VISB' charges, individually, divided by $40 -- confirmed 2026-09-09.",
+        "2025-10-31_through_2026-05-31": "$2,360-2,371/month -> 59.0-59.1 lines, ROCK STEADY for 8 straight months -- matches the operator's stated 60 almost exactly",
+        "2026-07-01": "$2,784.73 -> 69.6 lines",
+        "2026-07-31": "$2,868.73 -> 71.7 lines",
+        "conclusion": "The account held at ~59 lines (matching the stated 60) from October 2025 through May 2026, then grew to ~70-72 lines by July 2026 -- an increase of 11-13 lines in roughly two months, worth ~$440-480/month more than the steady-state baseline. This is either legitimate fleet growth (new drivers/trucks added) or unaccounted growth worth investigating -- exactly the kind of creep the operator asked to catch. NOT YET EXPLAINED which."
+      },
+      "verizon_total_per_week": 636.42,
+      "verizon_total_per_week_NOTE": "This is the 47.7-week AVERAGE and blends the old ~59-line era with the new ~71-line one -- it understates the CURRENT run-rate. Use current_per_line below for where things stand now.",
+      "current_per_line": {
+        "_note": "Based on the most recent invoice (2026-07-31, $2,868.73) and the operator's $40/line reference.",
+        "most_recent_invoice_per_week": 662.87,
+        "implied_current_lines": 72,
+        "per_line_per_week": 9.20,
+        "per_line_per_month": 40.00
+      },
+      "lines": 60,
+      "per_line_per_week": 10.61,
+      "per_line_per_month": 46.13,
+      "sanity_check": "Superseded by implied_line_count_by_invoice above -- the $46.13/month implied by the 47-week average was itself a symptom of blending two different eras together, not a stable per-line rate. The operator's own $40/line figure is the better anchor now that it can be checked against individual invoices instead of one long average.",
+      "coverage_gap": {
+        "total_trucks": 90, "company_tablet_lines_historical": 60, "company_tablet_lines_current": 72,
+        "likely_own_tablet_trucks_historical": 30, "likely_own_tablet_trucks_current": 18,
+        "_note": "90 trucks (17 AFG + 32 ZONE + 41 XTRACK, the same denominator used everywhere else in this file) minus the CURRENT ~72 lines leaves ~18 trucks presumptively on a driver-owned tablet, not 30 -- fewer than the historical estimate, because more company lines now exist. Consistent with the own_tablet_rate ($125) admin-fee variant already recorded below for drivers who supply their own hardware. WHICH specific trucks these are is not determinable from anything in this corpus; only a per-line Verizon export (device/user per line, like the PrePass CHARGESBYDEVICE CSV format) or each driver's actual admin-fee schedule from settlement data would identify them by name."
+      },
+      "how_to_apply": "$10.61/truck/week applies ONLY to a truck whose driver has a company-provided tablet -- not uniformly across all 90 trucks the way the superseded $7.07 figure did. A driver on the own_tablet_rate ($125/month) schedule should carry $0 Verizon cost here, since they are already paying a different, higher flat fee that stands in for supplying their own device, not receiving both a discount rate AND a company tablet."
+    },
+    "total_measured_per_truck_week": {
+      "_note": "Sum of ifta + eld_software + transponders (per company) + samsara + verizon + pedigree_tpms (fleet-wide) -- Trippak excluded from every total since it is unmeasured, so every total below is a FLOOR, not the complete cost. STILL USES THE SUPERSEDED $7.07 flat Verizon spread, not verizon_60_lines' $10.61 -- which of each company's trucks actually hold one of the 60 lines is not known, so this fleet-average is kept as the conservative company-level figure rather than guessing a per-company split. Use verizon_60_lines directly for a specific truck known to have a company tablet.",
+      "XTRACK": 53.47, "ZONE": 59.09, "AFG": 43.35
+    },
+    "conclusion": "Even missing Trippak entirely, real cost is now 1.9-2.6x the $23.09/week the admin fee actually charges (XTRACK 2.3x, ZONE 2.6x, AFG 1.9x) -- the fee does not cover what it was stated to cover, on the six of seven items that could be measured."
+  },
+  "admin_fee_history_and_exceptions": {
+    "old_owner_operators_rate": 150,
+    "new_OO_and_LO_rate": 100,
+    "note_uzbek": "Eski ownerladaniki $150 qopketgan, yengiladan OO va LO obkeliw uchun $100 qiberila diyilgan ekan, kop eski driverladan change qimaganmiz admin feeni",
+    "translation_approx": "Old owners' fee stayed at $150; for bringing in new OO and LO the fee was set at $100, but many old drivers' fee was never changed to match.",
+    "own_tablet_rate": 125,
+    "own_transponder_rate": 140,
+    "_note": "own_tablet_rate and own_transponder_rate are reduced admin fees for a driver who supplies their own hardware instead of the company's -- NOT additive to the base $100/$150, they appear to REPLACE it for that driver. Not yet confirmed against any driver's actual settlement."
+  }
+}

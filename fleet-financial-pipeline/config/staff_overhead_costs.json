@@ -1,0 +1,31 @@
+{
+  "_note": "Same treatment as the ELD department (config/telematics_costs.json): each department's payroll from data/raw/payroll_staff/active_staff_payroll_jul2026.csv, converted to $/truck/week over the same 90-truck denominator used for ELD (17 AFG + 32 ZONE + 41 XTRACK) -- no department in this payroll file has a per-company column, so every one of them is a shared cross-company team, spread over the whole fleet, not billed per company. July 2026 is the most recent complete month; Jan-Jul average is also given since some staff only worked part of the window.",
+  "denominator_trucks": 90,
+  "by_department_per_truck_week": {
+    "ACCOUNTING":   {"july": 14.05, "jan_jul_avg": 12.27, "headcount": 5},
+    "DISPATCH":     {"july": 260.17, "jan_jul_avg": 173.36, "headcount": 19},
+    "ELD":          {"july": 14.82, "jan_jul_avg": 13.58, "headcount": 12},
+    "FLEET":        {"july": 23.16, "jan_jul_avg": 19.48, "headcount": 11},
+    "HR":           {"july": 18.73, "jan_jul_avg": 14.79, "headcount": 6},
+    "MANAGER":      {"july": 29.54, "jan_jul_avg": 22.81, "headcount": 2},
+    "UPDATE_TEAM":  {"july": 11.88, "jan_jul_avg": 9.97, "headcount": 7}
+  },
+  "DISPATCH_is_not_like_the_others": {
+    "_note": "Dispatch payroll is 6-18x every other department and swings hard month to month (Makhmud: $7,114 -> $9,738 -> $11,627 May-June-July) because it is COMMISSION on gross freight booked, not a flat wage -- config/dispatch_commission.json already documents the rate schedule (supplied 2026-09-02) but that schedule is NEVER CONSUMED by any analysis or ingest module in this repo (confirmed by grep 2026-09-08) -- this payroll figure is the first ACTUAL dispatch cost measured from real payments, not a double-count of anything already in cost_structure.py.",
+    "july_per_truck_week": 260.17, "jan_jul_avg_per_truck_week": 173.36
+  },
+  "MANAGER_department_caveat": {
+    "_note": "2 people: 'Adam' ($11,442 July, no surname given) and 'Sher Imam' ($120 July). Sher Imam's figure is a nominal/structural payroll line (same name tied to the Pedigree invoice and the Truck Max 'sher imam exp' bucket) and does not reflect real compensation for whatever role this is -- it is included in the department total above because it is what the payroll register actually shows, but should not be read as 'management costs the company $120/month for this person.'"
+  },
+  "totals_per_truck_week": {
+    "_note": "Sum of all 7 departments' $/truck/week, both bases, and the same total with DISPATCH excluded (since it is commission-on-revenue, not a flat overhead cost the way the other six departments are -- excluding it answers a different, arguably more useful question: 'what does fixed administrative overhead cost per truck', separate from 'what does the whole shared staff cost per truck').",
+    "all_seven_departments":       {"july": 372.35, "jan_jul_avg": 266.27},
+    "excluding_dispatch":          {"july": 112.18, "jan_jul_avg": 92.91}
+  },
+  "compared_to_the_stated_driver_admin_fee": {
+    "_note": "config/driver_arrangement_rates.json states a flat $100/month ($23.09/week) 'Administration Fee' charged to drivers across all three arrangement types. Real shared-staff overhead per truck is 4-5x that even EXCLUDING Dispatch's commission cost, and 12-16x that INCLUDING it. This is a factual gap between what is charged and what is spent, not a claim that the $100 fee was ever intended to cover 100% of shared staff cost -- freight margin, not the admin fee alone, is presumably what closes it. Reported because CLAUDE.md's own standing rule is to reconcile every rate against a measured source rather than let a stated number stand unchecked.",
+    "stated_admin_fee_per_week": 23.09,
+    "real_overhead_excluding_dispatch_july": 112.18,
+    "real_overhead_excluding_dispatch_avg": 92.91
+  }
+}

@@ -1,0 +1,25 @@
+
+!data/processed/.gitkeep
+!data/raw/.gitkeep
+# Live financial credentials — never commit
+# Real bank/card statements and the database built from them
+*.pyc
+.DS_Store
+.env
+.venv/
+__pycache__/
+config/*_credentials.json
+config/*_tokens.json
+config/*service_account*.json
+config/gsheets_service_account.json
+config/quickbooks_credentials.json
+config/quickbooks_tokens.json
+data/processed/
+data/processed/*
+data/raw/
+data/raw/*
+db/*.db
+db/*.sqlite
+db/*.sqlite3
+venv/
+data/cache/

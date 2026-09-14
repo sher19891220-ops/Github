@@ -1,0 +1,48 @@
+{
+  "_README": [
+    "Dispatch commission schedule, supplied by the operator 2026-09-02.",
+    "",
+    "Commission is paid on GROSS, but every SOLO and TEAM tier is gated on BOTH a",
+    "gross threshold AND a rate-per-mile threshold. That gate matters: it means a",
+    "dispatcher cannot earn by hauling cheap freight, which refutes the hypothesis",
+    "raised earlier in this engagement that a gross-based commission explained",
+    "ZONE's weak revenue per mile. It does not.",
+    "",
+    "The LO/OO schedule is the exception and has NO rate gate at all -- it pays on",
+    "gross alone, and it pays 1% even BELOW 8,000 gross. On a lease-to-own or",
+    "owner-operator truck the driver bears the fuel, maintenance and truck cost",
+    "while the company takes a 12% dispatch fee and the dispatcher takes commission,",
+    "both on gross. So on those trucks volume pays everyone except the driver, and",
+    "nothing in the schedule rewards rate."
+  ],
+  "source": "operator screenshot, 2026-09-02",
+  "paid_on": "gross",
+  "solo": [
+    {"min_gross": 8500,  "min_rpm": 2.3, "pct": 1.0},
+    {"min_gross": 9500,  "min_rpm": 2.5, "pct": 1.5},
+    {"min_gross": 10000, "min_rpm": 2.7, "pct": 2.0},
+    {"min_gross": 10000, "min_rpm": 3.0, "pct": 2.5},
+    {"min_gross": 12000, "min_rpm": 2.5, "pct": 2.5},
+    {"min_gross": 12000, "min_rpm": 3.0, "pct": 3.0}
+  ],
+  "team": [
+    {"min_gross": 12000, "min_rpm": 2.3, "pct": 1.0},
+    {"min_gross": 14000, "min_rpm": 2.5, "pct": 1.5},
+    {"min_gross": 14000, "min_rpm": 3.0, "pct": 2.5},
+    {"min_gross": 15000, "min_rpm": 3.0, "pct": 3.0}
+  ],
+  "lease_to_own_and_owner_operator": [
+    {"min_gross": 0,     "pct": 1.0},
+    {"min_gross": 8000,  "pct": 1.5},
+    {"min_gross": 10000, "pct": 2.0},
+    {"min_gross": 12000, "pct": 2.5}
+  ],
+  "rpm_met_gross_missed_bonus_pct": 0.25,
+  "rpm_met_gross_missed_example": "9,500 gross at 3.0 rpm pays 1.5% + 0.25% = 1.75%",
+  "company_stated_breakeven": {
+    "solo": {"gross": 7000, "rpm": 2.3},
+    "team": {"gross": 9500, "rpm": 2.35},
+    "pct_at_breakeven": 0.05,
+    "_note": "0.05% applies at break-even and between break-even and the minimum target"
+  }
+}

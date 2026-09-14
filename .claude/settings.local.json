@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add *)",
+      "Bash(git commit -q -m 'Stop the catalog re-parsing the same bytes under a second path *)"
+    ]
+  }
+}

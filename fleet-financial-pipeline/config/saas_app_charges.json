@@ -1,0 +1,47 @@
+{
+  "_note": "Found 2026-09-08 by searching the pipeline's own verified sources -- ingest/ingest_amex.py's deduped card export (10,271 txns, 2025-02-14..2026-08-27) and data/processed/boa_transactions.csv (147 statements, verified to their own balance delta, 2023-08-30..2026-07-31). Fleet-wide, not split by company -- neither source names which truck or company a SaaS charge belongs to. Rates below are TOTAL DOLLARS / WEEKS IN THE OBSERVED WINDOW for that vendor, never an average of per-charge amounts, per this project's own established convention.",
+  "DAT_load_board": {
+    "_note": "TWO NON-OVERLAPPING PAYMENT WINDOWS, not summed together: bank ACH ran Jan-Aug 2024 then stops; AMEX card charges start Mar 2025. There is an unexplained gap, Aug 2024-Mar 2025, with no DAT charge found on either rail -- not resolved, not assumed to be zero-cost.",
+    "bank_ACH_2024": {"total": 6233.08, "txns": 7, "start": "2024-01-30", "end": "2024-08-28", "per_week": 206.78},
+    "amex_card_2025on": {"total": 50296.19, "txns": 19, "start": "2025-03-08", "end": "2026-08-21", "per_week": 663.04}
+  },
+  "8x8_voip": {"source": "AMEX only, not found on bank", "total": 19969.68, "txns": 48,
+               "start": "2025-02-20", "end": "2026-08-02", "per_week": 264.75},
+  "RingCentral": {"source": "AMEX only, not found on bank", "total": 938.95, "txns": 9,
+                  "start": "2026-03-13", "end": "2026-08-20", "per_week": 41.08,
+                  "_note": "Only 5.3 months of charges -- looks recently added, possibly alongside or replacing 8x8."},
+  "Samsara_recurring": {"source": "AMEX only", "total": 48803.26, "txns": 30,
+                        "start": "2025-03-07", "end": "2026-08-20", "per_week": 643.36,
+                        "_note": "This is the FLEET-WIDE recurring AMEX total across ~18 months, separate from the single September 2026 ZONE-OH invoice in telematics_costs.json ($2,308.58) -- the invoice is one month's detail, this is the long-run card total."},
+  "Green_Light_ELD_recurring": {
+    "_note": "Real payment channel is PayPal, visible on AMEX as 'PAYPAL *GREENLIGHTE'. The 10 bank-ACH hits found ($320.00 total, all within a single 2-week window in April 2025) are almost certainly bank account MICRO-VERIFICATION deposits (Plaid-style), not subscription payments -- do not add them to the ELD run-rate.",
+    "amex_via_paypal": {"total": 48788.76, "txns": 42, "start": "2025-02-14", "end": "2026-08-10", "per_week": 630.11},
+    "bank_verification_pings_excluded": {"total": 320.00, "txns": 10, "start": "2025-04-08", "end": "2025-04-23"}
+  },
+  "Pedigree_recurring": {"source": "AMEX only", "total": 48648.80, "txns": 17,
+                        "start": "2025-04-02", "end": "2026-08-04", "per_week": 696.40,
+                        "_note": "Fleet-wide recurring total, separate from the single September 2026 ZONE-OH invoice in telematics_costs.json ($2,781.00)."},
+  "PrePass_BestPass_recurring": {"source": "bank ACH only, not found on AMEX", "total": 37048.67, "txns": 32,
+                                 "start": "2024-01-24", "end": "2026-07-02", "per_week": 291.39,
+                                 "_note": "Lower weekly average than the Aug-2026 device-level invoice implies (~$421/wk for that one month) -- consistent with fleet growth over the 2.5-year window, not a contradiction. The device-level invoice is the more current and more precise figure."},
+  "QuickBooks_Intuit": {
+    "amex": {"total": 3104.51, "txns": 49, "start": "2025-03-27", "end": "2026-08-21", "per_week": 42.44},
+    "bank": {"total": 3110.50, "txns": 6, "start": "2024-06-28", "end": "2025-02-28",
+             "_note": "POSITIVE on the bank feed (money IN) -- likely QuickBooks Payments merchant-processing deposits, not a subscription charge. Sign not yet explained; do not net against the AMEX subscription charges above."}
+  },
+  "GoDaddy": {"source": "AMEX only", "total": 6361.42, "txns": 82,
+             "start": "2025-03-03", "end": "2026-08-26", "per_week": 82.31,
+             "_note": "82 charges over 77 weeks is unusually frequent for domain/hosting renewals -- worth a closer look at what's actually being bought before trusting this as one clean recurring line."},
+  "Google_One": {"source": "AMEX only", "total": 93.90, "txns": 4,
+                "start": "2026-02-04", "end": "2026-08-01", "per_week": 3.69},
+  "not_found_on_either_rail": [
+    "Microsoft / Outlook / Office 365",
+    "Verizon",
+    "Motive / KeepTruckin (operator says pending a deal)",
+    "Zoom", "Slack", "Adobe", "DocuSign",
+    "Truckstop.com", "ITS Dispatch", "DAT One (as a name distinct from plain DAT)"
+  ],
+  "not_yet_split_by_company": [
+    "Every figure in this file is fleet-wide. PrePass proved that a vendor billed to one company's name can cover all three fleets (see config/telematics_costs.json) -- assume the same risk exists here for DAT, 8x8, RingCentral, Samsara, Green Light ELD, Pedigree, QuickBooks, GoDaddy until each is checked at the device/seat/user level the way PrePass was."
+  ]
+}
