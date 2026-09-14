@@ -43,6 +43,59 @@ def f(r, k):
         return 0.0
 
 
+NOT_SPEND = {"intercompany", "internal_transfer", "card_payment"}
+
+
+def build_cash_section(cash):
+    """D['cash'] -- factored out so this exact logic can be re-run on its own
+    (e.g. after a taxonomy fix that changes cash_categorized.csv's
+    categories) without needing every other section's inputs, some of which
+    are ephemeral raw-corpus files that don't survive a container reclaim."""
+    cat = collections.defaultdict(float)
+    cat_n = collections.Counter()
+    for r in cash:
+        v = f(r, "amount")
+        if v < 0:
+            cat[r["category"]] += v
+            cat_n[r["category"]] += 1
+    out = {
+        "outflow_by_category": sorted(
+            [{"category": k, "amount": round(v, 2), "txns": cat_n[k],
+              "spend": k not in NOT_SPEND} for k, v in cat.items()],
+            key=lambda x: x["amount"]),
+        "revenue_in": round(sum(f(r, "amount") for r in cash
+                                if r["category"] == "revenue" and f(r, "amount") > 0), 2),
+        "txns": len(cash),
+        "period": [min(r["date"] for r in cash), max(r["date"] for r in cash)],
+    }
+    bym = collections.defaultdict(lambda: collections.defaultdict(float))
+    for r in cash:
+        v = f(r, "amount")
+        k = r["date"][:7]
+        if r["category"] == "revenue" and v > 0:
+            bym[k]["revenue"] += v
+        elif v < 0 and r["category"] not in NOT_SPEND:
+            bym[k]["spend"] += -v
+    mk = sorted(bym)
+    out["monthly"] = {"months": mk,
+                      "revenue": [round(bym[k]["revenue"], 2) for k in mk],
+                      "spend": [round(bym[k]["spend"], 2) for k in mk]}
+
+    byw = collections.defaultdict(lambda: collections.defaultdict(float))
+    for r in cash:
+        v = f(r, "amount")
+        k = iso_week_monday(r["date"])
+        if r["category"] == "revenue" and v > 0:
+            byw[k]["revenue"] += v
+        elif v < 0 and r["category"] not in NOT_SPEND:
+            byw[k]["spend"] += -v
+    wk = sorted(byw)
+    out["weekly"] = {"weeks": wk,
+                     "revenue": [round(byw[k]["revenue"], 2) for k in wk],
+                     "spend": [round(byw[k]["spend"], 2) for k in wk]}
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--intake", required=True)
@@ -85,50 +138,7 @@ def main():
     D["entities"] = ents
 
     # ---- verified cash, by category and entity ---------------------------
-    cash = rd(I / "cash_categorized.csv")
-    NOT_SPEND = {"intercompany", "internal_transfer", "card_payment"}
-    cat = collections.defaultdict(float)
-    cat_n = collections.Counter()
-    for r in cash:
-        v = f(r, "amount")
-        if v < 0:
-            cat[r["category"]] += v
-            cat_n[r["category"]] += 1
-    D["cash"] = {
-        "outflow_by_category": sorted(
-            [{"category": k, "amount": round(v, 2), "txns": cat_n[k],
-              "spend": k not in NOT_SPEND} for k, v in cat.items()],
-            key=lambda x: x["amount"]),
-        "revenue_in": round(sum(f(r, "amount") for r in cash
-                                if r["category"] == "revenue" and f(r, "amount") > 0), 2),
-        "txns": len(cash),
-        "period": [min(r["date"] for r in cash), max(r["date"] for r in cash)],
-    }
-    bym = collections.defaultdict(lambda: collections.defaultdict(float))
-    for r in cash:
-        v = f(r, "amount")
-        k = r["date"][:7]
-        if r["category"] == "revenue" and v > 0:
-            bym[k]["revenue"] += v
-        elif v < 0 and r["category"] not in NOT_SPEND:
-            bym[k]["spend"] += -v
-    mk = sorted(bym)
-    D["cash"]["monthly"] = {"months": mk,
-                            "revenue": [round(bym[k]["revenue"], 2) for k in mk],
-                            "spend": [round(bym[k]["spend"], 2) for k in mk]}
-
-    byw = collections.defaultdict(lambda: collections.defaultdict(float))
-    for r in cash:
-        v = f(r, "amount")
-        k = iso_week_monday(r["date"])
-        if r["category"] == "revenue" and v > 0:
-            byw[k]["revenue"] += v
-        elif v < 0 and r["category"] not in NOT_SPEND:
-            byw[k]["spend"] += -v
-    wk = sorted(byw)
-    D["cash"]["weekly"] = {"weeks": wk,
-                           "revenue": [round(byw[k]["revenue"], 2) for k in wk],
-                           "spend": [round(byw[k]["spend"], 2) for k in wk]}
+    D["cash"] = build_cash_section(rd(I / "cash_categorized.csv"))
 
     # ---- utilization from odometers --------------------------------------
     odo = [r for r in rd(I / "odometers.csv") if r.get("flag") == "ok"]
