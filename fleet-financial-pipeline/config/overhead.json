@@ -44,8 +44,9 @@
     {
       "name": "Samuel Gonzalez Frank",
       "role": "fleet and staff",
-      "amount": 1000,
-      "period": "week"
+      "amount": 1150,
+      "period": "week",
+      "_note": "operator, 2026-09-14: raised from 1000/week to 1150/week."
     },
     {
       "name": "Bereket Inc (Aika)",
@@ -66,7 +67,7 @@
       "period": "week"
     }
   ],
-  "us_staff_1099_stated_total": 9800,
+  "us_staff_1099_stated_total": 9950,
   "w2": [
     {
       "name": "Sherkhonkhuja Imamkhodjaev",
@@ -184,12 +185,12 @@
         },
         {
           "name": "Ilfat",
-          "rate": 32,
+          "rate": 35,
           "hours": 54,
           "basis": "hourly",
-          "amount": 1728,
+          "amount": 1890,
           "period": "week",
-          "_note": "operator 2026-09-02: shop works 54 hours; Vlad usually 50"
+          "_note": "operator 2026-09-02: shop works 54 hours; Vlad usually 50. Rate raised from 32/hr to 35/hr, 2026-09-14 -- hours unchanged, so amount recomputed 35 x 54 = 1890 (was 1728)."
         },
         {
           "name": "Alovuddin",
