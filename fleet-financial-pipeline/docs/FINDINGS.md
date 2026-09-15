@@ -1713,6 +1713,57 @@ real JSON needs to be pasted into the remote environment's persistent
 variables as `QUICKMANAGE_CREDENTIALS` -- the one step only the operator can
 do, same as every other credential in this pipeline.
 
+## Samsara is finally connected, 2026-09-15 -- real odometer, IFTA blocked on account licensing
+
+Until this date Samsara appeared in this corpus only as a BILLING line item
+(the telematics-cost invoices above) -- never as a connected data source,
+despite being ranked top of "Mileage before money"'s own source preference
+(Samsara > QuickManage > Google Sheets) since before this pipeline's first
+commit. The operator pasted a working API token directly into chat; tested
+the same way every other pasted credential in this project is tested --
+session-only `export SAMSARA_API_TOKEN=...`, never written to a file, one
+targeted call against Samsara's own documented endpoint before building
+anything.
+
+**Confirmed real, not a demo account**: `GET /fleet/vehicles/stats` returned
+91 vehicles whose unit numbers (449248, 8092, 15862, 8671, 9859, 15852, 1645,
+1564, 4857, 6799, 15909, ...) match this project's own known fleet exactly --
+the same units already priced in `analysis/truck_maintenance.py`'s per-truck
+table and `analysis/truck_weeks.py`'s Iron Lease rate card.
+
+**ONE TOKEN COVERS THE WHOLE GROUP.** Unlike QuickManage (a separate client_
+id/client_secret pair per operating company, because QuickManage has no
+group-wide key), this single Samsara token returned all three companies'
+trucks in one call -- consistent with the telematics-cost section's own
+finding that a Samsara invoice "billed to ZONE-OH" already covers all three
+fleets, not ZONE's alone.
+
+**Odometer: real, working, sane values.** `obdOdometerMeters` on unit 449248
+converts to 428,875 miles as of 2026-09-15 -- a plausible lifetime figure for
+a used OTR tractor, not a placeholder or a zero. `ingest/pull_samsara.py
+--vehicles` pulls this for every vehicle and converts meters to miles on the
+way out (Samsara's own unit; nothing downstream should have to remember the
+conversion).
+
+**IFTA: the exact endpoint needed exists (`GET /fleet/reports/ifta/vehicle`,
+per-vehicle per-jurisdiction mileage in meters) but this account cannot call
+it** -- `403 "No access to required licenses"`, confirmed against the live
+API, not assumed from a scopes error. This is an ACCOUNT-LEVEL LICENSING gap,
+not a token-scope or code problem: Samsara sells IFTA Reporting as a separate
+add-on, and the org's Samsara subscription does not currently include it.
+`--vehicles` is entirely unaffected by this -- only `--ifta` is blocked.
+Enabling it (a Samsara subscription change, not anything in this repo) would
+let this same script pull real per-state mileage directly, which is exactly
+the shape of data the Oregon-mileage-gap and ZONE/XTRACK mpg-reconciliation
+sections above have so far had to reconstruct by OCR-ing scanned state
+filings. Until then, this remains a real, named, unpriced opportunity rather
+than something assumed unavailable.
+
+**For this to survive a container reclaim**, the token needs to be pasted
+into the remote environment's persistent variables as `SAMSARA_API_TOKEN` --
+the one step only the operator can do, same as every other credential in
+this pipeline.
+
 ## The dispatch export is the only DAY in the corpus
 
 `data/raw/ops/` is the dispatch system's own database: one row per driver per
