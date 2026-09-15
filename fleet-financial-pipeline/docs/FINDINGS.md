@@ -477,6 +477,49 @@ nets out at group level and leaves each return wrong on its own. **Direction
 decides the risk — understating gallons understates the tax owed**, which is the
 side an audit collects on, and that is XTRACK.
 
+**2026-09-15 — dug into this further, at the request "dig into the ZONE and
+XTRACK fuel gaps." Two things found, one corroborating, one only partial:**
+
+**1. The mpg each return implies, not just the gallon gap, points the same
+direction.** ZONE's return works out to 6.18 mpg; its own company drivers
+measure 6.82 on the same trucks — the return has *more* fuel than its real
+fleet burns. XTRACK's return works out to 8.76 mpg — implausibly efficient for
+a loaded Class 8 truck, against 6.66 measured on its own company drivers — the
+return has *less* fuel than its real fleet burns. A truck this pipeline already
+knows is not that efficient is exactly the signature of gallons filed under the
+wrong account, not a sheet error (Tier 1 passes cleanly on both companies' own
+company-driver blocks).
+
+**2. Checked whether the group's own known company-movers explain it, and
+found one live example inside the exact window.** `analysis/truck_weeks.py`
+already names 15909 and 7605 as trucks that move between XTRACK and ZONE.
+Unit 15909's own weekly rows: ran as a ZONE company-driver truck with real
+miles and gallons through the week of 2026-04-20, then goes to 0 miles/0
+gallons on ZONE for five straight weeks, then reappears on XTRACK's roster as
+an **owner-operator** truck starting the week of **2026-06-01** — inside Q2 —
+running real miles (2,155–4,378/week) through August. An owner-operator block
+carries no gallons column in this pipeline (by design — `truck_weeks.py`), so
+15909's June mileage feeds XTRACK's *implied* fuel need (via `sheet_miles`)
+without any matching gallons ever landing in XTRACK's own measured burn. If
+its IFTA/fuel-account reassignment did not move on the same date as this P&L
+handoff, this is a live instance of the exact mechanism the hypothesis above
+names.
+
+**This does not close the gap by itself, and is reported as partial rather
+than solved.** One truck's June-onward mileage (order of 15,000–20,000 mi/
+quarter at ~6.7 mpg, roughly 2,500–3,000 gal) is far short of the 20,089-gal
+ZONE excess or the 54,253-gal XTRACK shortfall, and the group NET is
+**−34,831 gal, not zero** (406,108 filed against three companies) — "roughly
+nets out" undersells a residual that is 8.6% of everything filed. 7605 moved
+XTRACK→ZONE too, but cleanly at the Q2/Q3 boundary (last XTRACK week
+2026-06-29, first ZONE week 2026-07-06), so it does not touch this quarter's
+gap. Confirmed: this is a real, dated, in-window mechanism consistent with the
+existing hypothesis, not a full account of the $34,831 net or the two
+individual gaps. Not yet checked: whether other trucks changed rosters mid-Q2
+the same way, and whether the actual IFTA-authority switch date for 15909 (as
+opposed to its P&L roster date) is available anywhere in this corpus to
+confirm the lag directly rather than infer it.
+
 **JUDGE THE FUEL ON GALLONS, NOT ON THE DERIVED OWNER-OPERATOR MPG.** The
 residual (filed gallons less the company drivers' measured burn) divides by a
 small number and swings: it called AFG "not a truck" at 10.8 mpg on a return
