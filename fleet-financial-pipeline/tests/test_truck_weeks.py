@@ -26,9 +26,12 @@ def days():
     return T.day_rows()
 
 
-def test_every_rate_card_truck_has_one_tier():
+def test_every_rate_card_truck_is_on_the_single_flat_rate():
+    """Superseded 2026-09-21: the two tiers collapsed into one flat rate for
+    the same 22-truck list -- operator: "900$ plus 0.15$ per mile for all of
+    trucks we are getting from iron lease." """
     assert len(T.IRON_RATE_CARD) == 22
-    assert set(T.IRON_RATE_CARD.values()) == {(735.0, 0.10), (900.0, 0.12)}
+    assert set(T.IRON_RATE_CARD.values()) == {(900.0, 0.15)}
 
 
 def test_a_company_driver_block_reconstructs_to_its_own_total(tw):

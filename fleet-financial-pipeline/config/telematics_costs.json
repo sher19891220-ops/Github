@@ -50,9 +50,49 @@
     "using_july_team_payroll": {"team_per_week": 1333.54, "total_per_week": 2192.30, "per_truck_per_week": 24.36},
     "using_jan_jul_avg_team_payroll": {"team_per_week": 1222.47, "total_per_week": 2081.23, "per_truck_per_week": 23.12}
   },
+  "motive": {
+    "_note": "Operator-supplied invoice, 2026-09-21 -- resolves the 'Motive (pending a deal)' placeholder below. A DIFFERENT vendor from Samsara/Green Light ELD: the 15 unit numbers given for Motive have ZERO overlap with the 83 (deduped from 86, 3 repeats: 8033, 4709, 5007) given for Samsara -- confirmed these are two distinct hardware fleets, not two bills for the same trucks.",
+    "invoice_number": "INV05727940", "account_name": "ZONE-OH LLC",
+    "invoice_date": "2026-08-20", "due_date": "2026-09-19",
+    "period_start": "2026-08-24", "period_end": "2029-08-23", "period_months": 36,
+    "line_items": {
+      "AG-Mini Powered Software Plan": {"quantity": 50, "price_per_unit": 8.00, "amount": 14400.00},
+      "Driver Safety Plan - AI Dashcam Plus Dual-Facing": {"quantity": 25, "price_per_unit": 12.50, "amount": 11250.00},
+      "Fleet Management Plan - AI Dashcam Plus Dual-Facing": {"quantity": 25, "price_per_unit": 12.50, "amount": 11250.00},
+      "Communications Plan - AI Dashcam Plus": {"quantity": 25, "price_per_unit": 3.00, "amount": 2700.00},
+      "AG-Mini Hardware": {"quantity": 50, "price_per_unit": 0.00, "amount": 0.00},
+      "Shipping Fee: Ground Shipping": {"quantity": 1, "price_per_unit": 0.00, "amount": 0.00},
+      "AG-Mini Cable": {"quantity": 50, "price_per_unit": 0.00, "amount": 0.00},
+      "AI Dashcam Plus - Dual-Facing": {"quantity": 25, "price_per_unit": 0.00, "amount": 0.00},
+      "Sales Credit - SW": {"quantity": 1, "price_per_unit": -3750.00, "amount": -3750.00}
+    },
+    "gross_amount": 35850.00,
+    "amortized": {
+      "per_month": 995.83, "per_week": 229.81,
+      "_note": "This is a 3-YEAR prepaid contract (2026-08-24 to 2029-08-23), not a recurring monthly bill -- amortized evenly across all 36 months here. Real financing terms (interest, an actual payment schedule rather than one lump invoice) are not known and could change the effective per-week cost."
+    },
+    "unit_list_supplied": ["1365", "1489", "1542", "1596", "1662", "289903", "289905", "3444", "3773",
+                           "4716", "4718", "484507", "5413", "8394", "495804"],
+    "by_company_resolved": {
+      "ZONE": ["1489", "1542", "4716", "484507"], "XTRACK": ["1662", "4718", "289903", "289905"],
+      "AFG": ["1365", "1596", "3773", "495804"], "unresolved": ["3444", "5413", "8394"]
+    },
+    "_open_question": "RESOLVED 2026-09-21, operator: the invoice's 25 dashcam devices and 50 AG-Mini trackers are NOT all installed yet -- only 15 of the 25 dashcam units are currently assigned to a specific truck (the unit list above). The other 10 dashcam devices and all 50 trackers are paid-for capacity waiting for trucks to run: 'once we have more trucks to run we can assign and install those motive devices... until then we need to reconcile 10 devices cost and 50 trackers cost between all companies.' So the FULL $229.81/wk is a real fixed cost regardless of installation status -- it does not wait for assignment to become a real expense -- and is spread fleet-wide (all running trucks, all three companies) rather than only over the 15 resolved units. See fleet_wide_motive below.",
+    "fleet_wide_motive_per_truck_week": {
+      "_note": "Operator instruction, 2026-09-21: spread the WHOLE $229.81/wk (not just the 15-unit share) across all companies, since the unassigned devices/trackers are still being paid for. Uses the same 90-truck denominator (17 AFG + 32 ZONE + 41 XTRACK) as samsara_per_truck_week/pedigree_tpms_per_truck_week in config/driver_arrangement_rates.json, for direct comparability.",
+      "total_per_week": 229.81, "trucks": 90, "per_truck_week": 2.55
+    }
+  },
+  "samsara_units_supplied_2026_09_21": {
+    "_note": "83 unique unit numbers (86 raw, 3 repeats) given as 'which units currently run Samsara' -- still no dollar total for XTRACK or AFG, only ZONE's single Sept-2026 invoice above. This at least gives a real per-company device COUNT to divide any future XTRACK/AFG invoice by, and confirms Samsara is NOT ZONE-only (39 of the 83 resolve to XTRACK, more than ZONE's own 23).",
+    "by_company_resolved": {
+      "ZONE": 23, "XTRACK": 39, "AFG": 11, "unresolved": 10
+    },
+    "unresolved_units": ["3898", "4713", "5007", "6968", "191274", "273000", "412666", "459721", "556797", "878131"],
+    "_open_question": "10 of 83 units don't match any current P&L truck -- likely trailers, spares, sold units, or trucks under a workbook this pipeline doesn't have (same caveat as PrePass/BestPass's 11 unresolved and Pedigree's un-checked trailer split above)."
+  },
   "still_missing": [
-    "XTRACK and AFG: Samsara, PrePass/BestPass, and trailer-tracking (Pedigree or equivalent) invoices",
-    "Motive (pending a deal, per the operator)",
-    "Verizon tablet usage cost (per the operator, still to be uploaded)"
+    "XTRACK and AFG: Samsara ($ totals -- the unit list above gives counts, not dollars), PrePass/BestPass and trailer-tracking (Pedigree or equivalent) invoices",
+    "Verizon tablet usage cost -- operator gave $3,500/month for 173 lines on 2026-09-21, but flagged it themselves as likely wrong ('that number is not correct but we will go according to the payment we are making until we find out'); this does not match the $2,360-2,868/month for 59-72 lines already measured from real AMEX card charges in config/driver_arrangement_rates.json's verizon_60_lines -- NOT reconciled, both numbers kept until the operator resolves which is real"
   ]
 }

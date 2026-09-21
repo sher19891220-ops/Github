@@ -44,14 +44,17 @@ sys.path.insert(0, str(ROOT / "analysis"))
 from ingest_weekly_pnl import week_key, WORKBOOKS
 from xtrack_diagnosis import read_blocks, CD_COST_FIELDS
 
-# Operator-supplied 2026-09-04. Base rent is per truck-week; the rate is per
-# mile. Two tiers, and which tier a truck is on is a property of the truck.
+# Operator-supplied 2026-09-04, SUPERSEDED 2026-09-21: the two tiers below
+# ($735+$0.10/mi and $900+$0.12/mi) are replaced by one flat rate -- operator,
+# 2026-09-21: "for iron lease rented trucks 900$ plus 0.15$ per mile for all
+# of trucks we are getting from iron lease." The unit list (which trucks are
+# on Iron Lease at all) is unchanged; only the rate applied to that same list
+# is now uniform. `iron_leased` below is still "is this unit a key here."
 IRON_RATE_CARD = {
-    **{u: (735.0, 0.10) for u in
-       ("15739", "4772", "6867", "15909", "15852", "15862", "9859", "6799")},
-    **{u: (900.0, 0.12) for u in
-       ("4716", "1489", "7605", "1431", "1645", "1568", "1542", "5007",
-        "5269", "6379", "1500", "3773", "4549", "1722")},
+    u: (900.0, 0.15) for u in
+    ("15739", "4772", "6867", "15909", "15852", "15862", "9859", "6799",
+     "4716", "1489", "7605", "1431", "1645", "1568", "1542", "5007",
+     "5269", "6379", "1500", "3773", "4549", "1722")
 }
 # 4 weeks out then 4 days home: a 32-day cycle carrying 4 home days.
 POLICY_CYCLE_DAYS = 32

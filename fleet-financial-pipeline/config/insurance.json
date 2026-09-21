@@ -280,6 +280,17 @@
     "per_week_over_30_weeks": 3069.43,
     "_note": "39 payments in seven months, declining within each month (1,623 then 1,591 then 1,530...), which is the pro-rata pattern of adding a unit mid-term: each new unit costs less as the policy year runs down. So this is endorsement premium on top of the base policy, not the base policy itself, and it must not be annualised as if it were a level charge."
    }
+  },
+  {
+   "type": "workers_compensation",
+   "entity": "ZONE_OH",
+   "monthly": 120.0,
+   "annual_total": 1440.0,
+   "basis": "flat monthly bill, spread across all ZONE running trucks (not a per-unit rate card the way auto liability is)",
+   "_note": "The one insurance category that was completely absent from this file until now -- confirmed absent by a Claude session on 2026-09-20, then supplied by the operator 2026-09-21: '$120 for a month only for Zone-OH LLC, and cost should be spreaded between all zone trucks. other companies doesn't have it.'",
+   "_open_question": "No invoice has been seen for this -- only the operator's stated monthly figure. Not yet confirmed whether $120/month is the full premium or a partial/minimum bill, the way the auto liability face premium differs sharply from its effective cost after return premium.",
+   "per_unit_week": null,
+   "_per_unit_week_note": "Not filled in here because it depends on ZONE's average running truck count over whatever window is being priced -- see analysis/admin_charge.py, which computes this against the same rolling window as every other per-truck figure rather than freezing one count into this config."
   }
  ],
  "ucr": [
@@ -305,8 +316,8 @@
    "year": 2026
   }
  ],
- "group_annual_known": 1972316.32,
- "group_weekly_known": 37929.16,
+ "group_annual_known": 1973756.32,
+ "group_weekly_known": 37956.85,
  "open_questions": [
   "AFG's total Progressive premium. The bills show a balance rising from $5,113 to $42,630 as units were added; the payments already made are not in the corpus.",
   "The Intact TIV: operator says $12,238,612 at submission, the schedule files total $12,927,748 and the March questionnaire $12,260,612.05. A 5.3% spread on a 4.50% rate is $31,000 a year -- which figure is the policy written on?",
@@ -321,6 +332,12 @@
  ],
  "allocation": {
   "_note": "Measured 2026-09-05 from ingest/fleet_registry.py, which joins the group unit workbook (unit number AND VIN) to the weekly P&Ls. This is what closed the unit-to-VIN gap: 67 of the 68 VINs on the master auto-liability schedule now resolve to a fleet number and to the company last running that truck.",
+  "workers_compensation": {
+   "basis": "100% ZONE -- operator, 2026-09-21: 'other companies doesn't have it'",
+   "ZONE": {"annual": 1440.0, "weekly": 27.69},
+   "XTRACK": {"annual": 0.0, "weekly": 0.0},
+   "AFG": {"annual": 0.0, "weekly": 0.0}
+  },
   "auto_liability": {
    "basis": "units on the master policy schedule, attributed to the company whose P&L last carried them",
    "premium_per_unit_year": 15991.65,
