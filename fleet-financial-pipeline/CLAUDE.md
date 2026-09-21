@@ -26,12 +26,15 @@ key still works or the corpus is stale -- it is a standing instruction, not a
 technical constraint, and must not be re-derived or second-guessed session to
 session.
 
-**What this means in practice:** new P&L data reaches this repo only by the
-operator uploading it directly, or (if they choose to set it up) through
-Claude's own Google Drive connector on their subscription -- never through
-this repo's own service-account credential. If a workbook looks stale and
-`ingest/pull_sheets.py` would normally be the fix, say so and ask the operator
-to re-upload or refresh it themselves; do not run the script or read the key.
+**Chosen refresh path: Claude's own Google Drive connector.** When a workbook
+needs refreshing, use the `mcp__Google_Drive__*` tools available in the
+session (part of the operator's Claude subscription -- no separate API key,
+no service-account credential to manage) to locate and read the current
+export, rather than `ingest/pull_sheets.py`. This still exports/reads the
+same `.xlsx` files this pipeline already parses; only the credential path
+changes. If that connector is not available in a given session (not every
+environment has it wired up), fall back to asking the operator to upload the
+file directly -- never fall back to the service-account key.
 The section below is kept for history/context only -- it describes a path
 that exists in the code but must not be used.
 
