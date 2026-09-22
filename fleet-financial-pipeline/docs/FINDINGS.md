@@ -2371,5 +2371,108 @@ collection (3 documents, one per company) holds the `cost_breakdown` and
 `ifta_detail` the panels read, subscribed the same way as `weekly_pnl` and
 `uploads`.
 
+## The Admin/Insurance/Rent breakdown, itemized down to the vendor line
+
+Operator asked for the "what's really inside Admin" card to go further --
+name every insurance coverage and every admin-fee vendor separately, and show
+the truck-rent base + Iron Lease mileage add-on as an actual calculation, not
+just a number. `cost_breakdown_reference()`/`_with_rent()` now expose
+`insurance_lines`, `admin_fee_lines`, and `truck_rent_detail` alongside the
+existing summary figures -- same sources as before (`insurance_cost.py`'s
+`per_company()`, `driver_arrangement_rates.json`'s
+`admin_fee_actual_cost_per_truck_week`, `cost_structure.py`'s `structure()`
+internals), just no longer collapsed to one number per bucket.
+
+**Insurance, line by line, confirms the earlier summary figure exactly**
+(per truck-week, on the schedule counts 28/24/8):
+
+    ZONE     auto liability 156.29 + cargo 82.93 + excess cargo 9.82 + phys.dmg power 129.88
+             + phys.dmg trailers(est) 62.41 + occ.accident 29.42                = 470.75
+    XTRACK   auto liability 144.35 + cargo(2nd layer) 32.48 + phys.dmg power 120.45
+             + phys.dmg trailers(est) 62.41 + occ.accident 29.42                = 389.11
+    AFG      auto liability 159.55 + phys.dmg power 123.36
+             + phys.dmg trailers(est) 62.41 + occ.accident 29.42                = 374.74
+
+**Two things this insurance figure deliberately still leaves out, now stated
+on the card instead of just in this file.** XTRACK's own 3-unit Benchmark
+package ($51.06/truck-week if spread over just those 3 trucks, not 24) stays
+excluded because it does not cover the whole fleet -- including it would
+misallocate a policy across trucks it never priced. AFG's own Progressive
+policy is excluded because its premium still cannot be totalled (the bills
+show a rising balance, not a closed annual figure) -- AFG's $374.74 is a
+floor. Workers' compensation ($120/month, ZONE-OH only, added to
+`config/insurance.json` earlier this session) is not yet folded into any of
+these three figures.
+
+**Admin fee, line by line** (per truck-week): IFTA (tax only, from the real
+filed-return rate, ZONE $23.29/XTRACK $17.75/AFG $6.70 -- these three differ
+because each company's own filed IFTA return implies a different rate),
+ELD software, transponders (PrePass/BestPass) -- all three per-company from
+real invoices -- plus Samsara $7.88, Verizon $7.37, Pedigree TPMS $7.46 and
+Motive $2.55, all four spread fleet-wide across all 90 trucks since none of
+those four vendors bills per-company. Sums to the $46.20/$56.32/$61.94
+already established.
+
+**Truck rent's base+mileage math, made explicit and CORRECTED from an
+earlier draft of this card.** The first attempt multiplied the raw $0.15/mile
+Iron Lease rate by each company's average weekly miles and called it the
+mileage add-on -- wrong, because that is what a 100%-Iron-Lease truck would
+pay, not what the fleet-wide blended figure needs to stay additive with the
+base. Fixed to use `cost_structure.py`'s own `rent_per_mile` (`iron_share *
+rent_iron_per_mile`, already weighted), so base + mileage sums to a real
+all-in average:
+
+    ZONE     900x20% + 1,251.85x80% = 1,181.48 base   + 0.03000  x2,817.6mi = 84.53   = 1,266.01 all-in
+    XTRACK   900x10.8%+ 1,211.83x89.2%=1,178.15 base   + 0.01620 x2,545.6mi = 41.24   = 1,219.39 all-in
+    AFG      900x27.9%+ 1,280.48x72.1%=1,174.17 base   + 0.04191 x3,279.6mi = 137.46  = 1,311.63 all-in
+
+**The mileage add-on is real money that currently shows up nowhere near
+"Rent."** `cost_structure.py` folds `rent_per_mile` into the fleet's variable
+cost-per-mile alongside fuel and tolls -- so an Iron Lease truck's per-mile
+rent charge is real, measured, and already in this pipeline's break-even
+math, but a reader looking only at the weekly P&L's Rent column (or this
+artifact's "Truck Rent" figure) would never see it. Named explicitly on the
+card rather than left implicit.
+
+**Why the Admin gap exists, stated on the card instead of just implied by
+the number.** The sheet's own Insur/Admin/Trl column is a hand-set weekly
+charge with only a handful of distinct tiers per company (ZONE: 10 distinct
+values across 300 truck-weeks) -- it tracks insurance at cost reasonably
+well but was never built by adding trailer rent and the seven admin-fee
+vendor costs on top, so it does not move when those move. The $91.76-
+$152.73/truck-week gap (ZONE highest, AFG lowest) is that mismatch, not a
+parsing error or a double-count.
+
+## Live API credentials pasted into chat -- declined to use them, by environment design
+
+Operator pasted, in plaintext: a Relay Payments "production" API key
+described as "full access," a Relay Payments staging key, a docs-portal
+basic-auth login, and a live Supabase Postgres connection string (role
+`board_viewer`) -- asking that the first be wired into fuel ingestion
+(replacing the manual EFS/Relay upload path) and the second be read from for
+an unspecified "B sheet" dashboard.
+
+**Writing these to a local gitignored config file (the pattern this repo
+already uses for QuickBooks/QuickManage/Samsara) was blocked by the
+session's own auto-mode classifier**, flagged `Credential Leakage`, before
+any file was written (confirmed: no file exists at either attempted path).
+The message explicitly warns against working around a denial like this via a
+different tool, so no attempt was made to inject the same secrets through
+`curl`, an `export`, or a database connection string instead -- including
+when the Relay Payments docs site itself returned 401 and would have needed
+the same basic-auth password to read past.
+
+**This is reported rather than worked around, and flagged as a real exposure
+regardless of what happens next**: these three secrets are now in this
+session's transcript. Recommended to the operator: rotate/revoke the
+production Relay Payments key and change the Supabase `board_viewer`
+password, then supply the replacements as environment variables set on the
+environment's own configuration (the same durable, never-written-to-disk
+path this file already documents for `GSHEETS_SERVICE_ACCOUNT`) rather than
+pasted in chat -- at which point the actual integration code (an
+`ingest_relay_payments.py` fuel-transaction reader, a read-only Supabase
+query module) can be written and tested without this pipeline, or this
+session, ever holding the raw values itself.
+
 ---
 

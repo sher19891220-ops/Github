@@ -156,18 +156,49 @@ def cost_breakdown_reference():
     reg = IC.load()
     ins = IC.per_company(reg)
     trucks_on_schedule = {"ZONE": 28, "XTRACK": 24, "AFG": 8}  # IC.main()'s own printed counts
-    admin_fee_rates = DA.load_rates()["admin_fee_actual_cost_per_truck_week"]["total_measured_per_truck_week"]
+    rates = DA.load_rates()
+    admin_fee_block = rates["admin_fee_actual_cost_per_truck_week"]
+    admin_fee_rates = admin_fee_block["total_measured_per_truck_week"]
+    per_company_admin = admin_fee_block["by_company_per_truck_week"]
+    fleet_wide_admin = admin_fee_block["fleet_wide_not_split_by_company"]
 
     out = {}
     for co in COMPANIES:
-        insurance_annual = sum(v for k, v in ins[co].items() if not k.endswith("_benchmark"))
-        insurance_per_truck_week = insurance_annual / 52 / trucks_on_schedule[co]
+        # Line-by-line, per truck-week -- excludes anything ending "_benchmark":
+        # XTRACK's own 3-unit Benchmark package only covers those 3 trucks, so
+        # spreading its cost across all 24 units on the schedule would
+        # misallocate a policy that does not cover the whole fleet.
+        insurance_lines = {k: round(v / 52 / trucks_on_schedule[co], 2)
+                           for k, v in ins[co].items() if not k.endswith("_benchmark")}
+        insurance_per_truck_week = sum(insurance_lines.values())
+
+        admin_fee_lines = dict(per_company_admin[co])
+        admin_fee_lines.update({
+            "samsara": fleet_wide_admin["samsara_per_truck_week"],
+            "verizon": fleet_wide_admin["verizon_per_truck_week"],
+            "pedigree_tpms": fleet_wide_admin["pedigree_tpms_per_truck_week"],
+            "motive": fleet_wide_admin["motive_per_truck_week"],
+        })
+        admin_fee_lines = {k: v for k, v in admin_fee_lines.items() if v is not None}
+
         out[co] = {
             "truck_rent_per_truck_week": None,  # filled from cost_structure.structure() by the caller
             "insurance_per_truck_week": round(insurance_per_truck_week, 2),
+            "insurance_lines": insurance_lines,
             "insurance_covers": "whole insured fleet (CD + OO), auto liability at its effective "
                                 "post-return-premium rate + physical damage + cargo + occ. accident",
+            "insurance_excludes_note":
+                ("XTRACK's own 3-unit Benchmark package ($51.06/truck-week if spread over just "
+                 "those 3 trucks) is tracked separately since it does not cover the whole fleet. "
+                 if co == "XTRACK" else
+                 "AFG's own Progressive policy is NOT included -- its premium cannot be totalled "
+                 "yet (the bills show a rising balance, not a closed annual figure), so this AFG "
+                 "insurance figure is a floor, not the whole cost. "
+                 if co == "AFG" else "") +
+                "Workers' compensation ($120/month, ZONE-OH only) is tracked in config/"
+                "insurance.json but is not yet folded into this per-truck-week figure.",
             "admin_fee_measured_per_truck_week": admin_fee_rates.get(co),
+            "admin_fee_lines": admin_fee_lines,
             "trailer_rent_per_truck_week": FC.RATES[co]["Trailer rent"],
             "trailer_rent_note": "ALLOCATED rate, not measured from a trailer-lease invoice -- "
                                  "treat like fixed_costs.py's own stale-truck-rent caveat.",
@@ -184,8 +215,43 @@ def cost_breakdown_reference_with_rent():
     out = cost_breakdown_reference()
     for co in COMPANIES:
         s = CS.structure(co)
+        m = s["m"]
         out[co]["truck_rent_per_truck_week"] = round(s["fixed"]["truck rent, base"], 2)
+        mileage_component = round(m["rent_per_mile"] * m["miles_per_truck"], 2)
+        out[co]["truck_rent_detail"] = {
+            "iron_lease_share": round(m["iron_share"], 4),
+            "iron_lease_base_per_week": m["rent_iron_base"],
+            "outside_lease_share": round(1 - m["iron_share"], 4),
+            "outside_lease_rent_per_week": round(m["rent_outside_per_week"], 2),
+            "iron_lease_mileage_rate_per_mile": round(m["rent_iron_per_mile"], 4),
+            "avg_miles_per_truck_week": round(m["miles_per_truck"], 1),
+            "fleet_weighted_mileage_component_per_truck_week": mileage_component,
+            "all_in_truck_rent_per_truck_week": round(s["fixed"]["truck rent, base"] + mileage_component, 2),
+            "note": "The figure shown as \"Truck Rent\" is the BASE blend only -- Iron "
+                    "Lease's flat $900/week base weighted by the share of the fleet on Iron "
+                    "Lease, plus everything else at its own P&L-measured rent. An Iron Lease "
+                    "truck ALSO pays $0.15/mile on top of that base; fleet-wide that averages "
+                    "to the mileage component above (the $0.15 rate weighted by the Iron "
+                    "Lease share, times this fleet's average weekly miles). That mileage "
+                    "add-on is NOT included in the base figure -- this pipeline currently "
+                    "folds it into the fleet's variable cost-per-mile instead, alongside fuel "
+                    "and tolls, so it never shows up next to Rent on the weekly P&L.",
+        }
         out[co]["admin_insurance_trailer_booked_per_truck_week"] = round(s["fixed"]["admin / insurance / trailer"], 2)
+        cb = out[co]
+        real_sum = (cb["insurance_per_truck_week"] + (cb["admin_fee_measured_per_truck_week"] or 0)
+                    + cb["trailer_rent_per_truck_week"])
+        out[co]["gap_per_truck_week"] = round(cb["admin_insurance_trailer_booked_per_truck_week"] - real_sum, 2)
+        out[co]["gap_explanation"] = (
+            "The sheet's own Insur/Admin/Trl column was never built by adding these three "
+            "things -- it is a hand-set weekly charge with only a handful of distinct tiers "
+            "per company (e.g. ZONE runs just 10 distinct values across 300 truck-weeks: "
+            "$394.38 x118, $534.28 x114), set mainly to track insurance at cost. It carries "
+            "little to none of the trailer-rent allocation and only a rough allowance for the "
+            "admin-fee vendor costs (IFTA/ELD/Samsara/Verizon/Motive/Pedigree) named above, so "
+            "it does not move when those real costs move. The gap is that mismatch, not a "
+            "data error."
+        )
     return out
 
 
