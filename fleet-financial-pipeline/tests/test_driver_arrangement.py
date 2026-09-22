@@ -93,6 +93,19 @@ def test_lease_to_walk_away_crosses_over_lease_to_purchase_as_miles_rise():
             > B.breakeven_per_mile(D.cost_inputs("lease_to_purchase", high_miles)))
 
 
+@pytest.mark.skipif(
+    not (ROOT / "data/raw/iron_lease/ltp_roster_pulled_2026-09-22.md").exists(),
+    reason="Iron Lease LTP roster snapshot not in container")
+def test_known_arrangements_resolves_real_units_from_the_ltp_roster():
+    """2026-09-22: the Iron Lease roster is now readable (ingest/
+    ingest_iron_lease_ltp_roster.py). Nelson Reginald's truck 2703 is
+    known, active lease-to-purchase; Norgaisse Aldens's terminated truck
+    9859 must not appear at all."""
+    known = D.known_arrangements()
+    assert known.get("2703") == "lease_to_purchase"
+    assert "9859" not in known
+
+
 def test_owner_operator_breakeven_is_far_below_lease_arrangements():
     """OO carries no truck charge at all -- its break-even rate/mile at
     the same miles must be well below LTP/LTWA, which both carry a truck

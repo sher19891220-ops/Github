@@ -13,30 +13,46 @@ one), and config/driver_arrangement_rates.json already carries that stated
 rate card for each -- nothing before this module turned it into a cost or
 break-even figure.
 
-WHAT THIS DOES NOT DO: say which of the group's actual trucks is on which
-arrangement. That needs a real roster -- the operator's own "Iron lease
-Leased trucks" Google Sheet (id 1X28pWOL4DDTpml9ZcNyqiukUVLxrSn5qmu0riI-
-gAOg) is the named candidate, per config/driver_arrangement_rates.json's
-own note -- and this pipeline has not ingested it. Every function here
-takes the arrangement as an explicit argument: it prices "a truck on
-LTP," not "truck 2703." A truck's arrangement can also change mid-life
-(docs/ACCOUNTING_MODEL.md Section 3), so a roster join would need to be
-per-week, not a static unit -> arrangement map, once one exists.
+WHICH TRUCK IS ON WHICH ARRANGEMENT: partially resolved 2026-09-22. The
+operator's own "Iron lease Leased trucks" Google Sheet (pulled via
+Claude's Google Drive connector, never the forbidden GSHEETS_SERVICE_
+ACCOUNT key -- see CLAUDE.md) is a real, weekly-snapshotted roster of
+every lease-to-purchase driver, parsed by ingest/
+ingest_iron_lease_ltp_roster.py. `known_arrangements()` below gives the
+CURRENT lease_to_purchase/lease_to_walk_away status for every truck on
+that roster. It does NOT cover plain owner-operator trucks -- those never
+appear on this roster at all, and no OO roster exists anywhere in this
+pipeline yet. Every pricing function below still takes the arrangement as
+an explicit argument rather than looking it up itself, since a truck's
+arrangement can change mid-life (Samuel Muhoza's did, twice, after an
+accident -- docs/ACCOUNTING_MODEL.md Section 3) and the caller should
+decide which snapshot it wants priced, not have one silently assumed.
 
-THE 'LO' MARKER IN COLUMN A IS NOT AN ARRANGEMENT FLAG -- checked and
-ruled out 2026-09-22 (see analysis/xtrack_diagnosis.py's corrected
-docstring): it sits at a varying position inside a truck's per-load row
-sequence, usually carrying a real dollar figure, not once at a fixed
-position the way a per-driver flag would. Do not resurrect it as a
-classifier for CD/OO/LTP/LTWA.
+THE 'LO' MARKER IN THE WEEKLY P&L'S COLUMN A IS NOT AN ARRANGEMENT FLAG --
+checked and ruled out 2026-09-22 (see analysis/xtrack_diagnosis.py's
+corrected docstring): it sits at a varying position inside a truck's
+per-load row sequence, usually carrying a real dollar figure, not once at
+a fixed position the way a per-driver flag would.
 
-STATED RATES, NOT MEASURED ONES. Every number here is what the operator
-SAID the arrangement charges (chat, 2026-09-08 and 2026-09-21) -- not yet
-reconciled against real settlements. The rate card's own file already
-flags one concrete mismatch: the lease-to-purchase sheet shows truck 2703
-charged $1,500/week against its $75,000 balance, not the $1,000
-'truck_payment' stated here. Treat these as the current policy, not
-confirmed billing.
+'LO' MEANS SOMETHING ELSE ENTIRELY IN A DIFFERENT DOCUMENT: on the Iron
+Lease "Leased trucks" roster's own Comments column, 'LO' is this
+operator's shorthand for LEASE-TO-WALKAWAY -- confirmed directly by the
+accounting team, 2026-09-22 ("LO- lease to walkaway"). Same two letters,
+two unrelated documents, two unrelated meanings. See ingest/
+ingest_iron_lease_ltp_roster.py, which reads that roster and is the
+source for `known_arrangements()` below.
+
+STATED RATES, MEASURED ROSTER. The per-arrangement dollar amounts here are
+still what the operator SAID each arrangement charges (chat, 2026-09-08
+and 2026-09-21) -- not yet reconciled against real settlements in general.
+One specific figure IS now reconciled: the lease-to-purchase rate card
+says $1,000/week, but truck 2703's real contract (confirmed by the
+accounting team, and matching the roster's own weekly deltas) is
+$1,500/week regular payment plus a separate $2,000 catch-up deposit he is
+behind on. `known_arrangements()` tells you WHICH truck is on which
+arrangement; it does not yet correct the $1,000 rate card itself to
+$1,500 -- that would need every driver's own contract confirmed the same
+way, not just one.
 """
 import json
 import sys
@@ -48,6 +64,21 @@ from breakeven_engine import CostInputs  # noqa: E402
 
 RATES_FILE = ROOT / "config/driver_arrangement_rates.json"
 ARRANGEMENTS = ("owner_operator", "lease_to_purchase", "lease_to_walk_away")
+
+
+def known_arrangements():
+    """{unit: arrangement} for every Iron-Lease-financed truck this
+    pipeline can currently classify, from the operator's own "Iron lease
+    Leased trucks" roster (ingest/ingest_iron_lease_ltp_roster.py) --
+    lease-to-purchase and lease-to-walk-away only. Says nothing about
+    plain owner-operator trucks, which never appear on that roster at
+    all; there is still no roster for those. A truck's arrangement can
+    change (Samuel Muhoza's did, twice, after an accident), so this is
+    the CURRENT snapshot, not a fact fixed for all time -- re-call it
+    rather than caching the result across sessions."""
+    sys.path.insert(0, str(ROOT / "ingest"))
+    import ingest_iron_lease_ltp_roster as roster  # noqa: E402
+    return roster.unit_arrangements()
 
 
 def load_rates():

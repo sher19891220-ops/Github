@@ -2157,3 +2157,61 @@ LTP balance, not the $1,000 `truck_payment` stated here).
 
 ---
 
+## 2026-09-22 (same day, continued) -- the Iron Lease roster resolves 'LO'
+## for real, and gives 12 real trucks a known arrangement
+
+**Pulled via Claude's Google Drive connector, not the forbidden API key.**
+The "Iron lease Leased trucks" sheet named as the missing roster earlier
+today is one tab of stacked weekly snapshots (not one-tab-per-week like
+the P&L workbooks): 12 drivers, 12 snapshots, 2026-06-16 through 09-01,
+each with an Overall/Charged/Left dollar balance. Saved to `data/raw/
+iron_lease/ltp_roster_pulled_2026-09-22.md`, parsed by the new `ingest/
+ingest_iron_lease_ltp_roster.py`.
+
+**'LO' on THIS sheet's Comments column means lease-to-walkaway --
+confirmed directly by the accounting team, same day: "LO- lease to
+walkaway."** This is a DIFFERENT document from the weekly P&L sheets
+where 'LO' was ruled out as a per-load annotation a few hours earlier --
+same two letters, two unrelated documents, two unrelated meanings, both
+now settled by evidence rather than guessed. The accounting team's own
+account matches the roster's data exactly on both open threads from
+earlier: Samuel Muhoza (truck 4864) had an accident, drove as company
+driver for a stretch, then converted to lease-to-walkaway -- exactly the
+CD-then-LO comment sequence the roster shows across its snapshots. Petit
+Noel Judeler's original truck (8091) "had too many issues," so his SAME
+lease-to-purchase contract was moved to a different truck (8132) -- also
+exactly what the snapshots show, mid-contract, no new contract needed.
+
+**Truck 2703's real contract, confirmed:** $1,500/week regular payment,
+plus a separate one-time $2,000 catch-up deposit he is behind on -- not
+the $1,000/week `truck_payment` stated in `config/driver_arrangement_
+rates.json` since 2026-09-08. The roster's own weekly deltas for Nelson
+Reginald match this ($1,500 most weeks, one $0 week) once the analysis
+correctly treats the $2,000 deposit as a separate receivable rather than
+blending it into a weekly rate.
+
+**Measured weekly paydown varies driver to driver -- $727 to $1,750/week
+across the 11 currently-active lease-to-purchase drivers** (`ingest_
+iron_lease_ltp_roster.weekly_paydown()`), which is why the stated $1,000
+rate card was NOT overwritten with a single new number: no single figure
+is right for all of them. A caller pricing a specific truck should read
+its own measured rate from this roster, not the rate card's flat figure.
+
+**A real bug caught before it shipped**: the first version of
+`weekly_paydown()` checked `is not None` to skip a snapshot with no
+reported figure (Evanuel Derilus, 08.18.26) -- but pandas stores a missing
+value as `NaN` in a float column, not `None`, so that check silently let
+a `NaN`-based delta through. It surfaced as "$3,500/wk over 2 intervals"
+for a driver who only has ONE clean interval, at $2,000/wk. Caught by
+writing the specific regression test first (`test_weekly_paydown_skips_a_
+snapshot_with_no_reported_figure`), not by eyeballing the printed output.
+
+**`analysis/driver_arrangement.known_arrangements()`** now resolves 11 of
+the 12 rostered trucks to a real, current lease_to_purchase or
+lease_to_walk_away status (the 12th, truck 9859, is `"Truck taken back"`
+-- terminated, correctly excluded, not priced as anything). This still
+says nothing about plain owner-operator trucks, which never appear on
+this roster at all -- no OO roster exists anywhere in this pipeline yet.
+
+---
+
