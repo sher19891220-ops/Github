@@ -2249,3 +2249,127 @@ Iron-Lease-financed," not as "confirmed OO."
 
 ---
 
+## 2026-09-22 (same day, continued) -- a weekly P&L intake artifact,
+## drag-and-drop uploads, and month/quarter/year rollups
+
+**Operator asked for a proper weekly P&L, a drag-and-drop upload for
+fuel/toll/mileage source documents, and month/quarter/year analyses.**
+Before building, clarified the delivery mechanism explicitly (this
+pipeline has no running server or database -- a literal "drag and drop"
+needs somewhere to receive a file): the operator chose a Claude Artifact
+page over a real hosted backend or staying with chat uploads.
+
+**`analysis/build_weekly_pnl_rollup.py`**: the weekly/monthly/quarterly/
+yearly P&L itself, built entirely from already-validated modules
+(`truck_weeks.py`'s per-truck-per-week rows, `cost_structure.py`'s
+per-mile IFTA rate) -- nothing new parsed, only aggregated. Company-driver
+trucks only, same reasoning as everywhere else in this pipeline: OO/LTP/
+LTWA have fundamentally different economics and are priced separately.
+73 company-weeks currently exist (2026-02-23 .. 2026-08-24across ZONE/
+XTRACK/AFG); month/quarter/year are derived from each week's own
+week-ending date, never prorated across a boundary.
+
+**The artifact** (https://claude.ai/artifact/3hcLkXqMLqbYhVeBF2c5H3,
+"Weekly P&L Intake"): a dropzone plus a weekly/monthly/quarterly/yearly
+table, seeded with all 73 real weeks via `ArtifactData` batch writes to
+its `weekly_pnl` collection, verified read back afterward. Declares
+`assets` + `db` capabilities -- both make the page organization-internal,
+never publicly shareable, which is the right default for real financial
+data.
+
+**Excel is not a supported asset type on this platform -- solved client-
+side, not by asking the operator to convert files by hand.** The `assets`
+capability's accepted types are images, PDF, fonts, video, and a handful
+of text formats (csv, markdown, json, plain, css, javascript); `.xlsx` is
+a zip-based binary format and is not among them. The page loads SheetJS
+(cdnjs, pinned version) and converts a dropped `.xlsx`/`.xls` to CSV
+entirely in the browser before upload -- PDF and CSV upload natively, and
+Excel is one client-side conversion away, invisibly to whoever drops the
+file.
+
+**No live "wake on upload" exists -- processing runs on an hourly
+Routine, not instantly.** Checked the actual capability contract before
+promising otherwise: an artifact republish or a comment sent to Claude
+wakes this session; a plain `db` write does not. So a dropped file is
+logged immediately (status `pending`) but only picked up the next time a
+Routine fires (`trig_011nrATEDddiMMCyJC5AeXVZ`, hourly, bound to this
+session) and queries the `uploads` collection for pending items. This is
+disclosed on the page itself ("check back in a few minutes"), not left
+for the operator to discover the hard way.
+
+**Only fuel reports are wired to auto-extract today.** The Routine's
+prompt parses a `kind_guess: "fuel"` upload the same way `ingest/
+ingest_efs_fuel.py` already does (EFS/Relay column conventions) and
+merges the result into the matching week's `weekly_pnl` document. IFTA,
+toll, and mileage documents are logged and classified by filename
+heuristic but land in `needs_review`, not silently guessed at -- extending
+each to a real parser is the same pattern, one document type at a time,
+not a rebuild.
+
+**A file the Routine can't confidently place is marked `needs_review`,
+never forced through.** Explicit instruction to the Routine: never guess
+which week or company an extracted figure belongs to, and never mark a
+file processed without a real extraction behind it. A parse failure is
+`error`, an unplaceable-but-real fuel file is `needs_review`; nothing
+sits silently as `pending` forever, and nothing is claimed as done that
+wasn't.
+
+## Weekly P&L artifact: click-through to truck-by-truck, and the Admin/Rent/IFTA breakdown made visible
+
+Operator request: each week must be clickable to a truck-by-truck page, and
+Admin / Rent / IFTA needed pulling apart rather than shown as one bundled
+number. `analysis/build_weekly_pnl_rollup.py` gained `truck_rows()` /
+`all_truck_rows()` (the same per-truck-per-week rows `truck_weeks.py` already
+produces, just reshaped per company-week) and `cost_breakdown_reference()` /
+`cost_breakdown_reference_with_rent()`, which assemble the ALREADY-ESTABLISHED
+real component figures (`insurance_cost.py`'s effective post-return-premium
+rate, the admin-fee measured build-up from the earlier $67 reconciliation,
+`fixed_costs.py`'s allocated trailer-rent RATES table) next to the sheet's own
+booked `Insur/Admin/Trl` figure -- nothing new parsed, only assembled and
+placed next to each other. 4 new tests confirm the pieces are read correctly
+and, deliberately, that they do NOT silently equal the booked figure.
+
+**The three components do not sum to the booked Admin figure, and that gap is
+shown, not hidden.** Per truck-week, real vs. booked -- in every company the
+real components sum HIGHER than what the sheet books as Admin:
+
+    ZONE     insurance $470.75 + admin-fee $61.94 + trailer rent $141.58 = $674.27 vs booked $521.54, gap $152.73
+    XTRACK   insurance $389.12 + admin-fee $56.32 + trailer rent $132.75 = $578.19 vs booked $459.33, gap $118.86
+    AFG      insurance $374.74 + admin-fee $46.20 + trailer rent $121.42 = $542.36 vs booked $450.60, gap  $91.76
+
+The gap is real and is surfaced as a `gap-flag` on the page rather than forced
+to reconcile -- the sheet's own Admin column was never built by adding these
+three things, so there is no reason to expect them to tie, and pretending
+they do would hide exactly the kind of mismatch this whole pipeline exists to
+catch. Since real cost exceeds what is booked in all three companies, the
+sheet is if anything UNDER-booking Admin, not over-booking it.
+
+**"Rent" on the sheet is truck rent only; trailer rent is bundled inside
+Admin, not Rent.** Confirmed via `xtrack_diagnosis.py`'s own ALIAS mapping
+("truck rental" -> "rent"). The UI's Rent column is relabeled "Truck Rent"
+with a tooltip, and the breakdown panel states this explicitly per company so
+it is not left implicit.
+
+**IFTA est. is a trailing per-mile rate, not a live quarterly engine** --
+`cost_structure.fuel_tax_per_mile(company)`'s own rate (ZONE 2 quarters
+$0.008265/mi, XTRACK 2 quarters $0.006974/mi, AFG 1 quarter $0.002042/mi)
+times that week's miles. The new IFTA info panel states the rate, how many
+quarters it is averaged from, and -- as important -- what it explicitly does
+NOT include: the Oregon weight-mile tax (a separate module, `oregon_gap.py`),
+the flat $30/month IFTA line already inside the admin fee, and any permit
+cost. Conflating this trailing estimate with a real filed return would
+overstate confidence in a number that is, by construction, always one quarter
+behind.
+
+**Data shape: a `trucks` array field on each existing `weekly_pnl` document,
+not 1,620 separate documents.** The first design (one document per
+truck-per-week, ~1,620 rows) was rejected in favor of adding a `trucks` array
+to each of the 73 existing weekly documents -- same total data, a fifth as
+many writes, and the click-through only ever needs one week's trucks at a
+time so there is no query benefit to splitting them out. A `reference`
+collection (3 documents, one per company) holds the `cost_breakdown` and
+`ifta_detail` the panels read, subscribed the same way as `weekly_pnl` and
+`uploads`.
+
+---
+
