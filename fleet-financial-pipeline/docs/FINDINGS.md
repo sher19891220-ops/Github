@@ -2215,3 +2215,37 @@ this roster at all -- no OO roster exists anywhere in this pipeline yet.
 
 ---
 
+## 2026-09-22 (same day, continued) -- an owner-operator roster, by
+## subtraction rather than new ingestion
+
+**Asked to "build a roster for owner-operator trucks too."** The answer
+turned out to already be sitting inside data this pipeline had: `analysis/
+xtrack_diagnosis.py`'s block reader tags EVERY truck company_driver or
+owner_operator every week, from the P&L's own column layout -- and
+"owner_operator" there means the owner-operator/lease-to-own COLUMN
+LAYOUT, which lease-to-purchase and lease-to-walk-away trucks use too
+(same docstring, unchanged since before this session: "owner-operator AND
+lease-to-own" share one header). So a residual roster is just
+subtraction: owner-operator-layout units, minus whatever the Iron Lease
+roster (added earlier today) says is actually LTP or LTWA. New module:
+`analysis/owner_operator_roster.py`.
+
+**Real numbers**: 39 distinct units across the three companies (11 ZONE,
+25 XTRACK, 8 AFG) are owner-operator-layout in their most recent P&L week
+and NOT on the Iron Lease LTP/LTWA roster -- 4 of them (1365, 1509, 1596,
+1722) appear under more than one company, consistent with this corpus's
+already-established truck movement between companies.
+
+**This is NOT a confirmed plain-owner-operator list, and the module says
+so plainly.** "Not Iron-Lease-financed" only rules out one financing
+source. The operator's own 2026-09-21 message and `docs/ACCOUNTING_
+MODEL.md` Section 3 name at least four OTHER truck-rental sources this
+pipeline has no roster for at all: STL, Right Truck Deal, Penske, and
+Ryder. Some of these 39 units are very plausibly financed through one of
+those instead of owned outright -- there is no way to tell without a
+roster for each of those sources too, the same way the Iron Lease sheet
+resolved LTP/LTWA. Read "residual" as "not company-driver, not
+Iron-Lease-financed," not as "confirmed OO."
+
+---
+
