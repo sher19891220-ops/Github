@@ -80,6 +80,14 @@ def fuel_tax_per_mile(company):
     Per MILE, not per truck: it is a tax on distance. Using the returns for both
     numerator and denominator keeps it internally consistent even where the
     returns disagree with the sheet about the miles.
+
+    THIS RATE BAKES IN THE FILED QUARTER'S OWN AVERAGE MPG. IFTA tax is
+    fundamentally a tax on GALLONS BURNED per jurisdiction, not on miles --
+    "tax/miles" is really "(tax/gallons) x (gallons/miles)", so applying it
+    to a week whose real mpg differs from the quarter's average silently
+    assumes that week ran at the quarter's mpg. See fuel_tax_per_gallon()
+    for the interim fix: use a week's own real gallons, which this pipeline
+    already measures, instead of assuming the quarter's mpg held.
     """
     name = IFTA_NAME[company]
     rs = [r for r in _ifta()
@@ -92,6 +100,43 @@ def fuel_tax_per_mile(company):
     miles = sum(r["total_miles"] for r in rs)
     return {"tax": tax, "miles": miles, "per_mile": tax / miles,
             "quarters": len(rs)}
+
+
+def fuel_tax_per_gallon(company):
+    """IFTA tax over IFTA gallons, from the same filed returns as
+    fuel_tax_per_mile() -- the interim weekly-precision step. Operator,
+    2026-09-22: "ifta we need to create ifta engine and ind the same time
+    calculate miles gallons of fuel for getting precise cost on weekly
+    basis not quarterly."
+
+    A full per-jurisdiction weekly engine needs weekly state-by-state miles
+    and fuel purchases, which this corpus does not have -- IFTA returns are
+    themselves quarterly, state-by-state aggregates. What this pipeline DOES
+    already measure, every week, per company, is real gallons and real
+    miles (truck_weeks.py). So instead of applying the filed return's own
+    average $/mile to this week's miles (which silently assumes this week
+    ran at the return's own average mpg), this applies the filed return's
+    own average $/gallon to THIS WEEK'S OWN REAL GALLONS -- a week that
+    burned more or fewer gallons than its miles alone would suggest (a
+    worse-loaded truck, cold weather, idling) now prices differently, which
+    a flat per-mile rate could never reflect. Still a real approximation:
+    it assumes this week's mix of jurisdictions matches the filed return's
+    average mix, the same assumption fuel_tax_per_mile() makes about mpg
+    instead of jurisdiction mix -- there is no cheaper way to remove BOTH
+    approximations without weekly state-by-state data this corpus lacks.
+    """
+    name = IFTA_NAME[company]
+    rs = [r for r in _ifta()
+          if name in (r.get("legal_name") or "").upper()
+          and str(r.get("period_end")) in TAX_QUARTERS
+          and r.get("tax_due") and r.get("total_gallons")]
+    if not rs:
+        return None
+    tax = sum(r["tax_due"] for r in rs)
+    gallons = sum(r["total_gallons"] for r in rs)
+    miles = sum(r["total_miles"] for r in rs if r.get("total_miles"))
+    return {"tax": tax, "gallons": gallons, "per_gallon": tax / gallons,
+            "quarters": len(rs), "return_mpg": (miles / gallons) if miles else None}
 
 
 def oregon_per_mile(company, fuel):

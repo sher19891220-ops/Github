@@ -75,6 +75,22 @@ def test_fuel_tax_is_priced_per_mile_not_per_truck(ss):
         assert 0.0001 < f["per_mile"] < 0.05, c
 
 
+def test_fuel_tax_per_gallon_is_the_weekly_precision_alternative():
+    """The interim weekly IFTA step (operator, 2026-09-22): tax/gallons from
+    the same filed returns as fuel_tax_per_mile(), so a week's own real
+    gallons -- not an assumed quarterly-average mpg -- drives the estimate."""
+    for co in C.COMPANIES:
+        g = C.fuel_tax_per_gallon(co)
+        m = C.fuel_tax_per_mile(co)
+        assert g and m
+        assert g["per_gallon"] == pytest.approx(g["tax"] / g["gallons"])
+        assert g["quarters"] == m["quarters"]
+        # Same filed returns, so tax/gallons implied by return_mpg must
+        # reconstruct tax/miles: (tax/gallons) / mpg == tax/miles.
+        assert g["per_gallon"] / g["return_mpg"] == pytest.approx(m["per_mile"], rel=0.02)
+        assert 0.01 < g["per_gallon"] < 1.0, co
+
+
 def test_the_registration_rate_states_its_own_coverage(ss):
     """The file names 48 trucks against a group fleet of 93, so its per-truck
     figure is the cost of a truck it COVERS and the coverage must be visible."""

@@ -22,12 +22,19 @@ blended in here. A truck that changes kind mid-history is counted under
 whichever kind it actually ran as THAT week -- truck_weeks.py's own row,
 not a static classification.
 
-IFTA HERE IS STILL THE TRAILING, PER-MILE-RATE VERSION, NOT A REAL WEEKLY
-ENGINE. `cost_structure.fuel_tax_per_mile(company)` is one rate per
-company, derived from the LATEST available filed IFTA return -- applying
-it to every historical week assumes that rate held constant, which is
-merely the best available estimate until a real per-quarter join exists.
-Flagged here rather than presented as more precise than it is.
+IFTA HERE IS AN INTERIM WEEKLY-PRECISION STEP, NOT A REAL PER-JURISDICTION
+ENGINE. Operator, 2026-09-22: build a real IFTA engine and price weekly,
+not quarterly. A full per-jurisdiction weekly engine needs weekly
+state-by-state miles and fuel purchases this corpus does not have -- IFTA
+returns are themselves quarterly, state-by-state aggregates. What this
+DOES fix: `ifta_estimate` now applies the filed return's own average
+$/GALLON (`cost_structure.fuel_tax_per_gallon`) to THIS WEEK'S OWN REAL
+GALLONS, instead of the return's average $/MILE to this week's miles --
+removing the old method's silent assumption that every week ran at the
+return's own average mpg. The one assumption still baked in (this week's
+jurisdiction mix matches the filed return's average mix) has no cheaper
+fix without weekly state-level data. The old miles-based figure is kept
+alongside as `ifta_estimate_per_mile_method`, for comparison only.
 
 MONTH/QUARTER/YEAR ARE DERIVED FROM THE WEEK-ENDING DATE, NOT PRORATED. A
 week that spans a month or quarter boundary is credited whole to the
@@ -240,12 +247,18 @@ def weekly_rows(company):
     calculated, see _augment; the rest still real P&L figures), mpg, a
     trailing IFTA estimate, and trucks running that week."""
     tr = _augment(company)
-    ifta_rate = None
+    ifta_rate_per_mile = None
+    ifta_rate_per_gallon = None
     try:
         f = CS.fuel_tax_per_mile(company)
-        ifta_rate = f["per_mile"] if f else None
+        ifta_rate_per_mile = f["per_mile"] if f else None
     except Exception:
-        ifta_rate = None
+        ifta_rate_per_mile = None
+    try:
+        g_ = CS.fuel_tax_per_gallon(company)
+        ifta_rate_per_gallon = g_["per_gallon"] if g_ else None
+    except Exception:
+        ifta_rate_per_gallon = None
 
     rows = []
     for week, g in tr.groupby("week"):
@@ -263,8 +276,16 @@ def weekly_rows(company):
         }
         for f in CD_MONEY_FIELDS:
             row[f] = round(g[f].sum(), 2)
-        row["ifta_estimate"] = round(miles * ifta_rate, 2) if ifta_rate else None
-        row["ifta_rate_per_mile"] = ifta_rate
+        # Interim weekly-precision IFTA (operator, 2026-09-22): this week's
+        # OWN real gallons x the filed return's own $/gallon rate, not this
+        # week's miles x an assumed constant mpg -- see
+        # cost_structure.fuel_tax_per_gallon()'s docstring for why gallons
+        # is the better weekly base than miles. The old miles-based figure
+        # is kept alongside for comparison, not as the estimate used.
+        row["ifta_estimate"] = round(gallons * ifta_rate_per_gallon, 2) if ifta_rate_per_gallon else None
+        row["ifta_rate_per_gallon"] = ifta_rate_per_gallon
+        row["ifta_estimate_per_mile_method"] = round(miles * ifta_rate_per_mile, 2) if ifta_rate_per_mile else None
+        row["ifta_rate_per_mile"] = ifta_rate_per_mile
         rows.append(row)
     return pd.DataFrame(rows).sort_values("week").reset_index(drop=True)
 
@@ -378,6 +399,26 @@ def cost_breakdown_reference_with_rent():
             "distinct tiers per company (e.g. ZONE runs just 10 distinct values across 300 "
             "truck-weeks: $394.38 x118, $534.28 x114), set mainly to track insurance at cost."
         )
+    return out
+
+
+def ifta_reference():
+    """Per-company IFTA detail for the artifact's reference collection --
+    both the active per-gallon method and the superseded per-mile one, so
+    the IFTA info panel can show its own math rather than just a number."""
+    out = {}
+    for co in COMPANIES:
+        g = CS.fuel_tax_per_gallon(co)
+        m = CS.fuel_tax_per_mile(co)
+        out[co] = {
+            "method": "per_gallon",
+            "tax": g["tax"], "gallons": g["gallons"], "per_gallon": g["per_gallon"],
+            "quarters": g["quarters"], "return_mpg": g["return_mpg"],
+            "per_mile_method_reference": {
+                "tax": m["tax"], "miles": m["miles"], "per_mile": m["per_mile"],
+                "quarters": m["quarters"],
+            } if m else None,
+        }
     return out
 
 

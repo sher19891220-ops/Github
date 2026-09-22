@@ -2600,5 +2600,50 @@ Operator asked directly where several admin-fee figures come from:
   confirmed by inspection of the underlying data, not something that
   needed fixing.
 
+## The interim weekly IFTA step: gallons, not miles
+
+Operator, 2026-09-22: "build the interim weekly IFTA step now" -- following
+up on the flagged choice between building this now or waiting for real
+weekly per-jurisdiction data. A true per-jurisdiction weekly engine still
+needs weekly state-by-state miles and fuel purchases this corpus does not
+have (IFTA returns are themselves quarterly, state-by-state aggregates),
+so this is the interim fix that IS buildable from what this pipeline
+already measures every week: real gallons and real miles per company.
+
+**The old method's hidden assumption, made visible by reading a raw filed
+return.** Every parsed IFTA return (`cost_structure._ifta()`) already
+carries `total_gallons` and `computed_mpg` alongside `total_miles` and
+`tax_due` -- fields the old `fuel_tax_per_mile()` never touched. IFTA tax
+is fundamentally a tax on GALLONS BURNED, not on miles: `tax/miles` is
+really `(tax/gallons) x (gallons/miles)`, so applying that quarter's
+`tax/miles` rate to a week whose real mpg differs from the quarter's own
+average silently assumes that week ran at the quarter's mpg. A worse-
+loaded truck, cold-weather idling, or a week of short local runs all move
+real mpg without the old estimate ever noticing.
+
+**The fix: `cost_structure.fuel_tax_per_gallon(company)`**, mirroring
+`fuel_tax_per_mile()` but keying off `total_gallons` instead of
+`total_miles` -- same filed returns, same `TAX_QUARTERS` filter, so the two
+methods are directly comparable, not two different data sources drifting
+apart. `build_weekly_pnl_rollup.weekly_rows()`'s `ifta_estimate` now equals
+`this_week's_real_gallons x per_gallon_rate` instead of
+`this_week's_miles x per_mile_rate`; the superseded miles-based figure is
+kept alongside as `ifta_estimate_per_mile_method`, never silently dropped,
+so a past week's estimate can still be cross-checked against the old
+method. Verified: `(tax/gallons) / return_mpg == tax/miles` on the same
+filed returns, to within rounding -- confirming the new rate is not an
+independent guess but the exact same tax reallocated onto the exact same
+fuel-consumption base IFTA itself taxes.
+
+**What is still an approximation, named rather than hidden.** The per-
+gallon rate still assumes this week's MIX OF JURISDICTIONS matches the
+filed return's average mix -- the same kind of assumption the old method
+made about mpg instead. There is no cheaper way to remove both
+approximations without weekly state-by-state mileage and fuel-purchase
+data, which does not exist in this corpus. The artifact's IFTA panel now
+shows both figures side by side (the active gallons-based estimate and the
+old miles-based one) so the size of the difference is visible, not just
+asserted.
+
 ---
 

@@ -43,14 +43,14 @@ def test_mpg_is_recomputed_from_summed_inputs_not_averaged(weekly):
         assert r.mpg == pytest.approx(r.miles / r.gallons, abs=0.005)
 
 
-def test_ifta_estimate_scales_with_miles_at_a_fixed_rate(weekly):
-    """ifta_estimate = miles * ifta_rate_per_mile, exactly -- this module
-    doesn't invent its own IFTA math, it applies cost_structure.py's
-    already-established per-mile rate."""
-    check = weekly.dropna(subset=["ifta_estimate", "ifta_rate_per_mile"])
+def test_ifta_estimate_per_mile_method_scales_with_miles_at_a_fixed_rate(weekly):
+    """ifta_estimate_per_mile_method = miles * ifta_rate_per_mile, exactly --
+    the superseded method, kept only as a labeled comparison figure (see
+    test_ifta_estimate_uses_gallons_not_miles for the active method)."""
+    check = weekly.dropna(subset=["ifta_estimate_per_mile_method", "ifta_rate_per_mile"])
     assert len(check) > 0
     for _, r in check.iterrows():
-        assert r.ifta_estimate == pytest.approx(r.miles * r.ifta_rate_per_mile, abs=0.01)
+        assert r.ifta_estimate_per_mile_method == pytest.approx(r.miles * r.ifta_rate_per_mile, abs=0.01)
 
 
 @pytest.mark.parametrize("granularity", ["month", "quarter", "year"])
@@ -194,6 +194,31 @@ def test_motive_rate_differs_by_camera_installation():
     installed_unit = next(iter(rates["motive"]["installed_units"]))
     other_unit = "not-a-real-unit-number"
     assert R.admin_for_unit(installed_unit, rates) > R.admin_for_unit(other_unit, rates)
+
+
+def test_ifta_estimate_uses_gallons_not_miles(weekly):
+    """Operator, 2026-09-22: build the interim weekly-precision IFTA step.
+    ifta_estimate must now be gallons x per-gallon rate, not miles x
+    per-mile rate -- and the two methods must actually differ on a real
+    week (if a week's mpg matched the quarter's average exactly they could
+    coincide, but not across an entire company's history)."""
+    import cost_structure as CS
+    co = "ZONE"
+    rows = weekly[weekly.company == co].dropna(subset=["ifta_estimate", "ifta_rate_per_gallon"])
+    assert len(rows) > 0
+    for _, r in rows.iterrows():
+        assert r.ifta_estimate == pytest.approx(r.gallons * r.ifta_rate_per_gallon, abs=0.01)
+    assert "ifta_estimate_per_mile_method" in weekly.columns
+    differing = (rows.ifta_estimate - weekly.loc[rows.index, "ifta_estimate_per_mile_method"]).abs()
+    assert (differing > 0.01).any()
+
+
+def test_ifta_reference_names_both_methods():
+    ref = R.ifta_reference()
+    for co in R.COMPANIES:
+        assert ref[co]["method"] == "per_gallon"
+        assert ref[co]["per_gallon"] > 0
+        assert ref[co]["per_mile_method_reference"]["per_mile"] > 0
 
 
 def test_occupational_accident_is_excluded_from_the_insurance_reference():
