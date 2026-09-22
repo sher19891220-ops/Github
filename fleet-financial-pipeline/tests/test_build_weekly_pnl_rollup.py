@@ -219,6 +219,20 @@ def test_ifta_reference_names_both_methods():
         assert ref[co]["method"] == "per_gallon"
         assert ref[co]["per_gallon"] > 0
         assert ref[co]["per_mile_method_reference"]["per_mile"] > 0
+        assert ref[co]["weight_distance"]["total_per_mile"] > 0
+
+
+def test_weekly_rows_carry_a_separate_weight_distance_field(weekly):
+    """Operator, 2026-09-22: build the weight-distance engine so it shows
+    company costs per week -- as its own field, never merged into
+    ifta_estimate (a different tax, on a different basis)."""
+    assert "weight_distance_tax_estimate" in weekly.columns
+    rows = weekly.dropna(subset=["weight_distance_tax_estimate", "weight_distance_rate_per_mile"])
+    assert len(rows) > 0
+    for _, r in rows.iterrows():
+        assert r.weight_distance_tax_estimate == pytest.approx(
+            r.miles * r.weight_distance_rate_per_mile, abs=0.01)
+        assert r.weight_distance_tax_estimate != pytest.approx(r.ifta_estimate, abs=0.01)
 
 
 def test_occupational_accident_is_excluded_from_the_insurance_reference():

@@ -2645,5 +2645,69 @@ shows both figures side by side (the active gallons-based estimate and the
 old miles-based one) so the size of the difference is visible, not just
 asserted.
 
+## Weight-distance taxes: a SEPARATE tax from IFTA, priced by real mile-share
+
+Operator uploaded a blank Illinois MFUT-15 IFTA return calculator template
+alongside five per-mile rates (Oregon 25.1c, Connecticut 10c, New Mexico
+5.9c, New York 5.5c, Kentucky 2.85c, all for an 80,000 lb combination
+vehicle), then asked to "build ifta engine which will show company costs
+per week." Reading the uploaded template first was the right call: its own
+jurisdiction rate table prices CT diesel fuel at $0.524/gal, KY at
+$0.234/gal, NM at $0.21/gal, NY at $0.3875/gal -- all per-GALLON standard
+IFTA fuel tax, completely separate line items from the operator's per-MILE
+rates. These five states each run their own WEIGHT-DISTANCE or highway-use
+tax on heavy trucks (Oregon's Weight-Mile Tax, Connecticut's Highway Use
+Fee, New Mexico's Weight-Distance Tax, New York's HUT, Kentucky's KYU),
+charged per mile ON TOP OF (Oregon: INSTEAD OF -- its IFTA rate is blank in
+the template, confirming the existing corpus finding that Oregon miles
+carry a 0.00 IFTA rate) standard fuel tax. Conflating the two would have
+double-counted nothing, but priced the wrong tax against the wrong rate.
+
+**The missing ingredient turned out to already be in the corpus.** Every
+parsed IFTA return (`cost_structure._ifta()`) carries a full `jurisdictions`
+dict -- state-by-state MILES for that quarter -- that nothing in this
+pipeline had used for anything except the Oregon-miles-at-0.00-rate check.
+That is real, filed, quarterly per-state mileage, the exact ingredient a
+weight-distance estimate needs and the exact thing repeatedly flagged this
+session as "not in this corpus." It was there the whole time, just
+unused for this purpose.
+
+**`cost_structure.weight_distance_tax_per_mile(company)`**
+(`config/weight_distance_tax_rates.json` holds the five rates): for each
+state, that state's SHARE of the company's total filed-return miles times
+the operator's schedule rate, summed to one blended $/mile add-on --
+applying a state's mile-share uniformly to every week, the same
+approximation `fuel_tax_per_gallon()` already makes about the jurisdiction
+mix. Real numbers:
+
+    ZONE     OR 0.13%+CT 2.76%+NM 1.35%+NY 4.92%+KY 1.98% of miles -> $0.007115/mi
+    XTRACK   OR 0.18%+CT 2.78%+NM 1.28%+NY 6.98%+KY 2.17% of miles -> $0.008452/mi
+    AFG      OR 0.63%+CT 1.96%+NM 1.97%+NY 4.40%+KY 1.71% of miles -> $0.007624/mi
+
+**Oregon is the one exception, priced from a real filed return where one
+exists, not the schedule rate.** This corpus already has REAL filed
+Oregon weight-mile returns for ZONE (`ingest/parse_oregon.py`,
+`cost_structure.oregon_per_mile()`) -- $0.000284/mi, close to but not the
+same as the $0.000325/mi the schedule-rate method would estimate, a
+believable cross-check. `weight_distance_tax_per_mile()` uses that real
+figure for ZONE and falls back to the schedule estimate only where no
+filed Oregon return exists (XTRACK's gap quarters, AFG entirely -- AFG has
+no Oregon account on record, per the existing `oregon_gap.py` finding).
+
+**Wired in as its own field, `weight_distance_tax_estimate`, never merged
+into `ifta_estimate`.** Same principle as Trailer Rent/Admin earlier this
+session: two different taxes on two different bases stay visibly separate
+rather than summed into one number that hides which part moved. The
+artifact gained a "WD Tax est." column and its own info panel (state-by-
+state, each line naming whether it is the real Oregon figure or a schedule
+estimate) alongside the existing IFTA panel.
+
+**What this still is not: a true per-jurisdiction WEEKLY engine.** The
+mile-SHARE is still a quarterly average applied to every week; getting a
+real weekly number needs weekly state-by-state mileage, which remains
+unavailable. This is a materially better estimate than not pricing these
+taxes at all, priced from real filed-return jurisdiction data rather than
+invented shares -- not a claim that the corpus gap is closed.
+
 ---
 

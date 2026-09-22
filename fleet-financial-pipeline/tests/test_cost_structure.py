@@ -91,6 +91,39 @@ def test_fuel_tax_per_gallon_is_the_weekly_precision_alternative():
         assert 0.01 < g["per_gallon"] < 1.0, co
 
 
+def test_weight_distance_tax_is_a_separate_charge_from_standard_ifta():
+    """Operator, 2026-09-22, after uploading a blank IFTA calculator that
+    confirmed OR/CT/NM/NY/KY charge a SEPARATE weight-distance tax on top
+    of (Oregon: instead of) standard IFTA fuel tax. Every state's line must
+    use a real mile count from the filed returns' own jurisdictions dict,
+    and the five lines must sum to the reported total."""
+    for co in C.COMPANIES:
+        wd = C.weight_distance_tax_per_mile(co)
+        assert wd
+        assert set(wd["lines"]) == {"OR", "CT", "NM", "NY", "KY"}
+        assert wd["total_per_mile"] == pytest.approx(sum(v["per_mile"] for v in wd["lines"].values()))
+        for state, line in wd["lines"].items():
+            assert line["miles"] >= 0
+            assert line["per_mile"] >= 0
+        assert 0 < wd["total_per_mile"] < 0.05, co
+
+
+def test_oregons_weight_distance_line_prefers_the_real_filed_return():
+    """ZONE has a real filed Oregon return in this corpus -- its OR line
+    must come from that (oregon_per_mile), not the schedule-rate estimate
+    every other state uses."""
+    wd = C.weight_distance_tax_per_mile("ZONE")
+    assert wd["lines"]["OR"]["source"] == "real_filed_oregon_return"
+    fuel = C.fuel_tax_per_mile("ZONE")
+    real_oregon = C.oregon_per_mile("ZONE", fuel)
+    assert wd["lines"]["OR"]["per_mile"] == pytest.approx(real_oregon["per_mile"])
+    # AFG has no Oregon account on record -- must fall back to the schedule
+    # estimate, never to zero.
+    wd_afg = C.weight_distance_tax_per_mile("AFG")
+    assert wd_afg["lines"]["OR"]["source"] == "schedule_estimate"
+    assert wd_afg["lines"]["OR"]["per_mile"] > 0
+
+
 def test_the_registration_rate_states_its_own_coverage(ss):
     """The file names 48 trucks against a group fleet of 93, so its per-truck
     figure is the cost of a truck it COVERS and the coverage must be visible."""

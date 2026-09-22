@@ -1,0 +1,16 @@
+{
+  "_note": "Operator-supplied 2026-09-22 (uploaded alongside a blank Illinois MFUT-15 IFTA return calculator template, which confirmed these are a DIFFERENT tax from standard IFTA fuel tax -- that template's own jurisdiction rate table prices CT diesel fuel at $0.524/gal, KY at $0.234/gal, NM at $0.21/gal and NY at $0.3875/gal, all separate line items from the per-mile rates below). These five states each run their own WEIGHT-DISTANCE or highway-use tax on heavy trucks, charged per mile on top of (Oregon: instead of) standard IFTA fuel tax: Oregon's Weight-Mile Tax, Connecticut's Highway Use Fee (since 2023), New Mexico's Weight-Distance Tax, New York's Highway Use Tax (HUT), and Kentucky's KYU (Weight Distance Tax). Rates are the operator's stated per-mile figures for an 80,000-lb combination vehicle -- actual per-truck rates are tiered by declared/registered weight, so a truck registered below 80,000 lbs would owe a lower rate than shown here; this is a fleet-wide approximation, not a truck-specific one.",
+  "rates_per_mile_80000lb": {
+    "OR": 0.251,
+    "CT": 0.10,
+    "NM": 0.059,
+    "NY": 0.055,
+    "KY": 0.0285
+  },
+  "OR_note": "Oregon ALSO has real, filed weight-mile tax returns in this corpus (ingest/parse_oregon.py, analysis/oregon_gap.py) for ZONE and partially for XTRACK -- cost_structure.oregon_per_mile() uses those REAL figures where a filed return exists, and only falls back to this schedule rate x mile-share estimate where it does not (XTRACK's gap quarters, AFG entirely -- AFG has no Oregon account on record).",
+  "CT_note": "Connecticut's Highway Use Fee is charged on vehicles with a gross weight over 26,000 lbs -- separate from, and in addition to, the CT diesel IFTA fuel tax already priced in the filed IFTA returns.",
+  "KY_note": "KYU applies to vehicles over 59,999 lbs.",
+  "NM_note": "New Mexico's Weight-Distance Tax rate scales by declared weight bracket; 0.059 is the operator's stated figure for the 80,000 lb bracket.",
+  "NY_note": "New York's Highway Use Tax offers a truck-weight method (used here) or an unloaded-weight method; 0.055 is the operator's stated truck-weight-method figure for 80,000 lbs.",
+  "source": "Operator, chat, 2026-09-22 -- official state tax schedules, not independently verified against a primary state filing in this corpus."
+}

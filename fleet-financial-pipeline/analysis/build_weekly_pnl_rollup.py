@@ -259,6 +259,12 @@ def weekly_rows(company):
         ifta_rate_per_gallon = g_["per_gallon"] if g_ else None
     except Exception:
         ifta_rate_per_gallon = None
+    wd_rate_per_mile = None
+    try:
+        wd = CS.weight_distance_tax_per_mile(company)
+        wd_rate_per_mile = wd["total_per_mile"] if wd else None
+    except Exception:
+        wd_rate_per_mile = None
 
     rows = []
     for week, g in tr.groupby("week"):
@@ -286,6 +292,14 @@ def weekly_rows(company):
         row["ifta_rate_per_gallon"] = ifta_rate_per_gallon
         row["ifta_estimate_per_mile_method"] = round(miles * ifta_rate_per_mile, 2) if ifta_rate_per_mile else None
         row["ifta_rate_per_mile"] = ifta_rate_per_mile
+        # Weight-distance taxes (OR/CT/NM/NY/KY) -- a SEPARATE tax from
+        # standard IFTA fuel tax, priced by cost_structure.
+        # weight_distance_tax_per_mile(): OR from a real filed return where
+        # one exists, the other four (and OR where it does not) from that
+        # state's mile-share x the operator's schedule rate. Kept as its
+        # own field, never merged into ifta_estimate above.
+        row["weight_distance_tax_estimate"] = round(miles * wd_rate_per_mile, 2) if wd_rate_per_mile else None
+        row["weight_distance_rate_per_mile"] = wd_rate_per_mile
         rows.append(row)
     return pd.DataFrame(rows).sort_values("week").reset_index(drop=True)
 
@@ -403,13 +417,16 @@ def cost_breakdown_reference_with_rent():
 
 
 def ifta_reference():
-    """Per-company IFTA detail for the artifact's reference collection --
-    both the active per-gallon method and the superseded per-mile one, so
-    the IFTA info panel can show its own math rather than just a number."""
+    """Per-company IFTA + weight-distance detail for the artifact's
+    reference collection -- the active per-gallon fuel-tax method, the
+    superseded per-mile one, and the separate weight-distance tax
+    breakdown (OR/CT/NM/NY/KY), so the IFTA info panel can show its own
+    math rather than just a number."""
     out = {}
     for co in COMPANIES:
         g = CS.fuel_tax_per_gallon(co)
         m = CS.fuel_tax_per_mile(co)
+        wd = CS.weight_distance_tax_per_mile(co)
         out[co] = {
             "method": "per_gallon",
             "tax": g["tax"], "gallons": g["gallons"], "per_gallon": g["per_gallon"],
@@ -418,6 +435,7 @@ def ifta_reference():
                 "tax": m["tax"], "miles": m["miles"], "per_mile": m["per_mile"],
                 "quarters": m["quarters"],
             } if m else None,
+            "weight_distance": wd,
         }
     return out
 
@@ -433,7 +451,8 @@ def _period_key(week, granularity):
     raise ValueError(granularity)
 
 
-SUM_FIELDS = ("gross", "miles", "gallons", "result", "ifta_estimate") + CD_MONEY_FIELDS
+SUM_FIELDS = ("gross", "miles", "gallons", "result", "ifta_estimate",
+              "weight_distance_tax_estimate") + CD_MONEY_FIELDS
 
 
 def rollup(weekly, granularity):

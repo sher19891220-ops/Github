@@ -159,6 +159,67 @@ def oregon_per_mile(company, fuel):
 
 
 @functools.lru_cache(maxsize=None)
+def _weight_distance_rates():
+    import json
+    return json.loads((ROOT / "config" / "weight_distance_tax_rates.json").read_text())
+
+
+def weight_distance_tax_per_mile(company):
+    """The five states that charge a separate WEIGHT-DISTANCE / highway-use
+    tax on heavy trucks -- on top of (Oregon: instead of) standard IFTA fuel
+    tax. Operator, 2026-09-22, after uploading a blank IFTA return
+    calculator that confirmed these are a different tax from the standard
+    per-gallon fuel tax already priced by fuel_tax_per_gallon(): Oregon's
+    Weight-Mile Tax, Connecticut's Highway Use Fee, New Mexico's
+    Weight-Distance Tax, New York's Highway Use Tax, and Kentucky's KYU.
+
+    THIS CORPUS HAS NO WEEKLY STATE-BY-STATE MILEAGE, so this prices each
+    state the same interim way as fuel_tax_per_gallon(): that state's SHARE
+    of this company's total miles, from the same filed IFTA returns'
+    `jurisdictions` breakdown (already parsed, previously unused for
+    anything but the Oregon gap check), times the operator-supplied
+    official per-mile rate for an 80,000 lb combination vehicle
+    (config/weight_distance_tax_rates.json). Applying a state's share
+    uniformly to every week assumes that week's routing matched the filed
+    return's average mix -- the same assumption named in
+    fuel_tax_per_gallon()'s docstring.
+
+    OREGON IS THE ONE EXCEPTION, PRICED FROM A REAL FILED RETURN INSTEAD OF
+    THE SCHEDULE RATE, WHEN ONE EXISTS. oregon_per_mile() already prices
+    Oregon from this company's own filed Oregon weight-mile returns
+    (ingest/parse_oregon.py) -- real, not a schedule estimate -- and is used
+    in place of the schedule-rate contribution whenever it is available
+    (ZONE). Where no filed Oregon return exists for this company (XTRACK's
+    gap quarters, AFG entirely), the schedule-rate estimate is used and
+    marked as such, never left at zero.
+    """
+    cfg = _weight_distance_rates()
+    rates = cfg["rates_per_mile_80000lb"]
+    name = IFTA_NAME[company]
+    rs = [r for r in _ifta()
+          if name in (r.get("legal_name") or "").upper()
+          and str(r.get("period_end")) in TAX_QUARTERS and r.get("total_miles")]
+    if not rs:
+        return None
+    total_miles = sum(r["total_miles"] for r in rs)
+    lines = {}
+    for state, rate in rates.items():
+        state_miles = sum((r.get("jurisdictions") or {}).get(state, 0) for r in rs)
+        share = state_miles / total_miles if total_miles else 0.0
+        lines[state] = {"miles": state_miles, "share": share, "rate": rate,
+                        "per_mile": share * rate, "source": "schedule_estimate"}
+
+    f = fuel_tax_per_mile(company)
+    oreg = oregon_per_mile(company, f) if f else None
+    if oreg:
+        lines["OR"] = {"miles": oreg["oregon_miles"], "share": None, "rate": None,
+                       "per_mile": oreg["per_mile"], "source": "real_filed_oregon_return"}
+
+    total_per_mile = sum(v["per_mile"] for v in lines.values())
+    return {"lines": lines, "total_per_mile": total_per_mile, "quarters": len(rs)}
+
+
+@functools.lru_cache(maxsize=None)
 def _registration():
     """The IRP workbook, the fleet registry and the attribution, done once.
 
