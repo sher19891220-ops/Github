@@ -2474,5 +2474,131 @@ pasted in chat -- at which point the actual integration code (an
 query module) can be written and tested without this pipeline, or this
 session, ever holding the raw values itself.
 
+## Admin, Rent and Trailer Rent are now CALCULATED per truck, never read from the sheet
+
+Operator, 2026-09-22, several corrections in one message: "admin cost do
+not get from google sheet get that from calculation that we did priorly...
+unit rent insurance cost do not get from google sheets but from
+calculations we did priorly... trailers make extra column for trailer rent
+only, remove it from admin side." `build_weekly_pnl_rollup.py`'s
+`_augment()` now computes `admin`/`rent`/`trailer_rent` for every truck-week
+from `admin_for_unit()`/`rent_for_unit()` (new module functions) instead of
+reading `truck_weeks.py`'s sheet-sourced `admin`/`rent` columns at all --
+`weekly_rows()` and `truck_rows()` share this one computation, so the two
+grains can never drift. `result` is recomputed from these calculated
+figures for the same reason -- carrying the sheet's own `result` alongside
+calculated cost components would silently mix two different bases.
+
+**Admin = insurance + the admin-fee vendor costs (Motive priced per truck,
+see below), uniform otherwise across a company's fleet** for lack of any
+more granular real source. **Trailer Rent is its own field now**, no longer
+implied inside Admin -- still `fixed_costs.py`'s allocated rate per
+company, unchanged in value, just no longer bundled.
+
+**Rent, per truck: Iron Lease's own formula on that truck's own miles, or
+the outside-lease average.** `rent_for_unit(unit, miles, rates)`: if the
+unit is in `truck_weeks.IRON_RATE_CARD`, rent = $900 base +
+$0.15/mile x THIS TRUCK'S ACTUAL MILES THAT WEEK (verified: unit 15909, 0
+miles that week, prices at exactly $900.00) -- not the earlier "base x
+share of fleet" blended average, which the operator explicitly asked to
+stop showing. A non-Iron-Lease truck gets `cost_structure.py`'s
+`rent_outside_per_week` (a company-level average of this company's own
+non-Iron P&L rent rows) -- a calculated figure, but still not a real
+per-vendor (Penske/Ryder/STL) rate, which remains pending real numbers from
+the operator, same as flagged earlier this session.
+
+## Occupational accident is recovered from the driver, not a company cost
+
+Operator, 2026-09-22: "occupational accident ocac paid by driver ... are
+you calculating it companies cost?" -- yes, `insurance_cost.py`'s
+`per_company()` was including it in the company-cost total. Fixed at the
+source: the key is renamed `occupational_accident_RECOVERED_FROM_DRIVER`
+(matching the existing `_ESTIMATED`/`_benchmark` suffix convention this
+module already uses to flag a line that needs different handling than a
+plain addable cost), excluded from `main()`'s printed totals and from
+`build_weekly_pnl_rollup.cost_breakdown_reference()`'s insurance figure.
+The reasoning: OCAC is billed and paid by the company, then deducted back
+from the driver's settlement -- the exact same recovery pattern CLAUDE.md
+already documents for a Truck Max repair invoice -- so counting it as a
+net company cost double-counts money the company never actually keeps.
+Kept in the register (real, billed, worth knowing exists) but excluded
+from every total. Confirmed safe: grepped every other caller of
+`insurance_cost.per_company()` in this repo -- only this file's own
+`cost_breakdown_reference()` consumes the line-item dict programmatically,
+everything else only references the module in prose, so the rename could
+not silently change any other established number.
+
+## Motive priced per truck: camera-installed trucks vs. everyone else
+
+Operator, 2026-09-22: "motive you can divide to cameras we have from
+motive count and consolidate between motive installed trucks only per
+truck price and rest consolidate between all other trucks." Read literally
+from the invoice's own line items (`config/telematics_costs.json`), not
+hardcoded: the three dashcam-only plans (Driver Safety + Fleet Management +
+Communications) total $25,200 over the 36-month contract; the AG-Mini
+tracker software plan nets against its matching "Sales Credit - SW" line
+(both are the only two line items sharing "SW" -- and only pairing them
+this way reconstructs the already-established $229.81/wk total exactly) to
+$10,650 over the same 36 months. Split:
+
+    dashcam total $161.54/wk ÷ 15 trucks with a known installed camera = $10.77/truck-week
+    tracker total  $68.27/wk ÷ 75 other trucks (90-truck fleet)        =  $0.91/truck-week
+    check: 15x10.77 + 75x0.91 = $229.80 ≈ established $229.81/wk
+
+A truck's own Admin now uses whichever of these two applies to its unit
+number (`_motive_rates()`'s `installed_units` set, from the invoice's own
+`unit_list_supplied`); the company-level reference figure blends each
+company's own known installed-camera count (ZONE 4, XTRACK 4, AFG 4, 3
+unresolved) against its total truck count for a representative average.
+
+## Two items flagged back to the operator rather than guessed
+
+**Trailer rent by type.** Operator: AFG and XTRACK run open-deck trailers
+(flatbed, stepdeck) at their own separate monthly/weekly rates, open-deck
+should be AFG-only, and reefers split between AFG and XTRACK. No real
+per-type dollar figures exist anywhere in this corpus yet, so
+`fixed_costs.py`'s one blended allocated rate per company stays in place
+(now surfaced as its own column, per the change above) with an explicit
+note naming this gap, rather than inventing a flatbed/stepdeck/reefer
+split with no invoice behind it.
+
+**A true weekly IFTA engine.** Operator: build a real IFTA engine and
+compute weekly miles/gallons for a precise weekly cost, not the current
+quarterly-trailing rate. `cost_structure.fuel_tax_per_mile()` already gives
+the best AVAILABLE per-mile rate (from the latest filed quarterly return);
+a genuinely weekly engine needs jurisdiction-by-jurisdiction miles and fuel
+purchases for each week, which this corpus does not have -- IFTA returns
+are themselves quarterly, state-by-state aggregates, not weekly. This
+week's own real miles and gallons ARE already available per company
+(`weekly_rows()`), so a scoped interim step (recompute using this week's
+own mpg against the filed return's own average per-gallon tax rate,
+instead of a flat historical per-mile rate) is buildable without new data
+-- a full per-jurisdiction weekly split is not, without either new weekly
+state-mileage data or a different data source than what is in this corpus
+today. Not built this session pending the operator's choice between the
+two.
+
+## Provenance answers, on the record
+
+Operator asked directly where several admin-fee figures come from:
+
+- **Transponders** ($3.94/$3.96/$4.06 per truck-week, XTRACK/ZONE/AFG):
+  `config/telematics_costs.json`'s `prepass_bestpass_transponders` --
+  the PrePass/BestPass invoice cross-referenced device-by-device (EQUIP ID)
+  against `ingest/fleet_registry.py`'s fleet registry, confirmed 2026-09-08
+  to cover trucks from all three companies despite billing under ZONE-OH's
+  name alone.
+- **Samsara** ($7.88/truck-week, fleet-wide): the same file's `samsara`
+  section -- ZONE-OH's own Sept-2026 invoice ($2,194.36 for 65 trucks'
+  dashcam/streaming plan), spread over the whole 90-truck fleet since the
+  invoice gives only aggregate quantities, no per-truck unit list, and
+  PrePass already proved a ZONE-OH-billed account can cover all three
+  companies once checked at the device level.
+- **Toll is already per-truck, not consolidated.** Every truck's own
+  `toll` figure in the truck-by-truck table is that unit's real P&L toll
+  charge for that week (unchanged by this session's admin/rent work) --
+  confirmed by inspection of the underlying data, not something that
+  needed fixing.
+
 ---
 

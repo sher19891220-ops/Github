@@ -35,6 +35,7 @@ period its own tab-name week-ending date falls in -- consistent with how
 every other calendar rollup in this corpus already works (docs/CATALOG.md,
 QUARTERS in analysis/pnl_accuracy.py).
 """
+import functools
 import sys
 from pathlib import Path
 
@@ -46,15 +47,199 @@ import cost_structure as CS  # noqa: E402
 import truck_weeks as T      # noqa: E402
 
 COMPANIES = ("ZONE", "XTRACK", "AFG")
-CD_MONEY_FIELDS = ("driver_pay", "admin", "fuel", "rent", "toll", "additional", "other")
+CD_MONEY_FIELDS = ("driver_pay", "admin", "fuel", "rent", "trailer_rent", "toll", "additional", "other")
+TRUCK_MONEY_FIELDS = CD_MONEY_FIELDS
+SHEET_MONEY_FIELDS = ("driver_pay", "fuel", "toll", "additional", "other")  # unchanged, still from the P&L
+
+
+@functools.lru_cache(maxsize=None)
+def _motive_rates():
+    """Real per-truck Motive cost, split by whether a truck has an
+    installed dashcam or not. Operator, 2026-09-22: "divide to cameras we
+    have from motive count and consolidate between motive installed trucks
+    only per truck price and rest consolidate between all other trucks."
+    Computed from the invoice's own line items (config/telematics_costs.json),
+    not hardcoded: the three dashcam-only plans (Driver Safety + Fleet
+    Management + Communications, $25,200 over the 36-month contract) split
+    across the 15 trucks with a known installed unit; the AG-Mini tracker
+    software plan, net of its matching "Sales Credit - SW" ($10,650 over
+    36 months -- the credit name and the software line are the only two
+    that share "SW", and only that pairing reconstructs the established
+    $229.81/wk total exactly), split across the other 75 trucks (the same
+    90-truck fleet-wide denominator used everywhere else in this file)."""
+    import json
+    cfg = json.loads((ROOT / "config" / "telematics_costs.json").read_text())
+    m = cfg["motive"]
+    li = m["line_items"]
+    months = m["period_months"]
+    weeks_per_month = 52 / 12
+    dashcam_keys = ("Driver Safety Plan - AI Dashcam Plus Dual-Facing",
+                    "Fleet Management Plan - AI Dashcam Plus Dual-Facing",
+                    "Communications Plan - AI Dashcam Plus")
+    dashcam_total = sum(li[k]["amount"] for k in dashcam_keys)
+    tracker_total = li["AG-Mini Powered Software Plan"]["amount"] + li["Sales Credit - SW"]["amount"]
+    installed_units = {str(u).strip() for u in m["unit_list_supplied"]}
+    total_trucks = m["fleet_wide_motive_per_truck_week"]["trucks"]
+    n_installed = len(installed_units)
+    n_other = total_trucks - n_installed
+    dashcam_wk_total = dashcam_total / months / weeks_per_month
+    tracker_wk_total = tracker_total / months / weeks_per_month
+    per_installed = round(dashcam_wk_total / n_installed, 2)
+    per_other = round(tracker_wk_total / n_other, 2)
+    # Fleet-wide truck counts, same denominator as driver_arrangement_rates.
+    # json's samsara/verizon/pedigree figures (17 AFG + 32 ZONE + 41 XTRACK).
+    company_trucks = {"AFG": 17, "ZONE": 32, "XTRACK": 41}
+    installed_by_company = dict(m["by_company_resolved"])
+    installed_by_company.pop("unresolved", None)
+    company_avg = {}
+    for co, total in company_trucks.items():
+        n_co_installed = len(installed_by_company.get(co, []))
+        n_co_other = total - n_co_installed
+        company_avg[co] = round(
+            (n_co_installed * per_installed + n_co_other * per_other) / total, 2)
+    return {
+        "installed_units": installed_units,
+        "per_installed_truck_week": per_installed,
+        "per_other_truck_week": per_other,
+        "n_installed": n_installed, "n_other": n_other,
+        "company_avg_per_truck_week": company_avg,
+    }
+
+
+@functools.lru_cache(maxsize=None)
+def _per_truck_cost_rates(co):
+    """Every per-truck-week rate this module needs to price Admin, Trailer
+    Rent, and truck Rent -- computed once per company, from calculations
+    already established elsewhere in this pipeline, NEVER from the P&L
+    sheet's own Admin/Rent columns. Operator, 2026-09-22: "admin cost do
+    not get from google sheet get that from calculation that we did
+    priorly... unit rent insurance cost do not get from google sheets but
+    from calculations we did priorly." Motive is kept separate from the
+    rest of the admin fee because it is NOT uniform per truck (see
+    _motive_rates); everything else here (insurance, the other six
+    admin-fee vendors, trailer rent) is uniform across a company's trucks
+    for lack of any more granular real source."""
+    import fixed_costs as FC
+    import insurance_cost as IC
+    import driver_arrangement as DA
+
+    reg = IC.load()
+    ins = IC.per_company(reg)
+    trucks_on_schedule = {"ZONE": 28, "XTRACK": 24, "AFG": 8}  # IC.main()'s own printed counts
+    # Excludes "_benchmark" (XTRACK's own 3-unit policy does not cover the
+    # whole fleet) and "_RECOVERED_FROM_DRIVER" (occupational accident is
+    # billed by the company but deducted back from the driver's settlement,
+    # so it is not a net company cost -- see insurance_cost.py).
+    insurance_lines = {k: round(v / 52 / trucks_on_schedule[co], 2)
+                       for k, v in ins[co].items()
+                       if not k.endswith("_benchmark") and not k.endswith("_RECOVERED_FROM_DRIVER")}
+
+    rates = DA.load_rates()
+    admin_fee_block = rates["admin_fee_actual_cost_per_truck_week"]
+    admin_fee_lines = dict(admin_fee_block["by_company_per_truck_week"][co])
+    fleet_wide = admin_fee_block["fleet_wide_not_split_by_company"]
+    admin_fee_lines.update({
+        "samsara": fleet_wide["samsara_per_truck_week"],
+        "verizon": fleet_wide["verizon_per_truck_week"],
+        "pedigree_tpms": fleet_wide["pedigree_tpms_per_truck_week"],
+    })
+    admin_fee_lines = {k: v for k, v in admin_fee_lines.items() if v is not None}
+
+    s = CS.structure(co)
+    m = s["m"]
+    return {
+        "insurance_lines": insurance_lines,
+        "insurance_per_truck_week": round(sum(insurance_lines.values()), 2),
+        "admin_fee_lines_excl_motive": admin_fee_lines,
+        "admin_fee_excl_motive_per_truck_week": round(sum(admin_fee_lines.values()), 2),
+        "motive": _motive_rates(),
+        "trailer_rent_per_truck_week": FC.RATES[co]["Trailer rent"],
+        "outside_lease_rent_per_week": round(m["rent_outside_per_week"], 2),
+        "iron_lease_base_per_week": m["rent_iron_base"],
+        "iron_lease_mileage_rate_per_mile": m["rent_iron_per_mile"],
+        "structure": s,
+    }
+
+
+def _motive_for_unit(unit, motive_rates):
+    u = str(unit).strip()
+    return (motive_rates["per_installed_truck_week"] if u in motive_rates["installed_units"]
+            else motive_rates["per_other_truck_week"])
+
+
+def admin_for_unit(unit, rates):
+    """insurance + the six uniform admin-fee vendors + this specific
+    truck's own Motive rate (camera-installed vs. other) -- see
+    _per_truck_cost_rates and _motive_rates."""
+    return round(rates["insurance_per_truck_week"] + rates["admin_fee_excl_motive_per_truck_week"]
+                 + _motive_for_unit(unit, rates["motive"]), 2)
+
+
+def rent_for_unit(unit, miles, rates):
+    """Iron Lease trucks: the real rate-card formula (flat base + $/mile on
+    THIS truck's own miles this week) -- not a fleet-wide blend. Every
+    other truck: the outside/market lease average measured from this
+    company's own non-Iron-Lease P&L rent rows (cost_structure.py's
+    rent_outside_per_week) -- a calculated figure, not that truck's raw
+    sheet value, but still not a real per-vendor (Penske/Ryder/STL) rate;
+    those remain pending real numbers from the operator."""
+    u = str(unit).strip()
+    if u in T.IRON_RATE_CARD:
+        base, per_mile = T.IRON_RATE_CARD[u]
+        return round(base + per_mile * (miles or 0), 2)
+    return rates["outside_lease_rent_per_week"]
+
+
+def _augment(company):
+    """One row per (week, unit) for this company's company-driver fleet,
+    with admin/rent/trailer_rent computed from _per_truck_cost_rates/
+    admin_for_unit/rent_for_unit rather than read from the sheet -- driver
+    pay, fuel, toll, additional and other are untouched, still real P&L
+    figures."""
+    tw = T.truck_weeks(company)
+    cd = tw[tw.kind == "company_driver"].copy()
+    rates = _per_truck_cost_rates(company)
+    rows = []
+    for (week, unit), g in cd.groupby(["week", "unit"]):
+        r = g.iloc[0]
+        u = str(unit).strip()
+        row = {
+            "company": company, "week": week, "unit": u,
+            "driver": r.get("driver", ""), "gross": round(r.gross, 2),
+            "miles": round(r.miles, 1), "gallons": round(r.gallons, 1),
+            "mpg": round(r.miles / r.gallons, 2) if r.gallons else None,
+        }
+        for f in SHEET_MONEY_FIELDS:
+            row[f] = round(r[f], 2)
+        row["admin"] = admin_for_unit(u, rates)
+        row["rent"] = rent_for_unit(u, r.miles, rates)
+        row["trailer_rent"] = rates["trailer_rent_per_truck_week"]
+        # result is recomputed, not carried from the sheet: it must reflect
+        # the calculated admin/rent/trailer_rent above, not the sheet's own
+        # bundled Insur/Admin/Trl and Truck Rental figures.
+        row["result"] = round(
+            row["gross"] - row["driver_pay"] - row["admin"] - row["fuel"] - row["rent"]
+            - row["trailer_rent"] - row["toll"] + row["additional"] + row["other"], 2)
+        rows.append(row)
+    return pd.DataFrame(rows).sort_values(["week", "unit"]).reset_index(drop=True)
+
+
+def truck_rows(company):
+    """One row per company-driver truck per week -- the drill-down behind
+    a weekly summary row."""
+    return _augment(company)
+
+
+def all_truck_rows():
+    return pd.concat([truck_rows(co) for co in COMPANIES], ignore_index=True)
 
 
 def weekly_rows(company):
     """One row per week for this company's company-driver fleet: gross,
-    miles, gallons, the CD cost components, mpg, a trailing IFTA estimate,
-    and trucks running that week."""
-    tw = T.truck_weeks(company)
-    cd = tw[tw.kind == "company_driver"].copy()
+    miles, gallons, the CD cost components (admin/rent/trailer_rent
+    calculated, see _augment; the rest still real P&L figures), mpg, a
+    trailing IFTA estimate, and trucks running that week."""
+    tr = _augment(company)
     ifta_rate = None
     try:
         f = CS.fuel_tax_per_mile(company)
@@ -63,7 +248,7 @@ def weekly_rows(company):
         ifta_rate = None
 
     rows = []
-    for week, g in cd.groupby("week"):
+    for week, g in tr.groupby("week"):
         running = g[g.gross > 0]
         miles = g.miles.sum()
         gallons = g.gallons.sum()
@@ -88,105 +273,26 @@ def all_weekly_rows():
     return pd.concat([weekly_rows(co) for co in COMPANIES], ignore_index=True)
 
 
-TRUCK_MONEY_FIELDS = ("driver_pay", "admin", "fuel", "rent", "toll", "additional", "other")
-
-
-def truck_rows(company):
-    """One row per company-driver truck per week -- the drill-down behind
-    a weekly summary row. Same fields as weekly_rows(), at truck grain,
-    plus the driver name from that week's own P&L block."""
-    tw = T.truck_weeks(company)
-    cd = tw[tw.kind == "company_driver"].copy()
-    rows = []
-    for (week, unit), g in cd.groupby(["week", "unit"]):
-        r = g.iloc[0]
-        row = {
-            "company": company, "week": week, "unit": str(unit).strip(),
-            "driver": r.get("driver", ""), "gross": round(r.gross, 2),
-            "miles": round(r.miles, 1), "gallons": round(r.gallons, 1),
-            "mpg": round(r.miles / r.gallons, 2) if r.gallons else None,
-            "result": round(r.result, 2),
-        }
-        for f in TRUCK_MONEY_FIELDS:
-            row[f] = round(r[f], 2)
-        rows.append(row)
-    return pd.DataFrame(rows).sort_values(["week", "unit"]).reset_index(drop=True)
-
-
-def all_truck_rows():
-    return pd.concat([truck_rows(co) for co in COMPANIES], ignore_index=True)
-
-
 def cost_breakdown_reference():
-    """What 'Admin', 'Rent' and 'IFTA est.' actually consist of, per
-    company -- NOT a decomposition of the P&L's own bundled figures (the
-    sheet books them as one column each and does not itemize), but the
-    best independently-SOURCED figures this pipeline has for each named
-    sub-component, so the gap between 'what the sheet books' and 'what
-    the pieces actually cost' is visible rather than papered over.
-
-    Sources, each already established elsewhere in this pipeline:
-      truck_rent      cost_structure.py's rent_base_per_week -- Iron
-                      Lease/market blend, TRUCK rent only.
-      insurance       analysis/insurance_cost.py's PER TRUCK-WEEK figure
-                      (auto liability at its EFFECTIVE post-return-premium
-                      rate, physical damage, cargo, occupational
-                      accident) -- covers the whole insured fleet
-                      (company-driver AND owner-operator), not CD-only.
-      admin_fee       config/driver_arrangement_rates.json's
-                      admin_fee_actual_cost_per_truck_week -- MEASURED
-                      from real ELD/Samsara/Verizon/Pedigree/IFTA-admin
-                      invoices and bank/card data, not the stated fee.
-      trailer_rent    config/... fixed_costs.py's RATES table -- an
-                      ALLOCATED rate, not measured from cash (that
-                      module's own docstring already flags the sibling
-                      truck-rent rate as stale; treat this the same way
-                      until it is checked against a real trailer-lease
-                      invoice).
-
-    THE PIECES DO NOT SUM TO THE SHEET'S OWN 'ADMIN' COLUMN, ON PURPOSE:
-    that mismatch is real and already visible in this pipeline (docs/
-    FINDINGS.md, 2026-09-08/09/21/22 entries) -- reporting a forced match
-    would hide it.
+    """What 'Admin', 'Trailer Rent' and 'Rent' actually consist of, per
+    company -- built from _per_truck_cost_rates(), the SAME function
+    admin_for_unit()/rent_for_unit() use to price every truck row, so this
+    reference can never drift from what the weekly/truck tables actually
+    show. Nothing here reads the P&L sheet's own Admin or Rent columns.
+    Operator, 2026-09-22: "admin cost do not get from google sheet get
+    that from calculation that we did priorly, and from those brakedowns
+    ... unit rent insurance cost do not get from google sheets but from
+    calculations we did priorly."
     """
-    import fixed_costs as FC
-    import insurance_cost as IC
-    import driver_arrangement as DA
-
-    reg = IC.load()
-    ins = IC.per_company(reg)
-    trucks_on_schedule = {"ZONE": 28, "XTRACK": 24, "AFG": 8}  # IC.main()'s own printed counts
-    rates = DA.load_rates()
-    admin_fee_block = rates["admin_fee_actual_cost_per_truck_week"]
-    admin_fee_rates = admin_fee_block["total_measured_per_truck_week"]
-    per_company_admin = admin_fee_block["by_company_per_truck_week"]
-    fleet_wide_admin = admin_fee_block["fleet_wide_not_split_by_company"]
-
     out = {}
     for co in COMPANIES:
-        # Line-by-line, per truck-week -- excludes anything ending "_benchmark":
-        # XTRACK's own 3-unit Benchmark package only covers those 3 trucks, so
-        # spreading its cost across all 24 units on the schedule would
-        # misallocate a policy that does not cover the whole fleet.
-        insurance_lines = {k: round(v / 52 / trucks_on_schedule[co], 2)
-                           for k, v in ins[co].items() if not k.endswith("_benchmark")}
-        insurance_per_truck_week = sum(insurance_lines.values())
-
-        admin_fee_lines = dict(per_company_admin[co])
-        admin_fee_lines.update({
-            "samsara": fleet_wide_admin["samsara_per_truck_week"],
-            "verizon": fleet_wide_admin["verizon_per_truck_week"],
-            "pedigree_tpms": fleet_wide_admin["pedigree_tpms_per_truck_week"],
-            "motive": fleet_wide_admin["motive_per_truck_week"],
-        })
-        admin_fee_lines = {k: v for k, v in admin_fee_lines.items() if v is not None}
-
+        rates = _per_truck_cost_rates(co)
+        motive = rates["motive"]
         out[co] = {
-            "truck_rent_per_truck_week": None,  # filled from cost_structure.structure() by the caller
-            "insurance_per_truck_week": round(insurance_per_truck_week, 2),
-            "insurance_lines": insurance_lines,
+            "insurance_per_truck_week": rates["insurance_per_truck_week"],
+            "insurance_lines": rates["insurance_lines"],
             "insurance_covers": "whole insured fleet (CD + OO), auto liability at its effective "
-                                "post-return-premium rate + physical damage + cargo + occ. accident",
+                                "post-return-premium rate + physical damage + cargo",
             "insurance_excludes_note":
                 ("XTRACK's own 3-unit Benchmark package ($51.06/truck-week if spread over just "
                  "those 3 trucks) is tracked separately since it does not cover the whole fleet. "
@@ -195,62 +301,82 @@ def cost_breakdown_reference():
                  "yet (the bills show a rising balance, not a closed annual figure), so this AFG "
                  "insurance figure is a floor, not the whole cost. "
                  if co == "AFG" else "") +
+                "Occupational accident premium is billed by the company but deducted back from "
+                "the driver's settlement, so it is NOT counted here -- see insurance_cost.py. "
                 "Workers' compensation ($120/month, ZONE-OH only) is tracked in config/"
                 "insurance.json but is not yet folded into this per-truck-week figure.",
-            "admin_fee_measured_per_truck_week": admin_fee_rates.get(co),
-            "admin_fee_lines": admin_fee_lines,
-            "trailer_rent_per_truck_week": FC.RATES[co]["Trailer rent"],
-            "trailer_rent_note": "ALLOCATED rate, not measured from a trailer-lease invoice -- "
-                                 "treat like fixed_costs.py's own stale-truck-rent caveat.",
+            "admin_fee_lines": dict(rates["admin_fee_lines_excl_motive"],
+                                    motive_camera_installed_trucks=motive["per_installed_truck_week"],
+                                    motive_other_trucks=motive["per_other_truck_week"]),
+            "admin_fee_measured_per_truck_week": round(
+                rates["admin_fee_excl_motive_per_truck_week"]
+                + motive["company_avg_per_truck_week"][co], 2),
+            "admin_fee_note": f"Motive is split by whether a truck actually has a camera "
+                f"installed: {motive['n_installed']} trucks fleet-wide currently do, at "
+                f"${motive['per_installed_truck_week']}/truck-week each; the other "
+                f"{motive['n_other']} carry ${motive['per_other_truck_week']}/truck-week "
+                f"(the unassigned trackers/spare cameras, still real cost). The figure above "
+                f"blends {co}'s own known installed-camera count into a company average "
+                f"(${motive['company_avg_per_truck_week'][co]}/truck-week); a specific truck's "
+                f"own Admin in the truck-by-truck table uses whichever rate actually applies "
+                f"to it, not this blend.",
+            "trailer_rent_per_truck_week": rates["trailer_rent_per_truck_week"],
+            "trailer_rent_note": "ALLOCATED rate, not yet broken out by trailer type. Operator, "
+                "2026-09-22: AFG runs open-deck trailers (flatbed/stepdeck) that ZONE/XTRACK do "
+                "not, and reefers split between AFG and XTRACK, each at its own monthly/weekly "
+                "rate -- real per-type rates are not yet in this pipeline, so this remains one "
+                "blended allocated figure per company until they are supplied.",
         }
     return out
 
 
 def cost_breakdown_reference_with_rent():
-    """cost_breakdown_reference() plus each company's real truck-rent
-    figure from cost_structure.structure(), which needs the full P&L +
-    IRP/IFTA read cost_structure.py already pays elsewhere -- kept as a
-    separate call so a caller that only wants the cheap reference figures
-    isn't forced to pay for a full structure() build."""
+    """cost_breakdown_reference() plus each company's truck-rent detail --
+    the same Iron-Lease-rate-card-or-outside-lease-average calculation
+    rent_for_unit() applies to every truck row, shown as the actual
+    arithmetic rather than a 'base x share of fleet' blend. Needs the full
+    P&L + IRP/IFTA read cost_structure.py already pays elsewhere, so this
+    is a separate call from cost_breakdown_reference() for callers that
+    only want the cheaper figures."""
     out = cost_breakdown_reference()
     for co in COMPANIES:
-        s = CS.structure(co)
+        rates = _per_truck_cost_rates(co)
+        s = rates["structure"]
         m = s["m"]
-        out[co]["truck_rent_per_truck_week"] = round(s["fixed"]["truck rent, base"], 2)
-        mileage_component = round(m["rent_per_mile"] * m["miles_per_truck"], 2)
+        iron_base = rates["iron_lease_base_per_week"]
+        iron_rate = rates["iron_lease_mileage_rate_per_mile"]
+        avg_miles = round(m["miles_per_truck"], 1)
+        iron_lease_example_per_truck_week = round(iron_base + iron_rate * avg_miles, 2)
+        out[co]["truck_rent_per_truck_week"] = iron_lease_example_per_truck_week
         out[co]["truck_rent_detail"] = {
-            "iron_lease_share": round(m["iron_share"], 4),
-            "iron_lease_base_per_week": m["rent_iron_base"],
-            "outside_lease_share": round(1 - m["iron_share"], 4),
-            "outside_lease_rent_per_week": round(m["rent_outside_per_week"], 2),
-            "iron_lease_mileage_rate_per_mile": round(m["rent_iron_per_mile"], 4),
-            "avg_miles_per_truck_week": round(m["miles_per_truck"], 1),
-            "fleet_weighted_mileage_component_per_truck_week": mileage_component,
-            "all_in_truck_rent_per_truck_week": round(s["fixed"]["truck rent, base"] + mileage_component, 2),
-            "note": "The figure shown as \"Truck Rent\" is the BASE blend only -- Iron "
-                    "Lease's flat $900/week base weighted by the share of the fleet on Iron "
-                    "Lease, plus everything else at its own P&L-measured rent. An Iron Lease "
-                    "truck ALSO pays $0.15/mile on top of that base; fleet-wide that averages "
-                    "to the mileage component above (the $0.15 rate weighted by the Iron "
-                    "Lease share, times this fleet's average weekly miles). That mileage "
-                    "add-on is NOT included in the base figure -- this pipeline currently "
-                    "folds it into the fleet's variable cost-per-mile instead, alongside fuel "
-                    "and tolls, so it never shows up next to Rent on the weekly P&L.",
+            "iron_lease_base_per_week": iron_base,
+            "iron_lease_mileage_rate_per_mile": iron_rate,
+            "avg_miles_per_truck_week": avg_miles,
+            "iron_lease_example_per_truck_week": iron_lease_example_per_truck_week,
+            "outside_lease_rent_per_week": rates["outside_lease_rent_per_week"],
+            "iron_lease_share_of_fleet": round(m["iron_share"], 4),
+            "note": "Rent is calculated per truck, not read from the sheet. An Iron Lease "
+                    f"truck's rent is ${iron_base:,.0f}/week base + ${iron_rate:.2f}/mile x its "
+                    "OWN miles that week -- shown here at this fleet's average weekly miles as "
+                    "an example, but the truck-by-truck table applies it to each truck's real "
+                    "miles. A truck that is not on Iron Lease (roughly "
+                    f"{round((1 - m['iron_share']) * 100)}% of this fleet) carries the "
+                    "outside/market-lease average shown above instead -- a calculated company "
+                    "average, not that truck's own raw sheet figure, since real per-vendor "
+                    "(Penske/Ryder/STL) rates are not yet in this pipeline.",
         }
         out[co]["admin_insurance_trailer_booked_per_truck_week"] = round(s["fixed"]["admin / insurance / trailer"], 2)
         cb = out[co]
-        real_sum = (cb["insurance_per_truck_week"] + (cb["admin_fee_measured_per_truck_week"] or 0)
+        real_sum = (cb["insurance_per_truck_week"] + cb["admin_fee_measured_per_truck_week"]
                     + cb["trailer_rent_per_truck_week"])
         out[co]["gap_per_truck_week"] = round(cb["admin_insurance_trailer_booked_per_truck_week"] - real_sum, 2)
         out[co]["gap_explanation"] = (
-            "The sheet's own Insur/Admin/Trl column was never built by adding these three "
-            "things -- it is a hand-set weekly charge with only a handful of distinct tiers "
-            "per company (e.g. ZONE runs just 10 distinct values across 300 truck-weeks: "
-            "$394.38 x118, $534.28 x114), set mainly to track insurance at cost. It carries "
-            "little to none of the trailer-rent allocation and only a rough allowance for the "
-            "admin-fee vendor costs (IFTA/ELD/Samsara/Verizon/Motive/Pedigree) named above, so "
-            "it does not move when those real costs move. The gap is that mismatch, not a "
-            "data error."
+            "This is a reference point only -- the Admin and Trailer Rent shown on the P&L "
+            "are the calculated figures above, not this sheet figure. The sheet's own "
+            "Insur/Admin/Trl column was never built by adding insurance, the admin-fee vendor "
+            "costs and trailer rent -- it is a hand-set weekly charge with only a handful of "
+            "distinct tiers per company (e.g. ZONE runs just 10 distinct values across 300 "
+            "truck-weeks: $394.38 x118, $534.28 x114), set mainly to track insurance at cost."
         )
     return out
 

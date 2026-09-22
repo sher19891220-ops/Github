@@ -123,3 +123,83 @@ def test_a_week_spanning_two_months_is_credited_to_one_month_only():
     assert R._period_key("2026-02-01", "month") == "2026-02"
     assert R._period_key("2026-03-31", "quarter") == "2026-Q1"
     assert R._period_key("2026-04-01", "quarter") == "2026-Q2"
+
+
+def test_admin_is_calculated_not_the_sheets_own_column():
+    """Operator, 2026-09-22: 'admin cost do not get from google sheet get
+    that from calculation that we did priorly.' A truck's admin must equal
+    insurance + admin-fee (Motive included, whichever rate applies to that
+    unit), computed by admin_for_unit() -- never read off the row."""
+    co = "ZONE"
+    tk = R.truck_rows(co)
+    rates = R._per_truck_cost_rates(co)
+    for _, row in tk.head(20).iterrows():
+        assert row.admin == pytest.approx(R.admin_for_unit(row.unit, rates), abs=0.01)
+
+
+def test_trailer_rent_is_its_own_field_separate_from_admin():
+    """Operator, 2026-09-22: 'trailers make extra column for trailer rent
+    only, remove it from admin side.'"""
+    tk = R.truck_rows("ZONE")
+    assert "trailer_rent" in tk.columns
+    rates = R._per_truck_cost_rates("ZONE")
+    assert (tk.trailer_rent == rates["trailer_rent_per_truck_week"]).all()
+    # Admin must not itself equal insurance + admin-fee + trailer_rent --
+    # trailer rent is excluded from the admin calculation entirely.
+    for _, row in tk.head(5).iterrows():
+        assert row.admin != pytest.approx(
+            rates["insurance_per_truck_week"] + rates["trailer_rent_per_truck_week"], abs=0.01)
+
+
+def test_iron_lease_trucks_get_the_rate_card_formula_on_their_own_miles():
+    """Operator, 2026-09-22: rent should be 'base pay ... from iron lease
+    + milage (0.15 * miles driven)' -- this truck's own miles, not a
+    fleet-wide blend."""
+    import truck_weeks as T
+    co = "ZONE"
+    iron_units = [u for u in T.IRON_RATE_CARD if u in set(R.truck_rows(co).unit)]
+    assert iron_units, "expected at least one Iron Lease unit in ZONE's company-driver fleet"
+    tk = R.truck_rows(co)
+    rates = R._per_truck_cost_rates(co)
+    sample = tk[tk.unit == iron_units[0]].iloc[0]
+    base, per_mile = T.IRON_RATE_CARD[iron_units[0]]
+    assert sample.rent == pytest.approx(base + per_mile * sample.miles, abs=0.01)
+    assert sample.rent != pytest.approx(rates["outside_lease_rent_per_week"], abs=0.01)
+
+
+def test_non_iron_trucks_get_the_outside_lease_average_not_the_sheet():
+    import truck_weeks as T
+    co = "ZONE"
+    tk = R.truck_rows(co)
+    rates = R._per_truck_cost_rates(co)
+    non_iron = tk[~tk.unit.isin(T.IRON_RATE_CARD.keys())]
+    assert len(non_iron) > 0
+    assert (non_iron.rent == rates["outside_lease_rent_per_week"]).all()
+
+
+def test_motive_split_reconstructs_the_established_fleet_total():
+    """The camera-installed and other-truck rates must add back to the
+    $229.81/wk total telematics_costs.json already establishes -- if this
+    ever drifts, the split stopped being a split of the same invoice."""
+    m = R._motive_rates()
+    total = (m["n_installed"] * m["per_installed_truck_week"]
+             + m["n_other"] * m["per_other_truck_week"])
+    assert total == pytest.approx(229.81, abs=0.5)
+    assert m["per_installed_truck_week"] > m["per_other_truck_week"]
+
+
+def test_motive_rate_differs_by_camera_installation():
+    co = "ZONE"
+    rates = R._per_truck_cost_rates(co)
+    installed_unit = next(iter(rates["motive"]["installed_units"]))
+    other_unit = "not-a-real-unit-number"
+    assert R.admin_for_unit(installed_unit, rates) > R.admin_for_unit(other_unit, rates)
+
+
+def test_occupational_accident_is_excluded_from_the_insurance_reference():
+    """Operator, 2026-09-22: OCAC is recovered from the driver, so it must
+    not inflate the company-cost insurance figure shown here."""
+    bd = R.cost_breakdown_reference()
+    for co in R.COMPANIES:
+        assert not any(k.endswith("_RECOVERED_FROM_DRIVER") for k in bd[co]["insurance_lines"])
+        assert "Occupational accident" in bd[co]["insurance_excludes_note"]

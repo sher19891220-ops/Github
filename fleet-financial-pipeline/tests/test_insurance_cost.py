@@ -133,3 +133,16 @@ def test_trailer_physical_damage_is_flagged_as_an_estimate(reg, by):
     assumption and the key says so."""
     for co in by:
         assert any(k.endswith("_ESTIMATED") for k in by[co])
+
+
+def test_occupational_accident_is_recorded_but_not_a_company_cost(reg, by):
+    """Operator, 2026-09-22: the driver's occupational accident premium is
+    paid by the company and then deducted back from the driver's settlement
+    -- the same recovery pattern as a Truck Max repair invoice -- so it is
+    real, billed, and named, but must never land in a company-cost total."""
+    assert any(k.endswith("_RECOVERED_FROM_DRIVER") for co in by for k in by[co])
+    for co in by:
+        recovered = sum(v for k, v in by[co].items() if k.endswith("_RECOVERED_FROM_DRIVER"))
+        assert recovered > 0
+        net_total = sum(v for k, v in by[co].items() if not k.endswith("_RECOVERED_FROM_DRIVER"))
+        assert net_total == pytest.approx(sum(by[co].values()) - recovered)

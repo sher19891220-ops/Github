@@ -8,7 +8,12 @@ them is the mistake this module exists to prevent:
     per dollar of value  physical damage -- 4.50% of Total Insured Value a year
     per dollar of gross  ZONE's motor truck cargo -- $0.70 per $100 of revenue
     PER MILE             XTRACK's second cargo layer -- $1.43 per 100 miles
-    per owner-operator   occupational accident -- $107 a month
+    per owner-operator   occupational accident -- $107 a month (RECOVERED FROM
+                         THE DRIVER'S SETTLEMENT, operator 2026-09-22 -- billed
+                         and paid by the company, deducted back the same way a
+                         Truck Max repair invoice is, so it is NOT a net
+                         company cost; kept in the register, excluded from
+                         every company-cost total this module prints)
 
 So a truck that stops running still costs its auto liability, its excess cargo
 and its physical damage in full, stops costing the mileage-rated cargo entirely,
@@ -108,8 +113,16 @@ def per_company(reg, gross_per_week=None, miles_per_week=None):
             "physical_damage_trailers_ESTIMATED": vpd_total * (1 - unit_share_of_tiv) * share_units,
         }
         # The NTL/PD invoice is one bill covering both, so it is not split out.
+        # RECOVERED_FROM_DRIVER, not a company cost: operator, 2026-09-22 --
+        # occupational accident premium is paid by the company but deducted
+        # back from the driver's settlement, the same recovery pattern as a
+        # Truck Max repair invoice (CLAUDE.md's "recovery chain"). Kept in
+        # this register because it is a real, measured, billed line -- but
+        # the suffix marks it for exclusion from any company-cost total the
+        # same way "_ESTIMATED"/a "_benchmark" name flags a line that needs
+        # different handling than a plain addable cost.
         if oac_actual:
-            lines["occupational_accident"] = oac_actual * share_units
+            lines["occupational_accident_RECOVERED_FROM_DRIVER"] = oac_actual * share_units
         if co == "ZONE":
             lines["motor_truck_cargo"] = cargo_z["annual_total"]
             lines["excess_motor_truck_cargo"] = excess["annual_total"]
@@ -202,8 +215,13 @@ def main():
     for n in names:
         row = [by[c].get(n) or 0.0 for c in by]
         print(f"  {n:<38}" + "".join(f"{v:>13,.0f}" for v in row) + f"{sum(row):>13,.0f}")
-    tot = {c: sum(v.values()) for c, v in by.items()}
-    print(f"  {'TOTAL ANNUAL':<38}" + "".join(f"{tot[c]:>13,.0f}" for c in by)
+    # RECOVERED_FROM_DRIVER lines are real, billed, and shown above line by
+    # line -- but they are not a net company cost, so they are excluded here
+    # exactly like "own_package_benchmark" is excluded from a fleet-wide
+    # figure it does not belong in.
+    tot = {c: sum(v for k, v in row.items() if not k.endswith("_RECOVERED_FROM_DRIVER"))
+           for c, row in by.items()}
+    print(f"  {'TOTAL ANNUAL (net company cost)':<38}" + "".join(f"{tot[c]:>13,.0f}" for c in by)
           + f"{sum(tot.values()):>13,.0f}")
     print(f"  {'PER WEEK':<38}" + "".join(f"{tot[c] / WEEKS:>13,.0f}" for c in by)
           + f"{sum(tot.values()) / WEEKS:>13,.0f}")
