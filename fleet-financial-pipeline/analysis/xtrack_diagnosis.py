@@ -22,8 +22,15 @@ a mileage figure and produces a revenue-per-mile of 7.42 instead of 2.9.
 Every field here is therefore located by reading the block's own header row and
 matching on the label. Nothing is read by fixed position.
 
-An 'LO' marker appears in column A on lease-to-own rows inside an
-owner-operator block.
+An 'LO' marker was once thought to appear in column A on lease-to-own rows
+inside an owner-operator block -- RULED OUT 2026-09-22 (see analysis/
+driver_arrangement.py). Checked against the raw workbooks: 'LO' sits at a
+VARYING position inside a truck's own per-load row sequence (Unit# row,
+then load 1, load 2, 'LO', more loads...), usually carrying a real gross
+dollar figure, across all three companies. A per-driver lease-arrangement
+flag would appear once, at a fixed position, per truck -- this doesn't.
+It is a per-LOAD annotation (most likely a load-type code), not a marker
+of CD/OO/lease-to-purchase/lease-to-walk-away. Do not read it as one.
 """
 import argparse
 import collections

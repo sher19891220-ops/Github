@@ -2101,3 +2101,59 @@ directly -- this entry is the narrative, those are the source of record.
 
 ---
 
+## 2026-09-22 -- the 'LO' marker was never an arrangement flag, and wiring
+## LTP/LTWA/OO into the cost model hits a real, named data gap
+
+**Ruled out empirically, not by re-reading the same docstring.** A
+2026-09-04 session's docstring guessed an 'LO' marker in column A meant a
+lease-to-own row, and it was never actually turned into code -- just left
+as an unconfirmed observation. Asked to "wire up CD/LTP/LTWA/OO" (the
+operator's own terms), checking that guess against the raw workbooks
+before building on it found it doesn't hold: across ZONE, XTRACK and AFG,
+'LO' sits at a VARYING position inside a truck's own per-load row sequence
+(the unit's own row, then load 1, load 2, sometimes 'LO', more loads...),
+usually carrying a real gross dollar figure. A per-driver lease-
+arrangement flag would sit once, at a fixed position, per truck -- this
+doesn't. It reads as a per-LOAD annotation (most likely a load-type code),
+unrelated to CD/OO/LTP/LTWA. Corrected in `analysis/xtrack_diagnosis.py`'s
+own docstring so the wrong guess doesn't get re-read as settled next time.
+
+**There is no per-truck roster distinguishing OO from lease-to-purchase
+from lease-to-walk-away anywhere in this pipeline's ingested corpus.**
+`config/driver_arrangement_rates.json` already had the STATED rate card
+for all three (added 2026-09-08, unrelated to this session) -- what it has
+never had is a mapping saying which actual truck/driver is on which. That
+file's own note names the candidate source: the operator's "Iron lease
+Leased trucks" Google Sheet (id 1X28pWOL4DDTpml9ZcNyqiukUVLxrSn5qmu0riI-
+gAOg), not yet ingested by anything in `ingest/`. Guessing this mapping
+from the P&L sheet's own owner-operator/company-driver split would be
+wrong on its face -- that split is CD vs. everyone else, it carries no
+information about which "everyone else" truck is OO vs. LTP vs. LTWA.
+
+**What was built instead: the capability to price a truck under a NAMED
+arrangement, ready for that roster once it exists.** `analysis/
+driver_arrangement.py` reads the three stated rate cards and builds a
+`breakeven_engine.CostInputs` from any of them -- `cost_inputs("lease_to_
+purchase", miles_driven=...)` runs straight through the same, already-
+tested break-even math company-driver trucks use, rather than a new
+formula. It takes the arrangement as an explicit argument (prices "a
+truck on LTP," not "truck 2703") because a truck's arrangement can also
+change mid-life (docs/ACCOUNTING_MODEL.md Section 3), so a future roster
+join needs to be per-week, not a static unit-to-arrangement table.
+`overhead_pct_of_gross` defaults to 0.0 for all three -- the revenue-
+linked company-overhead share was measured from company-driver economics
+only and has not been checked against OO/LTP/LTWA.
+
+**A real, sanity-checked property came out of wiring it up**: lease-to-
+walk-away's rate card is $100/week cheaper in fixed cost than lease-to-
+purchase ($1,650 vs $1,750) but adds a $0.13/mi surcharge LTP does not
+carry. At this fleet's real weekly mileage (2,000-3,000 mi, per `truck_
+breakeven.py`'s own `miles_per_truck`), that surcharge outweighs the fixed
+gap and LTP ends up the cheaper rate/mile of the two -- only below about
+769 mi/week does LTWA's lower fixed cost win out. Neither rate card has
+been reconciled against a real settlement yet (the file's own open
+question: truck 2703 is actually charged $1,500/week against a $75,000
+LTP balance, not the $1,000 `truck_payment` stated here).
+
+---
+
