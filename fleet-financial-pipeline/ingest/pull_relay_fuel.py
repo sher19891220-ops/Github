@@ -12,17 +12,38 @@ has to know whether a transaction arrived by upload or by API call.
 THIS FILE IS A SCAFFOLD, NOT A FINISHED INTEGRATION -- SAID PLAINLY RATHER
 THAN HIDDEN. `read_credentials()`, the env-var-over-file pattern, and the
 never-print-key-material discipline below are complete and match this
-project's other credential-handling modules (see `pull_sheets.py`). What is
-NOT yet confirmed is Relay's own API shape: `docs.relaypayments.com` (and the
-mirrors `relaypayments.readme.io`, `www.relaypayments.com/developers`) all
-return 401/404 without the docs-portal login the operator was given
-separately -- and that login was intentionally never used or stored here (see
-docs/FINDINGS.md, 2026-09-22, "Live API credentials pasted into chat"). So:
+project's other credential-handling modules (see `pull_sheets.py`) -- kept as
+a fallback for running this pipeline somewhere without the mechanism below.
 
-  - BASE_URL below is a PLACEHOLDER, not a confirmed host. Do not trust it.
-  - `whoami()` calls one guessed low-cost endpoint to prove the key works --
-    it is explicit that the path is unconfirmed, and it fails with a clear,
-    actionable message (never a silent wrong success) if that guess is wrong.
+THE PRIMARY MECHANISM, as of 2026-09-23, is this Claude Code environment's own
+"API credentials" feature (environment settings -> API credentials): the
+operator registered RELAY_PAYMENTS_API_KEY there, scoped to the single allowed
+host `api.relaypayments.com`, with an `Authorization: Bearer <key>` header
+injected by the environment's own outbound proxy on every request to that
+host. A session run in that environment NEVER holds or sees the raw key in
+this mode -- `whoami()` below makes a request with no auth header of its own,
+and the proxy attaches the real one in transit. This is a stronger guarantee
+than an env var (which code can still read directly), so it is tried first;
+the env-var/file path below only matters if RELAY_PAYMENTS_API_KEY happens to
+also be set as an ordinary variable somewhere else this runs.
+
+`api.relaypayments.com` itself is still NOT independently confirmed against
+Relay's own docs -- `docs.relaypayments.com` (and the mirrors
+`relaypayments.readme.io`, `www.relaypayments.com/developers`) all return
+401/404 without the docs-portal login the operator was given separately, and
+that login was intentionally never used or stored here (see docs/FINDINGS.md,
+2026-09-22, "Live API credentials pasted into chat"). A second host, given
+verbally as "the official alternative pattern used by their underlying
+internal infrastructure" and written as the unparseable string
+`"://relaypayments.com"`, was deliberately NOT wired in here: it is not a
+valid URL, and it did not trace back to anything from Relay itself (dashboard,
+docs, or support) -- treating it as a real fallback host would repeat exactly
+the kind of unverified guess this module has argued against from the start.
+
+  - `whoami()` below tries several UNCONFIRMED candidate endpoint paths
+    against the one host that is actually wired up, and reports each
+    response plainly -- a non-404 response is the first real signal of the
+    correct path; 404 across the board most likely means the host is wrong.
   - `parse_transaction()`, which would map one API transaction object into
     the load_relay() row shape, is NOT implemented. Guessing that mapping and
     being wrong would silently put real fuel dollars in the wrong column --
@@ -73,12 +94,16 @@ CREDS = ROOT / "config" / "relay_payments_credentials.json"
 ENV_VAR_PROD = "RELAY_PAYMENTS_API_KEY"
 ENV_VAR_STAGING = "RELAY_PAYMENTS_STAGING_API_KEY"
 
-# UNCONFIRMED -- a placeholder host, not a value read from Relay's own docs
-# (which this session could not reach without the login it declined to use).
-# Replace with the real base URL once docs.relaypayments.com is reachable, or
-# once a real call under --whoami reveals the working host.
-BASE_URL_PROD = "https://api.relaypayments.com"      # UNCONFIRMED
-BASE_URL_STAGING = "https://api.staging.relaypayments.com"  # UNCONFIRMED
+# api.relaypayments.com is the host wired into this environment's own
+# API-credential injection (see docstring) -- not yet proven correct until a
+# live whoami() call returns something other than a connection failure.
+BASE_URL_PROD = "https://api.relaypayments.com"
+BASE_URL_STAGING = "https://api.staging.relaypayments.com"  # UNCONFIRMED, no credential wired for this host
+
+# UNCONFIRMED candidate paths, tried in order by whoami(). "transactions" is
+# tried first because the operator said this key has "transactions API
+# endpoints enabled" specifically.
+CANDIDATE_ENDPOINTS = ("/v1/transactions", "/v1/account", "/v1/me")
 
 # The row shape ingest_rails.py's load_relay() already produces from Relay's
 # .xlsx exports -- parse_transaction() must return a dict with exactly these
@@ -120,55 +145,62 @@ def read_credentials(use_staging=False):
     return key, str(CREDS)
 
 
-def whoami():
-    """Proves whichever key is available loads and is accepted by SOME Relay
-    endpoint, before anything else runs. Tries the production key first, then
-    staging -- prints ONLY which key source was used and whether the call
-    succeeded, never the key itself.
-
-    THE ENDPOINT PATH BELOW IS A GUESS ("/v1/account" or similar convention),
-    NOT A CONFIRMED RELAY ENDPOINT. A 404 here most likely means the path is
-    wrong, not that the key is bad -- this function says so explicitly rather
-    than reporting a bad key when the real problem is an unconfirmed URL.
-    """
+def _probe(url, key=None):
+    """One GET against a live Relay endpoint. `key`, if given, is added as a
+    manual Authorization header (the env-var/file fallback path) -- otherwise
+    no auth header is set here at all, relying entirely on this environment's
+    own proxy to inject one for the allowed host. Never raises: returns
+    (status_or_None, body_bytes) so whoami() can report every candidate."""
     import urllib.error
     import urllib.request
+    headers = {"Accept": "application/json"}
+    if key:
+        headers["Authorization"] = f"Bearer {key}"
+    req = urllib.request.Request(url, headers=headers)
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            return resp.status, resp.read(500)
+    except urllib.error.HTTPError as e:
+        return e.code, e.read(500)
+    except urllib.error.URLError as e:
+        return None, str(e.reason).encode()
 
-    for use_staging, label in ((False, "production"), (True, "staging")):
-        try:
-            key, where = read_credentials(use_staging=use_staging)
-        except SystemExit:
-            continue
-        base = BASE_URL_STAGING if use_staging else BASE_URL_PROD
-        guessed_endpoint = f"{base}/v1/account"  # UNCONFIRMED
-        req = urllib.request.Request(
-            guessed_endpoint,
-            headers={"Authorization": f"Bearer {key}", "Accept": "application/json"})
-        try:
-            with urllib.request.urlopen(req, timeout=15) as resp:
-                print(f"  key source: {where} ({label})")
-                print(f"  {guessed_endpoint} -> HTTP {resp.status}: reachable and accepted")
-                return True
-        except urllib.error.HTTPError as e:
-            print(f"  key source: {where} ({label})")
-            if e.code in (401, 403):
-                print(f"  {guessed_endpoint} -> HTTP {e.code}: endpoint reachable, "
-                      f"key REJECTED -- confirm the key is active for this host")
-            else:
-                print(f"  {guessed_endpoint} -> HTTP {e.code}: endpoint path is most likely "
-                      f"wrong (this URL was never confirmed against Relay's real docs) -- "
-                      f"the key itself may be fine")
-            return False
-        except urllib.error.URLError as e:
-            print(f"  key source: {where} ({label})")
-            print(f"  {guessed_endpoint} -> could not connect ({e.reason}) -- "
-                  f"BASE_URL_{'STAGING' if use_staging else 'PROD'} is a placeholder, "
-                  f"most likely wrong")
-            return False
 
-    print(f"  Neither ${ENV_VAR_PROD} nor ${ENV_VAR_STAGING} is set, and no local "
-          f"fallback file exists at {CREDS}.")
-    return False
+def whoami():
+    """Proves the live host is reachable and reports what each UNCONFIRMED
+    candidate endpoint actually returns. Never prints key material -- in the
+    environment-credential mode there usually isn't any in this process to
+    print at all (see module docstring)."""
+    key = where = None
+    try:
+        key, where = read_credentials(use_staging=False)
+    except SystemExit:
+        pass
+
+    if key:
+        print(f"  key source: {where} (env var/file -- adding the Authorization header myself)")
+    else:
+        print(f"  no {ENV_VAR_PROD} env var or local file found -- relying on this "
+              f"environment's own API-credential injection for {BASE_URL_PROD} "
+              f"(this process never sees the key in that mode)")
+
+    any_non_404 = False
+    for path in CANDIDATE_ENDPOINTS:
+        url = BASE_URL_PROD + path
+        status, body = _probe(url, key)
+        if status is None:
+            print(f"  {url} -> could not connect ({body.decode(errors='replace')}) "
+                  f"-- the host itself is most likely wrong")
+        elif status == 404:
+            print(f"  {url} -> HTTP 404 (this path is most likely wrong)")
+        else:
+            any_non_404 = True
+            print(f"  {url} -> HTTP {status}: {body.decode(errors='replace')[:200]!r}")
+
+    if not any_non_404:
+        print(f"  every candidate path 404'd (or failed to connect) against "
+              f"{BASE_URL_PROD} -- the host is probably wrong too, not just the paths")
+    return any_non_404
 
 
 def parse_transaction(payload):
