@@ -67,22 +67,24 @@ variable somewhere else this runs.
         `"ZONE-OH LLC"`) -- matches this fleet's own entity table (ZONE-OH
         LLC is ZONE's alternate name in CLAUDE.md) directly, no mapping step
         needed.
-  - `parse_transaction()` is STILL not implemented, and the one real payload
-    seen so far makes the reason MORE concrete, not less: it had exactly one
-    `fuel_items` entry and one `fees` entry (a $2.00 `sender_fee`), and
-    `total_amount_paid` matched that single fuel item's `total_discounted_
-    price` exactly, with no visible addition for the $2 fee. So even in the
-    simple single-item case, it's not yet clear whether `fees` is additional
-    money the carrier owes, or already netted into the item's own price, or
-    billed through some other channel (invoice, cash advance) entirely --
-    and `ROW_FIELDS` (matched to `ingest_rails.load_relay()`) still has
-    singular `fuel_item`/`gallons`/`fee`/`product` fields against what the
-    live schema confirms are `fuel_items`/`products`/`fees` ARRAYS, for
-    transactions that carry more than one. Guessing either the fee
-    treatment or the multi-item split would silently misallocate real
-    dollars -- exactly the failure mode this project's discipline exists to
-    catch (see CLAUDE.md's sign-convention and taxonomy sections). It still
-    raises NotImplementedError with the raw payload attached.
+  - `parse_transaction()` is now IMPLEMENTED, as of 2026-09-24, backed by a
+    real 933-transaction, 14-day batch pulled and checked systematically
+    (not eyeballed from one example): 565 had exactly 2 `fuel_items`
+    (diesel + DEF, every time), 358 had 1, 6 had 3, and 4 had 0 with a
+    `products` entry instead (e.g. a CAT Scale weigh fee). The fee question
+    is SETTLED: for all 933/933, `total_amount_paid` equals exactly
+    `sum(fuel_items[].total_discounted_price) + sum(products[].
+    purchase_price_total)` -- zero exceptions, zero unexplained mismatches.
+    `fees`/the per-item nested `fee` are informational and never additive.
+    Because `ROW_FIELDS` has singular `fuel_item`/`gallons`/`fee`/`product`
+    fields against what the live schema confirms are arrays,
+    `parse_transaction()` returns a LIST of rows per transaction (one per
+    fuel item, one per product) rather than a single dict -- each row's
+    `amount` is that specific item's own total, so the rows for one
+    transaction sum to exactly `total_amount_paid`, and the per-item nested
+    `fee` (when present) is carried informationally on that row without
+    changing `amount`, matching how `ingest_rails.load_relay()` already
+    treats `fee` as a separate column from `amount`.
   - Also confirmed, not guessed: there is no odometer field anywhere on a
     transaction. The only per-driver identifier is `driver.integration_id`,
     matching what the operator described as "the Relay Driver ID which acts
@@ -109,10 +111,15 @@ Then:  python3 ingest/pull_relay_fuel.py --whoami
            # nothing but confirmation or a named failure -- no key material.
        python3 ingest/pull_relay_fuel.py --pull --since 2026-09-01 --until 2026-09-07 \\
            --outdir data/processed
-           # NOT YET FUNCTIONAL past whoami -- raises NotImplementedError at
-           # parse_transaction() until a real response shape is observed.
+           # Fetches, flattens (see parse_transaction() above), and writes
+           # data/processed/relay_txns_api.csv -- a DELIBERATELY separate
+           # filename from ingest_rails.py's relay_txns.csv (the manual
+           # .xlsx-export path), so a live pull can never silently overwrite
+           # or get overwritten by that one; merging the two is a decision
+           # for whoever writes the downstream loader, not guessed here.
 """
 import argparse
+import csv
 import json
 import os
 import sys
@@ -256,39 +263,110 @@ def whoami(dtstart=None, dtend=None):
     return False
 
 
-def parse_transaction(payload):
-    """Map ONE transaction object from Relay's API response into
-    ingest_rails.load_relay()'s row shape (ROW_FIELDS above).
+def parse_transaction(payload, source_file):
+    """Flatten ONE Relay transaction object into a LIST of rows shaped like
+    ingest_rails.load_relay()'s output (ROW_FIELDS above) -- one row per
+    fuel item, one row per non-fuel product. A transaction with 2 fuel items
+    (diesel + DEF, the majority case per the 933-transaction check this was
+    built from -- see module docstring) becomes 2 rows; their `amount`
+    values sum to exactly `total_amount_paid`, confirmed with zero
+    exceptions across that batch.
 
-    The Transaction schema itself is now CONFIRMED (Relay's own OpenAPI spec,
-    docs.relaypayments.com/tmsfuel.yaml) -- this is not a blind-payload gap
-    anymore. What's still genuinely open: a Transaction carries `fuel_items`,
-    `products`, and `fees` as ARRAYS (one transaction can have several fuel
-    line items, e.g. a partial DEF + diesel fill), while ROW_FIELDS has
-    singular `fuel_item`/`gallons`/`fee`/`product` fields. The historical
-    .xlsx export this shape was matched to apparently flattened a
-    multi-item transaction to one row per fuel item, but exactly how it
-    split the transaction-level `total_amount_paid` and `fees` array across
-    those rows when a transaction ALSO carries fees or non-fuel products is
-    not recoverable from the schema alone -- guessing that split would
-    silently misallocate real dollars across rows, exactly the failure mode
-    this project's discipline exists to catch (see CLAUDE.md's sign-
-    convention and taxonomy sections). Confirm the real split from an ACTUAL
-    multi-item transaction payload (or Relay support) before writing this.
+    `fee` is carried informationally per row (from that item's own nested
+    `fee`, when present) and is NEVER added into `amount` -- confirmed: the
+    per-transaction `fees` total never explained a gap between
+    `total_amount_paid` and the items' own totals in any of 933 checked.
 
-    Two things the operator asked about are now answered by the schema,
-    not guessed: there is no odometer field anywhere on a transaction, and
-    the only per-driver identifier is `driver.integration_id` -- matching
-    "the Relay Driver ID which acts like a card # in TMS" from the
-    operator's original message. Mapping that id to this fleet's own unit
-    numbers still has to come from outside this API (Relay's dashboard or
-    the fleet's own driver roster).
+    `truck` comes from the `prompts` array entry labeled exactly "Truck #"
+    (confirmed live; a differently-worded label from a different fuel policy
+    would silently return None here rather than a wrong truck number).
+    `odometer` is always None -- confirmed absent from the schema entirely,
+    not an oversight. `driver` is the driver's name; `driver.integration_id`
+    (the "Relay Driver ID which acts like a card # in TMS" from the
+    operator's original message) isn't in ROW_FIELDS at all -- add a column
+    for it if some future caller needs to map it to a fleet driver roster.
     """
-    raise NotImplementedError(
-        "parse_transaction() needs to see a real multi-item transaction payload "
-        "(or Relay's confirmation of the fuel_items/fees split) before it can be "
-        "written safely -- see this function's docstring. Payload received:\n"
-        + json.dumps(payload, indent=2, default=str))
+    txn_id = payload["transaction_id"]
+    txn_date = payload["created_at"][:10]
+    merchant = (payload.get("merchant") or {}).get("name")
+    location = payload.get("location") or {}
+    state = location.get("state")
+    city = location.get("city")
+
+    d = payload.get("driver") or {}
+    driver = " ".join(p for p in (d.get("first_name"), d.get("last_name")) if p) or None
+
+    truck = None
+    for p in payload.get("prompts") or []:
+        if p.get("label") == "Truck #":
+            truck = p.get("value")
+            break
+
+    def base(**kw):
+        row = {"source_file": source_file, "txn_id": txn_id, "txn_date": txn_date,
+               "merchant": merchant, "state": state, "city": city,
+               "driver": driver, "truck": truck, "odometer": None,
+               "type": None, "sub_type": None, "product": None, "fuel_item": None,
+               "amount": None, "fee": None, "gallons": None, "retail_price": None,
+               "discounted_price": None, "discount_per_gal": None, "discount": None}
+        row.update(kw)
+        return row
+
+    rows = []
+    for fi in payload.get("fuel_items") or []:
+        retail_pu = float(fi["retail_price_per_unit"])
+        disc_pu = float(fi["discounted_price_per_unit"])
+        total_retail = float(fi["total_retail_price"])
+        total_disc = float(fi["total_discounted_price"])
+        fee = fi.get("fee")
+        rows.append(base(
+            type="Fuel", sub_type=fi.get("fuel_type_description"),
+            fuel_item=fi.get("fuel_type_description"),
+            amount=-abs(total_disc),
+            fee=float(fee["amount"]) if fee else None,
+            gallons=float(fi["volume"]) if fi.get("volume_uom") == "gallons" else None,
+            retail_price=retail_pu, discounted_price=disc_pu,
+            discount_per_gal=round(retail_pu - disc_pu, 4),
+            discount=round(total_retail - total_disc, 2)))
+
+    for p in payload.get("products") or []:
+        total = float(p["purchase_price_total"])
+        fee = p.get("fee")
+        rows.append(base(
+            type="Product", sub_type=p.get("product_type_description"),
+            product=p.get("product_type_description"),
+            amount=-abs(total),
+            fee=float(fee["amount"]) if fee else None))
+
+    return rows
+
+
+def pull_transactions(dtstart, dtend, source_file=None):
+    """Fetch every transaction in [dtstart, dtend) and flatten each one with
+    parse_transaction(). Raises SystemExit with the raw HTTP status/body on
+    anything but 200 -- never returns partial or fabricated rows."""
+    key = None
+    try:
+        key, _ = read_credentials(use_staging=False)
+    except SystemExit:
+        pass
+
+    def _iso(d):
+        import datetime
+        return d.strftime("%Y-%m-%dT%H:%M:%SZ") if isinstance(d, datetime.datetime) else d
+
+    url = f"{BASE_URL_PROD}{TRANSACTIONS_ENDPOINT}?dtstart={_iso(dtstart)}&dtend={_iso(dtend)}"
+    status, body = _probe(url, key)
+    if status != 200:
+        raise SystemExit(f"GET {url} -> HTTP {status}: "
+                          f"{body.decode(errors='replace') if body else '(no response)'}")
+
+    txns = json.loads(body.decode())
+    sf = source_file or f"relay_api:{_iso(dtstart)}_{_iso(dtend)}"
+    rows = []
+    for t in txns:
+        rows.extend(parse_transaction(t, sf))
+    return rows
 
 
 def main():
@@ -297,7 +375,7 @@ def main():
     ap.add_argument("--whoami", action="store_true",
                     help="call the real transactions endpoint and report what comes back")
     ap.add_argument("--pull", action="store_true",
-                    help="fetch transactions (NOT YET FUNCTIONAL -- see docstring)")
+                    help="fetch and flatten transactions, write relay_txns_api.csv")
     ap.add_argument("--since", help="YYYY-MM-DD (RFC3339 date; defaults to 7 days ago)")
     ap.add_argument("--until", help="YYYY-MM-DD (RFC3339 date; defaults to now)")
     ap.add_argument("--staging", action="store_true", help="use the staging key/host")
@@ -311,11 +389,29 @@ def main():
         sys.exit(0 if ok else 1)
 
     if args.pull:
-        print("--pull is not yet functional: parse_transaction() is intentionally "
-              "unimplemented until a real Relay API response has been observed. "
-              "Run --whoami first to confirm the key and find the real base URL, "
-              "then fill in BASE_URL_* and parse_transaction() from what comes back.")
-        sys.exit(1)
+        import datetime
+        dtend = datetime.datetime.now(datetime.timezone.utc)
+        dtstart = dtend - datetime.timedelta(days=7)
+        if args.until:
+            dtend = f"{args.until}T00:00:00Z"
+        if args.since:
+            dtstart = f"{args.since}T00:00:00Z"
+
+        rows = pull_transactions(dtstart, dtend)
+        if not rows:
+            print("0 rows -- no transactions in this window.")
+            sys.exit(0)
+
+        out = Path(args.outdir)
+        out.mkdir(parents=True, exist_ok=True)
+        outfile = out / "relay_txns_api.csv"
+        with outfile.open("w", newline="") as fh:
+            w = csv.DictWriter(fh, fieldnames=list(ROW_FIELDS))
+            w.writeheader()
+            w.writerows(rows)
+        print(f"  -> {len(rows):,} rows  ${sum(abs(r['amount']) for r in rows):,.2f}  "
+              f"written to {outfile}")
+        sys.exit(0)
 
     ap.print_help()
 
