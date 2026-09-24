@@ -51,41 +51,44 @@ matters if RELAY_PAYMENTS_API_KEY happens to also be set as an ordinary
 variable somewhere else this runs.
 
   - `whoami()` below calls the now-CONFIRMED transactions endpoint with a
-    real date range and reports the raw response -- 403 most likely means
-    the credential's `Bearer ` prefix needs to be cleared (see above); 200
-    means it's fully working.
-  - `parse_transaction()` is STILL not implemented, and for a real structural
-    reason now visible in the spec, not just an unseen-response gap: one
-    Transaction can carry MULTIPLE `fuel_items`, `products`, and `fees`
-    (each its own array), while `ROW_FIELDS` below (matched to
-    `ingest_rails.load_relay()`) has singular `fuel_item`/`gallons`/
-    `fee`/`product` fields -- one value each, not a list. The historical
-    .xlsx export apparently flattened a multi-item transaction into that
-    shape somehow (one row per fuel item, most likely), but exactly how it
-    split `amount` and `fee` across those rows when a transaction also has
-    fees or non-fuel products is NOT visible from the schema alone, and
-    guessing that split would silently misallocate real dollars -- exactly
-    the failure mode this project's discipline exists to catch (see
-    CLAUDE.md's sign-convention and taxonomy sections). It still raises
-    NotImplementedError with the raw payload attached, but the docstring
-    there now names the specific open question rather than "no shape at
-    all."
-  - The Transaction schema also confirms two things the operator's original
-    message asked about, independently of any guess: there is NO odometer
-    field anywhere on a transaction, and there is NO truck/unit number
-    either -- only `driver.integration_id`, which matches exactly what the
-    operator described as "the Relay Driver ID which acts like a card # in
-    TMS." Mapping that id to this fleet's own unit numbers still needs to
-    come from Relay's dashboard or the fleet's own driver roster -- it is
-    not in this API's response at all, confirmed rather than assumed.
-
-THE TMS INTEGRATION_ID QUESTION IS STILL OPEN. The operator's own message
-describes "TMS Fuel API Integration_ID" as "the Relay Driver ID which acts
-like a card # in TMS" -- i.e. fetching a transaction may need a per-driver or
-per-card identifier from Relay's TMS integration, not just the account-level
-API key. No mapping of that ID to this fleet's own driver/unit numbers exists
-anywhere in this corpus yet. Do not invent one; if the real API requires it,
-that mapping needs to come from Relay's dashboard or docs.
+    real date range. CONFIRMED WORKING as of 2026-09-24: HTTP 200 with real
+    transaction rows, once the environment credential's `Authorization`
+    header was sent with NO `Bearer ` prefix (raw key value only) -- proving
+    the apiKey-scheme read above was correct, not just a plausible guess.
+  - Two more things the operator's original message asked about are now
+    answered from a REAL observed transaction, not the schema alone:
+      * Truck number: NOT a dedicated field, but present -- Relay's fuel
+        code flow has the driver enter it at the pump, and it comes back
+        under `prompts`: `{"label": "Truck #", "value": "5007"}` (label text
+        confirmed exact; do not match on a different label without seeing
+        another sample first, in case Relay's UI wording varies by fuel
+        policy).
+      * Company/entity: `linked_org.name` on the transaction itself (e.g.
+        `"ZONE-OH LLC"`) -- matches this fleet's own entity table (ZONE-OH
+        LLC is ZONE's alternate name in CLAUDE.md) directly, no mapping step
+        needed.
+  - `parse_transaction()` is STILL not implemented, and the one real payload
+    seen so far makes the reason MORE concrete, not less: it had exactly one
+    `fuel_items` entry and one `fees` entry (a $2.00 `sender_fee`), and
+    `total_amount_paid` matched that single fuel item's `total_discounted_
+    price` exactly, with no visible addition for the $2 fee. So even in the
+    simple single-item case, it's not yet clear whether `fees` is additional
+    money the carrier owes, or already netted into the item's own price, or
+    billed through some other channel (invoice, cash advance) entirely --
+    and `ROW_FIELDS` (matched to `ingest_rails.load_relay()`) still has
+    singular `fuel_item`/`gallons`/`fee`/`product` fields against what the
+    live schema confirms are `fuel_items`/`products`/`fees` ARRAYS, for
+    transactions that carry more than one. Guessing either the fee
+    treatment or the multi-item split would silently misallocate real
+    dollars -- exactly the failure mode this project's discipline exists to
+    catch (see CLAUDE.md's sign-convention and taxonomy sections). It still
+    raises NotImplementedError with the raw payload attached.
+  - Also confirmed, not guessed: there is no odometer field anywhere on a
+    transaction. The only per-driver identifier is `driver.integration_id`,
+    matching what the operator described as "the Relay Driver ID which acts
+    like a card # in TMS" -- still needs a mapping to this fleet's own
+    driver roster from outside this API if that id is ever needed directly
+    (the `prompts`-based Truck # above may make it unnecessary for costing).
 
 THE KEY LIVES IN AN ENVIRONMENT VARIABLE, NOT A FILE, same reasoning as
 pull_sheets.py: this container is ephemeral, and a key on disk has to be
