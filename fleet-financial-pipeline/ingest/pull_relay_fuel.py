@@ -193,7 +193,14 @@ def _probe(url, key=None):
     allowed host -- if that proxy credential still sends a `Bearer ` prefix,
     expect HTTP 403 `{"message": "Access denied"}` (confirmed live 2026-09-24;
     see module docstring) until its Prefix field is cleared in environment
-    settings. Never raises: returns (status_or_None, body_bytes)."""
+    settings. Reads the ENTIRE response body -- a transactions pull is easily
+    tens of KB, and a truncated read here produced invalid JSON that
+    pull_transactions() then crashed on trying to parse (caught 2026-09-25,
+    once a real multi-transaction week was pulled through this path instead
+    of the single-transaction whoami() preview that never exceeded a couple
+    KB). Callers that only want a short preview (whoami()) truncate the
+    DECODED TEXT for display, not the read itself. Never raises: returns
+    (status_or_None, body_bytes)."""
     import urllib.error
     import urllib.request
     headers = {"Accept": "application/json"}
@@ -201,10 +208,10 @@ def _probe(url, key=None):
         headers["Authorization"] = key
     req = urllib.request.Request(url, headers=headers)
     try:
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            return resp.status, resp.read(2000)
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            return resp.status, resp.read()
     except urllib.error.HTTPError as e:
-        return e.code, e.read(2000)
+        return e.code, e.read()
     except urllib.error.URLError as e:
         return None, str(e.reason).encode()
 
@@ -250,7 +257,8 @@ def whoami(dtstart=None, dtend=None):
         print(f"  could not connect ({text}) -- unexpected, this host was reachable before")
         return False
     if status == 200:
-        print(f"  HTTP 200: the credential works. Response (first 2000 bytes):\n{text}")
+        print(f"  HTTP 200: the credential works. Response ({len(body)} bytes, "
+              f"first 2000 shown):\n{text[:2000]}")
         return True
     if status == 403:
         print(f"  HTTP 403: {text}\n"
