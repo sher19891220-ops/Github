@@ -179,6 +179,62 @@ def test_a_return_is_identified_by_structure_not_by_a_keyword():
     assert P.IFTA_STEP2.search(IFTA_SAMPLE)
 
 
+OH_JURISDICTION_SAMPLE = """OH|TAX eServices
+International Fuel Tax Agreement (IFTA) Return Submission
+Company Name: ZONE-OH LLC
+Return Information
+Fuel Type Total Distance Total Tax Paid Volume Untaxed or Unreceipted Volume Average Miles Per Volume
+Diesel 100,000 14,000 0 7.14
+JurFuel Type Tax Rate Total Miles Taxable Miles Taxable Volume Tax Paid VolumeTax (Credit) Interest
+AL Diesel 0.31 13,773 13,773 1897 1,488 $126.79 $0.00
+AZ Diesel 0.26 20,280 20,280 2793 5,894 ($806.26) $0.00
+CT Diesel 0.49 43,506 43,506 5993 1,183 $2,352.09 $0.00
+KY Diesel 0.22 38,926 38,926 5362 7,871 ($551.98) $0.00
+KY Diesel 0.11 0 0 5362 0 $563.01 $0.00
+Summary Information
+Total Vehicles Reported 63
+Tax Due $1,683.65
+"""
+
+
+def test_jurisdiction_tax_rows_match_a_real_zone_oh_return():
+    """Column order verified against ZONE-OH's actual 2026 Q1 filed return
+    (OH|TAX eServices): Jur | Fuel Type | Tax Rate | Total Miles | Taxable
+    Miles | Taxable Volume | Tax Paid Volume | Tax(Credit) | Interest. AZ's
+    real row there was `0.26 20,280 20,280 2793 5,894 ($806.26) $0.00` --
+    (2793 - 5894) x 0.26 = -806.26 to the penny, which is why this fixture
+    reuses AZ's exact real figures rather than invented ones."""
+    rows = P.jurisdiction_tax_rows(OH_JURISDICTION_SAMPLE)
+    az = next(r for r in rows if r["state"] == "AZ")
+    assert az["rate"] == 0.26
+    assert az["taxable_gallons"] - az["tax_paid_gallons"] == pytest.approx(-3101)
+    assert az["tax_due"] == pytest.approx(-806.26)
+
+
+def test_a_states_surcharge_row_is_kept_not_deduped():
+    """Kentucky (and on the real return, Virginia) files its KYU surcharge as
+    a SECOND same-state row at a different rate with 0 miles, reusing the
+    base row's taxable volume -- jurisdiction_miles()'s max()-by-state
+    collapse is right for mileage but would silently drop this row's tax_due
+    if reused here, understating KY's real liability."""
+    rows = P.jurisdiction_tax_rows(OH_JURISDICTION_SAMPLE)
+    ky_rows = [r for r in rows if r["state"] == "KY"]
+    assert len(ky_rows) == 2
+    assert ky_rows[1]["total_miles"] == 0
+    assert ky_rows[1]["taxable_gallons"] == ky_rows[0]["taxable_gallons"]
+
+
+def test_summing_every_jurisdiction_row_reconciles_to_the_returns_own_total():
+    """THE CONTROL: on the real ZONE-OH return this fixture is drawn from,
+    summing all 50 jurisdiction Tax(Credit) rows -- including both surcharge
+    rows -- reproduced the Summary Information's own 'Tax Due $12,145.28' to
+    the penny. Same reconciliation, smaller fixture."""
+    rows = P.jurisdiction_tax_rows(OH_JURISDICTION_SAMPLE)
+    stated = P.OH_TAX.search(OH_JURISDICTION_SAMPLE)
+    assert stated, "fixture must carry a Summary Information Tax Due line"
+    assert sum(r["tax_due"] for r in rows) == pytest.approx(P.num(stated.group(1)), abs=0.01)
+
+
 def test_a_relative_path_does_not_break_the_reader():
     """Path.relative_to() raised on a relative argument and the caller's except
     swallowed it, so every return parsed to nothing."""

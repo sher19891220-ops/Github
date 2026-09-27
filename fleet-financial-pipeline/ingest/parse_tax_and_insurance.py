@@ -231,6 +231,61 @@ def jurisdiction_miles(body):
     return out
 
 
+# THE OHIO FORM'S JURISDICTION ROW ALSO CARRIES THE REAL, FILED PER-STATE TAX
+# RATE AND NET TAX DUE -- jurisdiction_miles() above throws both away. Column
+# order confirmed against a real ZONE-OH return (2026 Q1, OH|TAX eServices):
+# `Jur Fuel Type | Tax Rate | Total Miles | Taxable Miles | Taxable Volume |
+#  Tax Paid Volume | Tax (Credit) | Interest` -- e.g.
+# `AZ Diesel 0.26 20,280 20,280 2793 5,894 ($806.26) $0.00`, where net taxable
+# gallons = taxable volume(2793) - tax paid volume(5894) = -3101, and
+# -3101 x 0.26 = -806.26, matching the printed figure exactly. Summing every
+# row's Tax(Credit) column, INCLUDING the zero-mile surcharge rows some states
+# file (Kentucky's KYU surcharge, Virginia's own second line -- both reuse the
+# SAME taxable volume as their state's base row, at a different rate, with
+# total/taxable miles at 0 since a surcharge is not mileage-based), reproduces
+# that return's own "Summary Information > Tax Due" figure to the penny
+# ($12,145.28 on the return checked) -- the same reconcile-to-the-filed-total
+# discipline as every other control in this module.
+#
+# ONLY THE OHIO FORM IS HANDLED. No file in this corpus currently parses via
+# the Step-3 path (load_ifta() has never returned a Step-3 record), so a
+# Step-3 equivalent is not written until a real one can be verified the same
+# way -- guessing its column order from the miles-only regex's shape would be
+# exactly the kind of unverified number this module exists to avoid.
+JURIS_TAX_ROW = re.compile(
+    r"^\s*([A-Z]{2})\s+Diesel\s+([\d.]+)\s+([\d,]+)\s+([\d,]+)\s+([\d,]+)\s+"
+    r"([\d,]+)\s+(\(?\$[\d,.]+\)?)\s+(\(?\$[\d,.]+\)?)", re.M)
+
+
+def _signed_money(s):
+    """'$126.79' -> 126.79, '($806.26)' -> -806.26 -- num() alone chokes on
+    the parens a negative jurisdiction line uses in place of a minus sign."""
+    s = s.strip()
+    neg = s.startswith("(")
+    return -num(s.strip("()")) if neg else num(s)
+
+
+def jurisdiction_tax_rows(body):
+    """Every jurisdiction row, in filing order, as a full dict -- NOT deduped
+    or maxed like jurisdiction_miles(): a state that files a base rate and a
+    surcharge rate (Kentucky, Virginia) legitimately appears twice, and both
+    rows must be kept and both tax_due figures summed for that state's real
+    total, or the reconciliation to the return's own Summary total breaks.
+
+    {state, rate, total_miles, taxable_miles, taxable_gallons,
+     tax_paid_gallons, tax_due, interest} per row.
+    """
+    out = []
+    for st, rate, tm, txm, txg, tpg, tax_due, interest in JURIS_TAX_ROW.findall(body or ""):
+        if st in NOT_A_JURISDICTION:
+            continue
+        out.append({"state": st, "rate": num(rate), "total_miles": num(tm),
+                    "taxable_miles": num(txm), "taxable_gallons": num(txg),
+                    "tax_paid_gallons": num(tpg), "tax_due": _signed_money(tax_due),
+                    "interest": _signed_money(interest)})
+    return out
+
+
 @cache.cached("ifta", lambda: sorted(glob.glob(str(IFTA_DIR / "**/*.pdf"),
                                                 recursive=True)))
 def load_ifta(pattern=None):
@@ -244,6 +299,7 @@ def load_ifta(pattern=None):
             r = parse_ifta(f, body) or parse_ohio_return(f, body)
             if r:
                 r["jurisdictions"] = jurisdiction_miles(body)
+                r["jurisdiction_tax_rows"] = jurisdiction_tax_rows(body)
         except Exception as exc:                       # never silent
             failed.append((rel(f), f"{type(exc).__name__}: {exc}"))
             continue
