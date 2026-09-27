@@ -404,10 +404,15 @@ def other_charges_by_unit(rows):
     return out
 
 
-def pull_transactions(dtstart, dtend, source_file=None):
-    """Fetch every transaction in [dtstart, dtend) and flatten each one with
-    parse_transaction(). Raises SystemExit with the raw HTTP status/body on
-    anything but 200 -- never returns partial or fabricated rows."""
+def pull_transactions_raw(dtstart, dtend):
+    """Fetch every RAW (unflattened) Relay transaction JSON object in
+    [dtstart, dtend) -- the same live call pull_transactions() makes, but
+    returns Relay's own transaction objects instead of flattening them, so a
+    caller can filter on a field parse_transaction()/ROW_FIELDS don't carry
+    forward (e.g. `linked_org.name`, the billed-to company) BEFORE
+    flattening. Raises SystemExit with the raw HTTP status/body on anything
+    but 200 -- never returns partial or fabricated rows.
+    """
     key = None
     try:
         key, _ = read_credentials(use_staging=False)
@@ -423,8 +428,47 @@ def pull_transactions(dtstart, dtend, source_file=None):
     if status != 200:
         raise SystemExit(f"GET {url} -> HTTP {status}: "
                           f"{body.decode(errors='replace') if body else '(no response)'}")
+    return json.loads(body.decode())
 
-    txns = json.loads(body.decode())
+
+def rows_for_company(txns, company_substring, source_file=None):
+    """Filter RAW Relay transaction objects (pull_transactions_raw()'s
+    output) down to the ones billed to a company whose `linked_org.name`
+    contains company_substring (case-insensitive -- same substring-match
+    convention state_tax_engine.latest_rate_state() already uses to match a
+    company to its own filed IFTA returns), then flatten the matches with
+    parse_transaction().
+
+    THIS IS THE COMPANY-SCOPING STEP THAT MATTERS FOR IFTA CORRECTNESS. IFTA
+    is filed PER COMPANY (each entity has its own account) -- crediting one
+    company's fuel-tax liability using another company's fuel purchases in
+    the same state would overstate every company's credit and understate
+    the real tax owed. A transaction with no `linked_org` at all is
+    excluded, never guessed into a company.
+    """
+    sub = company_substring.upper()
+    matched = [t for t in txns if sub in ((t.get("linked_org") or {}).get("name") or "").upper()]
+    sf = source_file or f"relay_api_company:{company_substring}"
+    rows = []
+    for t in matched:
+        rows.extend(parse_transaction(t, sf))
+    return rows
+
+
+def pull_transactions(dtstart, dtend, source_file=None):
+    """Fetch every transaction in [dtstart, dtend) and flatten each one with
+    parse_transaction() -- the fleet-wide view, ACROSS EVERY COMPANY Relay
+    bills to. Fine for a whoami-style check or a genuinely cross-company
+    report; NOT fine as the gallons_state/other_charges input for one
+    company's own IFTA math -- use pull_transactions_raw() + rows_for_company()
+    instead whenever the caller already knows which single company this is
+    for (see rows_for_company()'s own docstring)."""
+    txns = pull_transactions_raw(dtstart, dtend)
+
+    def _iso(d):
+        import datetime
+        return d.strftime("%Y-%m-%dT%H:%M:%SZ") if isinstance(d, datetime.datetime) else d
+
     sf = source_file or f"relay_api:{_iso(dtstart)}_{_iso(dtend)}"
     rows = []
     for t in txns:

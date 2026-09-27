@@ -331,3 +331,54 @@ def test_pull_transactions_raises_on_non_200(monkeypatch):
     with pytest.raises(SystemExit) as e:
         RF.pull_transactions("2026-09-01T00:00:00Z", "2026-09-02T00:00:00Z")
     assert "403" in str(e.value)
+
+
+def test_pull_transactions_raw_raises_on_non_200(monkeypatch):
+    monkeypatch.setattr(RF, "_probe", lambda url, key=None: (403, b'{"message":"Access denied"}'))
+    with pytest.raises(SystemExit) as e:
+        RF.pull_transactions_raw("2026-09-01T00:00:00Z", "2026-09-02T00:00:00Z")
+    assert "403" in str(e.value)
+
+
+def test_pull_transactions_raw_returns_the_bare_json_list(monkeypatch):
+    txn = _txn(fuel_items=[_fuel_item("diesel", "Diesel", 7.0, 6.5, 50)])
+    monkeypatch.setattr(RF, "_probe", lambda url, key=None: (200, json.dumps([txn]).encode()))
+    txns = RF.pull_transactions_raw("2026-09-01T00:00:00Z", "2026-09-02T00:00:00Z")
+    assert txns == [txn]
+
+
+def test_pull_transactions_still_flattens_every_company(monkeypatch):
+    """pull_transactions() (no company filter) must keep working exactly as
+    before the refactor into pull_transactions_raw()."""
+    zone_txn = _txn(fuel_items=[_fuel_item("diesel", "Diesel", 7.0, 6.5, 50)], truck="1")
+    zone_txn["linked_org"] = {"id": "org_z", "name": "ZONE-OH LLC", "number": "1"}
+    xtrack_txn = _txn(fuel_items=[_fuel_item("diesel", "Diesel", 7.0, 6.5, 30)], truck="2")
+    xtrack_txn["linked_org"] = {"id": "org_x", "name": "Xtrack LLC", "number": "2"}
+    monkeypatch.setattr(RF, "_probe",
+                        lambda url, key=None: (200, json.dumps([zone_txn, xtrack_txn]).encode()))
+    rows = RF.pull_transactions("2026-09-01T00:00:00Z", "2026-09-02T00:00:00Z")
+    assert {r["truck"] for r in rows} == {"1", "2"}
+
+
+def test_rows_for_company_keeps_only_the_matching_linked_org(monkeypatch):
+    zone_txn = _txn(fuel_items=[_fuel_item("diesel", "Diesel", 7.0, 6.5, 50)], truck="1")
+    zone_txn["linked_org"] = {"id": "org_z", "name": "ZONE-OH LLC", "number": "1"}
+    xtrack_txn = _txn(fuel_items=[_fuel_item("diesel", "Diesel", 7.0, 6.5, 30)], truck="2")
+    xtrack_txn["linked_org"] = {"id": "org_x", "name": "Xtrack LLC", "number": "2"}
+    rows = RF.rows_for_company([zone_txn, xtrack_txn], "ZONE")
+    assert {r["truck"] for r in rows} == {"1"}
+    assert rows[0]["gallons"] == pytest.approx(50)
+
+
+def test_rows_for_company_is_case_insensitive():
+    txn = _txn(fuel_items=[_fuel_item("diesel", "Diesel", 7.0, 6.5, 50)], truck="1")
+    txn["linked_org"] = {"id": "org_a", "name": "AFG Transportco LLC", "number": "1"}
+    rows = RF.rows_for_company([txn], "afg")
+    assert len(rows) == 1
+
+
+def test_rows_for_company_excludes_transactions_with_no_linked_org():
+    """Never guess a company for a transaction Relay didn't attribute to one."""
+    txn = _txn(fuel_items=[_fuel_item("diesel", "Diesel", 7.0, 6.5, 50)], truck="1")
+    txn["linked_org"] = None
+    assert RF.rows_for_company([txn], "ZONE") == []
