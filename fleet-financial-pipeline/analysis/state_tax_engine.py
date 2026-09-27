@@ -122,6 +122,33 @@ def gallons_by_state(fuel_rows):
     return out
 
 
+def unit_week_totals(state_rows):
+    """Collapse unit_state_report()'s per-(unit, state) rows into ONE row per
+    unit for that week -- ifta_tax and permit_tax summed across every state
+    that unit ran in. This is the shape a weekly_pnl merge actually wants: a
+    P&L truck row carries one number per week, not one per state. company/
+    period are carried from whichever row for that unit set them (every row
+    from one unit_state_report() call already shares the same company and
+    period, so the first non-empty value wins).
+
+    Returns {unit: {company, period, unit, ifta_tax, permit_tax, states}} --
+    `states` lists which jurisdictions contributed, so a caller can still
+    show "OH, KY, IN" without re-deriving it from the per-state rows.
+    """
+    out = {}
+    for r in state_rows:
+        u = out.setdefault(r["unit"], {"company": r.get("company"), "period": r.get("period"),
+                                        "unit": r["unit"], "ifta_tax": 0.0, "permit_tax": 0.0,
+                                        "states": []})
+        u["ifta_tax"] += r["ifta_tax"]
+        u["permit_tax"] += r["permit_tax"]
+        u["states"].append(r["state"])
+    for u in out.values():
+        u["ifta_tax"] = round(u["ifta_tax"], 2)
+        u["permit_tax"] = round(u["permit_tax"], 2)
+    return out
+
+
 def gallons_state_from_relay(dtstart, dtend):
     """Real per-state diesel gallons purchased in [dtstart, dtend) pulled
     LIVE from Relay Payments -- the gallons_state input ifta_by_state() /

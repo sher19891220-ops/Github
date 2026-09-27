@@ -278,6 +278,53 @@ def test_diesel_rows_on_empty_input():
     assert RF.diesel_rows([]) == []
 
 
+def test_other_charges_by_unit_separates_def_and_cat_scales():
+    """Same truck, one fill with DEF, one separate scale weigh -- both real
+    costs, neither a diesel gallon, both must land on that truck's own
+    bucket without touching each other."""
+    diesel = _fuel_item("diesel", "Diesel", 8.259, 7.812, 94.080)
+    de_f = _fuel_item("def", "Def", 4.899, 4.899, 4.761)  # total_disc ~ 23.32
+    fuel_txn = _txn(fuel_items=[diesel, de_f], truck="7004")
+    product = {"product_type": "scales", "product_type_description": "CAT Scales",
+               "price_per_unit": "12.50", "quantity": "1.000",
+               "purchase_price_total": "12.50"}
+    scale_txn = _txn(products=[product], truck="7004")
+    rows = RF.parse_transaction(fuel_txn, "src") + RF.parse_transaction(scale_txn, "src")
+    out = RF.other_charges_by_unit(rows)
+    assert out["7004"]["def_cost"] == pytest.approx(23.32, abs=0.01)
+    assert out["7004"]["cat_scale_cost"] == pytest.approx(12.50)
+
+
+def test_other_charges_by_unit_splits_by_truck():
+    txn_a = _txn(products=[{"product_type": "scales", "product_type_description": "CAT Scales",
+                             "price_per_unit": "10.0", "quantity": "1.0",
+                             "purchase_price_total": "10.0"}], truck="1001")
+    txn_b = _txn(products=[{"product_type": "scales", "product_type_description": "CAT Scales",
+                             "price_per_unit": "5.0", "quantity": "1.0",
+                             "purchase_price_total": "5.0"}], truck="2002")
+    rows = RF.parse_transaction(txn_a, "src") + RF.parse_transaction(txn_b, "src")
+    out = RF.other_charges_by_unit(rows)
+    assert out["1001"]["cat_scale_cost"] == pytest.approx(10.0)
+    assert out["2002"]["cat_scale_cost"] == pytest.approx(5.0)
+
+
+def test_other_charges_by_unit_drops_rows_with_no_truck():
+    """Never attribute a charge to a guessed unit."""
+    txn = _txn(products=[{"product_type": "scales", "product_type_description": "CAT Scales",
+                           "price_per_unit": "5.0", "quantity": "1.0",
+                           "purchase_price_total": "5.0"}], truck=None)
+    rows = RF.parse_transaction(txn, "src")
+    assert RF.other_charges_by_unit(rows) == {}
+
+
+def test_other_charges_by_unit_ignores_plain_diesel_rows():
+    """A truck with only a clean diesel fill (no DEF, no scale) gets no
+    bucket at all -- there is nothing to indicate."""
+    txn = _txn(fuel_items=[_fuel_item("diesel", "Diesel", 7.0, 6.5, 50)], truck="9001")
+    rows = RF.parse_transaction(txn, "src")
+    assert RF.other_charges_by_unit(rows) == {}
+
+
 def test_pull_transactions_raises_on_non_200(monkeypatch):
     """Never returns partial or fabricated rows on a bad response."""
     monkeypatch.setattr(RF, "_probe", lambda url, key=None: (403, b'{"message":"Access denied"}'))

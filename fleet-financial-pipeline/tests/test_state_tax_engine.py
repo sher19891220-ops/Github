@@ -38,6 +38,27 @@ def test_gallons_by_state_reads_either_efs_or_relay_shape():
     assert E.gallons_by_state(relay_rows) == {"KY": pytest.approx(80.0)}
 
 
+def test_unit_week_totals_collapses_per_state_rows_to_one_row_per_unit():
+    """MILEAGE has unit 200 running OH, KY, and OR in the same week --
+    unit_week_totals() must sum its ifta_tax/permit_tax across all three
+    into one row, not leave three."""
+    report = E.unit_state_report(MILEAGE, GALLONS_STATE, RATE_STATE, mpg=6.0)
+    out = E.unit_week_totals(report)
+    assert set(out.keys()) == {"100", "200"}
+    r100 = [r for r in report if r["unit"] == "100"]
+    r200 = [r for r in report if r["unit"] == "200"]
+    assert out["100"]["ifta_tax"] == pytest.approx(sum(r["ifta_tax"] for r in r100), abs=0.01)
+    assert out["100"]["permit_tax"] == pytest.approx(sum(r["permit_tax"] for r in r100), abs=0.01)
+    assert out["200"]["ifta_tax"] == pytest.approx(sum(r["ifta_tax"] for r in r200), abs=0.01)
+    assert out["200"]["permit_tax"] == pytest.approx(sum(r["permit_tax"] for r in r200), abs=0.01)
+    assert sorted(out["200"]["states"]) == ["KY", "OH", "OR"]
+    assert out["200"]["company"] == "ZONE" and out["200"]["period"] == "2026-W01"
+
+
+def test_unit_week_totals_on_empty_input():
+    assert E.unit_week_totals([]) == {}
+
+
 def test_gallons_state_from_relay_pulls_filters_and_sums(monkeypatch):
     """The real wiring: pull_transactions() -> diesel_rows() (drop DEF and
     Product rows) -> gallons_by_state() -- no network here, pull_relay_fuel's

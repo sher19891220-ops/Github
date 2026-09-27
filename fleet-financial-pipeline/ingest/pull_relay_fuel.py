@@ -369,6 +369,41 @@ def diesel_rows(rows):
     return [r for r in rows if r.get("type") == "Fuel" and r.get("fuel_item") == "Diesel"]
 
 
+def other_charges_by_unit(rows):
+    """Per-truck CAT Scale and DEF charges from parse_transaction()/
+    pull_transactions() rows -- real spend that diesel_rows() deliberately
+    excludes from the IFTA fuel-gallons credit (DEF isn't a taxed motor
+    fuel; a scale weigh fee isn't fuel at all), but that doesn't mean they
+    don't belong on the P&L -- they're real costs a truck actually incurred,
+    just not diesel. Returns {truck: {"def_cost": $, "cat_scale_cost": $}}.
+
+    `truck` comes from the row's own `truck` field (Relay's "Truck #" prompt,
+    same as parse_transaction() already extracts it) -- a row with no truck
+    is dropped, never attributed to a guessed unit. Amounts are `abs()`'d:
+    parse_transaction() stores every row's `amount` as a negative cash
+    outflow (see its own docstring), but a P&L cost column reads as a
+    positive dollar figure.
+    """
+    out = {}
+    for r in rows:
+        truck = r.get("truck")
+        if not truck:
+            continue
+        is_def = r.get("type") == "Fuel" and r.get("fuel_item") == "Def"
+        is_cat_scale = r.get("type") == "Product" and r.get("product") == "CAT Scales"
+        if not (is_def or is_cat_scale):
+            continue
+        bucket = out.setdefault(truck, {"def_cost": 0.0, "cat_scale_cost": 0.0})
+        if is_def:
+            bucket["def_cost"] += abs(r.get("amount") or 0.0)
+        else:
+            bucket["cat_scale_cost"] += abs(r.get("amount") or 0.0)
+    for bucket in out.values():
+        bucket["def_cost"] = round(bucket["def_cost"], 2)
+        bucket["cat_scale_cost"] = round(bucket["cat_scale_cost"], 2)
+    return out
+
+
 def pull_transactions(dtstart, dtend, source_file=None):
     """Fetch every transaction in [dtstart, dtend) and flatten each one with
     parse_transaction(). Raises SystemExit with the raw HTTP status/body on
