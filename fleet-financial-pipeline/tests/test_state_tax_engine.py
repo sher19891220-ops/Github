@@ -38,6 +38,32 @@ def test_gallons_by_state_reads_either_efs_or_relay_shape():
     assert E.gallons_by_state(relay_rows) == {"KY": pytest.approx(80.0)}
 
 
+def test_gallons_state_from_relay_pulls_filters_and_sums(monkeypatch):
+    """The real wiring: pull_transactions() -> diesel_rows() (drop DEF and
+    Product rows) -> gallons_by_state() -- no network here, pull_relay_fuel's
+    own live-API path is mocked at pull_transactions() the same way
+    test_pull_motive.py mocks Motive's _get()."""
+    import pull_relay_fuel as RF  # noqa: E402  (ingest/ already on sys.path via state_tax_engine)
+
+    fake_rows = [
+        {"type": "Fuel", "fuel_item": "Diesel", "state": "OH", "gallons": 100.0},
+        {"type": "Fuel", "fuel_item": "Def", "state": "OH", "gallons": 5.0},
+        {"type": "Fuel", "fuel_item": "Diesel", "state": "KY", "gallons": 40.0},
+        {"type": "Product", "fuel_item": None, "state": "KY", "gallons": None},
+    ]
+
+    captured = {}
+
+    def fake_pull(dtstart, dtend, source_file=None):
+        captured["args"] = (dtstart, dtend)
+        return fake_rows
+
+    monkeypatch.setattr(RF, "pull_transactions", fake_pull)
+    out = E.gallons_state_from_relay("2026-09-14T00:00:00Z", "2026-09-21T00:00:00Z")
+    assert captured["args"] == ("2026-09-14T00:00:00Z", "2026-09-21T00:00:00Z")
+    assert out == {"OH": pytest.approx(100.0), "KY": pytest.approx(40.0)}
+
+
 def test_rates_by_state_treats_a_states_first_row_as_base_second_as_surcharge():
     rows = [{"state": "KY", "rate": 0.22}, {"state": "KY", "rate": 0.11},
             {"state": "OH", "rate": 0.47}]

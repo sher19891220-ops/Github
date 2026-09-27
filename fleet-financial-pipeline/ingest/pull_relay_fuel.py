@@ -349,6 +349,26 @@ def parse_transaction(payload, source_file):
     return rows
 
 
+def diesel_rows(rows):
+    """Filter parse_transaction()/pull_transactions() rows down to real,
+    taxable diesel purchases only -- excludes DEF (fuel_item == "Def") and
+    any non-fuel Product row (CAT Scale fees etc., which carry no `gallons`
+    at all and would fail state_tax_engine.gallons_by_state()'s expectation
+    silently by just contributing 0.0).
+
+    THIS MATTERS FOR IFTA MATH, NOT JUST TIDINESS. Confirmed from the same
+    933-transaction batch parse_transaction() was built from (see its
+    docstring): 565 of 933 transactions had a diesel fill AND a separate DEF
+    line item together. DEF (diesel exhaust fluid) is not a taxed motor fuel
+    -- summing its gallons into a state's purchased total would overstate the
+    IFTA credit for fuel already taxed there, understating the real tax owed.
+    state_tax_engine.gallons_by_state()'s own docstring says the caller must
+    already have restricted rows to real diesel/fuel purchases; this is that
+    restriction for Relay's row shape specifically.
+    """
+    return [r for r in rows if r.get("type") == "Fuel" and r.get("fuel_item") == "Diesel"]
+
+
 def pull_transactions(dtstart, dtend, source_file=None):
     """Fetch every transaction in [dtstart, dtend) and flatten each one with
     parse_transaction(). Raises SystemExit with the raw HTTP status/body on

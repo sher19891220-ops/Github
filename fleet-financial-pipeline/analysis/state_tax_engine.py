@@ -122,6 +122,26 @@ def gallons_by_state(fuel_rows):
     return out
 
 
+def gallons_state_from_relay(dtstart, dtend):
+    """Real per-state diesel gallons purchased in [dtstart, dtend) pulled
+    LIVE from Relay Payments -- the gallons_state input ifta_by_state() /
+    unit_state_report() have so far only ever been exercised against test
+    fixtures or an explicit {} (no fuel-purchase credit netted in, gross
+    liability only). This is the first real source for it.
+
+    dtstart/dtend are RFC3339 strings, passed straight through to
+    pull_relay_fuel.pull_transactions() -- same format that module's own
+    --whoami/--pull already require, not reinvented here.
+
+    Raises SystemExit the same way pull_transactions() does on anything but
+    HTTP 200 (a Relay outage, a bad credential) -- never returns a partial or
+    fabricated gallons_state a caller could mistake for "no fuel purchased".
+    """
+    import pull_relay_fuel as R
+    rows = R.pull_transactions(dtstart, dtend)
+    return gallons_by_state(R.diesel_rows(rows))
+
+
 def ifta_rate_schedule(path=IFTA_SCHEDULE_PATH):
     """{state_abbr: {"base": $/gal, "surcharge": $/gal}} from the operator-
     supplied Q3 2026 48-state reference -- the recommended default rate_state

@@ -254,6 +254,30 @@ def test_parse_transaction_rows_match_row_fields_exactly():
     assert set(rows[0].keys()) == set(RF.ROW_FIELDS)
 
 
+def test_diesel_rows_drops_def_and_products():
+    """Confirmed real case: a diesel fill with a DEF line item on the same
+    transaction, plus a separate CAT Scale product-only transaction. Only
+    the Diesel row must survive -- DEF isn't a taxed motor fuel and a
+    Product row has no gallons at all, so both would corrupt
+    state_tax_engine.gallons_by_state()'s per-state total if left in."""
+    diesel = _fuel_item("diesel", "Diesel", 8.259, 7.812, 94.080)
+    de_f = _fuel_item("def", "Def", 4.899, 4.899, 4.761)
+    fuel_txn = _txn(fuel_items=[diesel, de_f])
+    product_txn = _txn(products=[{"product_type": "scales",
+                                   "product_type_description": "CAT Scales",
+                                   "price_per_unit": "5.250", "quantity": "1.000",
+                                   "purchase_price_total": "5.25"}])
+    rows = RF.parse_transaction(fuel_txn, "src") + RF.parse_transaction(product_txn, "src")
+    kept = RF.diesel_rows(rows)
+    assert len(kept) == 1
+    assert kept[0]["fuel_item"] == "Diesel"
+    assert kept[0]["gallons"] == pytest.approx(94.080)
+
+
+def test_diesel_rows_on_empty_input():
+    assert RF.diesel_rows([]) == []
+
+
 def test_pull_transactions_raises_on_non_200(monkeypatch):
     """Never returns partial or fabricated rows on a bad response."""
     monkeypatch.setattr(RF, "_probe", lambda url, key=None: (403, b'{"message":"Access denied"}'))
