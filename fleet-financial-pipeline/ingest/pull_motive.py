@@ -31,27 +31,31 @@ RESPONSE SHAPE:
     converted to miles here on the way out, same reasoning as
     pull_samsara.py's m_to_mi(), so nothing downstream has to remember to.
 
-CREDENTIALS LIVE IN AN ENVIRONMENT VARIABLE, NOT ON DISK, NOT IN CHAT. Same
-discipline as every other live pull in this pipeline (pull_sheets.py,
-pull_samsara.py, pull_relay_fuel.py): this container is ephemeral, and a key
-typed into a conversation or written to a tracked (or even gitignored) file
-has to be re-supplied by hand after every reclaim, while an environment
-variable set on the remote environment survives restarts and is never
-echoed. The operator confirmed 2026-09-27 that the value already shared in
-chat IS a live API token -- it is deliberately NOT used or stored anywhere
-in this repo; only the environment-variable NAME below is referenced.
+CREDENTIALS, ACTUAL MECHANISM CONFIRMED 2026-09-27: this Claude Code
+environment's "API credentials" feature (environment settings -> API
+credentials), scoped to host api.gomotive.com, injecting its own
+Authorization/X-Api-Key header on every outbound request to that host. This
+process NEVER holds or sees the raw key in that mode -- read_token() returns
+None, _get() sends no auth header of its own, and the proxy attaches the
+real one in transit. This is the SAME mechanism pull_relay_fuel.py already
+relies on for Relay, and it is why this module never needed the operator's
+token pasted in chat on 2026-09-27 -- that value went straight into the
+environment's credential store, never into this repo or this process.
 
-    MOTIVE_API_TOKEN   set on this environment's own settings, never pasted
-                       into a session
+    MOTIVE_API_TOKEN   the FALLBACK path only: a plain environment variable,
+                       for running this pipeline somewhere without the
+                       credential-injection mechanism above. read_token()
+                       tries this first and only falls back to injection
+                       (returning None) when it's unset -- which is the
+                       normal case in this environment.
 
 NO ERROR MESSAGE, LOG LINE, OR SAVED FILE MAY CONTAIN THE TOKEN. Only vehicle
 counts and jurisdiction codes (not secrets) are ever printed. Raw, shaped API
 responses ARE saved to disk (data/raw/motive/) because that is the actual
 data being fetched, not the credential that fetched it.
 
-Setup, once (config/motive_credentials.example.json shows the shape):
-    export MOTIVE_API_TOKEN='...'
-    python3 ingest/pull_motive.py --whoami                          # proves the token works
+Setup, once the environment credential above is registered:
+    python3 ingest/pull_motive.py --whoami                          # proves the credential works
     python3 ingest/pull_motive.py --ifta --start-date 2026-09-14 --end-date 2026-09-21
 """
 import argparse
@@ -72,31 +76,36 @@ KM_PER_MILE = 1.609344
 
 
 def read_token():
-    """Never returns or logs the raw token value in an error message --
-    only where it came from (an env var name, or a file path, neither of
-    which is a secret). Same pattern as pull_samsara.read_token()."""
+    """A LOCAL token only -- $MOTIVE_API_TOKEN or the gitignored fallback
+    file. Returns None (never raises) when neither is set, which is the
+    NORMAL case in this environment: Motive is set up as a host-based API
+    credential (environment settings -> API credentials, scoped to
+    api.gomotive.com) that injects its own Authorization header on the way
+    out -- this process never sees that key at all, the same mode
+    pull_relay_fuel.py's _probe() already relies on. A local token, when
+    present, is used INSTEAD of relying on injection (e.g. running this
+    pipeline somewhere without that mechanism)."""
     token = os.environ.get(ENV_VAR, "").strip()
-    where = f"${ENV_VAR}"
-    if not token:
-        if not CREDS_FILE.exists():
-            raise SystemExit(
-                f"No Motive token: ${ENV_VAR} is unset and there is no file "
-                f"at {CREDS_FILE}. Set ${ENV_VAR} on this environment's own "
-                f"settings -- see this module's docstring -- never paste a "
-                f"token into a chat session.")
+    if token:
+        return token
+    if CREDS_FILE.exists():
         try:
             token = json.loads(CREDS_FILE.read_text()).get("token", "").strip()
         except json.JSONDecodeError as exc:
             raise SystemExit(f"{CREDS_FILE} is not valid JSON: {exc}")
-        where = str(CREDS_FILE)
-    if not token:
-        raise SystemExit(f"{where} has no token set.")
-    return token
+        if token:
+            return token
+    return None
 
 
 def _get(token, path, params=None):
-    r = requests.get(f"{BASE}{path}", params=params or {},
-                     headers={"X-Api-Key": token}, timeout=60)
+    """token=None sends NO Authorization/X-Api-Key header at all -- the
+    environment's own proxy injects the real one for api.gomotive.com in
+    that mode. Setting an empty/placeholder header here would either do
+    nothing or collide with the proxy's own injection, so it is left out
+    entirely rather than sent as "" or a dummy value."""
+    headers = {"X-Api-Key": token} if token else {}
+    r = requests.get(f"{BASE}{path}", params=params or {}, headers=headers, timeout=60)
     r.raise_for_status()
     return r.json()
 

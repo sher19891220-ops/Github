@@ -28,11 +28,15 @@ def test_m_to_mi_none_passes_through():
     assert S.m_to_mi(None) is None
 
 
-def test_read_token_missing_raises_systemexit(monkeypatch, tmp_path):
+def test_read_token_missing_returns_none_not_an_exception(monkeypatch, tmp_path):
+    """The normal case as of 2026-09-27: Samsara is set up in this
+    environment as a host-based API credential (environment settings), not a
+    plain env var -- read_token() must return None so the caller falls
+    through to sending no auth header and letting the environment's proxy
+    inject the real one, never raise as if that were a setup error."""
     monkeypatch.delenv(S.ENV_VAR, raising=False)
     monkeypatch.setattr(S, "CREDS_FILE", tmp_path / "does_not_exist.json")
-    with pytest.raises(SystemExit):
-        S.read_token()
+    assert S.read_token() is None
 
 
 def test_read_token_from_env_var(monkeypatch):
@@ -40,13 +44,23 @@ def test_read_token_from_env_var(monkeypatch):
     assert S.read_token() == "samsara_api_test_token_only_for_this_test"
 
 
-def test_read_token_env_var_never_echoed_in_error(monkeypatch, tmp_path, capsys):
-    """The error path for a missing token must name where it looked, never
-    a token value -- there is none to leak here, but the message itself
-    must not be built from anything that could contain one."""
-    monkeypatch.delenv(S.ENV_VAR, raising=False)
-    monkeypatch.setattr(S, "CREDS_FILE", tmp_path / "missing.json")
-    with pytest.raises(SystemExit) as exc:
-        S.read_token()
-    assert "samsara_api" not in str(exc.value)
-    assert S.ENV_VAR in str(exc.value)
+def test_get_sends_no_auth_header_when_token_is_none(monkeypatch):
+    """token=None must not send an empty/placeholder Authorization header --
+    that would risk colliding with the environment proxy's own injected
+    header for api.samsara.com."""
+    captured = {}
+
+    class FakeResp:
+        def raise_for_status(self):
+            pass
+
+        def json(self):
+            return {"data": []}
+
+    def fake_get(url, params=None, headers=None, timeout=None):
+        captured["headers"] = headers
+        return FakeResp()
+
+    monkeypatch.setattr(S.requests, "get", fake_get)
+    S._get(None, "/fleet/vehicles/stats")
+    assert captured["headers"] == {}

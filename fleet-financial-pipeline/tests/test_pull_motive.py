@@ -26,14 +26,37 @@ def test_the_local_fallback_file_can_never_be_committed():
     assert r.returncode == 0, "config/motive_credentials.json is NOT gitignored"
 
 
-def test_missing_credentials_fail_with_setup_instructions(monkeypatch, tmp_path):
+def test_no_local_credential_returns_none_not_an_exception(monkeypatch, tmp_path):
+    """The normal case in this environment: Motive is set up as a host-based
+    API credential (environment settings), not a plain env var -- read_token()
+    must return None so the caller falls through to sending no auth header
+    and letting the environment's proxy inject the real one, never raise as
+    if that were a setup error."""
     monkeypatch.setattr(PM, "CREDS_FILE", tmp_path / "absent.json")
     monkeypatch.delenv(PM.ENV_VAR, raising=False)
-    with pytest.raises(SystemExit) as e:
-        PM.read_token()
-    msg = str(e.value)
-    assert PM.ENV_VAR in msg
-    assert "never paste a token into a chat session" in msg
+    assert PM.read_token() is None
+
+
+def test_get_sends_no_auth_header_when_token_is_none(monkeypatch):
+    """token=None must not send an empty/placeholder Authorization or
+    X-Api-Key header -- either would risk colliding with the environment
+    proxy's own injected header for api.gomotive.com."""
+    captured = {}
+
+    class FakeResp:
+        def raise_for_status(self):
+            pass
+
+        def json(self):
+            return {"ifta_trips": [], "pagination": {}}
+
+    def fake_get(url, params=None, headers=None, timeout=None):
+        captured["headers"] = headers
+        return FakeResp()
+
+    monkeypatch.setattr(PM.requests, "get", fake_get)
+    PM._get(None, "/v1/ifta/summary")
+    assert captured["headers"] == {}
 
 
 def test_env_var_wins_over_the_fallback_file(monkeypatch, tmp_path):

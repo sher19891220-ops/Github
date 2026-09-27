@@ -72,31 +72,34 @@ METERS_PER_MILE = 1609.344
 
 
 def read_token():
-    """Never returns or logs the raw token value in an error message --
-    only where it came from (an env var name, or a file path, neither of
-    which is a secret)."""
+    """A LOCAL token only -- $SAMSARA_API_TOKEN or the gitignored fallback
+    file. Returns None (never raises) when neither is set: as of 2026-09-27
+    Samsara is set up in this environment as a host-based API credential
+    (environment settings -> API credentials, scoped to api.samsara.com)
+    that injects its own Authorization header on the way out, the same
+    mechanism pull_relay_fuel.py's _probe() and pull_motive.py's read_token()
+    already rely on -- this process never sees that key in that mode. A
+    local token, when present (e.g. the token confirmed live on 2026-09-15,
+    if it survives a container reclaim as a real env var), is used INSTEAD
+    of relying on injection."""
     token = os.environ.get(ENV_VAR, "").strip()
-    where = f"${ENV_VAR}"
-    if not token:
-        if not CREDS_FILE.exists():
-            raise SystemExit(
-                f"No Samsara token: ${ENV_VAR} is unset and there is no file "
-                f"at config/samsara_credentials.json. See this module's "
-                f"docstring, or config/samsara_credentials.example.json for "
-                f"the file's shape.")
+    if token:
+        return token
+    if CREDS_FILE.exists():
         try:
             token = json.loads(CREDS_FILE.read_text()).get("token", "").strip()
         except json.JSONDecodeError as exc:
             raise SystemExit(f"{CREDS_FILE} is not valid JSON: {exc}")
-        where = str(CREDS_FILE)
-    if not token:
-        raise SystemExit(f"{where} has no token set.")
-    return token
+        if token:
+            return token
+    return None
 
 
 def _get(token, path, params=None):
-    r = requests.get(f"{BASE}{path}", params=params or {},
-                     headers={"Authorization": f"Bearer {token}"}, timeout=60)
+    """token=None sends NO Authorization header at all -- the environment's
+    own proxy injects the real one for api.samsara.com in that mode."""
+    headers = {"Authorization": f"Bearer {token}"} if token else {}
+    r = requests.get(f"{BASE}{path}", params=params or {}, headers=headers, timeout=60)
     r.raise_for_status()
     return r.json()
 
