@@ -41,7 +41,10 @@ CACHE_DIR = ROOT / "data/cache"
 # Bump when a parser's OUTPUT SHAPE changes in a way older entries would not
 # carry. A code change that alters what a parser returns is not visible in the
 # input files, so it is the one invalidation this cannot infer.
-VERSION = "1"
+# 2026-09-27: load_ifta()'s output shape changed (added jurisdiction_tax_rows)
+# -- a stale "1" cache silently served returns missing the new field, exactly
+# the failure mode this VERSION lever exists for.
+VERSION = "2"
 DISABLE = os.environ.get("FLEET_NO_CACHE") == "1"
 
 
