@@ -83,6 +83,64 @@ def test_excluding_a_company_reweights_the_rest_to_one(built):
     assert sum(x["share"] for x in g.values()) == pytest.approx(1.0)
 
 
+def test_company_for_week_finds_an_exact_week_match(monkeypatch):
+    monkeypatch.setattr(F, "_pnl_appearances", lambda: {
+        "1365": [["2026-09-14", "AFG", "owner_operator"], ["2026-09-21", "AFG", "owner_operator"]],
+    })
+    assert F.company_for_week("1365", "2026-09-14") == ("AFG", "owner_operator")
+    assert F.company_for_week("1365", "2026-09-21") == ("AFG", "owner_operator")
+
+
+def test_company_for_week_refuses_the_nearest_week_instead_of_the_exact_one(monkeypatch):
+    """The bug this fixes: a unit's most-recent-ever appearance is a
+    different week than the one being resolved for -- company_for_week()
+    must return None, never the nearest match, so a caller doesn't silently
+    attribute real financial data to the wrong week's company."""
+    monkeypatch.setattr(F, "_pnl_appearances", lambda: {
+        "1489": [["2026-08-17", "ZONE", "company_driver"]],
+    })
+    assert F.company_for_week("1489", "2026-09-14") is None
+    assert F.company_for_week("1489", "2026-08-17") == ("ZONE", "company_driver")
+
+
+def test_company_for_week_on_an_unknown_unit_is_none_not_an_exception(monkeypatch):
+    monkeypatch.setattr(F, "_pnl_appearances", lambda: {})
+    assert F.company_for_week("9999999", "2026-09-14") is None
+
+
+def test_last_seen_in_pnl_still_returns_the_single_most_recent_appearance(monkeypatch):
+    """Signature/behavior must stay unchanged for registry() and every
+    existing caller -- only the addition of company_for_week() is new."""
+    monkeypatch.setattr(F, "_pnl_appearances", lambda: {
+        "1365": [["2026-08-17", "AFG", "owner_operator"],
+                 ["2026-09-21", "AFG", "owner_operator"],
+                 ["2026-09-07", "AFG", "owner_operator"]],
+    })
+    assert F.last_seen_in_pnl() == {"1365": ("2026-09-21", "AFG", "owner_operator")}
+
+
+def test_a_real_unit_confirmed_on_two_real_weeks_matches_both_exactly(built):
+    """Real regression case, found live 2026-09-27: unit 1365 (AFG,
+    owner-operator) really does appear in AFG's own P&L for BOTH
+    2026-09-14 and 2026-09-21 -- company_for_week() must confirm both,
+    not just the most recent one last_seen_in_pnl() would report."""
+    if F.company_for_week("1365", "2026-09-21") is None:
+        pytest.skip("unit 1365 not present in this corpus snapshot")
+    assert F.company_for_week("1365", "2026-09-14") == ("AFG", "owner_operator")
+    assert F.company_for_week("1365", "2026-09-21") == ("AFG", "owner_operator")
+
+
+def test_a_real_unit_with_no_pnl_coverage_for_a_week_returns_none(built):
+    """Real regression case, found live 2026-09-27: unit 1489's real P&L
+    corpus for ZONE tops out at 2026-08-17 -- company_for_week() must NOT
+    claim it belongs to ZONE for 2026-09-14 just because that was its most
+    recent appearance at the time."""
+    last = F.last_seen_in_pnl().get("1489")
+    if last is None or last[0] >= "2026-09-14":
+        pytest.skip("corpus has moved on; this unit's staleness gap has closed")
+    assert F.company_for_week("1489", "2026-09-14") is None
+
+
 def test_the_registry_reproduces_the_master_policy_schedule(built):
     """67 of the 68 VINs on the auto-liability schedule must resolve. If that
     ever drops, the join has broken and every allocation built on it is wrong."""

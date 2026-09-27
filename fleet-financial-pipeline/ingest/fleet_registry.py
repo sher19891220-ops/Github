@@ -102,12 +102,30 @@ def read_units():
     return dict(out), rows_seen
 
 
-def last_seen_in_pnl():
-    """unit -> (week, company, block kind) of the most recent P&L that carried it."""
+def _pnl_workbook_paths():
+    from ingest_weekly_pnl import WORKBOOKS
+    return [str(ROOT / p) for p in WORKBOOKS.values()]
+
+
+@cache.cached("pnl_appearances", _pnl_workbook_paths)
+def _pnl_appearances():
+    """unit -> [[week, company, block kind], ...] -- EVERY appearance of that
+    unit across every company's weekly P&L, not just the most recent one.
+
+    This exists because a single "most recent" answer (last_seen_in_pnl(),
+    below) cannot say whether a unit was really running under a given company
+    during some OTHER, earlier week -- a later week's appearance under a
+    different company overwrites that information entirely. Confirmed a real
+    bug from exactly this gap (2026-09-27): 4 units were resolved to AFG via
+    their most-recent-ever P&L appearance, then that resolution was used to
+    write real tax data for a completely different, earlier week -- one AFG's
+    own P&L never actually listed any of those 4 units in. company_for_week()
+    below is the fix: an EXACT week match, or nothing, never the nearest one.
+    """
     import openpyxl
     from ingest_weekly_pnl import week_key, WORKBOOKS
     from xtrack_diagnosis import read_blocks
-    last = {}
+    appearances = collections.defaultdict(list)
     for company, path in WORKBOOKS.items():
         wb = openpyxl.load_workbook(ROOT / path, data_only=True)
         for tab in wb.sheetnames:
@@ -115,10 +133,46 @@ def last_seen_in_pnl():
             if not wk:
                 continue
             for b in read_blocks(wb[tab]):
-                u = b["unit"]
-                if u not in last or wk > last[u][0]:
-                    last[u] = (wk, company, b["kind"])
+                appearances[b["unit"]].append([wk, company, b["kind"]])
+    return dict(appearances)
+
+
+def last_seen_in_pnl():
+    """unit -> (week, company, block kind) of the most recent P&L that carried
+    it -- signature and behavior UNCHANGED from before this module tracked
+    every appearance, so registry() and every existing caller keep working
+    exactly as they did. This is "most recent ever", not "ran under this
+    company during week X" -- for the latter, which is what resolving a real
+    week's mileage/tax data to a company actually needs, use
+    company_for_week() instead. Never use this function's answer as if it
+    were true for some OTHER week than the one it names.
+    """
+    last = {}
+    for u, apps in _pnl_appearances().items():
+        wk, company, kind = max(apps, key=lambda a: a[0])
+        last[u] = (wk, company, kind)
     return last
+
+
+def company_for_week(unit, target_week):
+    """(company, kind) if `unit` appears in EXACTLY `target_week`'s P&L for
+    some company -- None if it doesn't, even when the unit has a "most
+    recent" appearance elsewhere (last_seen_in_pnl()) that might tempt a
+    caller to assume it. Never guesses from the nearest week: an exact match
+    or nothing, the same "measurement, not judgement" rule this module
+    already applies to VIN-to-unit resolution. `target_week` is the same
+    "YYYY-MM-DD" (Monday-anchored) string week_key()/week_start use
+    throughout this pipeline.
+
+    THIS IS THE RIGHT CALL for resolving which company a specific week's
+    mileage/fuel/tax data belongs to -- last_seen_in_pnl() is not, because it
+    only ever knows about each unit's single most recent appearance and says
+    nothing about whether that appearance is the same week being processed.
+    """
+    for wk, company, kind in _pnl_appearances().get(unit, []):
+        if wk == target_week:
+            return company, kind
+    return None
 
 
 @cache.cached("fleet_registry", lambda: [str(WORKBOOK)] + [
