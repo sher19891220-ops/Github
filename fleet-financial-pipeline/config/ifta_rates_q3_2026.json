@@ -1,0 +1,1097 @@
+{
+  "metadata": {
+    "title": "48-State Trucking Tax CPM Reference",
+    "vehicle_assumption": "80,000-lb, 5-axle interstate tractor-trailer",
+    "ifta_period": "Q3 2026",
+    "default_mpg": 7.0,
+    "warning": "Update IFTA rates every quarter. Net IFTA depends on tax-paid fuel purchases."
+  },
+  "states": [
+    {
+      "state": "Alabama",
+      "abbr": "AL",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.31,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.31,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.044286,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.044286,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "Arizona",
+      "abbr": "AZ",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.26,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.26,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.037143,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.037143,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "Arkansas",
+      "abbr": "AR",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.285,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.285,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.040714,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.040714,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "California",
+      "abbr": "CA",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.979,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.979,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.139857,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.139857,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "Colorado",
+      "abbr": "CO",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.335,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.335,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.047857,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.047857,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "Connecticut",
+      "abbr": "CT",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.499,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.499,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.071286,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": {
+        "name": "Connecticut Highway Use Fee (HUF)",
+        "rate_per_mile_80k": 0.1,
+        "filing_frequency": "Quarterly",
+        "rule": "80,000-lb bracket (78,001\u201380,000 lb). 80,001+ is $0.175/mi.",
+        "source": "https://portal.ct.gov/drs/businesses/highway-use-fee/huf"
+      },
+      "combined_gross_tax_cpm_before_tolls": 0.171286,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "Delaware",
+      "abbr": "DE",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.22,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.22,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.031429,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.031429,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "Florida",
+      "abbr": "FL",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.4097,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.4097,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.058529,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.058529,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "Georgia",
+      "abbr": "GA",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.373,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.373,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.053286,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.053286,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "Idaho",
+      "abbr": "ID",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.32,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.32,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.045714,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.045714,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "Illinois",
+      "abbr": "IL",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.738,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.738,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.105429,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.105429,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "Indiana",
+      "abbr": "IN",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.63,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.63,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.09,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.09,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "Iowa",
+      "abbr": "IA",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.325,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.325,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.046429,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.046429,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "Kansas",
+      "abbr": "KS",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.26,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.26,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.037143,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.037143,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "Kentucky",
+      "abbr": "KY",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.22,
+        "diesel_surcharge_per_gallon": 0.105,
+        "diesel_total_per_gallon": 0.325,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.046429,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": {
+        "name": "Kentucky Weight Distance Tax (KYU)",
+        "rate_per_mile_80k": 0.0285,
+        "filing_frequency": "Quarterly",
+        "rule": "Vehicles over 59,999 lb. Flat $0.0285 per Kentucky mile.",
+        "source": "https://transportation.ky.gov/Audits/Pages/Weight-Distance-and-Intrastate-Audit-Assistance.aspx"
+      },
+      "combined_gross_tax_cpm_before_tolls": 0.074929,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "Louisiana",
+      "abbr": "LA",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.2,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.2,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.028571,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.028571,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "Maine",
+      "abbr": "ME",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.312,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.312,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.044571,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.044571,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "Maryland",
+      "abbr": "MD",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.4745,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.4745,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.067786,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.067786,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "Massachusetts",
+      "abbr": "MA",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.24,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.24,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.034286,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.034286,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "Michigan",
+      "abbr": "MI",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.524,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.524,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.074857,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.074857,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "Minnesota",
+      "abbr": "MN",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.326,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.326,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.046571,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.046571,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "Mississippi",
+      "abbr": "MS",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.24,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.24,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.034286,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.034286,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "Missouri",
+      "abbr": "MO",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.295,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.295,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.042143,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.042143,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "Montana",
+      "abbr": "MT",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.2975,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.2975,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.0425,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.0425,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "Nebraska",
+      "abbr": "NE",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.318,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.318,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.045429,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.045429,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "Nevada",
+      "abbr": "NV",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.27,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.27,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.038571,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.038571,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "New Hampshire",
+      "abbr": "NH",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.222,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.222,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.031714,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.031714,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "New Jersey",
+      "abbr": "NJ",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.561,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.561,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.080143,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.080143,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "New Mexico",
+      "abbr": "NM",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.21,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.21,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.03,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": {
+        "name": "New Mexico Weight Distance Tax",
+        "rate_per_mile_80k": 0.04378,
+        "filing_frequency": "Quarterly",
+        "rule": "80,000-lb full-haul rate (78,001\u201380,000 lb). Applies separately from IFTA.",
+        "source": "https://realfile.tax.newmexico.gov/mvd10964.pdf"
+      },
+      "combined_gross_tax_cpm_before_tolls": 0.07378,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "New York",
+      "abbr": "NY",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.3805,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.3805,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.054357,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": {
+        "name": "New York Highway Use Tax (HUT)",
+        "rate_per_mile_80k": 0.0546,
+        "filing_frequency": "Monthly / Quarterly / Annual based on prior-year HUT liability",
+        "rule": "Default modeling rate: 80,000-lb laden taxable NON-THRUWAY miles, gross-weight method, Schedule 1. Toll-paid Thruway miles are excluded. Unladen and special Schedule 2 rates differ.",
+        "source": "https://www.tax.ny.gov/forms/current-forms/motor/mt903i.htm"
+      },
+      "combined_gross_tax_cpm_before_tolls": 0.108957,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "North Carolina",
+      "abbr": "NC",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.41,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.41,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.058571,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.058571,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "North Dakota",
+      "abbr": "ND",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.23,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.23,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.032857,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.032857,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "Ohio",
+      "abbr": "OH",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.47,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.47,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.067143,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.067143,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "Oklahoma",
+      "abbr": "OK",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.19,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.19,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.027143,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.027143,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "Oregon",
+      "abbr": "OR",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": null,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.0,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.0,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": {
+        "name": "Oregon Weight-Mile Tax (WMT)",
+        "rate_per_mile_80k": 0.2512,
+        "filing_frequency": "Monthly by default; quarterly if approved/elected",
+        "rule": "Table A, 78,001\u201380,000 lb. Oregon diesel IFTA rate is N/A for this model; WMT is the principal mileage tax.",
+        "source": "https://www.oregon.gov/odot/MCT/Pages/File-Tax-Reports.aspx"
+      },
+      "combined_gross_tax_cpm_before_tolls": 0.2512,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "Pennsylvania",
+      "abbr": "PA",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.741,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.741,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.105857,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.105857,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "Rhode Island",
+      "abbr": "RI",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.4,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.4,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.057143,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.057143,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "South Carolina",
+      "abbr": "SC",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.28,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.28,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.04,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.04,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "South Dakota",
+      "abbr": "SD",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.28,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.28,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.04,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.04,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "Tennessee",
+      "abbr": "TN",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.27,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.27,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.038571,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.038571,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "Texas",
+      "abbr": "TX",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.2,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.2,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.028571,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.028571,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "Utah",
+      "abbr": "UT",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.379,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.379,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.054143,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.054143,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "Vermont",
+      "abbr": "VT",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.31,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.31,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.044286,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.044286,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "Virginia",
+      "abbr": "VA",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.336,
+        "diesel_surcharge_per_gallon": 0.143,
+        "diesel_total_per_gallon": 0.479,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.068429,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.068429,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "Washington",
+      "abbr": "WA",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.595,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.595,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.085,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.085,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "West Virginia",
+      "abbr": "WV",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.357,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.357,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.051,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.051,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "Wisconsin",
+      "abbr": "WI",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.329,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.329,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.047,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.047,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    },
+    {
+      "state": "Wyoming",
+      "abbr": "WY",
+      "ifta": {
+        "period": "Q3 2026",
+        "diesel_base_per_gallon": 0.24,
+        "diesel_surcharge_per_gallon": 0.0,
+        "diesel_total_per_gallon": 0.24,
+        "source": "https://www.tax.ny.gov/forms/html-instructions/2026/motor/ifta105-926.htm"
+      },
+      "model": {
+        "assumed_mpg": 7.0,
+        "gross_ifta_cpm": 0.034286,
+        "note": "Gross IFTA CPM is tax exposure before tax-paid fuel credits; do not treat it as the final net IFTA settlement."
+      },
+      "separate_mileage_tax": null,
+      "combined_gross_tax_cpm_before_tolls": 0.034286,
+      "tolls": {
+        "included": false,
+        "note": "Route-specific tolls must be added separately."
+      }
+    }
+  ]
+}

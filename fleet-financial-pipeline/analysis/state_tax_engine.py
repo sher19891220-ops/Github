@@ -38,18 +38,34 @@ each state."
               this period's real per-unit miles in that state. Every other
               state gets permit_tax == 0.0.
 
-RATES ARE ESTIMATES, NEVER RE-DERIVATIONS. The current quarter has not been
-filed yet, so ifta_by_state() uses the MOST RECENTLY FILED quarter's own
-per-state rate (parse_tax_and_insurance.jurisdiction_tax_rows()) applied to
-this period's real activity -- the same estimate discipline
-cost_structure.fuel_tax_per_gallon() already uses fleet-wide, now per state.
-A state's printed rate is itself a 2-decimal DISPLAY of a more precise filed
-figure (confirmed against a real ZONE-OH return: Kentucky's real KYU rate
-divides to ~0.105, printed as 0.11), so a state that files its own surcharge
-as a second row (Kentucky, Virginia) has both displayed rates summed into one
-effective per-gallon rate here -- close, not exact, and never asserted as
-exact until that quarter is itself filed and its own return supersedes the
-estimate.
+TWO RATE SOURCES, BOTH SHAPED {state: {"base": $/gal, "surcharge": $/gal}}:
+
+  ifta_rate_schedule()   the operator-supplied Q3 2026 48-state reference
+                         (config/ifta_rates_q3_2026.json) -- CURRENT, forward-
+                         looking, and uniform across every company (a state
+                         sets one rate for everyone, not one per carrier).
+                         THE RECOMMENDED DEFAULT for costing a quarter that
+                         has not been filed yet.
+  latest_rate_state()    this company's own MOST RECENTLY FILED IFTA return
+                         (parse_tax_and_insurance.jurisdiction_tax_rows()) --
+                         a real, past-tense number, useful for RECONCILING
+                         what was estimated against what was actually filed
+                         (this pipeline's standing dual-source-reconciliation
+                         habit), not as the primary driver going forward. A
+                         state's printed rate on a filed PDF is itself a
+                         2-decimal DISPLAY of a more precise figure (confirmed
+                         against a real ZONE-OH return: Kentucky's real KYU
+                         rate divides to ~0.105, printed as 0.11) -- close,
+                         not exact.
+
+BASE AND SURCHARGE ARE CREDITED DIFFERENTLY, PER THE OPERATOR'S OWN REFERENCE
+MODEL (Trip_Calculator sheet in the Q3 2026 workbook): the fuel-tax credit for
+gallons already purchased (and taxed) in a state applies to the BASE rate
+ONLY, never the surcharge -- a surcharge (Kentucky's KYU-style IFTA
+surcharge, Virginia's own) is collected through the return regardless of
+where the fuel was bought, so crediting it against pump purchases would
+under-state the liability. Liability = taxable_gallons x (base + surcharge);
+credit = gallons_purchased x base; ifta_tax = liability - credit.
 
 PER-UNIT ALLOCATION. IFTA is filed at the FLEET level, never per truck -- a
 state doesn't see or care which of a carrier's trucks ran its miles. So a
@@ -68,6 +84,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "ingest"))
 
 WD_RATES_PATH = ROOT / "config" / "weight_distance_tax_rates.json"
+IFTA_SCHEDULE_PATH = ROOT / "config" / "ifta_rates_q3_2026.json"
 
 
 def _period_end_date(s):
@@ -105,14 +122,32 @@ def gallons_by_state(fuel_rows):
     return out
 
 
+def ifta_rate_schedule(path=IFTA_SCHEDULE_PATH):
+    """{state_abbr: {"base": $/gal, "surcharge": $/gal}} from the operator-
+    supplied Q3 2026 48-state reference -- the recommended default rate_state
+    for ifta_by_state()/unit_state_report() on a quarter still in progress."""
+    d = json.loads(Path(path).read_text())
+    out = {}
+    for s in d["states"]:
+        ifta = s.get("ifta") or {}
+        out[s["abbr"]] = {"base": ifta.get("diesel_base_per_gallon") or 0.0,
+                          "surcharge": ifta.get("diesel_surcharge_per_gallon") or 0.0}
+    return out
+
+
 def rates_by_state(jurisdiction_rows):
-    """Sum each state's filed rate(s) from parse_tax_and_insurance.
-    jurisdiction_tax_rows() -- a state with its own surcharge row (Kentucky's
-    KYU, Virginia's own second line) files it as a second row at a different
-    rate, and both belong in that state's real effective per-gallon cost."""
+    """{state: {"base", "surcharge"}} from parse_tax_and_insurance.
+    jurisdiction_tax_rows() -- a state's FIRST row (real miles traveled) is
+    its base rate; a state that files a SECOND row for the same state (zero
+    miles -- Kentucky's KYU, Virginia's own surcharge) contributes that row's
+    rate as the surcharge, summed if a state ever files more than two."""
     out = {}
     for r in jurisdiction_rows:
-        out[r["state"]] = out.get(r["state"], 0.0) + r["rate"]
+        st = r["state"]
+        if st not in out:
+            out[st] = {"base": r["rate"], "surcharge": 0.0}
+        else:
+            out[st]["surcharge"] += r["rate"]
     return out
 
 
@@ -133,26 +168,40 @@ def fleet_mpg(mileage_rows, total_gallons):
 
 
 def ifta_by_state(mileage_rows, gallons_state, rate_state, mpg):
-    """{state: {state_miles, taxable_gallons, gallons_purchased,
-    net_taxable_gallons, rate, ifta_tax}} -- fleet level, one row per state
-    that had real miles this period. A state with no rate on file (never
-    filed for) or no usable mpg is skipped, never zeroed -- zero would read
-    as "no tax owed" instead of "not computable yet"."""
+    """{state: {state_miles, taxable_gallons, gallons_purchased, base,
+    surcharge, liability, credit, ifta_tax}} -- fleet level, one row per
+    state that had real miles this period. A state with no rate on file
+    (never filed for, or absent from the schedule) or no usable mpg is
+    skipped, never zeroed -- zero would read as "no tax owed" instead of
+    "not computable yet".
+
+    `rate_state` is {state: {"base": $/gal, "surcharge": $/gal}} -- from
+    ifta_rate_schedule() (recommended) or latest_rate_state() (reconciliation
+    against a real filed return). liability taxes BOTH base and surcharge;
+    the fuel-tax credit for gallons already purchased there applies BASE
+    ONLY (see module docstring) -- a plain float for rate_state's per-state
+    value is no longer accepted, so a caller passing the old shape fails
+    loudly (TypeError on the dict access) rather than silently mispricing
+    every state's surcharge as a double credit.
+    """
     out = {}
     if not mpg:
         return out
     for st, miles in miles_by_state(mileage_rows).items():
-        rate = rate_state.get(st)
-        if rate is None:
+        r = rate_state.get(st)
+        if r is None:
             continue
+        base, surcharge = r.get("base", 0.0), r.get("surcharge", 0.0)
         taxable_gallons = miles / mpg
         purchased = gallons_state.get(st, 0.0)
-        net = taxable_gallons - purchased
+        liability = taxable_gallons * (base + surcharge)
+        credit = purchased * base
         out[st] = {"state_miles": round(miles, 1),
                    "taxable_gallons": round(taxable_gallons, 2),
                    "gallons_purchased": round(purchased, 2),
-                   "net_taxable_gallons": round(net, 2),
-                   "rate": rate, "ifta_tax": round(net * rate, 2)}
+                   "base": base, "surcharge": surcharge,
+                   "liability": round(liability, 2), "credit": round(credit, 2),
+                   "ifta_tax": round(liability - credit, 2)}
     return out
 
 
@@ -185,7 +234,7 @@ def latest_rate_state(legal_name_substring, ifta_returns):
     return rates_by_state(latest["jurisdiction_tax_rows"]), latest.get("period_end")
 
 
-def unit_state_report(mileage_rows, gallons_state, rate_state, mpg, permit_rates=None):
+def unit_state_report(mileage_rows, gallons_state, rate_state=None, mpg=None, permit_rates=None):
     """The combined per-unit, per-state table: ifta_tax and permit_tax as two
     separate columns for every (company, unit, state) this period saw real
     miles in -- one row per mileage_rows entry, never invented for a
@@ -195,7 +244,18 @@ def unit_state_report(mileage_rows, gallons_state, rate_state, mpg, permit_rates
     (see module docstring: IFTA is filed at the fleet level, so a truck's
     share of the liability is its share of the state's miles). permit_tax is
     computed directly per unit, no allocation.
+
+    rate_state defaults to ifta_rate_schedule() (the current-quarter 48-state
+    reference) -- pass latest_rate_state(company, returns)[0] instead to
+    reconcile against what THIS company actually filed last quarter. mpg
+    defaults to the schedule's own stated assumption (7.0) only when the
+    caller has no real gallons to compute fleet_mpg() from; prefer passing a
+    real mpg whenever real gallons exist, same reasoning as fuel_actuals.py.
     """
+    rate_state = rate_state if rate_state is not None else ifta_rate_schedule()
+    if mpg is None:
+        mpg = json.loads(Path(IFTA_SCHEDULE_PATH).read_text()).get("metadata", {}).get(
+            "default_mpg", 7.0)
     permit_rates = permit_rates if permit_rates is not None else permit_states()
     ifta_state = ifta_by_state(mileage_rows, gallons_state, rate_state, mpg)
     state_totals_miles = miles_by_state(mileage_rows)

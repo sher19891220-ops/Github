@@ -50,6 +50,7 @@ alone -- `company` is a required argument the uploader/caller must supply.
 """
 import argparse
 import csv
+import json
 import re
 import sys
 from datetime import datetime, timedelta
@@ -170,28 +171,64 @@ def parse_activity_csv(path, company, year):
     return mileage_rows, summary
 
 
+def parse_activity_dir(dir_path, company, year):
+    """Every *.csv in a directory, one truck's export each (the operator's
+    real weekly workflow: one Samsara file per truck) -- combined into one
+    mileage_rows list. A file that fails to parse is reported and skipped,
+    never silently dropped: 'we need for all units' means every unit that
+    parses, not a batch that quietly loses one truck to a bad export."""
+    all_rows, summaries, failed = [], [], []
+    for p in sorted(Path(dir_path).glob("*.csv")):
+        try:
+            rows, summary = parse_activity_csv(p, company, year)
+        except Exception as exc:
+            failed.append((str(p), f"{type(exc).__name__}: {exc}"))
+            continue
+        all_rows.extend(rows)
+        summaries.append(summary)
+    return all_rows, summaries, failed
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                   formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("csv_path")
+    src = ap.add_mutually_exclusive_group(required=True)
+    src.add_argument("csv_path", nargs="?", help="one truck's weekly export")
+    src.add_argument("--dir", help="a directory of *.csv exports, one truck each")
     ap.add_argument("--company", required=True, help="never guessed from the filename")
     ap.add_argument("--year", type=int, required=True, help="the Time column carries no year")
+    ap.add_argument("--out", help="write the combined mileage_rows as JSON to this path")
     a = ap.parse_args()
-    rows, summary = parse_activity_csv(a.csv_path, a.company, a.year)
-    print(f"unit {summary['unit']}, week of {summary['week_start']}: "
-          f"{summary['total_miles']} mi total ({summary['rows']} rows, "
-          f"{summary['first_seen']} .. {summary['last_seen']})")
-    for r in rows:
-        print(f"  {r['state']}: {r['miles']} mi")
-    if summary["no_state_miles"]:
-        print(f"  UNATTRIBUTED (no state parsed from Location): {summary['no_state_miles']} mi")
-    if summary["dropped_negative_deltas"]:
-        print(f"  DROPPED {summary['dropped_negative_deltas']} negative-odometer "
-              f"reading(s) -- see module docstring", file=sys.stderr)
-    check = summary["attributed_miles"] + summary["no_state_miles"]
-    if abs(check - summary["total_miles"]) > 0.5:
-        print(f"  CONTROL FAILED: states+unattributed={check} != total={summary['total_miles']}",
-              file=sys.stderr)
+
+    if a.dir:
+        rows, summaries, failed = parse_activity_dir(a.dir, a.company, a.year)
+        print(f"{len(summaries)} truck(s) parsed, {len(failed)} failed, "
+              f"{sum(s['total_miles'] for s in summaries):.1f} mi total, "
+              f"{len(rows)} (unit, state) row(s)")
+        for s in summaries:
+            print(f"  unit {s['unit']}: {s['total_miles']} mi across {len(s['states'])} state(s)")
+        for path, err in failed:
+            print(f"  FAILED {path}: {err}", file=sys.stderr)
+    else:
+        rows, summary = parse_activity_csv(a.csv_path, a.company, a.year)
+        print(f"unit {summary['unit']}, week of {summary['week_start']}: "
+              f"{summary['total_miles']} mi total ({summary['rows']} rows, "
+              f"{summary['first_seen']} .. {summary['last_seen']})")
+        for r in rows:
+            print(f"  {r['state']}: {r['miles']} mi")
+        if summary["no_state_miles"]:
+            print(f"  UNATTRIBUTED (no state parsed from Location): {summary['no_state_miles']} mi")
+        if summary["dropped_negative_deltas"]:
+            print(f"  DROPPED {summary['dropped_negative_deltas']} negative-odometer "
+                  f"reading(s) -- see module docstring", file=sys.stderr)
+        check = summary["attributed_miles"] + summary["no_state_miles"]
+        if abs(check - summary["total_miles"]) > 0.5:
+            print(f"  CONTROL FAILED: states+unattributed={check} != total={summary['total_miles']}",
+                  file=sys.stderr)
+
+    if a.out:
+        Path(a.out).write_text(json.dumps(rows, indent=2))
+        print(f"  wrote {len(rows)} mileage_rows to {a.out}")
 
 
 if __name__ == "__main__":

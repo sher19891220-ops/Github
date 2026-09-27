@@ -101,7 +101,8 @@ def test_to_mileage_rows_matches_state_tax_engine_shape():
                     "state": "OH", "miles": 120.0}]
 
     import state_tax_engine as E  # noqa: E402
-    report = E.unit_state_report(out, gallons_state={}, rate_state={"OH": 0.47}, mpg=6.5)
+    report = E.unit_state_report(out, gallons_state={},
+                                 rate_state={"OH": {"base": 0.47, "surcharge": 0.0}}, mpg=6.5)
     assert report[0]["state"] == "OH" and report[0]["ifta_tax"] != 0.0
 
 

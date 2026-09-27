@@ -99,6 +99,50 @@ def test_a_row_with_no_recognizable_state_is_reported_not_hidden(tmp_path):
     assert summary["total_miles"] == pytest.approx(30.0)
 
 
+def test_parse_activity_dir_combines_every_trucks_file(tmp_path):
+    """The operator's real weekly workflow: one Samsara export per truck,
+    'we need for all units' -- a directory of them combines into one
+    mileage_rows list covering every truck that parsed."""
+    # _write() always names its file activity.csv, so both trucks' files are
+    # written directly here instead, landing in the same directory.
+    import csv as csv_mod
+    d = tmp_path
+    with open(d / "unit100.csv", "w", newline="") as f:
+        w = csv_mod.writer(f)
+        w.writerow(HEADER)
+        w.writerows([
+            row("100", "Sep 14 7:00AM EDT", 0, "Main St, Columbus, OH, 43004"),
+            row("100", "Sep 14 8:00AM EDT", 100, "Main St, Columbus, OH, 43004"),
+        ])
+    with open(d / "unit200.csv", "w", newline="") as f:
+        w = csv_mod.writer(f)
+        w.writerow(HEADER)
+        w.writerows([
+            row("200", "Sep 14 7:00AM EDT", 0, "I 70, Wheeling, WV, 26003"),
+            row("200", "Sep 14 8:00AM EDT", 50, "I 70, Wheeling, WV, 26003"),
+        ])
+    rows, summaries, failed = M.parse_activity_dir(d, company="ZONE", year=2026)
+    assert failed == []
+    assert {s["unit"] for s in summaries} == {"100", "200"}
+    by_unit_state = {(r["unit"], r["state"]): r["miles"] for r in rows}
+    assert by_unit_state[("100", "OH")] == pytest.approx(100.0)
+    assert by_unit_state[("200", "WV")] == pytest.approx(50.0)
+
+
+def test_parse_activity_dir_reports_a_bad_file_without_losing_the_good_ones(tmp_path):
+    d = tmp_path
+    (d / "broken.csv").write_text("not,a,valid,samsara,export\n1,2,3,4,5\n")
+    with open(d / "unit100.csv", "w", newline="") as f:
+        import csv as csv_mod
+        w = csv_mod.writer(f)
+        w.writerow(HEADER)
+        w.writerows([row("100", "Sep 14 7:00AM EDT", 0, "Main St, Columbus, OH, 43004"),
+                     row("100", "Sep 14 8:00AM EDT", 10, "Main St, Columbus, OH, 43004")])
+    rows, summaries, failed = M.parse_activity_dir(d, company="ZONE", year=2026)
+    assert len(summaries) == 1 and summaries[0]["unit"] == "100"
+    assert len(failed) == 1 and "broken.csv" in failed[0][0]
+
+
 def test_more_than_one_vehicle_in_one_file_is_refused_not_guessed(tmp_path):
     rows = [
         row("100", "Sep 14 7:00AM EDT", 100, "Main St, Columbus, OH, 43004"),
@@ -121,7 +165,7 @@ def test_output_rows_are_ready_for_state_tax_engine(tmp_path):
     ]
     p = _write(tmp_path, rows)
     mileage_rows, _ = M.parse_activity_csv(p, company="ZONE", year=2026)
-    out = E.unit_state_report(mileage_rows, gallons_state={}, rate_state={"OH": 0.47},
-                               mpg=6.5)
+    out = E.unit_state_report(mileage_rows, gallons_state={},
+                               rate_state={"OH": {"base": 0.47, "surcharge": 0.0}}, mpg=6.5)
     assert out[0]["unit"] == "100" and out[0]["state"] == "OH"
     assert out[0]["ifta_tax"] != 0.0
