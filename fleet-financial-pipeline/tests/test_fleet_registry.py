@@ -108,6 +108,83 @@ def test_company_for_week_on_an_unknown_unit_is_none_not_an_exception(monkeypatc
     assert F.company_for_week("9999999", "2026-09-14") is None
 
 
+# --------------------------------------------- resolve_unit_for_week() -----
+# DispatchHQ's sub_truck_periods fallback, added 2026-09-28: a substitute
+# truck (breakdown/shop) is never the number the P&L tracks that driver
+# under, so company_for_week() alone can never resolve it -- a structural
+# gap, not the staleness gap company_for_week() itself already fixes.
+
+def test_resolve_unit_for_week_prefers_the_direct_pnl_match(monkeypatch):
+    """A direct P&L hit never even looks at sub_truck_periods."""
+    monkeypatch.setattr(F, "_pnl_appearances", lambda: {
+        "1489": [["2026-09-14", "ZONE", "company_driver"]],
+    })
+    result = F.resolve_unit_for_week("1489", "2026-09-14",
+                                     sub_truck_periods=[{"sub_truck": "1489"}])
+    assert result == {"company": "ZONE", "kind": "company_driver", "resolved_via": "direct"}
+
+
+def test_resolve_unit_for_week_falls_back_to_the_original_trucks_company(monkeypatch):
+    """The live case found 2026-09-28: substitute truck 878131 standing in
+    for original truck 484505 -- 484505 is what the P&L actually tracks."""
+    monkeypatch.setattr(F, "_pnl_appearances", lambda: {
+        "484505": [["2026-09-14", "ZONE", "company_driver"]],
+    })
+    subs = [{"driver_id": 1, "original_truck": "484505", "sub_truck": "878131",
+            "reason": "Breakdown", "start_date": "2026-09-01", "end_date": None}]
+    result = F.resolve_unit_for_week("878131", "2026-09-14", sub_truck_periods=subs)
+    assert result == {"company": "ZONE", "kind": "company_driver",
+                      "resolved_via": "sub_truck_period", "original_truck": "484505"}
+
+
+def test_resolve_unit_for_week_without_sub_truck_periods_behaves_like_company_for_week(monkeypatch):
+    monkeypatch.setattr(F, "_pnl_appearances", lambda: {})
+    assert F.resolve_unit_for_week("878131", "2026-09-14") is None
+    assert F.resolve_unit_for_week("878131", "2026-09-14", sub_truck_periods=[]) is None
+
+
+def test_resolve_unit_for_week_respects_the_substitution_date_range(monkeypatch):
+    """A substitution that ended before this week, or starts after it, must
+    not resolve -- the same 'exact match, never the nearest' discipline as
+    company_for_week() itself."""
+    monkeypatch.setattr(F, "_pnl_appearances", lambda: {
+        "484505": [["2026-09-14", "ZONE", "company_driver"]],
+    })
+    ended_before = [{"original_truck": "484505", "sub_truck": "878131",
+                     "start_date": "2026-07-01", "end_date": "2026-08-01"}]
+    starts_after = [{"original_truck": "484505", "sub_truck": "878131",
+                     "start_date": "2026-10-01", "end_date": None}]
+    assert F.resolve_unit_for_week("878131", "2026-09-14", sub_truck_periods=ended_before) is None
+    assert F.resolve_unit_for_week("878131", "2026-09-14", sub_truck_periods=starts_after) is None
+
+
+def test_resolve_unit_for_week_never_guesses_through_an_ambiguous_substitute(monkeypatch):
+    """Two different drivers' periods both claim the same substitute number
+    over the target week -- a real DispatchHQ data ambiguity, not something
+    to pick an answer for."""
+    monkeypatch.setattr(F, "_pnl_appearances", lambda: {
+        "484505": [["2026-09-14", "ZONE", "company_driver"]],
+        "494656": [["2026-09-14", "XTRACK", "company_driver"]],
+    })
+    subs = [
+        {"original_truck": "484505", "sub_truck": "878131",
+         "start_date": "2026-09-01", "end_date": None},
+        {"original_truck": "494656", "sub_truck": "878131",
+         "start_date": "2026-09-10", "end_date": None},
+    ]
+    assert F.resolve_unit_for_week("878131", "2026-09-14", sub_truck_periods=subs) is None
+
+
+def test_resolve_unit_for_week_does_not_invent_a_company_if_the_original_truck_doesnt_resolve_either(monkeypatch):
+    """DispatchHQ names the original truck; the P&L still has to confirm it
+    for this exact week, or resolution stays None -- DispatchHQ alone is
+    never enough to attribute real tax data to a company."""
+    monkeypatch.setattr(F, "_pnl_appearances", lambda: {})
+    subs = [{"original_truck": "484505", "sub_truck": "878131",
+            "start_date": "2026-09-01", "end_date": None}]
+    assert F.resolve_unit_for_week("878131", "2026-09-14", sub_truck_periods=subs) is None
+
+
 def test_last_seen_in_pnl_still_returns_the_single_most_recent_appearance(monkeypatch):
     """Signature/behavior must stay unchanged for registry() and every
     existing caller -- only the addition of company_for_week() is new."""

@@ -175,6 +175,63 @@ def company_for_week(unit, target_week):
     return None
 
 
+def resolve_unit_for_week(unit, target_week, sub_truck_periods=None):
+    """company_for_week(), with the one fallback DispatchHQ's data makes
+    possible: a substitute truck.
+
+    A driver whose truck breaks down or goes into the shop keeps running --
+    DispatchHQ logs this as a sub_truck_periods row (original_truck ->
+    sub_truck, over a date range), but the P&L only ever tracks that driver
+    under their ORIGINAL truck number. So real mileage reported under the
+    SUBSTITUTE number can never resolve through company_for_week() alone, no
+    matter how current the P&L is -- this is a structural gap in what the
+    P&L can name, not a staleness gap company_for_week() already exists to
+    catch. Confirmed live 2026-09-28: substitute truck 878131 (standing in
+    for ZONE unit 484505 since 2026-09-01, reason "Breakdown") already shows
+    real ZONE-billed DEF spend in Relay's 2026-09-14 data, and would sit in
+    units_unresolved_for_this_exact_week forever without this.
+
+    This checks the substitution log ONLY when the direct P&L lookup fails,
+    and then resolves to the ORIGINAL truck's own company_for_week() result
+    -- it never invents a company; DispatchHQ only ever supplies the mapping
+    from substitute number back to original number, and the P&L still has to
+    confirm the original truck for that exact week. Two or more overlapping
+    sub_truck_periods rows for the same substitute number is a DispatchHQ
+    data ambiguity, not something to guess through -- treated as unresolved.
+
+    `sub_truck_periods`: the real rows from
+    pull_dispatchhq.board_fetch_all("sub_truck_periods") (fetch once per
+    caller run, not once per unit -- fleet-wide, it is currently 17 rows and
+    does not change mid-run). None (the default) means "don't attempt the
+    fallback", not "fetch live" -- this function makes no network call
+    itself, matching every other function in this module.
+
+    Returns None, or a dict: {"company", "kind", "resolved_via" ("direct" or
+    "sub_truck_period"), "original_truck" (only set for the latter)}.
+    """
+    direct = company_for_week(unit, target_week)
+    if direct is not None:
+        company, kind = direct
+        return {"company": company, "kind": kind, "resolved_via": "direct"}
+    if not sub_truck_periods:
+        return None
+
+    week_start = datetime.date.fromisoformat(target_week)
+    week_end = (week_start + datetime.timedelta(days=6)).isoformat()
+    matches = [r for r in sub_truck_periods if r.get("sub_truck") == unit
+              and r.get("start_date", "9999") <= week_end
+              and (not r.get("end_date") or r["end_date"] >= target_week)]
+    if len(matches) != 1:
+        return None
+    original = matches[0].get("original_truck")
+    resolved = company_for_week(original, target_week)
+    if resolved is None:
+        return None
+    company, kind = resolved
+    return {"company": company, "kind": kind, "resolved_via": "sub_truck_period",
+            "original_truck": original}
+
+
 @cache.cached("fleet_registry", lambda: [str(WORKBOOK)] + [
     str(p) for p in sorted(Path(ROOT / "data/raw/pnl").glob("*.xlsx"))])
 def registry():
