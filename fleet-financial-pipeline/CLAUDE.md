@@ -459,6 +459,45 @@ of it. A transposed digit shows as a negative delta, then the correction back to
 reality shows as a large positive one that can sit under any plausibility ceiling
 and pass silently. Both are excluded (`is_tainted`).
 
+---
+
+## DispatchHQ — pending, unverified, NOT a Samsara replacement, 2026-09-28
+
+**Operator instruction: this must never replace the Samsara CSV-upload path**
+for non-Motive trucks. Whatever DispatchHQ turns out to hold, mileage-by-state
+for IFTA still comes from Motive (live) or a real Samsara export (uploaded) --
+never from this source.
+
+**What it is:** a live Postgres database (DispatchHQ, reached through a
+Supabase pooler) the operator wants explored as a possible source of
+dispatch-level detail this pipeline doesn't have today -- named tables
+`load_entries`, `drivers`, `weeks`, `dispatcher_history`, `sub_truck_periods`,
+`hidden_week_periods`. **Nothing below the table names is confirmed** -- no
+query has been run against it yet. Do not treat the guesses in
+`ingest/pull_dispatchhq.py`'s docstring as schema; read it for real once
+access exists, and record what is actually found here or in
+`docs/FINDINGS.md`.
+
+**Two separate blockers, so far:**
+1. **Network.** This is a raw Postgres connection (port 6543 or 5432), not
+   HTTPS -- a different allowlist than what already lets Relay/Sheets/Drive
+   calls through. `python3 ingest/pull_dispatchhq.py --check-network` proved
+   both ports timed out from this environment, 2026-09-28. Only the operator
+   can widen network access, in this environment's own settings.
+2. **Credential.** `DISPATCHHQ_DATABASE_URL` (a `board_viewer`-scoped pooler
+   string) is not set anywhere in this container. Same handling as every
+   other credential here: environment variable first, `config/
+   dispatchhq_credentials.json` (gitignored) as a local fallback, **never
+   pasted into a chat session** -- a service-account key already went through
+   this exact mistake once, 2026-09-28, and should not repeat.
+
+**`ingest/pull_dispatchhq.py` enforces read-only independently of the
+database role**: `run_query()` refuses anything that isn't a bare `SELECT`
+or `WITH`, so a credential mix-up cannot turn into a write against a
+database this pipeline does not own. `--whoami` proves the credential
+without printing it; `--tables` / `--describe TABLE` are how the real schema
+gets confirmed once access exists.
+
 ## Taxonomy invariants
 
 `taxonomy/categorize.py` was rewritten to satisfy these. **Run
