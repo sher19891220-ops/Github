@@ -502,6 +502,19 @@ pooler IPs. **Still zero rows or schema seen.** The next step is still the
 operator's: open network access in the environment settings (raw TCP 6543
 to the pooler host, not only an HTTPS domain allowlist).
 
+**Re-check #2, 2026-09-28, after the operator widened network access:**
+still `timeout expired` on 6543/5432 across all three pooler IPs. Root
+cause is structural, not a setting: this cloud environment's egress proxy
+does not carry raw-TCP database connections at all (`/root/.ccr/README.md`,
+"Not supported through the proxy: ... raw-TCP databases"). No network
+access level fixes it from here. Second, independent defect: the DSN's
+username is bare `board_viewer` -- Supabase's pooler needs
+`board_viewer.<project-ref>`, so even with a working network it would fail
+("Tenant or user not found"). Realistic paths: run `--whoami`/`--tables`
+from a machine with direct Postgres egress and commit the output, or
+expose the tables read-only over Supabase's HTTPS REST API, which does go
+through the proxy.
+
 **`ingest/pull_dispatchhq.py` enforces read-only independently of the
 database role**: `run_query()` refuses anything that isn't a bare `SELECT`
 or `WITH`, so a credential mix-up cannot turn into a write against a
