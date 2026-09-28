@@ -195,3 +195,113 @@ def test_rest_tables_falls_back_to_probing_the_named_tables(rest_env):
     assert set(rows) == set(D.KNOWN_TABLES)
     assert rows["drivers"] == (42, 200)
     assert rows["weeks"] == (None, 401)
+
+
+# ---------------------------------------------------------------- board mode
+# Confirmed live 2026-09-28: the path that actually works from this
+# environment (plain HTTPS, a single X-API-Key header). No network here --
+# these guard the credential handling and the table-name allowlist.
+
+@pytest.fixture
+def board_env(monkeypatch, tmp_path):
+    monkeypatch.setattr(D, "CREDS", tmp_path / "absent.json")
+    monkeypatch.setenv(D.BOARD_KEY_VAR, "real-key")
+    monkeypatch.delenv(D.BOARD_URL_VAR, raising=False)
+    return monkeypatch
+
+
+def test_board_key_is_required_and_never_defaulted(monkeypatch, tmp_path):
+    monkeypatch.setattr(D, "CREDS", tmp_path / "absent.json")
+    monkeypatch.delenv(D.BOARD_KEY_VAR, raising=False)
+    with pytest.raises(SystemExit) as e:
+        D.read_board_credentials()
+    assert D.BOARD_KEY_VAR in str(e.value)
+
+
+def test_board_url_defaults_when_unset(board_env):
+    url, key, where = D.read_board_credentials()
+    assert url == D.DEFAULT_BOARD_URL
+    assert key == "real-key"
+    assert where == f"${D.BOARD_KEY_VAR}"
+
+
+def test_board_url_env_var_overrides_the_default(board_env):
+    board_env.setenv(D.BOARD_URL_VAR, "https://override.example.com/api")
+    url, _, _ = D.read_board_credentials()
+    assert url == "https://override.example.com/api"
+
+
+def test_board_file_fallback(monkeypatch, tmp_path):
+    f = tmp_path / "key.json"
+    f.write_text('{"board_api_key": "file-key", "board_url": "https://from-file.example.com"}')
+    monkeypatch.setattr(D, "CREDS", f)
+    monkeypatch.delenv(D.BOARD_KEY_VAR, raising=False)
+    monkeypatch.delenv(D.BOARD_URL_VAR, raising=False)
+    url, key, where = D.read_board_credentials()
+    assert key == "file-key"
+    assert url == "https://from-file.example.com"
+    assert where == str(f)
+
+
+def test_board_requires_https(board_env):
+    board_env.setenv(D.BOARD_URL_VAR, "http://insecure.example.com")
+    with pytest.raises(SystemExit, match="https://"):
+        D.read_board_credentials()
+
+
+def test_board_request_refuses_an_unknown_table(board_env):
+    with pytest.raises(ValueError, match="not one of the known board tables"):
+        D.board_request("some_other_table")
+
+
+def test_board_request_sends_the_api_key_header_and_params(board_env):
+    import requests
+    seen = {}
+
+    class Resp:
+        status_code = 200
+        def raise_for_status(self):
+            pass
+        def json(self):
+            return {"table": "weeks", "page": 0, "returned": 0,
+                    "total_rows": 0, "has_more": False, "data": []}
+
+    def fake_get(url, params=None, headers=None, timeout=None):
+        seen.update(url=url, params=params, headers=headers)
+        return Resp()
+    board_env.setattr(requests, "get", fake_get)
+    D.board_request("weeks", page=2, limit=50, since="2026-06-01")
+    assert seen["url"] == D.DEFAULT_BOARD_URL
+    assert seen["headers"]["X-API-Key"] == "real-key"
+    assert seen["params"] == {"table": "weeks", "page": 2, "limit": 50, "since": "2026-06-01"}
+
+
+def test_board_fetch_all_paginates_until_has_more_is_false(board_env):
+    import requests
+    pages = {
+        0: {"data": [{"id": 1}, {"id": 2}], "has_more": True},
+        1: {"data": [{"id": 3}], "has_more": False},
+    }
+
+    class Resp:
+        def __init__(self, body):
+            self._body = body
+        def raise_for_status(self):
+            pass
+        def json(self):
+            return self._body
+
+    def fake_get(url, params=None, headers=None, timeout=None):
+        return Resp(pages[params["page"]])
+    board_env.setattr(requests, "get", fake_get)
+    rows = D.board_fetch_all("weeks", limit=2)
+    assert [r["id"] for r in rows] == [1, 2, 3]
+
+
+def test_board_tables_includes_the_seventh_table_not_in_the_original_six():
+    """driver_row_order was found live 2026-09-28, not named by the operator
+    up front -- both --tables and any caller iterating BOARD_TABLES must see
+    it, while KNOWN_TABLES (used elsewhere for the "named by operator" flag)
+    stays exactly the original six."""
+    assert set(D.BOARD_TABLES) == set(D.KNOWN_TABLES) | {"driver_row_order"}
+    assert len(D.BOARD_TABLES) == 7

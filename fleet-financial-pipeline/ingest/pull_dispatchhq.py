@@ -82,6 +82,32 @@ from the JWT's `role` claim. Two options, safer first:
      unless the anon key is private to this pipeline.
 Tables must also be in a schema PostgREST exposes (Settings -> API ->
 Exposed schemas; `public` by default).
+
+BOARD API MODE (--board), CONFIRMED LIVE 2026-09-28 -- the path that actually
+works. A DispatchHQ-authored serverless function
+(https://dispatchhq-opal.vercel.app/api/board-data) sits in front of
+Supabase and answers all seven real tables over plain HTTPS with a single
+`X-API-Key` header -- not PostgREST's `apikey`/`Authorization: Bearer`, and
+not the six-table guess this module started with: there is a 7th,
+`driver_row_order` (per-week UI sort order, no financial content). Real
+schema per table, confirmed by sampling live data 2026-09-28 (see
+CLAUDE.md's DispatchHQ section for the full field list and row counts) --
+this replaces every earlier guess in this docstring's history.
+
+    DISPATCHHQ_BOARD_KEY   the X-API-Key value (required; never defaulted)
+    DISPATCHHQ_BOARD_URL   the endpoint (optional -- defaults to the URL
+                           above; only the key is a secret)
+
+(or "board_api_key" / "board_url" in the same gitignored credentials file.)
+
+    python3 ingest/pull_dispatchhq.py --board --tables
+    python3 ingest/pull_dispatchhq.py --board --describe load_entries
+    python3 ingest/pull_dispatchhq.py --board --pull weeks --out /tmp/weeks.json
+
+READ-ONLY BY CONSTRUCTION, not just by convention: this API exposes exactly
+one verb (a GET with a `table` query parameter) and no write endpoint at
+all, so unlike run_query()/rest_request() there is no method to police --
+board_request() never builds anything but a GET.
 """
 import argparse
 import json
@@ -104,6 +130,11 @@ REST_READ_METHODS = ("GET", "HEAD")
 
 KNOWN_TABLES = ("load_entries", "drivers", "weeks", "dispatcher_history",
                 "sub_truck_periods", "hidden_week_periods")
+
+BOARD_URL_VAR = "DISPATCHHQ_BOARD_URL"
+BOARD_KEY_VAR = "DISPATCHHQ_BOARD_KEY"
+DEFAULT_BOARD_URL = "https://dispatchhq-opal.vercel.app/api/board-data"
+BOARD_TABLES = KNOWN_TABLES + ("driver_row_order",)
 
 
 def probe_reachability(hosts=POOLER_HOSTS, timeout=5):
@@ -387,6 +418,128 @@ def main_rest(a):
     return False
 
 
+# --------------------------------------------------------------- board mode
+
+def read_board_credentials():
+    """(url, key, where). The URL has a sensible default (it is not a
+    secret); the key does not -- it is never defaulted, only ever read from
+    the environment or the gitignored file."""
+    url = os.environ.get(BOARD_URL_VAR, "").strip() or DEFAULT_BOARD_URL
+    key = os.environ.get(BOARD_KEY_VAR, "").strip()
+    where = f"${BOARD_KEY_VAR}"
+    if not key and CREDS.exists():
+        try:
+            info = json.loads(CREDS.read_text())
+        except json.JSONDecodeError as e:
+            raise SystemExit(f"{CREDS} is not valid JSON ({e}). No credential printed.")
+        key = (info.get("board_api_key") or "").strip()
+        url = os.environ.get(BOARD_URL_VAR, "").strip() or (info.get("board_url") or "").strip() or url
+        where = str(CREDS)
+    if not key:
+        raise SystemExit(
+            f"Board API needs ${BOARD_KEY_VAR} (or \"board_api_key\" in "
+            f"{CREDS.name}). See this module's docstring, BOARD API MODE, "
+            f"for the setup steps. No credential printed.")
+    if not url.startswith("https://"):
+        raise SystemExit(f"${BOARD_URL_VAR} must start with https://.")
+    return url, key, where
+
+
+def board_request(table, page=0, limit=1000, since=None, timeout=30):
+    """The one door to the board API. Always a GET -- this API exposes no
+    other verb, so unlike run_query()/rest_request() there is nothing to
+    refuse; the guarantee comes from never building anything else."""
+    import requests
+    if table not in BOARD_TABLES:
+        raise ValueError(f"{table!r} is not one of the known board tables: {BOARD_TABLES}")
+    url, key, _ = read_board_credentials()
+    params = {"table": table, "page": page, "limit": limit}
+    if since:
+        params["since"] = since
+    r = requests.get(url, params=params, headers={"X-API-Key": key}, timeout=timeout)
+    r.raise_for_status()
+    return r.json()
+
+
+def board_probe_table(table):
+    """(total_rows_or_None, error_or_None) from a one-row page -- proves
+    access and gets the real count without pulling the table."""
+    try:
+        body = board_request(table, page=0, limit=1)
+        return body.get("total_rows"), None
+    except Exception as exc:
+        return None, str(exc)
+
+
+def board_list_tables():
+    return [(t, *board_probe_table(t)) for t in BOARD_TABLES]
+
+
+def board_describe(table):
+    """[(column, python_type)] inferred from one real row -- this API has
+    no schema document, only data, so a sample is all there is."""
+    body = board_request(table, page=0, limit=1)
+    rows = body.get("data") or []
+    if not rows:
+        return []
+    return [(k, type(v).__name__) for k, v in rows[0].items()]
+
+
+def board_fetch_all(table, since=None, limit=1000):
+    """Every row of one table, paginating on has_more. A real pull, not a
+    sample -- used by --pull and by any future real ingestion, never by
+    --tables/--describe, which only ever look at one page."""
+    page, out = 0, []
+    while True:
+        body = board_request(table, page=page, limit=limit, since=since)
+        out.extend(body.get("data") or [])
+        if not body.get("has_more"):
+            return out
+        page += 1
+
+
+def main_board(a):
+    if a.check_network:
+        url = os.environ.get(BOARD_URL_VAR, "").strip() or DEFAULT_BOARD_URL
+        import requests
+        try:
+            r = requests.get(url, timeout=15)
+            print(f"  {url}  HTTP {r.status_code} (host reachable)")
+        except Exception as exc:
+            print(f"  {url}  FAILED: {type(exc).__name__}: {exc}")
+        return True
+    if a.whoami:
+        url, _, where = read_board_credentials()
+        body = board_request("weeks", limit=1)
+        print(f"  credential loaded from {where}")
+        print(f"  {url} -> HTTP 200, table={body.get('table')!r}, "
+              f"total_rows={body.get('total_rows')}")
+        return True
+    if a.tables:
+        for name, count, err in board_list_tables():
+            flag = "" if name in KNOWN_TABLES else "  (not in the operator's original six)"
+            print(f"  {name:<24}{count if count is not None else f'ERROR: {err}':<10}{flag}")
+        return True
+    if a.describe:
+        cols = board_describe(a.describe)
+        if not cols:
+            print(f"  {a.describe!r}: no rows to infer columns from")
+            return True
+        for name, ptype in cols:
+            print(f"  {name:<24}{ptype}")
+        print("  (types inferred from one live row; there is no schema document)")
+        return True
+    if a.pull:
+        rows = board_fetch_all(a.pull, since=a.since)
+        print(f"  pulled {len(rows)} rows from {a.pull!r}"
+              f"{f' since {a.since}' if a.since else ''}")
+        if a.out:
+            Path(a.out).write_text(json.dumps(rows, indent=1))
+            print(f"  wrote {a.out}")
+        return True
+    return False
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -401,7 +554,21 @@ def main():
     ap.add_argument("--rest", action="store_true",
                     help="use Supabase's HTTPS REST API instead of raw Postgres "
                          "(needed where only HTTPS egress exists)")
+    ap.add_argument("--board", action="store_true",
+                    help="use DispatchHQ's own board-data API -- the path that "
+                         "actually works from this environment, confirmed live")
+    ap.add_argument("--pull", metavar="TABLE",
+                    help="(--board only) fetch every row of TABLE, paginating")
+    ap.add_argument("--since", metavar="DATE",
+                    help="(--board --pull only) only load_entries/weeks support this")
+    ap.add_argument("--out", metavar="FILE",
+                    help="(--board --pull only) write the pulled rows as JSON")
     a = ap.parse_args()
+
+    if a.board:
+        if not main_board(a):
+            ap.print_help()
+        return
 
     if a.rest:
         if not main_rest(a):

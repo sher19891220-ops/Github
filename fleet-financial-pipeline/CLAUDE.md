@@ -461,22 +461,44 @@ and pass silently. Both are excluded (`is_tainted`).
 
 ---
 
-## DispatchHQ — pending, unverified, NOT a Samsara replacement, 2026-09-28
+## DispatchHQ — LIVE via its board API, 2026-09-28, NOT a Samsara replacement
 
 **Operator instruction: this must never replace the Samsara CSV-upload path**
-for non-Motive trucks. Whatever DispatchHQ turns out to hold, mileage-by-state
-for IFTA still comes from Motive (live) or a real Samsara export (uploaded) --
-never from this source.
+for non-Motive trucks. Whatever DispatchHQ holds, mileage-by-state for IFTA
+still comes from Motive (live) or a real Samsara export (uploaded) -- never
+from this source.
 
-**What it is:** a live Postgres database (DispatchHQ, reached through a
-Supabase pooler) the operator wants explored as a possible source of
-dispatch-level detail this pipeline doesn't have today -- named tables
-`load_entries`, `drivers`, `weeks`, `dispatcher_history`, `sub_truck_periods`,
-`hidden_week_periods`. **Nothing below the table names is confirmed** -- no
-query has been run against it yet. Do not treat the guesses in
-`ingest/pull_dispatchhq.py`'s docstring as schema; read it for real once
-access exists, and record what is actually found here or in
-`docs/FINDINGS.md`.
+**Working access, confirmed live 2026-09-28: `--board` mode.**
+`https://dispatchhq-opal.vercel.app/api/board-data`, a DispatchHQ-authored
+HTTPS proxy in front of Supabase, auth'd with a single `X-API-Key` header
+(`DISPATCHHQ_BOARD_KEY`, env var first then `board_api_key` in the gitignored
+credentials file -- see `ingest/pull_dispatchhq.py`'s BOARD API MODE
+docstring). Real schema, from sampling live data (row counts as of
+2026-09-28; expect them to grow):
+
+| table | rows | columns |
+|---|--:|---|
+| `weeks` | 18 | `id` (=`monday`, e.g. `"2026-06-15"`), `monday`, `month`, `quarter`, `year`, `range_label`, `created_at` |
+| `drivers` | 145 | `id`, `name`, `dispatcher`, `truck` (unit #), `mc` (e.g. `"ZONE OH LLC"`, `"Xtrack LLC"` -- matches this file's entity names), `pay_type` (`CPM`/`LO`/`%`/...), `config` (Solo/Team), `driver_status` (active/inactive), `note`, `created_at`, `inactive_reason`, `inactive_date`, `inactive_note`, `comeback_date` |
+| `load_entries` | 10,469 | `id`, `week_id` (FK `weeks.id`), `driver_id` (FK `drivers.id`), `day_index`, `entry_type` (`"loadday"`), `pickup_city`, `pickup_gross`, `pickup_miles`, `delivery_city`, `nr_reason`, `updated_at`, `note`, `nr_location`, `dispatcher`, `pay_type`, `created_at` |
+| `dispatcher_history` | 194 | `id`, `driver_id` (FK), `dispatcher`, `effective_date`, `created_at` |
+| `sub_truck_periods` | 17 | `id`, `driver_id` (FK), `original_truck`, `sub_truck`, `reason` (e.g. `"Shop / Repair"`, `"Breakdown"`), `note`, `start_date`, `end_date`, `created_at` |
+| `hidden_week_periods` | 15 | `id`, `driver_id` (FK), `start_date`, `end_date`, `reason` (e.g. `"Vacation"`, `"FIRED"`), `created_at` |
+| `driver_row_order` | 143 | `id`, `week_id` (FK), `driver_id` (FK), `sort_order`, `created_at` -- a 7th table, UI sort order only, not named by the operator up front, no financial content |
+
+**Not yet used for anything** -- this is real, live dispatch/roster data, not
+yet wired into any analysis. Plausible value once it is: `sub_truck_periods`
+and `hidden_week_periods` could explain gaps `fleet_registry.py` currently
+can't (a truck substituted for repair, a driver on vacation/terminated);
+`drivers.truck`/`mc` is a live truck-to-company-to-driver mapping; none of it
+touches mileage-by-state or IFTA, per the operator instruction above.
+
+    python3 ingest/pull_dispatchhq.py --board --tables
+    python3 ingest/pull_dispatchhq.py --board --describe TABLE
+    python3 ingest/pull_dispatchhq.py --board --pull TABLE --out FILE.json
+
+**History below, kept for context -- two other paths were tried first and
+neither panned out from this environment:**
 
 **Two separate blockers, so far:**
 1. **Network.** This is a raw Postgres connection (port 6543 or 5432), not
@@ -526,35 +548,27 @@ driver PII if DispatchHQ's app ships its anon key to browsers. Also still
 unconfirmed: whether the proxy allows `<ref>.supabase.co` (a made-up ref
 got 502 at the CONNECT, which can't tell policy apart from a non-existent host).
 
-**A THIRD path, 2026-09-28 -- a custom Vercel proxy, given by the operator,
-confirmed reachable but broken server-side.** Not Supabase's own PostgREST
-(above) -- `https://dispatchhq-opal.vercel.app/api/board-data` is a
-DispatchHQ-authored serverless function in front of it, auth'd with a plain
-`X-API-Key` header (not `apikey`/`Authorization: Bearer`), taking `table`
-(the six named tables plus a 7th, `driver_row_order`, not previously named),
-`since`, `page`, `limit`. HTTPS + the key both work fine -- proof positive
-that plain HTTPS is unblocked here and the earlier raw-Postgres failure
-really was protocol-specific, not a general network problem. But every
-table returns HTTP 500, identically:
+**A THIRD path, first tried 2026-09-28 -- the Vercel proxy that turned out to
+work, but 500'd on its first try.** `https://dispatchhq-opal.vercel.app/api/board-data`
+first returned HTTP 500 identically on every table:
 `{"error":"Request failed","detail":"TypeError: Failed to parse URL from
-undefined/rest/v1/<table>?select=*"}`. That is the DEPLOYMENT's own backend
+undefined/rest/v1/<table>?select=*"}` -- the deployment's own backend
 concatenating an unset environment variable (its Supabase project URL) into
-a template string -- a bug in `dispatchhq-opal.vercel.app`'s Vercel
-configuration, not anything on this pipeline's side. Needs the operator (or
-whoever owns that Vercel project) to check its environment variables and
-confirm the Supabase URL is actually set for the deployed environment.
-Nothing to build against this path until it stops 500ing -- guessing a
-response shape from a server that has never once succeeded would be
-guessing, not reading a schema. The API key given for this was pasted into
-a chat session (like the Sheets key once was) -- treat it as exposed once
-the endpoint is fixed, same as that earlier case.
+a template string. Real connectivity and the API key both worked even then
+(proof plain HTTPS is unblocked here; the raw-Postgres failure above really
+was protocol-specific). The operator fixed the Vercel deployment's own env
+var; a retry the same day returned real rows -- this is now the section's
+`--board` mode above. The API key was pasted into a chat session (like the
+Sheets key once was) -- worth rotating if that matters for this key.
 
-**`ingest/pull_dispatchhq.py` enforces read-only independently of the
-database role**: `run_query()` refuses anything that isn't a bare `SELECT`
-or `WITH`, so a credential mix-up cannot turn into a write against a
-database this pipeline does not own. `--whoami` proves the credential
-without printing it; `--tables` / `--describe TABLE` are how the real schema
-gets confirmed once access exists.
+**`ingest/pull_dispatchhq.py` enforces read-only independently of whatever
+access it's granted, in all three modes.** Raw Postgres: `run_query()`
+refuses anything that isn't a bare `SELECT`/`WITH`. REST mode:
+`rest_request()` refuses every verb but GET/HEAD, and a `service_role` /
+`sb_secret_` key is refused before any request. `--board` (the one that
+actually works): the API itself exposes no write verb at all, and
+`board_request()` never builds anything but a GET. `--whoami` proves a
+credential without printing it, in every mode.
 
 ## Taxonomy invariants
 
