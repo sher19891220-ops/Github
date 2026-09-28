@@ -16,15 +16,38 @@ WHY behind it lives.
 
 ---
 
-## DO NOT use the Google Sheets API key -- operator directive, 2026-09-21
+## Google Sheets API key -- overridden by operator, 2026-09-28
 
-**`ingest/pull_sheets.py` and `GSHEETS_SERVICE_ACCOUNT` are OFF LIMITS.** The
-operator does not want this pipeline (or any Claude session working in it)
+**Superseded below.** The 2026-09-21 "OFF LIMITS" directive was explicitly
+overridden by the operator on 2026-09-28, in-session, after Drive's connector
+proved unable to refresh ZONE's stale P&L source: the full `.xlsx` export
+still fails ("File too large for export") at 11.6 MB, and the CSV/text export
+that does succeed drops the tab name entirely -- confirmed live by decoding
+one such export, which came back as an empty template block with no date or
+week identifiable anywhere in it. `ingest/pull_sheets.py` and
+`GSHEETS_SERVICE_ACCOUNT` are therefore back in play for this pipeline.
+
+**This override removes the POLICY block only, not the technical one.**
+`GSHEETS_SERVICE_ACCOUNT` is still unset in this container and
+`config/gsheets_service_account.json` still does not exist here
+(`python3 ingest/pull_sheets.py --whoami` confirmed both, 2026-09-28) -- so
+nothing has actually been pulled via the Sheets API yet. The six-step setup in
+`pull_sheets.py`'s docstring (create a GCP service account, enable Drive +
+Sheets APIs, download the JSON key, base64 it into the remote environment's
+`GSHEETS_SERVICE_ACCOUNT` variable, share each P&L sheet with the service
+account's email as Viewer) still needs the operator -- a Claude session cannot
+create Google Cloud credentials or share a Sheet on the operator's behalf.
+
+The original directive text is kept below for context; treat it as historical
+until the operator says otherwise again.
+
+**`ingest/pull_sheets.py` and `GSHEETS_SERVICE_ACCOUNT` were OFF LIMITS.** The
+operator did not want this pipeline (or any Claude session working in it)
 pulling data from Google Sheets via that service-account key, in any
-circumstance, until they say otherwise. This is independent of whether the
-key still works or the corpus is stale -- it is a standing instruction, not a
-technical constraint, and must not be re-derived or second-guessed session to
-session.
+circumstance, until they said otherwise. This was independent of whether the
+key still worked or the corpus was stale -- it was a standing instruction, not
+a technical constraint, and was not to be re-derived or second-guessed session
+to session.
 
 **Chosen refresh path: Claude's own Google Drive connector.** When a workbook
 needs refreshing, use the `mcp__Google_Drive__*` tools available in the
