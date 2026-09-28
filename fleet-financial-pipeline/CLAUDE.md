@@ -515,6 +515,17 @@ from a machine with direct Postgres egress and commit the output, or
 expose the tables read-only over Supabase's HTTPS REST API, which does go
 through the proxy.
 
+**HTTPS REST mode added, 2026-09-28 -- built, NOT yet run live.**
+`--rest` runs `--check-network` / `--whoami` / `--tables` / `--describe`
+through Supabase's PostgREST API on 443, which this environment's proxy
+does carry. Needs `DISPATCHHQ_SUPABASE_URL` + `DISPATCHHQ_SUPABASE_KEY`
+(neither set yet). It sends only GET/HEAD and refuses service_role /
+`sb_secret_` keys before any request. Operator decision still open: issue
+a `board_viewer`-role JWT (safer), or grant `anon` SELECT, which exposes
+driver PII if DispatchHQ's app ships its anon key to browsers. Also still
+unconfirmed: whether the proxy allows `<ref>.supabase.co` (a made-up ref
+got 502 at the CONNECT, which can't tell policy apart from a non-existent host).
+
 **`ingest/pull_dispatchhq.py` enforces read-only independently of the
 database role**: `run_query()` refuses anything that isn't a bare `SELECT`
 or `WITH`, so a credential mix-up cannot turn into a write against a
