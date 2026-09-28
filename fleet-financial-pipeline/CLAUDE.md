@@ -526,6 +526,29 @@ driver PII if DispatchHQ's app ships its anon key to browsers. Also still
 unconfirmed: whether the proxy allows `<ref>.supabase.co` (a made-up ref
 got 502 at the CONNECT, which can't tell policy apart from a non-existent host).
 
+**A THIRD path, 2026-09-28 -- a custom Vercel proxy, given by the operator,
+confirmed reachable but broken server-side.** Not Supabase's own PostgREST
+(above) -- `https://dispatchhq-opal.vercel.app/api/board-data` is a
+DispatchHQ-authored serverless function in front of it, auth'd with a plain
+`X-API-Key` header (not `apikey`/`Authorization: Bearer`), taking `table`
+(the six named tables plus a 7th, `driver_row_order`, not previously named),
+`since`, `page`, `limit`. HTTPS + the key both work fine -- proof positive
+that plain HTTPS is unblocked here and the earlier raw-Postgres failure
+really was protocol-specific, not a general network problem. But every
+table returns HTTP 500, identically:
+`{"error":"Request failed","detail":"TypeError: Failed to parse URL from
+undefined/rest/v1/<table>?select=*"}`. That is the DEPLOYMENT's own backend
+concatenating an unset environment variable (its Supabase project URL) into
+a template string -- a bug in `dispatchhq-opal.vercel.app`'s Vercel
+configuration, not anything on this pipeline's side. Needs the operator (or
+whoever owns that Vercel project) to check its environment variables and
+confirm the Supabase URL is actually set for the deployed environment.
+Nothing to build against this path until it stops 500ing -- guessing a
+response shape from a server that has never once succeeded would be
+guessing, not reading a schema. The API key given for this was pasted into
+a chat session (like the Sheets key once was) -- treat it as exposed once
+the endpoint is fixed, same as that earlier case.
+
 **`ingest/pull_dispatchhq.py` enforces read-only independently of the
 database role**: `run_query()` refuses anything that isn't a bare `SELECT`
 or `WITH`, so a credential mix-up cannot turn into a write against a
