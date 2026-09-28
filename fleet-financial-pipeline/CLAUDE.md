@@ -491,6 +491,17 @@ access exists, and record what is actually found here or in
    pasted into a chat session** -- a service-account key already went through
    this exact mistake once, 2026-09-28, and should not repeat.
 
+**Re-check, 2026-09-28 (later):** `DISPATCHHQ_DATABASE_URL` is now set as an
+env var and parses as a `board_viewer` user on
+`aws-0-us-east-1.pooler.supabase.com:6543` -- blocker 2 is cleared.
+`psycopg2` was not installed in the container (it is in `requirements.txt`
+but the setup path doesn't install it); `pip install psycopg2-binary` fixed
+that. Blocker 1 still stands: `--check-network` timed out on 6543 and 5432,
+and `--whoami` / `--tables` both failed with `timeout expired` against both
+pooler IPs. **Still zero rows or schema seen.** The next step is still the
+operator's: open network access in the environment settings (raw TCP 6543
+to the pooler host, not only an HTTPS domain allowlist).
+
 **`ingest/pull_dispatchhq.py` enforces read-only independently of the
 database role**: `run_query()` refuses anything that isn't a bare `SELECT`
 or `WITH`, so a credential mix-up cannot turn into a write against a
