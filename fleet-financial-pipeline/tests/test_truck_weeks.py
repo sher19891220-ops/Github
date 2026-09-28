@@ -50,10 +50,22 @@ def test_the_gross_shortfall_split_is_exactly_additive(tw):
 
 def test_the_two_series_cover_different_windows(tw, days):
     """27 weeks of money, 13 of days. Averaging one over the other's window is
-    the easiest wrong number here, so the difference is asserted, not assumed."""
+    the easiest wrong number here, so the difference is asserted, not assumed.
+
+    tw (the P&L) and days (dispatch/roster, via load_days.load()) are
+    independent corpora refreshed on their own schedules -- their end dates
+    matching was a coincidence of when each was last pulled, not a structural
+    fact. Confirmed 2026-09-28: refreshing XTRACK's real P&L past its old
+    stale window (via ingest/pull_sheets_tabs.py) moved tw.week.max() to
+    2026-09-14 while days, an unrelated source, stayed at 2026-08-24 -- an
+    exact-equality assertion here would fail every time either source is
+    refreshed independently of the other. What actually must hold: the money
+    series is never staler than the days series (day-level dispatch data
+    generally lags behind money since it depends on the fleet actually
+    running the week, not on when someone updates a spreadsheet)."""
     assert tw.week.nunique() > days.week_id.nunique()
     assert tw.week.min() < days.week_id.min()
-    assert tw.week.max() == days.week_id.max()
+    assert tw.week.max() >= days.week_id.max()
 
 
 def test_home_time_entitlement_scales_with_days_actually_on_the_book(days):

@@ -39,9 +39,11 @@ FOUR TRAPS, each of which silently changes the answer
 
 3. THE ITEMISATION OF 'Other expenses total' IS ON ITS OWN ROWS, label and
    value side by side, and the block moves column between weeks. It is located
-   by testing candidate columns until the items sum to the stated total. In 26
-   of 27 XTRACK weeks the tie is exact; the exception is 2026-08-17, where
-   'Freight Expenses' ($59.60) sits outside the stated total.
+   by testing candidate columns until the items sum to the stated total. As of
+   2026-09-28 (30 weeks), the tie is exact in 28 of 30; 'Freight Expenses'
+   sits outside the stated total in both 2026-08-17 ($59.60) and 2026-08-31
+   ($123.34) -- the same line item, a recurring quirk in how XTRACK's own
+   bookkeeper totals that row, not a one-off.
 
 4. TWO MILEAGE DEFINITIONS. 'Total mileage' is loaded miles for every truck;
    'Total Odometer mileage' is all miles for company drivers only. Revenue per

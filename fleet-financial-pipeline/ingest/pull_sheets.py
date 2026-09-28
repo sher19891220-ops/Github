@@ -125,12 +125,15 @@ SHEETS = {
 }
 
 
-def read_credentials():
-    """The key, from the environment first and a file second.
+def read_key_info():
+    """The key's parsed JSON, from the environment first and a file second.
 
-    Never returns or logs the key material itself -- callers get a credentials
-    object. The one thing printed anywhere is client_email, which is the address
-    you share the sheets with and is not a secret.
+    Never returns or logs the key material itself to a print/log call -- but
+    the dict IS the key, so a caller building its own Credentials (a wider
+    scope than SCOPES, e.g. ingest/pull_sheets_tabs.py's spreadsheets.readonly)
+    must not print it either. The one thing printed anywhere in this module is
+    client_email, which is the address you share the sheets with and is not a
+    secret.
     """
     raw = os.environ.get(ENV_VAR, "").strip()
     where = f"${ENV_VAR}"
@@ -157,6 +160,12 @@ def read_credentials():
                          "That is a truncated or wrong-file paste, not an auth "
                          "problem -- re-copy the whole JSON.")
     info["private_key"] = _repair_private_key(info["private_key"], where)
+    return info
+
+
+def read_credentials():
+    """The key, as Credentials scoped to this module's SCOPES (drive.readonly)."""
+    info = read_key_info()
     from google.oauth2 import service_account
     return service_account.Credentials.from_service_account_info(
         info, scopes=SCOPES), info["client_email"]

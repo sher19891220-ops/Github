@@ -225,9 +225,18 @@ def test_ifta_reference_names_both_methods():
 def test_weekly_rows_carry_a_separate_weight_distance_field(weekly):
     """Operator, 2026-09-22: build the weight-distance engine so it shows
     company costs per week -- as its own field, never merged into
-    ifta_estimate (a different tax, on a different basis)."""
+    ifta_estimate (a different tax, on a different basis).
+
+    Pre-existing edge case, found 2026-09-28 (unrelated to any P&L refresh --
+    reproduces identically with every other change of that day reverted): a
+    week with zero miles (AFG 2026-09-21 at the time) makes BOTH
+    `miles * weight_distance_rate_per_mile` and the ifta side legitimately
+    round to 0.0 -- same value, for a reason that has nothing to do with the
+    two taxes sharing a basis. The inequality this test exists to prove only
+    means something once there are real miles to tax two different ways."""
     assert "weight_distance_tax_estimate" in weekly.columns
     rows = weekly.dropna(subset=["weight_distance_tax_estimate", "weight_distance_rate_per_mile"])
+    rows = rows[rows.miles > 0]
     assert len(rows) > 0
     for _, r in rows.iterrows():
         assert r.weight_distance_tax_estimate == pytest.approx(

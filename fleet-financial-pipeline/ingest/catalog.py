@@ -142,6 +142,15 @@ KIND_PATTERNS = [
      "QuickBooks/BofA bank-feed CSV. NO beginning/ending balance, so it cannot be "
      "self-verified -- control: none. An export of exactly 300 rows hit the UI page "
      "cap and is a truncated view of the account, not the account."),
+    (r"data/raw/eld_transponder_telematics/", "eld_telematics_invoice",
+     "ELD/telematics/toll-transponder vendor invoices and their per-device "
+     "billing detail -- Green Light ELD and Samsara subscription invoices "
+     "(one per company), a Pedigree Technologies invoice, a wireless-line "
+     "billing CSV, and a PrePass CHARGESBYDEVICE CSV (per-unit toll-tag fees, "
+     "identifies the truck by PP DEVICE ID / EQUIP ID, not by company name). "
+     "Confirmed by reading each file's own text 2026-09-28. Not yet read by "
+     "any parser in this pipeline -- these are real per-company subscription "
+     "and toll-tag costs currently absent from every cost breakdown."),
     (r"report__fb", "recruiting_cost",
      "Driver recruiting cost per candidate -- MVR, PSP, clearinghouse, drug test, "
      "travel -- with recruiter and hired/not-hired status. The acquisition side of "

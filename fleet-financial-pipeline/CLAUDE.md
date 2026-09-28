@@ -354,20 +354,59 @@ rendering of these workbooks — which drops tab names — loses the time axis
 completely. Always export `.xlsx` (`ingest_gsheet_pnl.py`); fall back to
 `ingest_gsheet_pnl_text.py` only for totals, and never date its output.
 
-**Superseded 2026-09-04: the full `.xlsx` exports DO exist.**
+**Solved 2026-09-28: `ingest/pull_sheets_tabs.py` reads individual tabs and
+never hits the export limit at all.** The whole-file export ceiling below is a
+Google-side limit on `files.export` -- it fires identically whether the
+caller is the Drive connector or this project's own Sheets service account
+(confirmed live: both returned `exportSizeLimitExceeded` on the same ZONE/
+XTRACK files the same day the service account was set up). No credential
+fixes that. What does: `spreadsheets.values.get`, scoped to ONE tab at a
+time, never renders the rest of the spreadsheet, so the ceiling never
+applies. `pull_sheets_tabs.py` lists a sheet's tabs, keeps the ones after the
+latest week already in the local workbook (plus that latest week itself, in
+case it was still being edited), and fetches each one directly --
+`valueRenderOption=UNFORMATTED_VALUE`, the same computed numbers
+`data_only=True` already reads out of a full export, never a formula string.
+
+**It never re-opens the existing `.xlsx` in write mode.** That file holds
+real Excel formulas with cached values, and openpyxl drops a formula's cached
+value on a load/save round trip (it does not recompute) -- re-saving the
+existing file in place would silently zero every OLD week's numbers the next
+time anything reads it with `data_only=True`, which is how every consumer in
+this pipeline reads it. Instead it reads every existing tab as already-computed
+values and rebuilds a fresh workbook from those values plus the newly-fetched
+tabs, all as plain values, no formulas anywhere, written atomically. Verified
+by round-tripping ZONE's real file this way with zero fetches at all and
+confirming `read_workbook()` parsed it identically before and after (0 diffs,
+26 weeks) before ever pointing it at the real spreadsheet.
+
+    python3 ingest/pull_sheets_tabs.py ZONE_3YR    # or XTRACK
+    python3 ingest/pull_sheets_tabs.py XTRACK --check   # report only
+
+**Run its own control before trusting a fetch.** It reports `check_weekly_pnl()`
+on exactly the weeks it just touched -- not "everything new since last time",
+the CUTOFF week specifically, since that is the one most likely to have been
+mid-edit at the last fetch. A current-week tab that is on the sheet but not
+yet filled in by the office reads as `panel=0 units=0`, which is not a
+mismatch, just an empty tab -- expect it on the newest tab and do not treat it
+as a parse failure.
+
+**Superseded 2026-09-04 (see above): the full `.xlsx` exports DO exist.**
 `5f79f0b0-ZONE_Profit__Loss_2024_and_2025_and_2026.xlsx` (139 tabs, 15.6 MB) and
-`1efc7de0-Xtrack_LLC_Profit_and_Loss_Weekly.xlsx` (145 tabs) are in the corpus.
-The remaining limit is this reader, not Drive: the pre-2026 tabs use a different
-panel layout, so of those 139 and 145 tabs only 72 and 26 currently parse. The
-text path is still not a substitute. Historical note follows.
+`1efc7de0-Xtrack_LLC_Profit_and_Loss_Weekly.xlsx` (145 tabs) are in the corpus,
+but both stall at 2026-08-24 -- a full re-export was never going to reach the
+current week even when it worked; only the per-tab reader above does. The
+remaining limit on THESE two static files is this reader, not Drive: their
+pre-2026 tabs use a different panel layout, so of those 139 and 145 tabs only
+72 and 26 currently parse. Historical note on the export ceiling itself follows.
 
 **Drive refuses to export a sheet above its size limit.** ZONE (3 years of
 weeks, 11.3 MB) and Xtrack (5.8 MB) both exceed it, so only their text
 rendering is reachable — and that rendering is INCOMPLETE: for ZONE the panel
 `Total gross` sums to $34.1M against $5.8M of unit rows, and the weekly anchor
 stops firing partway so the tail collapses into one bucket. **Do not quote
-ZONE or Xtrack P&L figures from the text path.** They need a per-year or
-per-quarter `.xlsx` export.
+ZONE or Xtrack P&L figures from the text path.** Use `pull_sheets_tabs.py`
+above instead of a per-year/per-quarter manual export.
 
 **Internal control for this source:** the panel's `Total gross` must equal the
 sum of that week's unit rows. AFG passes 20/20 weeks to the penny. Run it on
