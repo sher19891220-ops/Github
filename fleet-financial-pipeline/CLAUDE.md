@@ -16,6 +16,45 @@ WHY behind it lives.
 
 ---
 
+## Current state -- handoff, updated 2026-09-30 (read first)
+
+What was in flight when the last working session crashed, so the operator
+never has to re-explain it. Update this block at the end of any session
+that changes it; move settled items into their topic sections below.
+
+- **weekly_pnl backfill: DONE.** ZONE (+08-24, 08-31, 09-07, 09-14) and
+  XTRACK (+08-31, 09-07, 09-14) now run through 2026-09-14, matching AFG.
+  Built with `analysis/build_weekly_pnl_rollup.py`, which reproduced an
+  existing doc byte-for-byte before it was used on the new weeks. AFG and
+  prior weeks untouched.
+- **Known drift, not fixed on purpose:** the ZONE/XTRACK 2026-08-24 docs no
+  longer exactly match the live Google Sheet for at least one truck (small
+  dollar difference). Most likely the sheet was edited after sync. Re-pull
+  only if the operator says the sheet is now the truth.
+- **Next week to land: 2026-09-21.** No tab in either workbook as of
+  2026-09-29. AFG's real Motive IFTA/permit for that week is already in
+  `state_tax_by_unit/AFG_2026-09-21` (1365 $0.05/$0, 1596 $148.71/$39.05,
+  3773 $253.08/$18.71, 495804 $168.02/$7.32; gross-only, no Relay fuel
+  credit for AFG). It posts to the P&L once `weekly_pnl/AFG_2026-09-21`
+  exists. 13 ZONE/XTRACK units from that Motive pull are still unresolved
+  for that exact week.
+- **Hourly routine** "Process weekly P&L uploads" (trigger
+  `trig_011nrATEDddiMMCyJC5AeXVZ`, :45 every hour): healthy, last run
+  succeeded 2026-09-30 02:46Z. Its DispatchHQ substitute-truck fallback
+  has never run because `DISPATCHHQ_BOARD_KEY` was unset. Operator added it
+  to the environment 2026-09-30; it only reaches sessions started after
+  that. **First thing to verify in a new session:**
+  `python3 ingest/pull_dispatchhq.py --board --tables`, then
+  `--board --pull sub_truck_periods`.
+- **DispatchHQ access paths:** `--board` is the only one that works.
+  `--rest` (Supabase PostgREST) and the direct Postgres pooler path are
+  unused; the proxy can't carry raw Postgres, so the pooler path never
+  works from this cloud environment. Candidates for removal.
+- **Separate issue, not yet looked at:** the "Founder Hub Daily Logistics
+  Post" routine failed 2026-09-29 15:18Z after 7 seconds.
+
+---
+
 ## Google Sheets API key -- overridden by operator, 2026-09-28
 
 **Superseded below.** The 2026-09-21 "OFF LIMITS" directive was explicitly
