@@ -47,6 +47,18 @@ that changes it; move settled items into their topic sections below.
   a wake into a dead session -- nothing ran. The new routine checks out
   this branch itself; `DISPATCHHQ_BOARD_KEY` is in the environment, so each
   run loads `sub_truck_periods`. **Verify on first report** that SUBS loaded.
+- **Google Sheets refresh (ZONE/XTRACK): the ban was lifted 2026-09-28**
+  (full record in the "Google Sheets API key" section below). Drive's
+  connector can't refresh ZONE: `.xlsx` export fails at 11.6 MB, CSV export
+  drops the tab name (decoded one: empty template, no week identifiable).
+  Path is `ingest/pull_sheets.py` reading single tabs by name, which needs
+  `GSHEETS_SERVICE_ACCOUNT` (not set in the container as of 2026-09-28).
+  Operator-only steps: GCP service account, Drive+Sheets APIs, base64 key
+  into that env var, share each P&L sheet with its email as Viewer.
+  **Unresolved:** commit `ea90ce2` says tabs were read via the Sheets API and
+  the 08-24..09-14 backfill later landed, so some credential path evidently
+  worked at some point; re-run `python3 ingest/pull_sheets.py --whoami`
+  before telling the operator anything is missing.
 - **DispatchHQ access paths:** `--board` is the only one that works.
   `--rest` (Supabase PostgREST) and the direct Postgres pooler path are
   unused; the proxy can't carry raw Postgres, so the pooler path never
