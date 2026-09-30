@@ -38,14 +38,15 @@ that changes it; move settled items into their topic sections below.
   credit for AFG). It posts to the P&L once `weekly_pnl/AFG_2026-09-21`
   exists. 13 ZONE/XTRACK units from that Motive pull are still unresolved
   for that exact week.
-- **Hourly routine** "Process weekly P&L uploads" (trigger
-  `trig_011nrATEDddiMMCyJC5AeXVZ`, :45 every hour): healthy, last run
-  succeeded 2026-09-30 02:46Z. Its DispatchHQ substitute-truck fallback
-  has never run because `DISPATCHHQ_BOARD_KEY` was unset. Operator added it
-  to the environment 2026-09-30; it only reaches sessions started after
-  that. **First thing to verify in a new session:**
-  `python3 ingest/pull_dispatchhq.py --board --tables`, then
-  `--board --pull sub_truck_periods`.
+- **P&L routine** "Process weekly P&L uploads (daily)" (trigger
+  `trig_01UigpjTPVBWPrWu3gmrNwhp`): fresh session per run, daily 06:52
+  America/New_York, plus on demand (operator asks -> fire_trigger). Replaced
+  the old hourly routine `trig_011nrATEDddiMMCyJC5AeXVZ` on 2026-09-30 (now
+  DISABLED, kept for history): its persistent session died on a broken
+  setup script 2026-09-29 06:45Z and every hourly "success" after that was
+  a wake into a dead session -- nothing ran. The new routine checks out
+  this branch itself; `DISPATCHHQ_BOARD_KEY` is in the environment, so each
+  run loads `sub_truck_periods`. **Verify on first report** that SUBS loaded.
 - **DispatchHQ access paths:** `--board` is the only one that works.
   `--rest` (Supabase PostgREST) and the direct Postgres pooler path are
   unused; the proxy can't carry raw Postgres, so the pooler path never
